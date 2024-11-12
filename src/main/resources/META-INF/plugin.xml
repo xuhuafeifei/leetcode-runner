@@ -1,0 +1,47 @@
+<idea-plugin>
+    <id>org.example.leetcode-runner</id>
+    <name>Plugin display name here</name>
+    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+
+    <description><![CDATA[
+    Enter short description for your plugin here.<br>
+    <em>most HTML tags may be used</em>
+    ]]></description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- editors -->
+        <fileEditorProvider implementation="com.xhf.leetcode.plugin.editors.SplitTextEditorProvider"/>
+
+        <!-- setting -->
+        <applicationConfigurable parentId="tools" instance="com.xhf.leetcode.plugin.setting.AppSettingsConfigurable"
+                                 id="org.intellij.sdk.settings.AppSettingsConfigurable"
+                                 displayName="Leetcode Setting Demo"/>
+        <applicationService serviceImplementation="com.xhf.leetcode.plugin.setting.AppSettings"/>
+
+        <!-- tool window -->
+        <toolWindow id="Leetcode" secondary="true" icon="/icons/LeetCode.png" anchor="right"
+                    factoryClass="com.xhf.leetcode.plugin.window.LCToolWindowFactory"/>
+        <toolWindow id="Leetcode Console" secondary="true" icon="/icons/LeetCode.png" anchor="bottom"
+                    factoryClass="com.xhf.leetcode.plugin.window.LCConsoleWindowFactory" />
+    </extensions>
+
+    <actions>
+        <action id="leetcode.LoginAction" class="com.xhf.leetcode.plugin.actions.loginAction"
+                icon="/icons/login.png">
+        </action>
+        <action id="leetcode.DemoAction" class="com.xhf.leetcode.plugin.actions.DemoAction"
+                icon="/icons/clean.png">
+        </action>
+
+        <group id="leetcode.lcActionsToolbar">
+            <reference id="leetcode.LoginAction"/>
+            <separator/>
+            <reference id="leetcode.DemoAction"/>
+        </group>
+    </actions>
+
+</idea-plugin>
