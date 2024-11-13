@@ -27,6 +27,6 @@ public class MarkDownEditorProvider implements FileEditorProvider, DumbAware {
 
     @Override
     public @NotNull FileEditorPolicy getPolicy() {
-        return FileEditorPolicy.NONE;
+        return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
     }
 }

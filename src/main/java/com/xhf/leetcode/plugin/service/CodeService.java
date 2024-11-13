@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.manager;
+package com.xhf.leetcode.plugin.service;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -8,13 +8,12 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
-import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 
 import java.io.IOException;
 
-public class CodeManager {
+public class CodeService {
     public static String DIR = "temp";
 
     /**
@@ -24,8 +23,7 @@ public class CodeManager {
      * @param project
      */
     public static void openCodeEditor(Question question, Project project) {
-        LeetcodeClient lcClient = LeetcodeClient.getInstance(project);
-        lcClient.fillQuestion(question);
+        QuestionService.getInstance().fillQuestion(question, project);
 
         // create code file
         String key = createCodeFile(question);
@@ -35,7 +33,7 @@ public class CodeManager {
         StoreService.getInstance(project).addCache(key, value);
         // open code editor and load content
         ApplicationManager.getApplication().invokeAndWait(() -> {
-            VirtualFile file = LocalFileSystem.getInstance().findFileByPath(key);
+            VirtualFile file = LocalFileSystem.getInstance().refreshAndFindFileByPath(key);
             if (file != null) {
                 OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
                 FileEditorManager.getInstance(project).openTextEditor(ofd, false);

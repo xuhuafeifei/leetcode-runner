@@ -9,9 +9,12 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
-import com.xhf.leetcode.plugin.model.*;
-import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.model.GraphqlReqBody;
+import com.xhf.leetcode.plugin.model.HttpRequest;
+import com.xhf.leetcode.plugin.model.HttpResponse;
+import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
+import com.xhf.leetcode.plugin.utils.RandomUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
@@ -21,14 +24,11 @@ import java.util.List;
 
 public class LeetcodeClient {
 
-//    private static final LeetcodeClient lcClient = new LeetcodeClient();
-//
-//    public LeetcodeClient getInstance() {
-//        return lcClient;
-//    }
-
     private Project project;
     private final HttpClient httpClient;
+    private static boolean first = true;
+    private static volatile LeetcodeClient instance;
+
 
     private LeetcodeClient(Project project) {
         this.project = project;
@@ -50,8 +50,6 @@ public class LeetcodeClient {
     }
 
 
-    private static volatile LeetcodeClient instance;
-
     public static LeetcodeClient getInstance(Project project) {
         if (instance != null) return instance;
         synchronized (LeetcodeClient.class) {
@@ -62,16 +60,34 @@ public class LeetcodeClient {
         return instance;
     }
 
+
+    // this method used for test
+    @Deprecated
+    private LeetcodeClient() {
+        httpClient = HttpClient.getInstance();
+    }
+
+    @Deprecated // this method used for test
+    public static LeetcodeClient getInstanceForTest() {
+        instance = new LeetcodeClient();
+        return instance;
+    }
+
     /**
-     * init instance
-     * LeetcodeClient need to load cache, which may takes a lot of time. therefore,
-     * it should be called in a thread when plugin is loaded
+     * init instance if it is the first time
+     * LeetcodeClient need to load cache, which may take a lot of time.
+     * therefore,
+     * it should be called in a thread when the plugin is loaded
+     *
      * @param project
      */
     public static void init(Project project) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            getInstance(project);
-        });
+        if (first) {
+            first = false;
+            ApplicationManager.getApplication().invokeLater(() -> {
+                getInstance(project);
+            });
+        }
     }
 
 
@@ -141,7 +157,7 @@ public class LeetcodeClient {
     }
 
     /**
-     * get all question need a lot of time
+     * get all questions to need a lot of time
      * @return
      */
     public List<Question> getTotalQuestion() {
@@ -159,7 +175,7 @@ public class LeetcodeClient {
         boolean flag = true;
         int skip = 0, limit = 100;
         while (flag) {
-            SearchParams params = new SearchParams.ParamsBuilder()
+            GraphqlReqBody.SearchParams params = new GraphqlReqBody.SearchParams.ParamsBuilder()
                     .setCategorySlug("all-code-essentials")
                     .setLimit(limit)
                     .setSkip(skip)
@@ -205,7 +221,7 @@ public class LeetcodeClient {
 
     private List<Question> loadQuestionCache() {
         if (ql == null) {
-            // if second cache is null, search the first cache
+            // if the second cache is null, search the first cache
             String questionListJson = StoreService.getInstance(project).getCacheJson(StoreService.QUESTION_LIST_KEY);
             if (StringUtils.isBlank(questionListJson)) {
                 return null;
@@ -221,7 +237,7 @@ public class LeetcodeClient {
      * @param params search condition
      * @return
      */
-    public List<Question> getQuestionList(SearchParams params) {
+    public List<Question> getQuestionList(GraphqlReqBody.SearchParams params) {
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.PROBLEM_SET_QUERY);
@@ -253,17 +269,65 @@ public class LeetcodeClient {
 
 
     /**
-     * fill question with code snippets, translated title and content
-     * @param question
+     * query question info, which contains more info such as code snippets, translated content, etc.
+     * <p>
+     * more important, title slug is required, if not, the code will throw exception
+     *
+     * @param params
+     * @return
      */
-    public void fillQuestion(Question question) {
-        // get config
-        String langType = AppSettings.getInstance().getLangType();
+    public HttpResponse queryQuestionInfo(GraphqlReqBody.SearchParams params) {
+        if (StringUtils.isBlank(params.getTitleSlug())) {
+            throw new RuntimeException("title slug is null ! " + GsonUtils.toJsonStr(params));
+        }
 
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.QUESTION_CONTENT_QUERY);
-        body.addVariable("titleSlug", question.getTitleSlug());
+        body.setBySearchParams(params);
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        return httpClient.executePost(httpRequest);
+    }
+
+    /**
+     * get random question
+     * @param project
+     * @return
+     */
+    public Question getRandomQuestion(Project project) {
+        List<Question> totalQuestion = this.getTotalQuestion();
+        StoreService storeService = StoreService.getInstance(project);
+
+        int qId = RandomUtils.nextInt(0, totalQuestion.size() - 1);
+        while (storeService.contains(String.valueOf(qId))) {
+            qId = RandomUtils.nextInt(0, totalQuestion.size() - 1);
+        }
+        storeService.addCache(String.valueOf(qId), qId, false);
+
+        return totalQuestion.get(qId);
+    }
+
+    /**
+     * get today question
+     */
+    public Question getTodayQuestion(Project project) {
+        StoreService service = StoreService.getInstance(project);
+        Question q = service.getCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, Question.class);
+        if (q != null) {
+            return q;
+        }
+        q = new Question();
+
+        /* search question */
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.QUESTION_OF_TODAY_QUERY);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
                 .setBody(body.toJsonStr())
@@ -275,25 +339,26 @@ public class LeetcodeClient {
 
         String resp = httpResponse.getBody();
 
-        // parse json to array
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-        JsonObject questionJsonObj = jsonObject.getAsJsonObject("data").getAsJsonObject("question");
+        JsonElement jsonElement = jsonObject.getAsJsonObject("data").getAsJsonArray("todayRecord").get(0);
+        JsonObject questionJOB = jsonElement.getAsJsonObject().getAsJsonObject("question");
 
-        String translatedTitle = questionJsonObj.get("translatedTitle").getAsString();
-        String translatedContent = questionJsonObj.get("translatedContent").getAsString().replaceAll("\n\n", "");
-        String codeSnippets = null;
+        // extract field
+        String frontendQuestionId = questionJOB.get("frontendQuestionId").getAsString();
+        String difficulty = questionJOB.get("difficulty").getAsString();
+        String title = questionJOB.get("title").getAsString();
+        String titleSlug = questionJOB.get("titleSlug").getAsString();
+        String titleCn = questionJOB.get("titleCn").getAsString();
 
-        for (JsonElement item : questionJsonObj.getAsJsonArray("codeSnippets")) {
-            JsonObject obj = item.getAsJsonObject();
-            if (GsonUtils.fromJson(obj.get("lang"), String.class).equals(langType)) {
-                codeSnippets = obj.get("code").getAsString();
-                break;
-            }
-        }
+        q.setFrontendQuestionId(frontendQuestionId);
+        q.setDifficulty(difficulty);
+        q.setTitle(title);
+        q.setTitleSlug(titleSlug);
+        q.setTitleCn(titleCn);
 
-        // fill target obj
-        question.setTranslatedTitle(translatedTitle);
-        question.setTranslatedContent(translatedContent);
-        question.setCodeSnippets(codeSnippets);
+        /* store question */
+        service.addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, q, false);
+
+        return q;
     }
 }

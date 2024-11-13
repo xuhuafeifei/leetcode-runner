@@ -10,7 +10,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
-import com.xhf.leetcode.plugin.manager.CodeManager;
+import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import org.jetbrains.annotations.NonNls;
@@ -50,7 +50,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
                 Point point = e.getPoint();
                 int idx = questionList.locationToIndex(point);
                 Question question = questionList.getModel().getElementAt(idx);
-                CodeManager.openCodeEditor(question, project);
+                CodeService.openCodeEditor(question, project);
             }
         });
 

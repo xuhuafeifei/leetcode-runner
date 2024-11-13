@@ -2,12 +2,19 @@ package com.xhf.leetcode.plugin.io.file.utils;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class FileUtils {
 
+    /**
+     * read resource file by relative path
+     * @param relativeFilePath
+     * @return
+     */
     public static URL getResourceFileUrl(String relativeFilePath) {
-        // deal with file path (make all \ into /)
+        // deal with a file path (make all \ into /)
+        // because Class.getResource only allow / as separator
         relativeFilePath = unUnifyPath(relativeFilePath);
 
         Class<?> clazz = FileUtils.class;
@@ -24,7 +31,7 @@ public class FileUtils {
 
     public static String readContentFromFile(URL url) {
         StringBuilder content = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 content.append(line).append("\n");
@@ -46,7 +53,7 @@ public class FileUtils {
 
     public static String readContentFromFile(File file) {
         StringBuilder content = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 content.append(line).append("\n");
@@ -131,7 +138,7 @@ public class FileUtils {
 
         // write content
         try (FileOutputStream fos = new FileOutputStream(file)) {
-            fos.write(content.getBytes());
+            fos.write(content.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -152,10 +159,21 @@ public class FileUtils {
     }
 
     /**
-     * build path
+     * judge whether the content is a file path or not
+     * @param content
+     * @return
+     */
+    public static boolean isPath(String content) {
+        String regex = "^[a-zA-Z]:\\\\[^<>:\"/|?*]+(\\\\[^<>:\"/|?*]+)*$"; // Windows path
+        regex += "|^/[^<>:\"/|?*]+(/[^<>:\"/|?*]+)*$"; // Unix/Linux path
+        return content.matches(regex);
+    }
+
+    /**
+     * build a file path and make sure the path is unified
      */
     public static class PathBuilder {
-        private StringBuffer sb;
+        private final StringBuffer sb;
 
         public PathBuilder(String path) {
             this.sb = new StringBuffer(unifyPath(path));
@@ -173,8 +191,7 @@ public class FileUtils {
 
         public String build() {
             String path = sb.toString();
-            String s = FileUtils.unifyPath(path);
-            return s;
+            return FileUtils.unifyPath(path);
         }
     }
 }

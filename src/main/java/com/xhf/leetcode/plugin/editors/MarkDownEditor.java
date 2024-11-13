@@ -85,7 +85,7 @@ public class MarkDownEditor implements FileEditor {
 
     @Override
     public void dispose() {
-
+        jcefHtmlPanel.dispose();
     }
 
     @Override

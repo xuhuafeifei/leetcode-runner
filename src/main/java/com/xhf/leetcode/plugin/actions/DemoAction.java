@@ -18,11 +18,11 @@ public class DemoAction extends AnAction {
         project = e.getProject();
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
 
-        VirtualFile file2 = LocalFileSystem.getInstance().findFileByPath("E:\\java_code\\leetcode-runner\\src\\main\\java\\com\\xhf\\leetcode\\plugin\\window\\LCToolWindowFactory.java");
+        VirtualFile file2 = LocalFileSystem.getInstance().refreshAndFindFileByPath("E:\\java_code\\leetcode-runner\\src\\main\\java\\com\\xhf\\leetcode\\plugin\\window\\LCToolWindowFactory.java");
 
         open(file2, fileEditorManager);
 
-//        VirtualFile file = LocalFileSystem.getInstance().findFileByPath("E:\\java_code\\leetcode-runner\\src\\main\\resources\\META-INF\\plugin.xml");
+//        VirtualFile file = LocalFileSystem.getInstance().refreshAndFindFileByPath("E:\\java_code\\leetcode-runner\\src\\main\\resources\\META-INF\\plugin.xml");
 //
 //        open(file, fileEditorManager);
     }

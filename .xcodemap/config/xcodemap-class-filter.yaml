@@ -3,13 +3,13 @@ autoDetectedPackages:
 - com.xhf.learning.okhttp
 - com.xhf.learning.store
 - com.xhf.learning.ui
+- com.xhf.learning.utils
 - com.xhf.leetcode.plugin.actions
 - com.xhf.leetcode.plugin.editors
 - com.xhf.leetcode.plugin.icons
 - com.xhf.leetcode.plugin.io.console
 - com.xhf.leetcode.plugin.io.file
 - com.xhf.leetcode.plugin.io.http
-- com.xhf.leetcode.plugin.manager
 - com.xhf.leetcode.plugin.model
 - com.xhf.leetcode.plugin.service
 - com.xhf.leetcode.plugin.setting

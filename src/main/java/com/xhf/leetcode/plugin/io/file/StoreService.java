@@ -10,6 +10,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +69,8 @@ public final class StoreService implements Disposable {
 
     public static final String QUESTION_LIST_KEY = "QUESTION_LIST_KEY";
 
+    public static final String LEETCODE_TODAY_QUESTION_KEY = "LEETCODE_TODAY_QUESTION_KEY ";
+
     private final static Cache<String, StoreContent> cache = CacheBuilder.newBuilder().build();
 
     // require persistent cache
@@ -113,7 +116,12 @@ public final class StoreService implements Disposable {
         }
         content = durableCache.getIfPresent(key);
         if (content != null) {
-            return getIfNotExpireTime(content);
+            String res = getIfNotExpireTime(content);
+            if (res == null) {
+                // delete expired content
+                durableCache.invalidate(key);
+            }
+            return res;
         }
         return null;
     }
@@ -139,7 +147,9 @@ public final class StoreService implements Disposable {
      */
     private String getIfNotExpireTime(StoreContent content) {
         long expireTimestamp = content.getExpireTimestamp();
-        if (expireTimestamp == -1) return content.getContentJson();
+        if (expireTimestamp == -1) {
+            return content.getContentJson();
+        }
         return System.currentTimeMillis() < expireTimestamp ? content.getContentJson() : null;
     }
 
@@ -156,6 +166,7 @@ public final class StoreService implements Disposable {
     private ReentrantLock lock = new ReentrantLock();
 
     private void persistCache() {
+        this.scanFileCache();
         // build properties
         Properties properties = new Properties();
         // lock the durableCache to avoid thread problems
@@ -173,12 +184,27 @@ public final class StoreService implements Disposable {
     }
 
     /**
-     * load properties file to durable cache. if file not exists, load nothing
+     * load properties file to durable cache. if the file does not exist, load nothing
      */
     private void loadCache() {
         Properties properties = FileUtils.readPropertiesFileContent(this.filePath);
         properties.forEach((k, v) -> {
             durableCache.put((String) k, GsonUtils.fromJson((String) v, StoreContent.class));
+        });
+    }
+
+    /**
+     * scan all file paths in the cache, and remove those deleted from the local file system
+     */
+    private void scanFileCache() {
+        durableCache.asMap().forEach((k, v) -> {
+            if (FileUtils.isPath(k)) {
+                // check file exists
+                // String filePath = this.getCache(k, String.class);
+                if (! new File(k).exists()) {
+                    durableCache.invalidate(k);
+                }
+            }
         });
     }
 }

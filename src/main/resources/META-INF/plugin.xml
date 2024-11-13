@@ -31,16 +31,24 @@
 
     <actions>
         <action id="leetcode.LoginAction" class="com.xhf.leetcode.plugin.actions.loginAction"
-                icon="/icons/login.png">
+                text="Sign In" icon="/icons/login.png">
         </action>
         <action id="leetcode.DemoAction" class="com.xhf.leetcode.plugin.actions.DemoAction"
-                icon="/icons/clean.png">
+                text="Demo Test" icon="/icons/clean.png">
+        </action>
+        <action id="leetcode.PickOneAction" class="com.xhf.leetcode.plugin.actions.PickOneAction"
+                text="Pick One" icon="/icons/random.png">
+        </action>
+        <action id="leetcode.TodayQuestionAction" class="com.xhf.leetcode.plugin.actions.TodayQuestionAction"
+                text="Daily Question" icon="/icons/daily.svg">
         </action>
 
         <group id="leetcode.lcActionsToolbar">
             <reference id="leetcode.LoginAction"/>
             <separator/>
             <reference id="leetcode.DemoAction"/>
+            <reference id="leetcode.PickOneAction"/>
+            <reference id="leetcode.TodayQuestionAction"/>
         </group>
     </actions>
 
