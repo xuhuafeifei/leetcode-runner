@@ -29,6 +29,14 @@ public class LeetcodeApiUtils {
         return leetcodeUrl + getLeetcodeHost();
     }
 
+    public static String getRunCodeUrl(String titleSlug) {
+        return getLeetcodeUrl() + "/problems/" + titleSlug + "/interpret_solution/";
+    }
+
+    public static String getSubmissionCheckUrl(String id) {
+        return getLeetcodeUrl() + "/submissions/detail/" + id + "/check/";
+    }
+
     public static String getLeetcodeReqUrl() {
         return getLeetcodeUrl() + leetcodeGraphql;
     }

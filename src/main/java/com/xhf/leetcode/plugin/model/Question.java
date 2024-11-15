@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.model;
 
 public class Question {
+    private String questionId;
     private String frontendQuestionId;
 
     private Double acRate;
@@ -26,6 +27,23 @@ public class Question {
     private String translatedTitle;
     private String translatedContent;
     private String codeSnippets;
+    private String exampleTestcases;
+
+    public void setExampleTestcases(String exampleTestcases) {
+        this.exampleTestcases = exampleTestcases;
+    }
+
+    public String getExampleTestcases() {
+        return exampleTestcases;
+    }
+
+    public String getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(String questionId) {
+        this.questionId = questionId;
+    }
 
     public void setFrontendQuestionId(String frontendQuestionId) {
         this.frontendQuestionId = frontendQuestionId;

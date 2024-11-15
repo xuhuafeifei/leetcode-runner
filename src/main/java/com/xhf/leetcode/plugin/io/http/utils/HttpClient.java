@@ -17,6 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -105,14 +106,9 @@ public class HttpClient {
 
         // 设置请求体
         if (body != null) {
-            try {
-                StringEntity stringEntity = new StringEntity(body);
-                stringEntity.setContentType(httpRequest.getContentType());
-                request.setEntity(stringEntity);
-            } catch (IOException e) {
-                // todo: 修改为弹窗提示
-                throw new RuntimeException("http client set entity failed: " + e.getMessage(), e);
-            }
+            StringEntity stringEntity = new StringEntity(body, StandardCharsets.UTF_8);
+            stringEntity.setContentType(httpRequest.getContentType());
+            request.setEntity(stringEntity);
         }
 
         HttpResponse httpResponse = new HttpResponse(-1);
@@ -121,7 +117,7 @@ public class HttpClient {
             HttpEntity entity = response.getEntity();
             if (entity != null) {
                 httpResponse.setStatusCode(response.getStatusLine().getStatusCode());
-                httpResponse.setBody(EntityUtils.toString(entity));
+                httpResponse.setBody(EntityUtils.toString(entity, StandardCharsets.UTF_8));
                 for (Header header : response.getAllHeaders()) {
                     httpResponse.addHeader(header.getName(), header.getValue());
                 }

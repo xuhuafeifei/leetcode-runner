@@ -9,10 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
-import com.xhf.leetcode.plugin.model.GraphqlReqBody;
-import com.xhf.leetcode.plugin.model.HttpRequest;
-import com.xhf.leetcode.plugin.model.HttpResponse;
-import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
 import org.apache.commons.lang.StringUtils;
@@ -360,5 +357,68 @@ public class LeetcodeClient {
         service.addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, q, false);
 
         return q;
+    }
+
+    /**
+     * run code by leetcode platform
+     *
+     * @param runCodeModel
+     * @return
+     */
+    public RunCodeResult runCode(RunCode runCodeModel) {
+        /* check params */
+        if (StringUtils.isBlank(runCodeModel.getQuestionId())||
+                StringUtils.isBlank(runCodeModel.getLang())||
+                StringUtils.isBlank(runCodeModel.getDataInput())||
+                StringUtils.isBlank(runCodeModel.getTypeCode())||
+                StringUtils.isBlank(runCodeModel.getTitleSlug())
+        ) {
+            throw new RuntimeException("missing params " + runCodeModel);
+        }
+
+        String url = LeetcodeApiUtils.getRunCodeUrl(runCodeModel.getTitleSlug());
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(GsonUtils.toJsonStr(runCodeModel))
+                .addHeader("Accept", "application/json")
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+
+        String resp = httpResponse.getBody();
+
+        // get interpret_id
+        String interpretId = JsonParser.parseString(resp).getAsJsonObject().get("interpret_id").getAsString();
+
+        // check more info
+        url = LeetcodeApiUtils.getSubmissionCheckUrl(interpretId);
+
+        httpRequest = new HttpRequest.RequestBuilder(url).setContentType("application/json").build();
+
+        httpResponse = httpClient.executeGet(httpRequest);
+
+        // check data
+        while (! checkLeetcodeReady(httpResponse)) {
+            httpResponse = httpClient.executeGet(httpRequest);
+        }
+
+        resp = httpResponse.getBody();
+        return GsonUtils.fromJson(resp, RunCodeResult.class);
+    }
+
+    /**
+     * check leetcode whether ready for provide a run code result for a client to check
+     * @return
+     */
+    private boolean checkLeetcodeReady(HttpResponse httpResponse) {
+        String resp = httpResponse.getBody();
+        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+        JsonElement state = jsonObject.get("state");
+        if (state == null) {
+            return true;
+        }
+        return ! state.getAsString().equals("STARTED");
     }
 }

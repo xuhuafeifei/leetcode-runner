@@ -9,6 +9,7 @@ import java.util.List;
 public class GsonUtils {
     private static final Gson gson = new Gson();
 
+
     public static String toJsonStr(JsonObject jsonObject) {
         return gson.toJson(jsonObject);
     }

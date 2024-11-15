@@ -54,6 +54,8 @@ public class QuestionService {
         if (StringUtils.isNotBlank(question.getTranslatedTitle())
                 && StringUtils.isNotBlank(question.getTranslatedContent())
                 && StringUtils.isNotBlank(question.getCodeSnippets())
+                && StringUtils.isNotBlank(question.getQuestionId())
+                && StringUtils.isNotBlank(question.getExampleTestcases())
         ) {
             return;
         }
@@ -74,20 +76,24 @@ public class QuestionService {
 
         String translatedTitle = questionJsonObj.get("translatedTitle").getAsString();
         String translatedContent = questionJsonObj.get("translatedContent").getAsString().replaceAll("\n\n", "");
+        String questionId = questionJsonObj.get("questionId").getAsString();
+        String exampleTestcases = questionJsonObj.get("exampleTestcases").getAsString();
         String codeSnippets = null;
 
         for (JsonElement item : questionJsonObj.getAsJsonArray("codeSnippets")) {
             JsonObject obj = item.getAsJsonObject();
-            if (GsonUtils.fromJson(obj.get("lang"), String.class).equals(langType)) {
+            if (GsonUtils.fromJson(obj.get("lang"), String.class).equalsIgnoreCase(langType)) {
                 codeSnippets = obj.get("code").getAsString();
                 break;
             }
         }
 
         // fill target obj
+        question.setQuestionId(questionId);
         question.setTranslatedTitle(translatedTitle);
         question.setTranslatedContent(translatedContent);
         question.setCodeSnippets(codeSnippets);
+        question.setExampleTestcases(exampleTestcases);
     }
 
     /**

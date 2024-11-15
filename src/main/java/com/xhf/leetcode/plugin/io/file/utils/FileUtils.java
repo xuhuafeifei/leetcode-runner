@@ -103,8 +103,12 @@ public class FileUtils {
         file.createNewFile();
     }
 
+    public static boolean fileExists(String path) {
+        return new File(path).exists();
+    }
+
     /**
-     * create file if it does not exist and return the file
+     * create a file if it does not exist and return the file
      * @param path
      * @return
      * @throws IOException

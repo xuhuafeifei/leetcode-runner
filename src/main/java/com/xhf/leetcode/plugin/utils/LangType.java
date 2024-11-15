@@ -1,17 +1,13 @@
 package com.xhf.leetcode.plugin.utils;
 
 public enum LangType {
-    JAVA("Java", ".java"),
-    PYTHON("Python", ".py"),
-    CPP("C++", ".cpp"),
-    JAVASCRIPT("JavaScript", ".js"),
+    JAVA("java", ".java"),
+    PYTHON("python", ".py"),
+    CPP("cpp", ".cpp"),
+    JAVASCRIPT("javascript", ".js"),
     C("C", ".c"),
-    CPP14("C++14", ".cpp"),
-    CPP17("C++17", ".cpp"),
-    PYTHON3("Python3", ".py"),
-    PYTHON2("Python2", ".py"),
-    GO("Go", ".go"),
-    RUST("Rust", ".rs")
+    PYTHON3("python3", ".py"),
+    GO("golang", ".go"),
     ;
 
     private LangType(String langType, String suffix) {

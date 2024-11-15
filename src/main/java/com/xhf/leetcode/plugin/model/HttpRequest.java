@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.model;
 
+import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
@@ -111,6 +113,8 @@ public class HttpRequest {
         public RequestBuilder addBasicHeader() {
             addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0");
             addHeader("Connection", "keep-alive");
+            addHeader("Accept", "*/*");
+            addHeader("Host", LeetcodeApiUtils.getLeetcodeHost());
             return this;
         }
 

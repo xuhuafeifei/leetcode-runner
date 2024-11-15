@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
+import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,7 +53,7 @@ public class SplitTextEditorProvider implements AsyncFileEditorProvider, DumbAwa
         // get preview file
         String key = file.getPath();
         key = FileUtils.unifyPath(key);
-        String contentPath = StoreService.getInstance(project).getCache(key, String.class);
+        String contentPath = StoreService.getInstance(project).getCache(key, LeetcodeEditor.class).getMarkdownPath();
 
         assert contentPath != null;
         // need to refresh a current file system. otherwise, it will take a lot of time to find the file

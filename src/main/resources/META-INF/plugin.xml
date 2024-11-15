@@ -50,6 +50,12 @@
             <reference id="leetcode.PickOneAction"/>
             <reference id="leetcode.TodayQuestionAction"/>
         </group>
+
+        <group id="leetcode.editor.group">
+            <action id="leetcode.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
+                    text="Run Code" description="Run Code(editor)" icon="/icons/run.png">
+            </action>
+        </group>
     </actions>
 
 </idea-plugin>

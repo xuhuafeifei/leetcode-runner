@@ -31,7 +31,7 @@ public final class AppSettings
     public String filePath = "E:\\java_code\\leetcode-runner\\src\\main\\resources\\";
 
     public boolean ideaStatus = false;
-    public String langType = "Java";
+    public String langType = "java";
   }
 
   private State myState = new State();
