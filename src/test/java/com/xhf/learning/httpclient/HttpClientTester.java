@@ -3,10 +3,7 @@ package com.xhf.learning.httpclient;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
-import com.xhf.leetcode.plugin.model.GraphqlReqBody;
-import com.xhf.leetcode.plugin.model.Question;
-import com.xhf.leetcode.plugin.model.RunCode;
-import com.xhf.leetcode.plugin.model.RunCodeResult;
+import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import org.apache.http.impl.cookie.BasicClientCookie2;
@@ -121,7 +118,7 @@ public class HttpClientTester {
             RunCodeResult runCodeResult = instance.runCode(runCode);
             System.out.println(GsonUtils.toJsonStr(runCodeResult));
             System.out.println();
-            Thread.sleep(1000);
+            Thread.sleep(3000);
         }
     }
 
@@ -325,5 +322,24 @@ public class HttpClientTester {
 
         RunCodeResult runCodeResult = instance.runCode(runCode);
         System.out.println(GsonUtils.toJsonStr(runCodeResult));
+    }
+
+    @Test
+    public void testSubmitCodeUnderDiffCodeContent() throws InterruptedException {
+        String[] template = new String[]{getSucc(), getResError(), getRuntimeError(), getOutOfMemory(), getOutOfTime()};
+        RunCode runCode = new RunCode();
+        runCode.setLang("python3");
+        runCode.setQuestionId("3546");
+        runCode.setDataInput("\"0001111\"\n2\n[[0,6]]\n\"010101\"\n1\n[[0,5],[1,4],[2,3]]");
+        runCode.setTitleSlug("count-substrings-that-satisfy-k-constraint-ii");
+
+        for (String t : template) {
+            runCode.setTypeCode(t);
+            // request
+            SubmitCodeResult submitCodeResult = instance.submitCode(runCode);
+            System.out.println(GsonUtils.toJsonStr(submitCodeResult));
+            System.out.println();
+            Thread.sleep(3000);
+        }
     }
 }

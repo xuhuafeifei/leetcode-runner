@@ -14,6 +14,7 @@ public class HttpResponse {
     private String body;
 
     private List<Pair<String, String>> Header = new LinkedList<>();
+    private String msg;
 
     public HttpResponse() {}
 
@@ -53,5 +54,13 @@ public class HttpResponse {
             }
         }
         return list;
+    }
+
+    public void setMsg(String reasonPhrase) {
+        this.msg = reasonPhrase;
+    }
+
+    public String getMsg() {
+        return this.msg;
     }
 }

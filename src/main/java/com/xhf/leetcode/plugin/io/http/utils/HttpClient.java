@@ -118,6 +118,7 @@ public class HttpClient {
             if (entity != null) {
                 httpResponse.setStatusCode(response.getStatusLine().getStatusCode());
                 httpResponse.setBody(EntityUtils.toString(entity, StandardCharsets.UTF_8));
+                httpResponse.setMsg(response.getStatusLine().getReasonPhrase());
                 for (Header header : response.getAllHeaders()) {
                     httpResponse.addHeader(header.getName(), header.getValue());
                 }

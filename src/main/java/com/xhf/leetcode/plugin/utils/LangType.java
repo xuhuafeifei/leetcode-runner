@@ -5,7 +5,7 @@ public enum LangType {
     PYTHON("python", ".py"),
     CPP("cpp", ".cpp"),
     JAVASCRIPT("javascript", ".js"),
-    C("C", ".c"),
+    C("c", ".c"),
     PYTHON3("python3", ".py"),
     GO("golang", ".go"),
     ;

@@ -392,33 +392,80 @@ public class LeetcodeClient {
         // get interpret_id
         String interpretId = JsonParser.parseString(resp).getAsJsonObject().get("interpret_id").getAsString();
 
-        // check more info
-        url = LeetcodeApiUtils.getSubmissionCheckUrl(interpretId);
+        resp = checkAndGetLeetcodeAnswer(interpretId);
+        return GsonUtils.fromJson(resp, RunCodeResult.class);
+    }
 
-        httpRequest = new HttpRequest.RequestBuilder(url).setContentType("application/json").build();
 
-        httpResponse = httpClient.executeGet(httpRequest);
+    /**
+     * submit code
+     * @param runCodeModel
+     * @return
+     */
+    public SubmitCodeResult submitCode(RunCode runCodeModel) {
+        /* check params */
+        if (StringUtils.isBlank(runCodeModel.getQuestionId())||
+                StringUtils.isBlank(runCodeModel.getLang())||
+                StringUtils.isBlank(runCodeModel.getTypeCode())||
+                StringUtils.isBlank(runCodeModel.getTitleSlug())
+        ) {
+            throw new RuntimeException("missing params " + runCodeModel);
+        }
+
+        String url = LeetcodeApiUtils.getSubmitCodeUrl(runCodeModel.getTitleSlug());
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(GsonUtils.toJsonStr(runCodeModel))
+                .addHeader("Accept", "application/json")
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+
+        String resp = httpResponse.getBody();
+
+        // get submission_id
+        String submissionId = JsonParser.parseString(resp).getAsJsonObject().get("submission_id").getAsString();
+
+        resp = checkAndGetLeetcodeAnswer(submissionId);
+        return GsonUtils.fromJson(resp, SubmitCodeResult.class);
+    }
+
+    /**
+     * check leetcode whether ready for provide a run code result for a client to read
+     * <p>
+     * if a code result is not ready, a client will wait for it until it can be read
+     *
+     * @return the result of leetcode
+     */
+    private String checkAndGetLeetcodeAnswer(String id) {
+        String url = LeetcodeApiUtils.getSubmissionCheckUrl(id);
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url).setContentType("application/json").build();
+
+        HttpResponse httpResponse = httpClient.executeGet(httpRequest);
 
         // check data
         while (! checkLeetcodeReady(httpResponse)) {
             httpResponse = httpClient.executeGet(httpRequest);
         }
 
-        resp = httpResponse.getBody();
-        return GsonUtils.fromJson(resp, RunCodeResult.class);
+        return httpResponse.getBody();
     }
 
-    /**
-     * check leetcode whether ready for provide a run code result for a client to check
-     * @return
-     */
     private boolean checkLeetcodeReady(HttpResponse httpResponse) {
         String resp = httpResponse.getBody();
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+        /*
+         * if the result contains `state` field, that means the answer is not ready yet
+         * otherwise, the result is ready
+         */
         JsonElement state = jsonObject.get("state");
         if (state == null) {
             return true;
         }
         return ! state.getAsString().equals("STARTED");
     }
+
 }

@@ -33,6 +33,10 @@ public class LeetcodeApiUtils {
         return getLeetcodeUrl() + "/problems/" + titleSlug + "/interpret_solution/";
     }
 
+    public static String getSubmitCodeUrl(String titleSlug) {
+        return getLeetcodeUrl() + "/problems/" + titleSlug + "/submit/";
+    }
+
     public static String getSubmissionCheckUrl(String id) {
         return getLeetcodeUrl() + "/submissions/detail/" + id + "/check/";
     }

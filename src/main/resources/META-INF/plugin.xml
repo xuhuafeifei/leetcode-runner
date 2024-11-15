@@ -55,6 +55,9 @@
             <action id="leetcode.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
                     text="Run Code" description="Run Code(editor)" icon="/icons/run.png">
             </action>
+            <action id="leetcode.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
+                    text="Submit Code" description="Submit Code(editor)" icon="/icons/submit.png">
+            </action>
         </group>
     </actions>
 

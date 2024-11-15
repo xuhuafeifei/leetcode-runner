@@ -13,16 +13,14 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
-import com.xhf.leetcode.plugin.model.LeetcodeEditor;
-import com.xhf.leetcode.plugin.model.Question;
-import com.xhf.leetcode.plugin.model.RunCode;
-import com.xhf.leetcode.plugin.model.RunCodeResult;
+import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public class CodeService {
     public static String DIR = "temp";
@@ -113,24 +111,45 @@ public class CodeService {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Run Code", false){
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                RunCodeResult res = LeetcodeClient.getInstance(project).runCode(codeContent);
+                RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(codeContent);
                 // show it
                 ConsoleUtils.getInstance(project).showInfo(
-                        new ResultBuilder(res, codeContent.getDataInput()).build()
+                        createRunCodeResultBuilder(codeContent.getDataInput(), rcr).build()
                 );
             }
         });
-
     }
 
-    private static class ResultBuilder {
-        private String dataInput;
-        private StringBuilder sb;
-        private RunCodeResult rcr;
-        public ResultBuilder(RunCodeResult rcr, String dataInput) {
-            this.sb = new StringBuilder();
-            this.rcr = rcr;
-            this.dataInput = dataInput;
+    public static void submitCode(Project project, RunCode codeContent) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Submit Code", false){
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(codeContent);
+                // show it
+                ConsoleUtils.getInstance(project).showInfo(
+                        createSubmitCodeResultBuilder(scr).build()
+                );
+            }
+        });
+    }
+
+
+    /**
+     * abstract result builder, used to build result string to show the run code result in console
+     * <p>
+     * RunCodeResult encapsulates the result obtained from running the submitted Solution code on the leetcode platform.
+     * However, to ensure extensibility, an abstract class was extracted in the design to accommodate the output requirements of
+     * SubmitCodeResult.
+     *
+     * @param <T>
+     */
+    private static abstract class AbstractResultBuilder<T extends BaseCodeResult> {
+        protected T cr; // code result
+        protected final StringBuilder sb = new StringBuilder();
+        protected static final String splitter = "--------------";
+
+        public AbstractResultBuilder (T cr) {
+            this.cr = cr;
         }
 
         public String build() {
@@ -139,91 +158,159 @@ public class CodeService {
             return sb.toString();
         }
 
+        protected boolean isCorrectAnswer() {
+            return Objects.equals(cr.getTotalCorrect(), cr.getTotalTestcases()) &&
+                    StringUtils.isNotBlank(cr.getTotalCorrect()) &&
+                    StringUtils.isNotBlank(cr.getTotalTestcases());
+        }
+
         private void createHead() {
-            boolean correctAnswer = rcr.getCorrectAnswer();
+            boolean correctAnswer = isCorrectAnswer();
             if (correctAnswer) {
                 // true
-                sb.append("Accept...").append("\n");
-                sb.append("total test cases: ").append(rcr.getTotalTestcases()).append("\n");
-                sb.append("total correct: ").append(rcr.getTotalCorrect()).append("\n");
+                sb.append("✅ Accept...").append("\n");
+                sb.append("total test cases: ").append(cr.getTotalTestcases()).append("\n");
+                sb.append("total correct: ").append(cr.getTotalCorrect()).append("\n");
             } else {
-                boolean runSuccess = rcr.getRunSuccess();
+                boolean runSuccess = cr.getRunSuccess();
                 if (runSuccess) {
                     // true
-                    sb.append("Answer Wrong ...").append("\n");
-                    sb.append("total test cases: ").append(rcr.getTotalTestcases()).append("\n");
-                    sb.append("total correct: ").append(rcr.getTotalCorrect()).append("\n");
+                    sb.append("❌ Wrong Answer...").append("\n");
+                    sb.append("total test cases: ").append(cr.getTotalTestcases()).append("\n");
+                    sb.append("total correct: ").append(cr.getTotalCorrect()).append("\n");
                 }else {
                     // run error
-                    if ("Runtime Error".equals(rcr.getStatusMsg())) {
-                        sb.append("Runtime Error...").append("\n");
-                        sb.append(rcr.getFullRuntimeError()).append("\n");
-                    }else if ("Compile Error".equals(rcr.getStatusMsg())) {
-                        sb.append("Compile Error...").append("\n");
-                        sb.append(rcr.getFullCompileError()).append("\n");
+                    if ("Runtime Error".equals(cr.getStatusMsg())) {
+                        sb.append("❌ Runtime Error...").append("\n");
+                        sb.append(cr.getFullRuntimeError()).append("\n");
+                    }else if ("Compile Error".equals(cr.getStatusMsg())) {
+                        sb.append("❌ Compile Error...").append("\n");
+                        sb.append(cr.getFullCompileError()).append("\n");
                     }else {
                         throw new RuntimeException("unknown leetcode error...");
                     }
                 }
             }
         }
+        protected abstract void createBody();
+    }
 
-        private static final String spliter = "--------------";
-
-        private void createBody() {
-            String totalTestcases = rcr.getTotalTestcases();
-            if (StringUtils.isBlank(totalTestcases)) {
-                return;
+    private static AbstractResultBuilder<RunCodeResult> createRunCodeResultBuilder(String dataInput, RunCodeResult cr) {
+        return new AbstractResultBuilder<RunCodeResult>(cr) {
+            @Override
+            protected void createBody() {
+                String totalTestcases = cr.getTotalTestcases();
+                if (StringUtils.isBlank(totalTestcases)) {
+                    return;
+                }
+                int total = Integer.parseInt(totalTestcases);
+                for (int i = 0; i < total; i++) {
+                    sb.append(splitter).append("CASE ").append(i + 1).append(": ").append(cr.getCompareResult().charAt(i) == '1' ? "✅" : "❌").append(splitter).append("\n");
+                    // extract input
+                    extractInput(i, total);
+                    // extract std_output
+                    extractStdoutput(i, total);
+                    // extract answer
+                    extractAnswer(i, total);
+                    // extract expected answer
+                    extractExpectedAnswer(i, total);
+                }
             }
-            int total = Integer.parseInt(totalTestcases);
-            for (int i = 0; i < total; i++) {
-                sb.append(spliter).append("CASE ").append(i + 1).append(": ").append(rcr.getCompareResult().charAt(i) == '1' ? "✅" : "❌").append(spliter).append("\n");
+            private void extractExpectedAnswer(int i, int total) {
+                List<String> expectedCodeAnswer = cr.getExpectedCodeAnswer();
+                if (expectedCodeAnswer.size() < total) return;
+
+                sb.append("Expect Answer:").append("\n");
+                sb.append(expectedCodeAnswer.get(i)).append("\n");
+            }
+
+            private void extractAnswer(int i, int total) {
+                List<String> codeAnswer = cr.getCodeAnswer();
+                if (codeAnswer.size() < total) return;
+
+                sb.append("Code Answer:").append("\n");
+                sb.append(codeAnswer.get(i)).append("\n");
+            }
+
+            private void extractStdoutput(int i, int total) {
+                List<String> stdOutputList = cr.getStdOutputList();
+                if (stdOutputList.size() < total) return;
+                if (StringUtils.isBlank(stdOutputList.get(i))) return;
+
+                sb.append("Standard Output:").append("\n");
+                sb.append(stdOutputList.get(i)).append("\n");
+            }
+
+            private void extractInput(int i, int total) {
+                if (StringUtils.isBlank(dataInput)) {
+                    return;
+                }
+                String[] input = dataInput.split("\n");
+                if (input.length < total) return;
+
+                sb.append("Input:").append("\n");
+                int size = input.length / total;
+                int start = i * size, end = start + size;
+                for (int k = start; k < end; ++k) {
+                    sb.append(input[k]).append("\n");
+                }
+            }
+        };
+    }
+
+    private static AbstractResultBuilder<SubmitCodeResult> createSubmitCodeResultBuilder(SubmitCodeResult scr) {
+        return new AbstractResultBuilder<SubmitCodeResult>(scr) {
+            @Override
+            protected void createBody() {
+                boolean correctAnswer = isCorrectAnswer();
+                if (! correctAnswer) {
+                    return;
+                }
+                sb.append(splitter).append("LAST CASE").append(": ").append("❌").append(splitter).append("\n");
                 // extract input
-                extractInput(i, total);
+                extractInput();
                 // extract std_output
-                extractStdoutput(i, total);
+                extractStdoutput();
                 // extract answer
-                extractAnswer(i, total);
+                extractAnswer();
                 // extract expected answer
-                extractExpectedAnswer(i, total);
+                extractExpectedAnswer();
             }
-        }
 
-        private void extractExpectedAnswer(int i, int total) {
-            List<String> expectedCodeAnswer = rcr.getExpectedCodeAnswer();
-            if (expectedCodeAnswer.size() < total) return;
+            private void extractExpectedAnswer() {
+                String expectedOutput = cr.getExpectedOutput();
+                if (StringUtils.isBlank(expectedOutput)) return;
 
-            sb.append("Expect Answer:").append("\n");
-            sb.append(expectedCodeAnswer.get(i)).append("\n");
-        }
-
-        private void extractAnswer(int i, int total) {
-            List<String> codeAnswer = rcr.getCodeAnswer();
-            if (codeAnswer.size() < total) return;
-
-            sb.append("Code Answer:").append("\n");
-            sb.append(codeAnswer.get(i)).append("\n");
-        }
-
-        private void extractStdoutput(int i, int total) {
-            List<String> stdOutputList = rcr.getStdOutputList();
-            if (stdOutputList.size() < total) return;
-            if (StringUtils.isBlank(stdOutputList.get(i))) return;
-
-            sb.append("Standard Output:").append("\n");
-            sb.append(stdOutputList.get(i)).append("\n");
-        }
-
-        private void extractInput(int i, int total) {
-            String[] input = dataInput.split("\n");
-            if (input.length < total) return;
-
-            sb.append("Input:").append("\n");
-            int size = input.length / total;
-            int start = i * size, end = start + size;
-            for (int k = start; k < end; ++k) {
-                sb.append(input[k]).append("\n");
+                sb.append("Expect Answer:").append("\n");
+                sb.append(expectedOutput).append("\n");
             }
-        }
+
+            private void extractAnswer() {
+                String codeOutput = cr.getCodeOutput();
+                if (StringUtils.isBlank(codeOutput)) return;
+
+                sb.append("Code Answer:").append("\n");
+                sb.append(codeOutput).append("\n");
+            }
+
+            private void extractStdoutput() {
+                String stdOutput = cr.getStdOutput();
+                if (StringUtils.isBlank(stdOutput)) return;
+
+                sb.append("Standard Output:").append("\n");
+                sb.append(stdOutput).append("\n");
+            }
+
+            private void extractInput() {
+                String lastTestcase = cr.getLastTestcase();
+                if (StringUtils.isBlank(lastTestcase)) return;
+
+                String[] split = lastTestcase.split("\n");
+                sb.append("Input:").append("\n");
+                for (String s : split) {
+                    sb.append(s).append("\n");
+                }
+            }
+        };
     }
 }
