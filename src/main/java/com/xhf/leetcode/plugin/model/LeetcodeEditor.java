@@ -9,6 +9,15 @@ public class LeetcodeEditor {
     private String exampleTestcases;
     private String markdownPath;
     private String titleSlug;
+    private String defaultTestcases;
+
+    public String getDefaultTestcases() {
+        return defaultTestcases;
+    }
+
+    public void setDefaultTestcases(String defaultTestcases) {
+        this.defaultTestcases = defaultTestcases;
+    }
 
     public String getTitleSlug() {
         return titleSlug;

@@ -3,7 +3,7 @@ package com.xhf.learning.ui;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.fields.ExtendableTextComponent;
-import com.intellij.ui.components.fields.ExtendableTextField;
+import com.intellij.ui.components.fields.ExtendabletextArea;
 import org.junit.Test;
 
 import javax.swing.*;
@@ -34,8 +34,8 @@ public class TestUI {
         extComboBox.setEditable(true);
         extComboBox.setEditor(new BasicComboBoxEditor() {
             @Override
-            protected JTextField createEditorComponent() {
-                ExtendableTextField ecbEditor = new ExtendableTextField();
+            protected JtextArea createEditorComponent() {
+                ExtendabletextArea ecbEditor = new ExtendabletextArea();
                 ecbEditor.addExtension(browseExtension);
                 ecbEditor.setBorder(null);
                 return ecbEditor;

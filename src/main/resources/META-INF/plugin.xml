@@ -43,6 +43,7 @@
                 text="Daily Question" icon="/icons/daily.svg">
         </action>
 
+
         <group id="leetcode.lcActionsToolbar">
             <reference id="leetcode.LoginAction"/>
             <separator/>
@@ -58,6 +59,9 @@
             <action id="leetcode.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
                     text="Submit Code" description="Submit Code(editor)" icon="/icons/submit.png">
             </action>
+            <action id="leetcode.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
+                    text="Test Cases" description="Test Cases" icon="/icons/test_cases.svg">
+        </action>
         </group>
     </actions>
 

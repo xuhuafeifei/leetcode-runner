@@ -46,6 +46,39 @@ public class QuestionService {
     }
 
     /**
+     * query question by titleSlug
+     *
+     * @param titleSlug
+     * @param project
+     * @return
+     */
+    public Question queryQuestionInfo(@NotNull String titleSlug, Project project) {
+        GraphqlReqBody.SearchParams params = new GraphqlReqBody.SearchParams();
+        params.setTitleSlug(titleSlug);
+
+        HttpResponse httpResponse = this.queryQuestionInfo(params, project);
+        String resp = httpResponse.getBody();
+
+        Question question = new Question();
+        parseRespForFillingQuestion(question, resp);
+
+        return question;
+    }
+
+    /**
+     * query question
+     * @param params
+     * @param project
+     * @return
+     */
+    public HttpResponse queryQuestionInfo(GraphqlReqBody.SearchParams params, Project project) {
+        if (StringUtils.isBlank(params.getTitleSlug())) {
+            throw new RuntimeException("title slug is null ! " + GsonUtils.toJsonStr(params));
+        }
+        return LeetcodeClient.getInstance(project).queryQuestionInfo(params);
+    }
+
+    /**
      * fill question with code snippets, translated title and content
      * @param question
      */
@@ -60,8 +93,6 @@ public class QuestionService {
             return;
         }
 
-        // get a lang type
-        String langType = AppSettings.getInstance().getLangType();
 
         GraphqlReqBody.SearchParams params = new GraphqlReqBody.SearchParams();
         params.setTitleSlug(question.getTitleSlug());
@@ -69,6 +100,19 @@ public class QuestionService {
         HttpResponse httpResponse = LeetcodeClient.getInstance(project).queryQuestionInfo(params);
 
         String resp = httpResponse.getBody();
+
+        // parse resp and fill question
+        parseRespForFillingQuestion(question, resp);
+    }
+
+    /**
+     * parse json resp and extract certain field to fill the question
+     * @param question
+     * @param resp
+     */
+    private void parseRespForFillingQuestion(Question question, String resp) {
+        // get a lang type
+        String langType = AppSettings.getInstance().getLangType();
 
         // parse json to array
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();

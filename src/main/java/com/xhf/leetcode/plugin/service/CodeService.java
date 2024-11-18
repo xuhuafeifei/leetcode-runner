@@ -60,6 +60,7 @@ public class CodeService {
         le.setQuestionId(question.getQuestionId());
         le.setTitleSlug(question.getTitleSlug());
         le.setExampleTestcases(question.getExampleTestcases());
+        le.setDefaultTestcases(question.getExampleTestcases());
         le.setMarkdownPath(markdownFilePath);
         return le;
     }
@@ -263,7 +264,7 @@ public class CodeService {
             @Override
             protected void createBody() {
                 boolean correctAnswer = isCorrectAnswer();
-                if (! correctAnswer) {
+                if (correctAnswer) {
                     return;
                 }
                 sb.append(splitter).append("LAST CASE").append(": ").append("❌").append(splitter).append("\n");
@@ -313,4 +314,5 @@ public class CodeService {
             }
         };
     }
+
 }
