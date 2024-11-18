@@ -7,11 +7,10 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 
+
 /**
- * Auto-generated: 2024-11-13 19:57:1
- *
- * @author json.cn (i@json.cn)
- * @website http://www.json.cn/
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class RunCodeResult extends BaseCodeResult {
     @SerializedName("code_answer")

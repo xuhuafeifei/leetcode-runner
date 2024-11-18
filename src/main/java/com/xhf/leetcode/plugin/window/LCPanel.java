@@ -23,6 +23,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
     private MyList questionList;
 

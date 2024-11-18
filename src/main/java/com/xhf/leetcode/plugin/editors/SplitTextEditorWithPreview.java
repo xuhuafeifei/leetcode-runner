@@ -8,6 +8,10 @@ import com.intellij.openapi.fileEditor.TextEditorWithPreview;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class SplitTextEditorWithPreview extends TextEditorWithPreview {
 
     public SplitTextEditorWithPreview(@NotNull TextEditor editor, @NotNull FileEditor preview) {

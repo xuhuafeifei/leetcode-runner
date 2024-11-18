@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class HttpResponse {
     private int statusCode;

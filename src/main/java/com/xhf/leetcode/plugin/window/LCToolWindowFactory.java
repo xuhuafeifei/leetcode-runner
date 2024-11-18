@@ -11,10 +11,13 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class LCToolWindowFactory implements ToolWindowFactory, DumbAware {
 
     public static String ID = "Leetcode";
-
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {

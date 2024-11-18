@@ -3,6 +3,10 @@ package com.xhf.leetcode.plugin.utils;
 import java.util.Random;
 import java.util.UUID;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class RandomUtils {
 
     private static final Random RANDOM = new Random();

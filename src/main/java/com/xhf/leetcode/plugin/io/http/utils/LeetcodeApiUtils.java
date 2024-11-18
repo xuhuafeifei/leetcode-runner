@@ -2,6 +2,9 @@ package com.xhf.leetcode.plugin.io.http.utils;
 
 /**
  * leetcode api request utils
+ *
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class LeetcodeApiUtils {
     public static final String leetcode = "leetcode.com";

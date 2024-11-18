@@ -18,6 +18,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * support cache ability and disk persistence
+ *
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 @Service(Service.Level.PROJECT)
 public final class StoreService implements Disposable {
@@ -164,6 +167,7 @@ public final class StoreService implements Disposable {
 
     /*------------------------------disk---------------------------------*/
     private ReentrantLock lock = new ReentrantLock();
+
 
     private void persistCache() {
         this.scanFileCache();

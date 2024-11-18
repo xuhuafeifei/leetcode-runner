@@ -9,7 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * graphql请求体
+ * graphql request body
+ *
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class GraphqlReqBody {
     private String query;

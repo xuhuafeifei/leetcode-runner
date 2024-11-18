@@ -4,8 +4,11 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * the content of the code to be executed
- *
+ * <p>
  * leetcode platform needs this content to 'run code'
+ *
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class RunCode {
     private String lang;

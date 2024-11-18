@@ -12,6 +12,10 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.Date;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 @Service
 public final class ConsoleUtils implements Disposable {
 

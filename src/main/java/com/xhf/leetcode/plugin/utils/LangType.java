@@ -1,5 +1,9 @@
 package com.xhf.leetcode.plugin.utils;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public enum LangType {
     JAVA("java", ".java"),
     PYTHON("python", ".py"),

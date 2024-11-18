@@ -5,6 +5,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class FileUtils {
 
     /**

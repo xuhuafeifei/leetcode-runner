@@ -1,5 +1,3 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
-
 package com.xhf.leetcode.plugin.setting;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
@@ -17,7 +15,8 @@ import javax.swing.*;
 import java.util.Objects;
 
 /**
- * Supports creating and managing a {@link JPanel} for the Settings Dialog.
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class AppSettingsComponent {
 

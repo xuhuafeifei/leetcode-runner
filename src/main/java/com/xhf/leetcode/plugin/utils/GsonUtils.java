@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class GsonUtils {
     private static final Gson gson = new Gson();
 

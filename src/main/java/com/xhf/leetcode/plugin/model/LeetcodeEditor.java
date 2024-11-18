@@ -2,6 +2,9 @@ package com.xhf.leetcode.plugin.model;
 
 /**
  * store editor fill content, which will be used for run code
+ *
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class LeetcodeEditor {
     private String questionId;

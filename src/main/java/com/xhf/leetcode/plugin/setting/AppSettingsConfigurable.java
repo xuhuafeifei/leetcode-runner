@@ -9,7 +9,8 @@ import javax.swing.*;
 import java.util.Objects;
 
 /**
- * Provides controller functionality for application settings.
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 final class AppSettingsConfigurable implements Configurable {
 

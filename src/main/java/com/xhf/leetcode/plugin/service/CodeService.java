@@ -7,6 +7,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
@@ -17,11 +18,18 @@ import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class CodeService {
     public static String DIR = "temp";
 
@@ -133,6 +141,7 @@ public class CodeService {
             }
         });
     }
+
 
 
     /**
@@ -315,4 +324,93 @@ public class CodeService {
         };
     }
 
+
+    /**
+     * open test case dialog
+     * @param lc
+     * @param path
+     * @param project
+     */
+    public static void openTestCasesDialog(LeetcodeEditor lc, String path, Project project) {
+        // create dialog
+        new TestCasesDialog(
+                lc.getExampleTestcases(), path, project
+        ).show();
+    }
+
+    static class TestCasesDialog extends DialogWrapper {
+        private String dataInput;
+        private JPanel contentPane;
+        private JTextArea textArea;
+        // java file path, which is used for a key in cache
+        private String path;
+        private Project project;
+        private JButton resetButton;
+
+        public TestCasesDialog(String dataInput, String path, Project project) {
+            super(true);
+            this.dataInput = dataInput;
+            this.path = path;
+            this.project = project;
+            init();
+            setTitle("Set Test Cases");
+            setSize(600, 400);
+        }
+
+        @Override
+        protected @Nullable JComponent createCenterPanel() {
+            contentPane = new JPanel(new BorderLayout());
+            textArea = new JTextArea(400, 400);
+            textArea.setText(this.dataInput);
+            textArea.setEditable(true);
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            contentPane.add(scrollPane, BorderLayout.CENTER);
+
+            return contentPane;
+        }
+
+        @Override
+        protected @Nullable JComponent createSouthPanel() {
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+            // create reset button
+            resetButton = new JButton("Reset");
+            resetButton.setBorderPainted(false);
+            resetButton.setContentAreaFilled(false);
+            resetButton.setFocusPainted(false);
+            resetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            resetButton.addActionListener(e -> {
+                // get default data
+                LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
+                String defaultTestcases = lc.getDefaultTestcases();
+                textArea.setText(defaultTestcases);
+            });
+            buttonPanel.add(resetButton);
+
+
+            JButton okButton = new JButton("OK");
+            okButton.addActionListener(e -> doOKAction());
+            buttonPanel.add(okButton);
+
+            JButton cancelButton = new JButton("Cancel");
+            cancelButton.addActionListener(e -> doCancelAction());
+            buttonPanel.add(cancelButton);
+
+            return buttonPanel;
+        }
+
+        @Override
+        protected void doOKAction() {
+            String inputText = textArea.getText();
+            inputText = inputText.trim();
+            // update data
+            LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
+            lc.setExampleTestcases(inputText);
+            StoreService.getInstance(project).addCache(path, lc);
+            super.doOKAction();
+        }
+    }
 }

@@ -1,5 +1,3 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
-
 package com.xhf.leetcode.plugin.setting;
 
 import com.intellij.openapi.application.ApplicationManager;
@@ -10,13 +8,10 @@ import com.xhf.leetcode.plugin.utils.LangType;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
-/*
- * Supports storing the application settings in a persistent way.
- * The {@link com.intellij.openapi.components.State State} and {@link Storage}
- * annotations define the name of the data and the filename where these persistent
- * application settings are stored.
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
-
 @State(
         name = "AppSettings",
         storages = @Storage("SdkSettingsPlugin.xml")

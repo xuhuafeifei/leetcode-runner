@@ -7,6 +7,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.junit.Test;
 
 public class LeetCodeSubmit {
 
@@ -46,5 +47,32 @@ public class LeetCodeSubmit {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    abstract class abstractClass {
+        public void execute() {
+            System.out.println("abstractClass");
+            System.out.println(this.getClass());
+            System.out.println(this.getClass().getAnnotation(LoginPass.class));
+            System.out.println(this.getClass().getAnnotation(Test.class));
+            doExecute();
+        }
+
+        abstract void doExecute();
+    }
+
+    @LoginPass
+    class ConcreteClass extends abstractClass {
+        @Override
+        void doExecute() {
+            System.out.println("concreteClass");
+        }
+    }
+
+    @Test
+    public void test() {
+        ConcreteClass concreteClass = new ConcreteClass();
+        concreteClass.execute();
     }
 }

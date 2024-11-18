@@ -13,6 +13,10 @@ import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class SplitTextEditorProvider implements AsyncFileEditorProvider, DumbAware {
     private final TextEditorProvider first;
 

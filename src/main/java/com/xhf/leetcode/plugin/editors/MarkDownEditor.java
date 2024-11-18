@@ -16,6 +16,10 @@ import javax.swing.*;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class MarkDownEditor implements FileEditor {
     private Project project;
     private VirtualFile vFile;

@@ -9,6 +9,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class MarkDownEditorProvider implements FileEditorProvider, DumbAware {
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {

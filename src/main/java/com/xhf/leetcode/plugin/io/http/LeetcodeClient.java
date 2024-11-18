@@ -19,6 +19,10 @@ import org.apache.http.impl.cookie.BasicClientCookie2;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class LeetcodeClient {
 
     private Project project;

@@ -21,6 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class HttpClient {
 
     private HttpClient() {}

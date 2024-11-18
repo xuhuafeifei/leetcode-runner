@@ -2,6 +2,10 @@ package com.xhf.leetcode.plugin.model;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class BaseCodeResult {
     @SerializedName("lang")
     private String lang;

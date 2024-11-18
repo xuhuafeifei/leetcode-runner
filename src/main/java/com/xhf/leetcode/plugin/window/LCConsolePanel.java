@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvider {
 

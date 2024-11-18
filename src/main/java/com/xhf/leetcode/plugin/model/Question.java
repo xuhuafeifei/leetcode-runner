@@ -1,5 +1,9 @@
 package com.xhf.leetcode.plugin.model;
 
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
 public class Question {
     private String questionId;
     private String frontendQuestionId;

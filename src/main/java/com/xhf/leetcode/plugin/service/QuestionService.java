@@ -21,6 +21,9 @@ import java.util.List;
 
 /**
  * deal with http module and question ui module
+ *
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class QuestionService {
     private static QuestionService qs = new QuestionService();
