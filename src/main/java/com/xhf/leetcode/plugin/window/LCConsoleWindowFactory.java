@@ -8,7 +8,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentFactory;
+import com.intellij.ui.content.ContentManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -23,8 +23,9 @@ public class LCConsoleWindowFactory implements ToolWindowFactory, DumbAware {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         LCConsolePanel LCConsolePanel = new LCConsolePanel(toolWindow, project);
-        Content content = ContentFactory.SERVICE.getInstance().createContent(LCConsolePanel, "", false);
-        toolWindow.getContentManager().addContent(content);
+        ContentManager contentManager = toolWindow.getContentManager();
+        Content content = contentManager.getFactory().createContent(LCConsolePanel, "", false);
+        contentManager.addContent(content);
     }
 
     public static DataContext getDataContext(@NotNull Project project) {

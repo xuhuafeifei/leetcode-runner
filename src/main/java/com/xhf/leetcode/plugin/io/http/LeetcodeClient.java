@@ -277,7 +277,7 @@ public class LeetcodeClient {
      * @param params
      * @return
      */
-    public HttpResponse queryQuestionInfo(GraphqlReqBody.SearchParams params) {
+    public String queryQuestionInfoJson(GraphqlReqBody.SearchParams params) {
         if (StringUtils.isBlank(params.getTitleSlug())) {
             throw new RuntimeException("title slug is null ! " + GsonUtils.toJsonStr(params));
         }
@@ -293,7 +293,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        return httpClient.executePost(httpRequest);
+        return httpClient.executePost(httpRequest).getBody();
     }
 
     /**

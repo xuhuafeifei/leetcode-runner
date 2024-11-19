@@ -196,6 +196,9 @@ public class CodeService {
                     }else if ("Compile Error".equals(cr.getStatusMsg())) {
                         sb.append("❌ Compile Error...").append("\n");
                         sb.append(cr.getFullCompileError()).append("\n");
+                    }else if ("Time Limit Exceeded".equals(cr.getStatusMsg())) {
+                        sb.append("❌ Time Limit Exceeded...").append("\n");
+                        sb.append(cr.getFullCompileError()).append("\n");
                     }else {
                         throw new RuntimeException("unknown leetcode error...");
                     }
@@ -216,10 +219,10 @@ public class CodeService {
                 int total = Integer.parseInt(totalTestcases);
                 for (int i = 0; i < total; i++) {
                     sb.append(splitter).append("CASE ").append(i + 1).append(": ").append(cr.getCompareResult().charAt(i) == '1' ? "✅" : "❌").append(splitter).append("\n");
-                    // extract input
-                    extractInput(i, total);
                     // extract std_output
                     extractStdoutput(i, total);
+                    // extract input
+                    extractInput(i, total);
                     // extract answer
                     extractAnswer(i, total);
                     // extract expected answer
@@ -228,7 +231,7 @@ public class CodeService {
             }
             private void extractExpectedAnswer(int i, int total) {
                 List<String> expectedCodeAnswer = cr.getExpectedCodeAnswer();
-                if (expectedCodeAnswer.size() < total) return;
+                if (i >= expectedCodeAnswer.size()) return;
 
                 sb.append("Expect Answer:").append("\n");
                 sb.append(expectedCodeAnswer.get(i)).append("\n");
@@ -236,7 +239,7 @@ public class CodeService {
 
             private void extractAnswer(int i, int total) {
                 List<String> codeAnswer = cr.getCodeAnswer();
-                if (codeAnswer.size() < total) return;
+                if (i >= codeAnswer.size()) return;
 
                 sb.append("Code Answer:").append("\n");
                 sb.append(codeAnswer.get(i)).append("\n");
@@ -244,7 +247,7 @@ public class CodeService {
 
             private void extractStdoutput(int i, int total) {
                 List<String> stdOutputList = cr.getStdOutputList();
-                if (stdOutputList.size() < total) return;
+                if (i >= stdOutputList.size()) return;
                 if (StringUtils.isBlank(stdOutputList.get(i))) return;
 
                 sb.append("Standard Output:").append("\n");
@@ -256,7 +259,7 @@ public class CodeService {
                     return;
                 }
                 String[] input = dataInput.split("\n");
-                if (input.length < total) return;
+                if (i >= input.length) return;
 
                 sb.append("Input:").append("\n");
                 int size = input.length / total;
@@ -277,10 +280,10 @@ public class CodeService {
                     return;
                 }
                 sb.append(splitter).append("LAST CASE").append(": ").append("❌").append(splitter).append("\n");
-                // extract input
-                extractInput();
                 // extract std_output
                 extractStdoutput();
+                // extract input
+                extractInput();
                 // extract answer
                 extractAnswer();
                 // extract expected answer

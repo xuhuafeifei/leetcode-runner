@@ -5,7 +5,6 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.xhf.leetcode.plugin.utils.LangType;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -20,12 +19,9 @@ public final class AppSettings
         implements PersistentStateComponent<AppSettings.State> {
 
   static class State {
-    @NonNls
-    public String userId = "John Smith";
 
     public String filePath = "E:\\java_code\\leetcode-runner\\src\\main\\resources\\";
 
-    public boolean ideaStatus = false;
     public String langType = "java";
   }
 

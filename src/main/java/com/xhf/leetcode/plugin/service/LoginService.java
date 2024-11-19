@@ -34,15 +34,20 @@ public class LoginService {
     public static void doLogin(Project project) {
         LCPanel.MyList myList = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_QUESTION_LIST);
 
-        if (LeetcodeClient.getInstance(project).isLogin()) {
-            // load data
-            QuestionService.getInstance().loadAllQuestionData(project, myList);
-            LogUtils.LOG.info("login success...");
-            ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("login success...");
+        if (isLogin(project)) {
+            loginSuccessAfter(project, myList);
             return;
         }
         JcefLoginWindow jcefLoginWindow = new JcefLoginWindow(project, myList);
         jcefLoginWindow.start();
+    }
+
+    private static void loginSuccessAfter(Project project, LCPanel.MyList myList) {
+        // load data
+        loginFlag = Boolean.TRUE;
+        QuestionService.getInstance().loadAllQuestionData(project, myList);
+        LogUtils.LOG.info("login success...");
+        ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("login success...");
     }
 
     private static boolean loginFlag = Boolean.FALSE;
@@ -125,14 +130,11 @@ public class LoginService {
                          if (count == total - 1) {
                              // login info exists!
                              if (cookieList.stream().anyMatch(c -> c.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION))) {
-                                 // set login flag
-                                 loginFlag = Boolean.TRUE;
                                  // update cookies
                                  LeetcodeClient.getInstance(project).clearCookies();
                                  // store cookies
                                  LeetcodeClient.getInstance(project).setCookies(cookieList);
-                                 QuestionService.getInstance().loadAllQuestionData(project, myList);
-                                 ConsoleUtils.getInstance(project).showInfo("login success...");
+                                 loginSuccessAfter(project, myList);
                                  frame.dispose();
                              } else {
                                  cookieList.clear();

@@ -41,9 +41,7 @@ final class AppSettingsConfigurable implements Configurable {
   public boolean isModified() {
     AppSettings.State state =
         Objects.requireNonNull(AppSettings.getInstance().getState());
-    return !mySettingsComponent.getUserNameText().equals(state.userId) ||
-        mySettingsComponent.getIdeaUserStatus() != state.ideaStatus ||
-            !mySettingsComponent.getLangType().equals(state.langType) ||
+    return  !mySettingsComponent.getLangType().equals(state.langType) ||
             !mySettingsComponent.getFilePath().equals(state.filePath)
             ;
   }
@@ -55,8 +53,6 @@ final class AppSettingsConfigurable implements Configurable {
   public void apply() {
     AppSettings.State state =
         Objects.requireNonNull(AppSettings.getInstance().getState());
-    state.userId = mySettingsComponent.getUserNameText();
-    state.ideaStatus = mySettingsComponent.getIdeaUserStatus();
     state.langType = mySettingsComponent.getLangType();
     state.filePath = mySettingsComponent.getFilePath();
   }
@@ -68,8 +64,6 @@ final class AppSettingsConfigurable implements Configurable {
   public void reset() {
     AppSettings.State state =
         Objects.requireNonNull(AppSettings.getInstance().getState());
-    mySettingsComponent.setUserNameText(state.userId);
-    mySettingsComponent.setIdeaUserStatus(state.ideaStatus);
     mySettingsComponent.setLangType(state.langType);
     mySettingsComponent.setFilePath(state.filePath);
   }

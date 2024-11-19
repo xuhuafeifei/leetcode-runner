@@ -35,10 +35,8 @@ public class AppSettingsComponent {
   public AppSettingsComponent() {
     initComponent();
     myMainPanel = FormBuilder.createFormBuilder()
-//        .addLabeledComponent(new JBLabel("User name:"), myUserNameText, 1, false)
-        .addLabeledComponent(new JBLabel("lang type"), myLangType, 1, false)
+        .addLabeledComponent(new JBLabel("Lang type"), myLangType, 1, false)
         .addLabeledComponent(new JBLabel("Store path:"), myFileBrowserBtn, 1, false)
-//        .addComponent(myIdeaUserStatus, 1)
         .addComponentFillVertically(new JPanel(), 0)
         .getPanel();
   }

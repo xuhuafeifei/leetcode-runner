@@ -9,7 +9,6 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.GraphqlReqBody;
-import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
@@ -59,8 +58,7 @@ public class QuestionService {
         GraphqlReqBody.SearchParams params = new GraphqlReqBody.SearchParams();
         params.setTitleSlug(titleSlug);
 
-        HttpResponse httpResponse = this.queryQuestionInfo(params, project);
-        String resp = httpResponse.getBody();
+        String resp = this.queryQuestionInfo(params, project);
 
         Question question = new Question();
         parseRespForFillingQuestion(question, resp);
@@ -74,11 +72,11 @@ public class QuestionService {
      * @param project
      * @return
      */
-    public HttpResponse queryQuestionInfo(GraphqlReqBody.SearchParams params, Project project) {
+    public String queryQuestionInfo(GraphqlReqBody.SearchParams params, Project project) {
         if (StringUtils.isBlank(params.getTitleSlug())) {
             throw new RuntimeException("title slug is null ! " + GsonUtils.toJsonStr(params));
         }
-        return LeetcodeClient.getInstance(project).queryQuestionInfo(params);
+        return LeetcodeClient.getInstance(project).queryQuestionInfoJson(params);
     }
 
     /**
@@ -100,9 +98,7 @@ public class QuestionService {
         GraphqlReqBody.SearchParams params = new GraphqlReqBody.SearchParams();
         params.setTitleSlug(question.getTitleSlug());
 
-        HttpResponse httpResponse = LeetcodeClient.getInstance(project).queryQuestionInfo(params);
-
-        String resp = httpResponse.getBody();
+        String resp = LeetcodeClient.getInstance(project).queryQuestionInfoJson(params);
 
         // parse resp and fill question
         parseRespForFillingQuestion(question, resp);
