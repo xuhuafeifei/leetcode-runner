@@ -18,17 +18,14 @@ test {
     useJUnitPlatform()
 }
 
+// Solve the problem when garble build, the console will output messy character
 tasks.withType(JavaExec).configureEach {
     jvmArgs = ['-Xmx512m', '-Dfile.encoding=UTF-8', '-Dsun.stdout.encoding=UTF-8', '-Dsun.stderr.encoding=UTF-8']
 }
-//tasks.withType(JavaCompile).configureEach {
-//    options.encoding = 'UTF-8'
-//}
 
 group 'org.example'
 version '1.0-SNAPSHOT'
 
-// 设置Java版本
 sourceCompatibility = 17
 targetCompatibility = 17
 
@@ -41,12 +38,9 @@ dependencies {
 }
 
 dependencies {
-    implementation 'com.alibaba:fastjson:1.2.47'
-    implementation 'org.jsoup:jsoup:1.11.3'
     implementation('io.sentry:sentry:1.7.9') {
         exclude module: 'slf4j-api'
     }
-    implementation 'org.scilab.forge:jlatexmath:1.0.7'
     implementation 'org.apache.commons:commons-lang3:3.9'
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
