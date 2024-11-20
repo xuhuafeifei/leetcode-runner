@@ -3,6 +3,8 @@ package com.xhf.leetcode.plugin.io.file.utils;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -85,12 +87,13 @@ public class FileUtils {
         try (FileOutputStream fos = new FileOutputStream(path)) {
             // write properties to file
             properties.store(fos, "persist content");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     private static void checkAndCreateNewFile(String path) throws IOException {
+        if (! isPath(path)) {
+            throw new IllegalArgumentException("path is not a file path");
+        }
         // check file exists
         File file = new File(path);
         if (file.exists()) {
@@ -153,6 +156,31 @@ public class FileUtils {
     }
 
     /**
+     * find target file
+     * @param directory
+     * @param targetFileName
+     * @return
+     */
+    public static List<File> findTargetFiles(String directory, String targetFileName) {
+        File dir = new File(directory);
+        List<File> targetFiles = new ArrayList<>();
+
+        if (dir.exists() && dir.isDirectory()) {
+            File[] entries = dir.listFiles();
+            if (entries != null) {
+                for (File entry : entries) {
+                    if (entry.isDirectory()) {
+                        targetFiles.addAll(findTargetFiles(entry.getAbsolutePath(), targetFileName));
+                    } else if (entry.getName().equals(targetFileName)) {
+                        targetFiles.add(entry);
+                    }
+                }
+            }
+        }
+        return targetFiles;
+    }
+
+    /**
      * unify path separator
      * if path contains / such as E:/demo/a.text, change it into E:\demo\a.text
      * @param path
@@ -184,6 +212,7 @@ public class FileUtils {
         private final StringBuffer sb;
 
         public PathBuilder(String path) {
+            if (! isPath(path)) throw new IllegalArgumentException("path is not valid: " + path);
             this.sb = new StringBuffer(unifyPath(path));
         }
 

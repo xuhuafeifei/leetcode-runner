@@ -2,6 +2,7 @@
 package com.xhf.leetcode.plugin.setting;
 
 import com.intellij.openapi.options.Configurable;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,9 +53,13 @@ final class AppSettingsConfigurable implements Configurable {
   @Override
   public void apply() {
     AppSettings.State state =
-        Objects.requireNonNull(AppSettings.getInstance().getState());
+            Objects.requireNonNull(AppSettings.getInstance().getState());
     state.langType = mySettingsComponent.getLangType();
     state.filePath = mySettingsComponent.getFilePath();
+    // make sure that the core file path only init once and the path is valid
+    if (state.isEmptyCoreFilePath() && FileUtils.isPath(mySettingsComponent.getFilePath())) {
+      state.coreFilePath = mySettingsComponent.getFilePath();
+    }
   }
 
   /**
@@ -63,9 +68,10 @@ final class AppSettingsConfigurable implements Configurable {
   @Override
   public void reset() {
     AppSettings.State state =
-        Objects.requireNonNull(AppSettings.getInstance().getState());
+            Objects.requireNonNull(AppSettings.getInstance().getState());
     mySettingsComponent.setLangType(state.langType);
     mySettingsComponent.setFilePath(state.filePath);
+    state.coreFilePath = mySettingsComponent.getFilePath();
   }
 
   @Override

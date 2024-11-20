@@ -35,10 +35,10 @@ public class AppSettingsComponent {
   public AppSettingsComponent() {
     initComponent();
     myMainPanel = FormBuilder.createFormBuilder()
-        .addLabeledComponent(new JBLabel("Lang type"), myLangType, 1, false)
-        .addLabeledComponent(new JBLabel("Store path:"), myFileBrowserBtn, 1, false)
-        .addComponentFillVertically(new JPanel(), 0)
-        .getPanel();
+            .addLabeledComponent(new JBLabel("Lang type"), myLangType, 1, false)
+            .addLabeledComponent(new JBLabel("Store path:"), myFileBrowserBtn, 1, false)
+            .addComponentFillVertically(new JPanel(), 0)
+            .getPanel();
   }
 
   private void initComponent() {
@@ -47,11 +47,13 @@ public class AppSettingsComponent {
       myLangType.addItem(langType.getLangType());
     }
     // init file chooser
-    myFileBrowserBtn .addBrowseFolderListener(
+    myFileBrowserBtn.addBrowseFolderListener(
             new TextBrowseFolderListener(
                     FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
-            ){});
+            ) {
+            });
     myFileBrowserBtn.setText(AppSettings.getInstance().getFilePath());
+    myFileBrowserBtn.setEditable(false);
   }
 
   public JPanel getPanel() {
@@ -86,7 +88,7 @@ public class AppSettingsComponent {
   public String getLangType() {
     return Objects.requireNonNull(myLangType.getSelectedItem()).toString();
   }
-  
+
   public void setFilePath(String filePath) {
     myFileBrowserBtn.setText(filePath);
   }

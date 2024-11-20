@@ -45,9 +45,9 @@ public class CodeService {
         // create code file
         String codeFilePath = createCodeFile(question);
         // create content file
-        String markdownFilePath = createContentFile(question);
+        // String markdownFilePath = createContentFile(question);
 
-        LeetcodeEditor le = buildLeetcodeEditor(question, markdownFilePath);
+        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent());
 
         // store path info
         StoreService.getInstance(project).addCache(codeFilePath, le);
@@ -62,17 +62,19 @@ public class CodeService {
 
     }
 
-    private static LeetcodeEditor buildLeetcodeEditor(Question question, String markdownFilePath) {
+    private static LeetcodeEditor buildLeetcodeEditor(Question question, String translatedContent) {
         LeetcodeEditor le = new LeetcodeEditor();
         le.setLang(AppSettings.getInstance().getLangType());
         le.setQuestionId(question.getQuestionId());
         le.setTitleSlug(question.getTitleSlug());
         le.setExampleTestcases(question.getExampleTestcases());
         le.setDefaultTestcases(question.getExampleTestcases());
-        le.setMarkdownPath(markdownFilePath);
+        // le.setMarkdownPath(markdownFilePath);
+        le.setMarkdownContent(translatedContent);
         return le;
     }
 
+    @Deprecated // not used
     private static String createContentFile(Question question) {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)

@@ -10,9 +10,21 @@ public class LeetcodeEditor {
     private String questionId;
     private String lang;
     private String exampleTestcases;
+
+    @Deprecated // not used
     private String markdownPath;
+
+    private String markdownContent;
     private String titleSlug;
     private String defaultTestcases;
+
+    public String getMarkdownContent() {
+        return markdownContent;
+    }
+
+    public void setMarkdownContent(String markdownContent) {
+        this.markdownContent = markdownContent;
+    }
 
     public String getDefaultTestcases() {
         return defaultTestcases;

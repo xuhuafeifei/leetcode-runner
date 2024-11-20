@@ -5,7 +5,7 @@ import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import org.jetbrains.annotations.Nls;
@@ -22,12 +22,12 @@ import java.net.URL;
  */
 public class MarkDownEditor implements FileEditor {
     private Project project;
-    private VirtualFile vFile;
+    private LightVirtualFile vFile;
     private JCEFHtmlPanel jcefHtmlPanel;
     // default template
     private final String templatePath = "\\template\\default.html";
 
-    public MarkDownEditor(@NotNull Project project, @NotNull VirtualFile file) {
+    public MarkDownEditor(@NotNull Project project, @NotNull LightVirtualFile file) {
         this.project = project;
         this.vFile = file;
         this.jcefHtmlPanel = new JCEFHtmlPanel(this.vFile.getUrl());
@@ -38,7 +38,7 @@ public class MarkDownEditor implements FileEditor {
         URL url = FileUtils.getResourceFileUrl(this.templatePath);
         String html = FileUtils.readContentFromFile(url);
         // handle html
-        String newHtml = html.replace("{{content}}", FileUtils.readContentFromFile(vFile.getPath()));
+        String newHtml = html.replace("{{content}}", vFile.getContent());
         return newHtml;
     }
 

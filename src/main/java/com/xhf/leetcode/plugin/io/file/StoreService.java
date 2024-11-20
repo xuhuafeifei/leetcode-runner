@@ -24,18 +24,23 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Service(Service.Level.PROJECT)
 public final class StoreService implements Disposable {
-    private String filePath;
     private Project project;
-    private final String cacheFileName = "app.properties";
 
     public StoreService(Project project) {
         this.project = project;
         // load data
+        /*
         this.filePath = new FileUtils.PathBuilder(
                                 AppSettings.getInstance().getFilePath()
                              ).append(cacheFileName).build();
+         */
+        // this.filePath = AppSettings.getInstance().getCoreFilePath();
         // this.filePath = "E:\\java_code\\leetcode-runner\\src\\main\\resources\\app.properties";
         this.loadCache();
+    }
+
+    public String getCacheFilePath() {
+        return AppSettings.getInstance().getCoreFilePath();
     }
 
     public static StoreService getInstance(Project project) {
@@ -181,9 +186,9 @@ public final class StoreService implements Disposable {
         }
         // write to file
         try {
-            FileUtils.writePropertiesFileContent(this.filePath, properties);
+            FileUtils.writePropertiesFileContent(getCacheFilePath(), properties);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("write file error! filePath = " + getCacheFilePath());
         }
     }
 
@@ -191,7 +196,7 @@ public final class StoreService implements Disposable {
      * load properties file to durable cache. if the file does not exist, load nothing
      */
     private void loadCache() {
-        Properties properties = FileUtils.readPropertiesFileContent(this.filePath);
+        Properties properties = FileUtils.readPropertiesFileContent(getCacheFilePath());
         properties.forEach((k, v) -> {
             durableCache.put((String) k, GsonUtils.fromJson((String) v, StoreContent.class));
         });

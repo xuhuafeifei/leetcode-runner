@@ -33,8 +33,8 @@ import java.util.Objects;
 public class LoginService {
     public static void doLogin(Project project) {
         LCPanel.MyList myList = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_QUESTION_LIST);
-
-        if (isLogin(project)) {
+        // do not call isLogin function in this class
+        if (LeetcodeClient.getInstance(project).isLogin()) {
             loginSuccessAfter(project, myList);
             return;
         }
