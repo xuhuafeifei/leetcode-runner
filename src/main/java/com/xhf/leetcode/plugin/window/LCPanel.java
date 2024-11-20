@@ -42,7 +42,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
 
         // get action toolbar
         ActionToolbar actionToolbar = actionManager.createActionToolbar("leetcode Toolbar",
-                (DefaultActionGroup) actionManager.getAction("leetcode.lcActionsToolbar"),
+                (DefaultActionGroup) actionManager.getAction("leetcode.plugin.lcActionsToolbar"),
                 true);
 
         // build question list

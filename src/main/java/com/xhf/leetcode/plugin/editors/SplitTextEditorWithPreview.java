@@ -25,6 +25,6 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
 
     @Nullable
     protected ActionGroup createLeftToolbarActionGroup() {
-        return (ActionGroup) ActionManager.getInstance().getAction("leetcode.editor.group");
+        return (ActionGroup) ActionManager.getInstance().getAction("leetcode.plugin.editor.group");
     }
 }

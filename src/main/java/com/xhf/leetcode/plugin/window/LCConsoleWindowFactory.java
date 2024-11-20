@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class LCConsoleWindowFactory implements ToolWindowFactory, DumbAware {
 
-    public static String ID = "Leetcode Console";
+    public static String ID = "Leetcode Console Plugin";
 
 
     @Override

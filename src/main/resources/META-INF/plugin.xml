@@ -1,11 +1,14 @@
 <idea-plugin>
     <id>org.example.leetcode-runner</id>
-    <name>Plugin display name here</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <name>leetcode-runner</name>
+    <version>1.0</version>
+    <vendor email="2508020102@qq.com" url="https://github.com/xuhuafeifei/leetcode-runner">feigebuge</vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+        <p>Support the LC brush question plug-in with complete core functions, simple and easy to use, support all the functions required for daily brush questions, realize the separation from the Web-side LeetCode, brush algorithm,</p>
+        <p>&nbsp;</p>
+        <p>currently in the test version, support login, code running, problem submission, test sample setting functions</p>
+        <p>&nbsp;</p>
     ]]></description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
@@ -23,50 +26,50 @@
         <applicationService serviceImplementation="com.xhf.leetcode.plugin.setting.AppSettings"/>
 
         <!-- tool window -->
-        <toolWindow id="Leetcode" secondary="true" icon="/icons/LeetCode.png" anchor="right"
+        <toolWindow id="Leetcode Plugin" secondary="true" icon="/icons/LeetCode.png" anchor="right"
                     factoryClass="com.xhf.leetcode.plugin.window.LCToolWindowFactory"/>
-        <toolWindow id="Leetcode Console" secondary="true" icon="/icons/LeetCode.png" anchor="bottom"
+        <toolWindow id="Leetcode Console Plugin" secondary="true" icon="/icons/LeetCode.png" anchor="bottom"
                     factoryClass="com.xhf.leetcode.plugin.window.LCConsoleWindowFactory" />
     </extensions>
 
     <actions>
-        <action id="leetcode.LoginAction" class="com.xhf.leetcode.plugin.actions.loginAction"
+        <action id="leetcode.plugin.LoginAction" class="com.xhf.leetcode.plugin.actions.loginAction"
                 text="Sign In" icon="/icons/login.png">
         </action>
-        <action id="leetcode.DemoAction" class="com.xhf.leetcode.plugin.actions.DemoAction"
+        <action id="leetcode.plugin.DemoAction" class="com.xhf.leetcode.plugin.actions.DemoAction"
                 text="Demo Test" icon="/icons/clean.png">
         </action>
-        <action id="leetcode.PickOneAction" class="com.xhf.leetcode.plugin.actions.PickOneAction"
+        <action id="leetcode.plugin.PickOneAction" class="com.xhf.leetcode.plugin.actions.PickOneAction"
                 text="Pick One" icon="/icons/random.png">
         </action>
-        <action id="leetcode.TodayQuestionAction" class="com.xhf.leetcode.plugin.actions.TodayQuestionAction"
+        <action id="leetcode.plugin.TodayQuestionAction" class="com.xhf.leetcode.plugin.actions.TodayQuestionAction"
                 text="Daily Question" icon="/icons/daily.svg">
         </action>
-        <action id="leetcode.Settings" class="com.xhf.leetcode.plugin.actions.SettingAction"
+        <action id="leetcode.plugin.Settings" class="com.xhf.leetcode.plugin.actions.SettingAction"
                 text="Setting" icon="/icons/config.svg">
         </action>
 
 
-        <group id="leetcode.lcActionsToolbar">
-            <reference id="leetcode.LoginAction"/>
+        <group id="leetcode.plugin.lcActionsToolbar">
+            <reference id="leetcode.plugin.LoginAction"/>
             <separator/>
-            <reference id="leetcode.DemoAction"/>
-            <reference id="leetcode.PickOneAction"/>
-            <reference id="leetcode.TodayQuestionAction"/>
+            <reference id="leetcode.plugin.DemoAction"/>
+            <reference id="leetcode.plugin.PickOneAction"/>
+            <reference id="leetcode.plugin.TodayQuestionAction"/>
             <separator/>
-            <reference id="leetcode.Settings"/>
+            <reference id="leetcode.plugin.Settings"/>
         </group>
 
-        <group id="leetcode.editor.group">
-            <action id="leetcode.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
+        <group id="leetcode.plugin.editor.group">
+            <action id="leetcode.plugin.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
                     text="Run Code" description="Run Code(editor)" icon="/icons/run.png">
             </action>
-            <action id="leetcode.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
+            <action id="leetcode.plugin.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
                     text="Submit Code" description="Submit Code(editor)" icon="/icons/submit.png">
             </action>
-            <action id="leetcode.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
+            <action id="leetcode.plugin.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
                     text="Test Cases" description="Test Cases" icon="/icons/test_cases.svg">
-        </action>
+            </action>
         </group>
     </actions>
 
