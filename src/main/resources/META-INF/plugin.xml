@@ -19,7 +19,7 @@
         <!-- setting -->
         <applicationConfigurable parentId="tools" instance="com.xhf.leetcode.plugin.setting.AppSettingsConfigurable"
                                  id="org.intellij.sdk.settings.AppSettingsConfigurable"
-                                 displayName="Leetcode Setting Demo"/>
+                                 displayName="Leetcode Setting"/>
         <applicationService serviceImplementation="com.xhf.leetcode.plugin.setting.AppSettings"/>
 
         <!-- tool window -->
@@ -42,6 +42,9 @@
         <action id="leetcode.TodayQuestionAction" class="com.xhf.leetcode.plugin.actions.TodayQuestionAction"
                 text="Daily Question" icon="/icons/daily.svg">
         </action>
+        <action id="leetcode.Settings" class="com.xhf.leetcode.plugin.actions.SettingAction"
+                text="Setting" icon="/icons/config.svg">
+        </action>
 
 
         <group id="leetcode.lcActionsToolbar">
@@ -50,6 +53,8 @@
             <reference id="leetcode.DemoAction"/>
             <reference id="leetcode.PickOneAction"/>
             <reference id="leetcode.TodayQuestionAction"/>
+            <separator/>
+            <reference id="leetcode.Settings"/>
         </group>
 
         <group id="leetcode.editor.group">

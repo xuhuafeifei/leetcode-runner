@@ -7,6 +7,7 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LoginPass;
+import com.xhf.leetcode.plugin.utils.SettingPass;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -19,10 +20,13 @@ public abstract class AbstractAction extends AnAction {
         Project project = e.getProject();
         assert project != null;
         // settings check
-        AppSettings appSettings = AppSettings.getInstance();
-        if (! appSettings.initOrNot()) {
-            ConsoleUtils.getInstance(project).showWaring("please init plugin setting");
-            return;
+        SettingPass settingPass = this.getClass().getAnnotation(SettingPass.class);
+        if (settingPass == null) {
+            AppSettings appSettings = AppSettings.getInstance();
+            if (!appSettings.initOrNot()) {
+                ConsoleUtils.getInstance(project).showWaring("please init plugin setting");
+                return;
+            }
         }
         // login check
         LoginPass annotation = this.getClass().getAnnotation(LoginPass.class);
