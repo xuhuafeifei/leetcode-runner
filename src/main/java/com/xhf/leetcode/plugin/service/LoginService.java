@@ -1,11 +1,13 @@
 package com.xhf.leetcode.plugin.service;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.impl.IdeFrameImpl;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
@@ -17,11 +19,13 @@ import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.cef.browser.CefBrowser;
 import org.cef.handler.CefLoadHandlerAdapter;
 import org.cef.network.CefCookieManager;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,8 +42,22 @@ public class LoginService {
             loginSuccessAfter(project, myList);
             return;
         }
+
         JcefLoginWindow jcefLoginWindow = new JcefLoginWindow(project, myList);
-        jcefLoginWindow.start();
+        try {
+            jcefLoginWindow.start();
+        } catch (Exception e) {
+            LogUtils.LOG.error("JCEF Login Failed, Start Cookie Login...", e);
+            startCookieLogin(project, myList);
+        }
+    }
+
+    private static void startCookieLogin(Project project, LCPanel.MyList myList) {
+        try {
+            new CookieLoginWindow(project, myList).start();
+        } catch (Exception e) {
+            throw new RuntimeException("Cookie Login Failed", e);
+        }
     }
 
     private static void loginSuccessAfter(Project project, LCPanel.MyList myList) {
@@ -64,88 +82,216 @@ public class LoginService {
      * <p>
      * loginFlag is a flag to check whether the user has clicked the login button and login succussfully
      *
-     * @return
      */
     public static boolean isLogin(Project project) {
         return loginFlag && LeetcodeClient.getInstance(project).isLogin();
     }
 
-    static class JcefLoginWindow {
-         private Project project;
+    static abstract class BasicWindow {
+        protected Project project;
+        protected LCPanel.MyList myList;
+        public BasicWindow(Project project, LCPanel.MyList myList) {
+            this.project = project;
+            this.myList = myList;
+        }
 
-         private LCPanel.MyList myList;
+        protected void start() throws Exception {
+            Window activeFrame = IdeFrameImpl.getActiveFrame();
+            if (activeFrame == null) {
+                return;
+            }
+            Rectangle bounds = activeFrame.getGraphicsConfiguration().getBounds();
+            final JFrame frame = new IdeFrameImpl();
+            frame.setTitle(getFrameTitle());
+            frame.setAlwaysOnTop(true);
+            frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            frame.setBounds(bounds.width / 4, bounds.height / 4, bounds.width / 2, bounds.height / 2);
+            frame.setLayout(new BorderLayout());
 
-         public JcefLoginWindow(Project project, LCPanel.MyList myList) {
-             this.project = project;
-             this.myList = myList;
-         }
+            loadComponent(frame);
 
-         public void start() {
-             Window activeFrame = IdeFrameImpl.getActiveFrame();
-             if (activeFrame == null) {
-                 return;
-             }
-             Rectangle bounds = activeFrame.getGraphicsConfiguration().getBounds();
-             final JFrame frame = new IdeFrameImpl();
-             frame.setTitle("Web Auth");
-             frame.setAlwaysOnTop(true);
-             frame.setDefaultCloseOperation(2);
-             frame.setBounds(bounds.width / 4, bounds.height / 4, bounds.width / 2, bounds.height / 2);
-             frame.setLayout(new BorderLayout());
+            frame.setVisible(true);
+        }
 
-             loadJCEFComponent(frame);
+        abstract String getFrameTitle();
 
-             frame.setVisible(true);
-         }
+        abstract void loadComponent(JFrame frame) throws Exception;
+    }
 
-         private void loadJCEFComponent(JFrame frame) {
-             final JBCefBrowser jbcebrowser = new JBCefBrowser(LeetcodeApiUtils.getLeetcodeLogin());
-             JBCefClient jbCefClient = jbcebrowser.getJBCefClient();
-             CefCookieManager cefCookieManager = jbcebrowser.getJBCefCookieManager().getCefCookieManager();
+    static class CookieLoginWindow extends BasicWindow {
 
-             // set frame listener
-             frame.addWindowListener(new WindowAdapter() {
-                 @Override
-                 public void windowClosed(WindowEvent e) {
-                     // clear all cookies
-                     cefCookieManager.deleteCookies("", "");
-                     // close jcef browser
-                     Disposer.dispose(jbcebrowser);
-                 }
-             });
+        private JPanel contentPane;
+        private JTextArea textArea;
+        private final JButton loginButton;
+        private final JButton cancelButton;
+        private final JButton helpButton;
+
+        public CookieLoginWindow(Project project, LCPanel.MyList myList) {
+            super(project, myList);
+            this.contentPane = new JPanel();
+            this.textArea = new JTextArea();
+            this.loginButton = new JButton("Login");
+            this.cancelButton = new JButton("Cancel");
+            this.helpButton = new JButton("Help");
+        }
+
+        @Override
+        String getFrameTitle() {
+            return "Cookie Login";
+        }
+
+        @Override
+        void loadComponent(JFrame frame) {
+            contentPane = new JPanel(new BorderLayout());
+            textArea = new JTextArea(400, 400);
+            textArea.setEditable(true);
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            contentPane.add(scrollPane, BorderLayout.CENTER);
+
+            // Initialize buttons
+            JPanel buttonPanel = new JPanel();
+            initLoginBtn(frame);
+            initCancelBtn(frame);
+            // initHelpBtn(frame);
+            buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+            buttonPanel.add(loginButton);
+            buttonPanel.add(cancelButton);
+            // buttonPanel.add(helpButton);
+
+            contentPane.add(buttonPanel, BorderLayout.SOUTH);
+
+            frame.add(contentPane, BorderLayout.CENTER);
+        }
+
+        private void initHelpBtn(JFrame frame) {
+            helpButton.addActionListener(e -> {
+                new HelpDialog(project, true).show();
+            });
+        }
+
+        private void initCancelBtn(JFrame frame) {
+            cancelButton.addActionListener(e -> {
+                frame.dispose();
+            });
+        }
+
+        private void initLoginBtn(JFrame frame) {
+            loginButton.addActionListener(e -> {
+                String text = textArea.getText();
+                if (text.isEmpty()) {
+                    JOptionPane.showMessageDialog(contentPane, "Please input your cookie", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                LeetcodeClient instance = LeetcodeClient.getInstance(project);
+                instance.setCookie(new BasicClientCookie2(LeetcodeApiUtils.LEETCODE_SESSION, text));
+                if (instance.isLogin()) {
+                    loginSuccessAfter(project, myList);
+                    frame.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(contentPane, "Cookie Error, Please Try Again", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+        }
+
+        @Deprecated
+        static class HelpDialog extends DialogWrapper {
+            @Override
+            protected void init() {
+                super.init();
+                getPeer().getWindow().setSize(new Dimension(600, 500));
+            }
+
+            protected HelpDialog(@Nullable Project project, boolean canBeParent) {
+                super(project, canBeParent);
+                init();
+                setTitle("Help");
+            }
+
+            @Override
+            protected @Nullable JComponent createCenterPanel() {
+                JPanel panel = new JPanel(new BorderLayout());
+                JTextPane helpContentPane = new JTextPane();
+                helpContentPane.setContentType("text/html");
+                helpContentPane.setText(getHelpContent());
+                helpContentPane.setEditable(false);
+
+                JScrollPane scrollPane = new JScrollPane(helpContentPane);
+                panel.add(scrollPane, BorderLayout.CENTER);
+
+                return panel;
+            }
 
 
-             // add cookie listener to check whether the target cookie exists when the page is loaded
-             jbCefClient.addLoadHandler(new CefLoadHandlerAdapter() {
-                 @Override
-                 public void onLoadingStateChange(CefBrowser browser, boolean isLoading, boolean canGoBack, boolean canGoForward) {
-                     List<Cookie> cookieList = new ArrayList<>();
+            private String getHelpContent() {
+                URL url = FileUtils.getResourceFileUrl("\\help\\CookieLoginHelp.md");
+                return FileUtils.readContentFromFile(url);
+            }
+        }
+    }
 
-                     // visit all cookies
-                     cefCookieManager.visitAllCookies((cookie, count, total, delete) -> {
-                         if (cookie.domain.contains("leetcode")) {
-                             BasicClientCookie2 basicClientCookie2 = new BasicClientCookie2(cookie.name, cookie.value);
-                             cookieList.add(basicClientCookie2);
-                         }
-                         if (count == total - 1) {
-                             // login info exists!
-                             if (cookieList.stream().anyMatch(c -> c.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION))) {
-                                 // update cookies
-                                 LeetcodeClient.getInstance(project).clearCookies();
-                                 // store cookies
-                                 LeetcodeClient.getInstance(project).setCookies(cookieList);
-                                 loginSuccessAfter(project, myList);
-                                 frame.dispose();
-                             } else {
-                                 cookieList.clear();
-                             }
-                         }
-                         return Boolean.TRUE;
-                     });
-                 }
-             }, jbcebrowser.getCefBrowser());
+    static class JcefLoginWindow extends BasicWindow {
 
-             frame.add(jbcebrowser.getComponent(), BorderLayout.CENTER);
-         }
-     }
+        public JcefLoginWindow(Project project, LCPanel.MyList myList) {
+            super(project, myList);
+        }
+
+        @Override
+        String getFrameTitle() {
+            return "Web Auth";
+        }
+
+        @Override
+        void loadComponent(JFrame frame) throws Exception {
+            final JBCefBrowser jbcebrowser = new JBCefBrowser(LeetcodeApiUtils.getLeetcodeLogin());
+            JBCefClient jbCefClient = jbcebrowser.getJBCefClient();
+            CefCookieManager cefCookieManager = jbcebrowser.getJBCefCookieManager().getCefCookieManager();
+
+            // set frame listener
+            frame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    // clear all cookies
+                    cefCookieManager.deleteCookies("", "");
+                    // close jcef browser
+                    Disposer.dispose(jbcebrowser);
+                }
+            });
+
+
+            // add cookie listener to check whether the target cookie exists when the page is loaded
+            jbCefClient.addLoadHandler(new CefLoadHandlerAdapter() {
+                @Override
+                public void onLoadingStateChange(CefBrowser browser, boolean isLoading, boolean canGoBack, boolean canGoForward) {
+                    List<Cookie> cookieList = new ArrayList<>();
+
+                    // visit all cookies
+                    cefCookieManager.visitAllCookies((cookie, count, total, delete) -> {
+                        if (cookie.domain.contains("leetcode")) {
+                            BasicClientCookie2 basicClientCookie2 = new BasicClientCookie2(cookie.name, cookie.value);
+                            cookieList.add(basicClientCookie2);
+                        }
+                        if (count == total - 1) {
+                            // login info exists!
+                            if (cookieList.stream().anyMatch(c -> c.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION))) {
+                                // update cookies
+                                LeetcodeClient.getInstance(project).clearCookies();
+                                // store cookies
+                                LeetcodeClient.getInstance(project).setCookies(cookieList);
+                                loginSuccessAfter(project, myList);
+                                frame.dispose();
+                            } else {
+                                cookieList.clear();
+                            }
+                        }
+                        return Boolean.TRUE;
+                    });
+                }
+            }, jbcebrowser.getCefBrowser());
+
+            frame.add(jbcebrowser.getComponent(), BorderLayout.CENTER);
+        }
+    }
 }
