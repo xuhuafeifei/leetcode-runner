@@ -6,10 +6,12 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.impl.IdeFrameImpl;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
+import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
+import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.window.LCPanel;
@@ -36,7 +38,7 @@ import java.util.Objects;
  */
 public class LoginService {
     public static void doLogin(Project project) {
-        LCPanel.MyList myList = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_QUESTION_LIST);
+        MyList<Question> myList = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_QUESTION_LIST);
         // do not call isLogin function in this class
         if (LeetcodeClient.getInstance(project).isLogin()) {
             loginSuccessAfter(project, myList);
@@ -52,7 +54,7 @@ public class LoginService {
         }
     }
 
-    private static void startCookieLogin(Project project, LCPanel.MyList myList) {
+    private static void startCookieLogin(Project project, MyList<Question> myList) {
         try {
             new CookieLoginWindow(project, myList).start();
         } catch (Exception e) {
@@ -60,7 +62,7 @@ public class LoginService {
         }
     }
 
-    private static void loginSuccessAfter(Project project, LCPanel.MyList myList) {
+    private static void loginSuccessAfter(Project project, MyList<Question> myList) {
         // load data
         loginFlag = Boolean.TRUE;
         QuestionService.getInstance().loadAllQuestionData(project, myList);
@@ -89,8 +91,8 @@ public class LoginService {
 
     static abstract class BasicWindow {
         protected Project project;
-        protected LCPanel.MyList myList;
-        public BasicWindow(Project project, LCPanel.MyList myList) {
+        protected MyList<Question> myList;
+        public BasicWindow(Project project, MyList<Question> myList) {
             this.project = project;
             this.myList = myList;
         }
@@ -126,7 +128,7 @@ public class LoginService {
         private final JButton cancelButton;
         private final JButton helpButton;
 
-        public CookieLoginWindow(Project project, LCPanel.MyList myList) {
+        public CookieLoginWindow(Project project, MyList<Question> myList) {
             super(project, myList);
             this.contentPane = new JPanel();
             this.textArea = new JTextArea();
@@ -224,7 +226,6 @@ public class LoginService {
                 return panel;
             }
 
-
             private String getHelpContent() {
                 URL url = FileUtils.getResourceFileUrl("\\help\\CookieLoginHelp.md");
                 return FileUtils.readContentFromFile(url);
@@ -234,7 +235,7 @@ public class LoginService {
 
     static class JcefLoginWindow extends BasicWindow {
 
-        public JcefLoginWindow(Project project, LCPanel.MyList myList) {
+        public JcefLoginWindow(Project project, MyList<Question> myList) {
             super(project, myList);
         }
 

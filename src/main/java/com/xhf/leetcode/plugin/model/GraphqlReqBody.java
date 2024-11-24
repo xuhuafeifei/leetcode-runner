@@ -46,7 +46,7 @@ public class GraphqlReqBody {
      * each field will be added to variables, and item's key is filedName, item's value is filedValue
      * <p>
      * additionally, if the field is not annotated with @Filters, it will be added to variables directly,
-     * otherwise, it will be added to filters, and then will be added to variables
+     * otherwise, it will be added to filters, and then filters will be added to variables
      *
      * @param params
      */
@@ -77,6 +77,7 @@ public class GraphqlReqBody {
             }
         }
         // add filters
+        if (filters.isEmpty()) return;
         addVariable("filters", filters);
     }
 
@@ -99,6 +100,33 @@ public class GraphqlReqBody {
         private Integer skip;
         private Integer limit;
         private String titleSlug;
+        private String questionSlug;
+        private Integer first;
+        private String orderBy;
+
+        public String getQuestionSlug() {
+            return questionSlug;
+        }
+
+        public void setQuestionSlug(String questionSlug) {
+            this.questionSlug = questionSlug;
+        }
+
+        public Integer getFirst() {
+            return first;
+        }
+
+        public void setFirst(Integer first) {
+            this.first = first;
+        }
+
+        public String getOrderBy() {
+            return orderBy;
+        }
+
+        public void setOrderBy(String orderBy) {
+            this.orderBy = orderBy;
+        }
 
         // filters content
         @Filters
@@ -154,6 +182,24 @@ public class GraphqlReqBody {
             // filters content
             private String searchKeywords;
 
+            private String questionSlug;
+            private Integer first;
+            private String orderBy;
+
+            public ParamsBuilder setQuestionSlug(String questionSlug) {
+                this.questionSlug = questionSlug;
+                return this;
+            }
+            public ParamsBuilder setFirst(Integer first) {
+                this.first = first;
+                return this;
+            }
+
+            public ParamsBuilder setOrderBy(String orderBy) {
+                this.orderBy = orderBy;
+                return this;
+            }
+
             public ParamsBuilder setTitleSlug(String titleSlug) {
                 this.titleSlug = titleSlug;
                 return this;
@@ -182,7 +228,7 @@ public class GraphqlReqBody {
             public ParamsBuilder basicParams() {
                 this.categorySlug = "all-code-essentials";
                 this.skip = 0;
-                this.limit = 4000;
+                this.limit = 40;
                 return this;
             }
 
@@ -193,6 +239,9 @@ public class GraphqlReqBody {
                 params.setLimit(limit);
                 params.setTitleSlug(titleSlug);
                 params.setSearchKeywords(searchKeywords);
+                params.setFirst(first);
+                params.setOrderBy(orderBy);
+                params.setQuestionSlug(questionSlug);
                 return params;
             }
         }

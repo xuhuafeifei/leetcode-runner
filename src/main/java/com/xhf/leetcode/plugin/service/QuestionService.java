@@ -7,12 +7,12 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.GraphqlReqBody;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
-import com.xhf.leetcode.plugin.window.LCPanel;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ public class QuestionService {
     /**
      * load questions data
      */
-    public void loadAllQuestionData(Project project, LCPanel.MyList myList) {
+    public void loadAllQuestionData(Project project, MyList<Question> myList) {
         // do not use another thread to get dataContext by DataManager
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
             @Override

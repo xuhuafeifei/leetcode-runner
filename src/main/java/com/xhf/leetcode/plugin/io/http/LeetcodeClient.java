@@ -159,7 +159,6 @@ public class LeetcodeClient {
 
     /**
      * get all questions to need a lot of time
-     * @return
      */
     public List<Question> getTotalQuestion() {
         // load cache
@@ -236,7 +235,6 @@ public class LeetcodeClient {
 
     /**
      * @param params search condition
-     * @return
      */
     public List<Question> getQuestionList(GraphqlReqBody.SearchParams params) {
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
@@ -274,8 +272,6 @@ public class LeetcodeClient {
      * <p>
      * more important, title slug is required, if not, the code will throw exception
      *
-     * @param params
-     * @return
      */
     public String queryQuestionInfoJson(GraphqlReqBody.SearchParams params) {
         if (StringUtils.isBlank(params.getTitleSlug())) {
@@ -298,8 +294,6 @@ public class LeetcodeClient {
 
     /**
      * get random question
-     * @param project
-     * @return
      */
     public Question getRandomQuestion(Project project) {
         List<Question> totalQuestion = this.getTotalQuestion();
@@ -366,8 +360,6 @@ public class LeetcodeClient {
     /**
      * run code by leetcode platform
      *
-     * @param runCodeModel
-     * @return
      */
     public RunCodeResult runCode(RunCode runCodeModel) {
         /* check params */
@@ -403,8 +395,6 @@ public class LeetcodeClient {
 
     /**
      * submit code
-     * @param runCodeModel
-     * @return
      */
     public SubmitCodeResult submitCode(RunCode runCodeModel) {
         /* check params */
@@ -472,4 +462,114 @@ public class LeetcodeClient {
         return ! state.getAsString().equals("STARTED");
     }
 
+    public List<Solution> querySolutionList(String questionSlug) {
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SOLUTION_LIST_QUERY);
+        // build by params
+        body.setBySearchParams(new GraphqlReqBody.SearchParams.ParamsBuilder()
+                .setQuestionSlug(questionSlug)
+                .setSkip(0)
+                .setFirst(15)
+                .setOrderBy("DEFAULT")
+                .build()
+        );
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+
+        String resp = httpResponse.getBody();
+
+        // parse json to array
+        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+        JsonArray jsonArray = jsonObject.getAsJsonObject("data")
+                .getAsJsonObject("questionSolutionArticles")
+                .getAsJsonArray("edges");
+
+        List<Solution> res = new ArrayList<>(15);
+        for (JsonElement element : jsonArray) {
+            JsonElement node = element.getAsJsonObject().get("node");
+            Solution solution = GsonUtils.fromJson(node, Solution.class);
+            res.add(solution);
+        }
+
+        return res;
+    }
+
+    public String getSolutionContent(String solutionSlug) {
+         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SOLUTION_CONTENT_QUERY);
+        body.addVariable("slug", solutionSlug);
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+
+        String resp = httpResponse.getBody();
+
+        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+
+        return jsonObject.getAsJsonObject("data")
+                .getAsJsonObject("solutionArticle")
+                .get("content")
+                .getAsString();
+    }
+
+    public List<Submission> getSubmissionList(String slug) {
+          String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SUBMISSION_LIST_QUERY);
+        body.addVariable("questionSlug", slug);
+        body.addVariable("offset", 0);
+        body.addVariable("limit", 50);
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+
+        String resp = httpResponse.getBody();
+
+        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+
+        JsonArray jsonArray = jsonObject.getAsJsonObject("data")
+                .getAsJsonObject("submissionList")
+                .getAsJsonArray("submissions");
+
+        return GsonUtils.fromJsonArray(jsonArray, Submission.class);
+    }
+
+    public String getSubmissionCode(String submissionId) {
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SUBMISSION_CONTENT_QUERY);
+        body.addVariable("submissionId", submissionId);
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+
+        String resp = httpResponse.getBody();
+
+        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+
+        return jsonObject.getAsJsonObject("data").getAsJsonObject("submissionDetail").get("code").getAsString();
+    }
 }

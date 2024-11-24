@@ -24,7 +24,8 @@ public class SplitTextEditorProvider implements AsyncFileEditorProvider, DumbAwa
 
     public SplitTextEditorProvider() {
         first = new PsiAwareTextEditorProvider();
-        second = new MarkDownEditorProvider();
+        // second = new MarkDownEditorProvider();
+        second = new FocusTextEditorProvider();
     }
 
     @Override
@@ -53,6 +54,19 @@ public class SplitTextEditorProvider implements AsyncFileEditorProvider, DumbAwa
 
     @Override
     public @NotNull Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile file) {
+        return new Builder() {
+            @Override
+            public FileEditor build() {
+                return new SplitTextEditorWithPreview((TextEditor) first.createEditor(project, file),
+                        second.createEditor(project, file));
+            }
+        };
+    }
+
+
+    /*
+    @Override
+    public @NotNull Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile file) {
         // get preview file
         String key = file.getPath();
         key = FileUtils.unifyPath(key);
@@ -71,4 +85,5 @@ public class SplitTextEditorProvider implements AsyncFileEditorProvider, DumbAwa
             }
         };
     }
+    */
 }

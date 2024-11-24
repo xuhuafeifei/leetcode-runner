@@ -9,7 +9,10 @@ import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
+import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
+import com.xhf.leetcode.plugin.listener.QuestionListener;
+import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.utils.DataKeys;
@@ -28,7 +31,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
-    private MyList questionList;
+    private MyList<Question> questionList;
 
     private Project project;
 
@@ -48,15 +51,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
         // build question list
         questionList = new MyList();
         questionList.setCellRenderer(new QuestionCellRender());
-        questionList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Point point = e.getPoint();
-                int idx = questionList.locationToIndex(point);
-                Question question = questionList.getModel().getElementAt(idx);
-                CodeService.openCodeEditor(question, project);
-            }
-        });
+        questionList.addMouseListener(new QuestionListener(questionList, project));
 
         // store to action toolbar
         actionToolbar.setTargetComponent(questionList);
@@ -75,33 +70,4 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
         }
         return super.getData(dataId);
     }
-
-    public static class MyList extends JBList<Question> {
-        public void setListData(List<Question> totalQuestion) {
-            Question[] data = new Question[totalQuestion.size()];
-            for (int i = 0; i < data.length; i++) {
-                data[i] = totalQuestion.get(i);
-            }
-            this.setListData(data);
-        }
-    }
-
-    public static class QuestionCellRender extends DefaultListCellRenderer {
-        private static Color Level1 = new Color(92, 184, 92);
-        private static Color Level2 = new Color(240, 173, 78);
-        private static Color Level3 = new Color(217, 83, 79);
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            Question question = (Question) value;
-            JLabel label = (JLabel) super.getListCellRendererComponent(list, question.toString(), index, isSelected, cellHasFocus);
-            switch (question.getDifficulty()) {
-                case "EASY": label.setForeground(Level1); break;
-                case "MEDIUM": label.setForeground(Level2); break;
-                case "HARD": label.setForeground(Level3); break;
-            }
-            return label;
-        }
-    }
-
 }

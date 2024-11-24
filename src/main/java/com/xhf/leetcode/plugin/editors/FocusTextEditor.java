@@ -1,20 +1,12 @@
 package com.xhf.leetcode.plugin.editors;
 
-import com.intellij.ide.lightEdit.LightEdit;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.ui.jcef.JCEFHtmlPanel;
-import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.components.BorderLayoutPanel;
-import com.intellij.util.xml.ui.DomFileEditor;
-import com.xhf.leetcode.plugin.io.file.StoreService;
-import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
-import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.intellij.ui.components.JBTabbedPane;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -22,53 +14,50 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
-import java.net.URL;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class MarkDownEditor implements FileEditor {
+public class FocusTextEditor implements FileEditor {
     private Project project;
-    private LightVirtualFile vFile;
-    private JCEFHtmlPanel jcefHtmlPanel;
-    // default template
-    private final String templatePath = "\\template\\default.html";
-    private final BorderLayoutPanel borderLayoutPanel;
+    private JComponent myComponent;
+    private VirtualFile file;
+    private JBTabbedPane tabbedPane;
 
-
-    public MarkDownEditor(@NotNull Project project, @NotNull LightVirtualFile file) {
+    public FocusTextEditor(Project project, @NotNull VirtualFile file) {
         this.project = project;
-        this.vFile = file;
-        this.jcefHtmlPanel = new JCEFHtmlPanel(this.vFile.getUrl());
-        this.jcefHtmlPanel.loadHTML(loadHTMLContent());
-        this.borderLayoutPanel = JBUI.Panels.simplePanel();
-
-        this.borderLayoutPanel.addToCenter(jcefHtmlPanel.getComponent());
+        this.file = file;
+        initComponent();
     }
 
-    private String loadHTMLContent() {
-        URL url = FileUtils.getResourceFileUrl(this.templatePath);
-        String html = FileUtils.readContentFromFile(url);
-        // handle html
-        String newHtml = html.replace("{{content}}", vFile.getContent());
-        return newHtml;
+    private void initComponent() {
+        tabbedPane = new JBTabbedPane();
+
+        JComponent contentPanel = new MarkDownEditor(project, ViewUtils.getHTMLContent(file, project)).getComponent();
+        JComponent solutionPanel = new SolutionEditor(project, file).getComponent();
+        JComponent submissionPanel = new SubmissionEditor(project, file).getComponent();
+
+        tabbedPane.addTab("content", contentPanel);
+        tabbedPane.addTab("solution", solutionPanel);
+        tabbedPane.addTab("submission", submissionPanel);
+
+        myComponent = tabbedPane;
     }
 
     @Override
     public @NotNull JComponent getComponent() {
-        // return jcefHtmlPanel.getComponent();
-        return this.borderLayoutPanel;
+        return myComponent;
     }
 
     @Override
     public @Nullable JComponent getPreferredFocusedComponent() {
-        return jcefHtmlPanel.getComponent();
+        return null;
     }
 
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) @NotNull String getName() {
-        return "markdown";
+        return null;
     }
 
     @Override
@@ -103,7 +92,7 @@ public class MarkDownEditor implements FileEditor {
 
     @Override
     public void dispose() {
-        jcefHtmlPanel.dispose();
+
     }
 
     @Override
