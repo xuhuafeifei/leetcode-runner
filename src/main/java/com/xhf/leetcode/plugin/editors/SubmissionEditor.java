@@ -51,12 +51,12 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
     @Override
     public void openSecond(String content) {
         // build light virtual file
-        LightVirtualFile solutionFile = new LightVirtualFile(
+        LightVirtualFile submissionFile = new LightVirtualFile(
                 ViewUtils.getLeetcodeEditorByVFile(file, project).getTitleSlug() + ".code", content
         );
-        MarkDownEditor markDownEditor = new MarkDownEditor(project, solutionFile);
-        BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(markDownEditor.getComponent());
-        secondComponent.addToTop(createToolbarWrapper(markDownEditor.getComponent()));
+        CodeEditor codeEditor = new CodeEditor(project, submissionFile);
+        BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(codeEditor.getComponent());
+        secondComponent.addToTop(createToolbarWrapper(codeEditor.getComponent()));
         jbSplitter.setSecondComponent(secondComponent);
     }
 

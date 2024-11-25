@@ -97,7 +97,7 @@ public class Submission {
         int len = 0;
         for (int i = 0; i < widths.length; i++) {
             len += widths[i];
-            sb.append(contents[i].toLowerCase());
+            sb.append(contents[i]);
             while (sb.length() < len) {
                 sb.append(" ");
             }

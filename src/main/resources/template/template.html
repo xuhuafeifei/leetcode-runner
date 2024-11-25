@@ -1,0 +1,43 @@
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vditor/dist/index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vditor/dist/index.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!--    <link rel="stylesheet" href="vditor/dist/index.css"/>-->
+<!--    <script src="vditor/dist/index.min.js"></script>-->
+<!--    <script src="vditor/dist/jquery-3.6.0.min.js"></script>-->
+
+<!--    <link rel="stylesheet" href="http://localhost:{{serverPort}}/vditor/dist/index.css"/>-->
+<!--    <script src="http://localhost:{{serverPort}}/vditor/dist/index.min.js"></script>-->
+<!--    <script src="http://localhost:{{serverPort}}/vditor/dist/jquery-3.6.0.min.js"></script>-->
+</head>
+
+<body className="body" style="margin: 0px;">
+<div id="vditor" className="vditor vditor--fullscreen" style="height: 100%"></div>
+<textarea id="content" style="display:none;">
+{{content}}
+</textarea>
+</body>
+
+</html>
+<script>
+    window.onload = function () {
+        $(".vditor-toolbar")[0].remove();
+        $(".vditor-sv")[0].remove();
+        $(".vditor-preview").find(".vditor-reset").css("max-width", "90%")
+    }
+    const vditor = new Vditor('vditor', {
+        "mode": "sv",
+        // "theme": "light",
+        "cache": {
+            "enable": false
+        },
+        preview: {
+            "maxWidth": $(window).width() - 100,
+            "actions": [], // close extra toolbar
+            "hljs": { "style": "dracula" },
+        },
+        value: document.getElementById("content").innerText
+    })
+</script>

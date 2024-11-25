@@ -10,7 +10,6 @@ import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
-import com.xhf.leetcode.plugin.io.http.LocalResourceHttpServer;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,48 +22,31 @@ import java.net.URL;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class MarkDownEditor implements FileEditor {
+public class HTMLEditor implements FileEditor {
     private Project project;
     private LightVirtualFile vFile;
     private JCEFHtmlPanel jcefHtmlPanel;
     // default template
-    private final String templatePath = "\\template\\template.html";
+    private final String templatePath = "\\template\\default.html";
     private final BorderLayoutPanel borderLayoutPanel;
 
-    public MarkDownEditor(@NotNull Project project, @NotNull LightVirtualFile file) {
+
+    public HTMLEditor(@NotNull Project project, @NotNull LightVirtualFile file) {
         this.project = project;
         this.vFile = file;
-        this.borderLayoutPanel = JBUI.Panels.simplePanel();
         this.jcefHtmlPanel = new JCEFHtmlPanel(this.vFile.getUrl());
-
         this.jcefHtmlPanel.loadHTML(loadHTMLContent());
+        this.borderLayoutPanel = JBUI.Panels.simplePanel();
 
         this.borderLayoutPanel.addToCenter(jcefHtmlPanel.getComponent());
     }
 
-//    private String loadHTMLContent() {
-//        URL url = FileUtils.getResourceFileUrl(this.templatePath);
-//        String html = FileUtils.readContentFromFile(url);
-//        // handle html
-//        String newHtml = html.replace("{{content}}", vFile.getContent());
-//        return newHtml;
-//    }
-
     private String loadHTMLContent() {
-        URL url = getClass().getResource(FileUtils.unUnifyPath(templatePath));
-        if (url == null) {
-            throw new RuntimeException("Template not found: " + templatePath);
-        }
-        try {
-            String html = FileUtils.readContentFromFile(url);
-            // Update resource paths to use the custom scheme
-            // html = html.replace("{{serverPort}}", String.format("%d", LocalResourceHttpServer.getInstance(project).getPort()));
-            // handle html
-            String newHtml = html.replace("{{content}}", vFile.getContent());
-            return newHtml;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load HTML content", e);
-        }
+        URL url = FileUtils.getResourceFileUrl(this.templatePath);
+        String html = FileUtils.readContentFromFile(url);
+        // handle html
+        String newHtml = html.replace("{{content}}", vFile.getContent());
+        return newHtml;
     }
 
     @Override

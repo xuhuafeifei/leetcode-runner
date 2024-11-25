@@ -212,7 +212,6 @@ public class FileUtils {
         private final StringBuffer sb;
 
         public PathBuilder(String path) {
-            if (! isPath(path)) throw new IllegalArgumentException("path is not valid: " + path);
             this.sb = new StringBuffer(unifyPath(path));
         }
 
