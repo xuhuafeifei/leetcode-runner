@@ -261,7 +261,6 @@ public class LoginService {
                 }
             });
 
-
             // add cookie listener to check whether the target cookie exists when the page is loaded
             jbCefClient.addLoadHandler(new CefLoadHandlerAdapter() {
                 @Override

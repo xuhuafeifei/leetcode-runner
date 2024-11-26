@@ -11,11 +11,12 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBSplitter;
 import com.intellij.util.ui.JBUI;
-import org.jetbrains.annotations.Nls;
+import com.xhf.leetcode.plugin.service.LoginService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 
 /**
@@ -70,6 +71,14 @@ public abstract class AbstractSplitTextEditor implements FileEditor {
         return myComponent;
     }
 
+    protected JTextPane showNotingTextPane() {
+        JTextPane textPane = new JTextPane();
+        textPane.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 15));
+        textPane.setForeground(new Color(110, 107, 107));
+        textPane.setBackground(new Color(253, 255, 255));
+        textPane.setEditable(false);
+        return textPane;
+    }
 
     /**
      * support open content ability

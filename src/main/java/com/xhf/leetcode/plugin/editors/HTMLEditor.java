@@ -4,6 +4,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Key;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
@@ -37,6 +38,8 @@ public class HTMLEditor implements FileEditor {
         this.jcefHtmlPanel = new JCEFHtmlPanel(this.vFile.getUrl());
         this.jcefHtmlPanel.loadHTML(loadHTMLContent());
         this.borderLayoutPanel = JBUI.Panels.simplePanel();
+
+        Disposer.register(this, this.jcefHtmlPanel);
 
         this.borderLayoutPanel.addToCenter(jcefHtmlPanel.getComponent());
     }

@@ -4,6 +4,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Key;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
@@ -37,6 +38,7 @@ public class MarkDownEditor implements FileEditor {
         this.borderLayoutPanel = JBUI.Panels.simplePanel();
         this.jcefHtmlPanel = new JCEFHtmlPanel(this.vFile.getUrl());
 
+        Disposer.register(this, this.jcefHtmlPanel);
         this.jcefHtmlPanel.loadHTML(loadHTMLContent());
 
         this.borderLayoutPanel.addToCenter(jcefHtmlPanel.getComponent());

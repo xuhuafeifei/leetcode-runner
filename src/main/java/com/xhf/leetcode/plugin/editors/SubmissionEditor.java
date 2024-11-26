@@ -16,8 +16,10 @@ import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.listener.SubmissionListener;
 import com.xhf.leetcode.plugin.model.Submission;
 import com.xhf.leetcode.plugin.render.SubmissionCellRender;
+import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.SubmissionService;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +40,12 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
 
     @Override
     protected void initFirstComp() {
+        if (! LoginService.isLogin(project)) {
+            JTextPane jTextPane = this.showNotingTextPane();
+            jTextPane.setText("Please Login First...");
+            jbSplitter.setFirstComponent(jTextPane);
+            return;
+        }
         MyList<Submission> myList = new MyList<>();
         // make list can show content with multi-line
         myList.setCellRenderer(new SubmissionCellRender());
@@ -45,6 +53,7 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
         myList.addMouseListener(new SubmissionListener(project, myList, this));
         myList.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 14));
         SubmissionService.loadSolution(project, myList, ViewUtils.getLeetcodeEditorByVFile(file, project).getTitleSlug());
+        myList.setEmptyText("No Submission");
         jbSplitter.setFirstComponent(new JBScrollPane(myList));
     }
 

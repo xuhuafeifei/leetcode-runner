@@ -12,6 +12,7 @@ import com.xhf.leetcode.plugin.model.Solution;
 import com.xhf.leetcode.plugin.render.SolutionCellRenderer;
 import com.xhf.leetcode.plugin.service.SolutionService;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,9 +48,17 @@ public class SolutionEditor extends AbstractSplitTextEditor {
         LightVirtualFile solutionFile = new LightVirtualFile(
                 ViewUtils.getLeetcodeEditorByVFile(file, project).getTitleSlug()+ ".solution.md", content
         );
-        MarkDownEditor markDownEditor = new MarkDownEditor(project, solutionFile);
-        BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(markDownEditor.getComponent());
-        secondComponent.addToTop(createToolbarWrapper(markDownEditor.getComponent()));
+        BorderLayoutPanel secondComponent = null;
+        if (StringUtils.isBlank(content)) {
+            JTextPane jTextPane = showNotingTextPane();
+            jTextPane.setText("This content is not supported to show yet..., please choose another solution");
+            secondComponent = JBUI.Panels.simplePanel(jTextPane);
+            secondComponent.addToTop(createToolbarWrapper(jTextPane));
+        }else {
+            MarkDownEditor markDownEditor = new MarkDownEditor(project, solutionFile);
+            secondComponent = JBUI.Panels.simplePanel(markDownEditor.getComponent());
+            secondComponent.addToTop(createToolbarWrapper(markDownEditor.getComponent()));
+        }
         jbSplitter.setSecondComponent(secondComponent);
     }
 

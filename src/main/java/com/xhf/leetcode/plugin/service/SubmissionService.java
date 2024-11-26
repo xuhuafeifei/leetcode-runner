@@ -17,15 +17,10 @@ import java.util.List;
  */
 public class SubmissionService {
     public static void loadSolution(Project project, MyList<Submission> myList, String slug) {
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
-            @Override
-            public void run(ProgressIndicator indicator) {
-                // query
-                List<Submission> submissionList = LeetcodeClient.getInstance(project).getSubmissionList(slug);
-                myList.setListData(submissionList);
-                myList.updateUI();
-            }
-        });
+        // query
+        List<Submission> submissionList = LeetcodeClient.getInstance(project).getSubmissionList(slug);
+        myList.setListData(submissionList);
+        myList.updateUI();
     }
 
     /**
