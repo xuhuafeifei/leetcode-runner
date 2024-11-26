@@ -16,7 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author shuzijun
+ * @author feigebuge
+ * @email 2508020102@qq.com
  */
 public class LocalHttpRequestHandler extends HttpRequestHandler {
 
