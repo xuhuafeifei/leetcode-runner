@@ -19,8 +19,8 @@ import java.net.URLConnection;
 /**
  * support local resource for webview
  */
-//@Service(Service.Level.PROJECT)
-@Deprecated
+@Service(Service.Level.PROJECT)
+@Deprecated // no need to start server, because the idea platform will start
 public final class LocalResourceHttpServer {
     private final Project project;
     private int port = -1;
@@ -78,7 +78,7 @@ public final class LocalResourceHttpServer {
 
                 setResponseHeaders(exchange, contentLength, path);
 
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[2048];
                 int length;
                 OutputStream os = exchange.getResponseBody();
                 while ((length = is.read(buffer)) != -1) {

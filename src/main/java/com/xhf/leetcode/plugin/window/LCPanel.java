@@ -6,11 +6,15 @@ import com.intellij.openapi.actionSystem.DataProvider;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.editors.MarkDownEditor;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
+import com.xhf.leetcode.plugin.io.http.LocalResourceHttpServer;
 import com.xhf.leetcode.plugin.listener.QuestionListener;
 import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.service.CodeService;
@@ -42,6 +46,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
         final ActionManager actionManager = ActionManager.getInstance();
 
         initLeetcodeClient();
+        initLocalServer();
 
         // get action toolbar
         ActionToolbar actionToolbar = actionManager.createActionToolbar("leetcode Toolbar",
@@ -58,6 +63,17 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
         setToolbar(actionToolbar.getComponent());
         setContent(new JBScrollPane(questionList));
     }
+
+    private void initLocalServer() {
+        LocalResourceHttpServer.getInstance(project);
+    }
+
+//    private void initMarkdonwEditor() {
+//        String s = new String("this is preview content, which is used for init");
+//        LightVirtualFile lightVirtualFile = new LightVirtualFile("preview.md", s);
+//        MarkDownEditor markDownEditor = new MarkDownEditor(project, lightVirtualFile);
+//        // Disposer.register(this, markDownEditor);
+//    }
 
     private void initLeetcodeClient() {
         LeetcodeClient.init(this.project);

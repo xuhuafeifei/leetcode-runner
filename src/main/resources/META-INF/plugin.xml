@@ -30,6 +30,9 @@
                     factoryClass="com.xhf.leetcode.plugin.window.LCToolWindowFactory"/>
         <toolWindow id="Leetcode Console Plugin" secondary="true" icon="/icons/LeetCode.png" anchor="bottom"
                     factoryClass="com.xhf.leetcode.plugin.window.LCConsoleWindowFactory" />
+
+        <!-- http request -->
+        <httpRequestHandler implementation="com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler"/>
     </extensions>
 
     <actions>

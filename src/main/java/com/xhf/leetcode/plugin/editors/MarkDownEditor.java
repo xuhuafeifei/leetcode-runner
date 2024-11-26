@@ -12,15 +12,19 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LocalResourceHttpServer;
+import com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.ide.BuiltInServerManager;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 
 /**
+ * support html or markdown show ability
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
@@ -31,6 +35,7 @@ public class MarkDownEditor implements FileEditor {
     // default template
     private final String templatePath = "\\template\\template.html";
     private final BorderLayoutPanel borderLayoutPanel;
+    private final String serverPath = "http://localhost:" + BuiltInServerManager.getInstance().getPort() + LocalHttpRequestHandler.PREFIX;
 
     public MarkDownEditor(@NotNull Project project, @NotNull LightVirtualFile file) {
         this.project = project;
@@ -44,14 +49,6 @@ public class MarkDownEditor implements FileEditor {
         this.borderLayoutPanel.addToCenter(jcefHtmlPanel.getComponent());
     }
 
-//    private String loadHTMLContent() {
-//        URL url = FileUtils.getResourceFileUrl(this.templatePath);
-//        String html = FileUtils.readContentFromFile(url);
-//        // handle html
-//        String newHtml = html.replace("{{content}}", vFile.getContent());
-//        return newHtml;
-//    }
-
     private String loadHTMLContent() {
         URL url = getClass().getResource(FileUtils.unUnifyPath(templatePath));
         if (url == null) {
@@ -60,7 +57,7 @@ public class MarkDownEditor implements FileEditor {
         try {
             String html = FileUtils.readContentFromFile(url);
             // Update resource paths to use the custom scheme
-//             html = html.replace("{{serverPort}}", String.format("%d", LocalResourceHttpServer.getInstance(project).getPort()));
+            html = html.replace("{{serverUrl}}", serverPath);
             // handle html
             String newHtml = html.replace("{{content}}", vFile.getContent());
             return newHtml;
@@ -71,7 +68,6 @@ public class MarkDownEditor implements FileEditor {
 
     @Override
     public @NotNull JComponent getComponent() {
-        // return jcefHtmlPanel.getComponent();
         return this.borderLayoutPanel;
     }
 
