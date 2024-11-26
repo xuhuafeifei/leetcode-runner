@@ -28,15 +28,23 @@
         $(".vditor-preview").find(".vditor-reset").css("max-width", "90%")
     }
     const vditor = new Vditor('vditor', {
-        "mode": "sv",
-        // "theme": "light",
-        "cache": {
-            "enable": false
+        mode: "sv",
+        lang: "zh_CN",
+        theme: "light",
+        toolbarConfig: {hide: true},
+        cache: {
+            enable: false
         },
         preview: {
-            "maxWidth": $(window).width() - 100,
-            "actions": [], // close extra toolbar
-            "hljs": { "style": "dracula" },
+            theme: {
+                current: "idea-light",
+            },
+            maxWidth: $(window).width() - 100,
+            actions: [], // close extra toolbar
+            hljs: { style: "dracula" },
+            math: {
+                inlineDigit: true
+            }
         },
         value: document.getElementById("content").innerText
     })

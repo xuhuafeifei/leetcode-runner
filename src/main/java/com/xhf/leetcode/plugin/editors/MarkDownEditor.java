@@ -58,7 +58,7 @@ public class MarkDownEditor implements FileEditor {
         try {
             String html = FileUtils.readContentFromFile(url);
             // Update resource paths to use the custom scheme
-            // html = html.replace("{{serverPort}}", String.format("%d", LocalResourceHttpServer.getInstance(project).getPort()));
+//             html = html.replace("{{serverPort}}", String.format("%d", LocalResourceHttpServer.getInstance(project).getPort()));
             // handle html
             String newHtml = html.replace("{{content}}", vFile.getContent());
             return newHtml;

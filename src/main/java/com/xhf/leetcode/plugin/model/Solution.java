@@ -16,19 +16,18 @@ public class Solution {
     private String translatedContent;
     private String summary;
 
-    private static final String whiteSpace = "              ";
+    private static final String whiteSpace = "       ";
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (author.getUsername().equals("LeetCode-Solution")) {
-            sb.append("☆ 官方：");
+            sb.append("☆ 官方: ");
         }else {
             sb.append(whiteSpace);
         }
-        sb.append("[").append(getName()).append("]").append("\n");
-        sb.append(whiteSpace).append(title).append("\n");
-        sb.append(whiteSpace).append(summary.replace("\n", "")).append("\n");
-        sb.append(whiteSpace).append("🖱 ").append(hitCount).append(" ").append("❤ ").append(favoriteCount);
+        sb.append("[").append(getName()).append("]").append("  ");
+        sb.append(getTitle()).append("  ");
+        sb.append("🖱 ").append(getHitCount()).append(" ❤ ").append(getFavoriteCount());
         return sb.toString();
     }
 

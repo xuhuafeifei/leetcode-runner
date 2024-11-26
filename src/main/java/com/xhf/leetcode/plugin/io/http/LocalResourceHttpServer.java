@@ -21,7 +21,7 @@ import java.net.URLConnection;
  */
 //@Service(Service.Level.PROJECT)
 @Deprecated
-public final class LocalResourceHttpServer implements Disposable {
+public final class LocalResourceHttpServer {
     private final Project project;
     private int port = -1;
     private HttpServer server;
@@ -36,9 +36,11 @@ public final class LocalResourceHttpServer implements Disposable {
         }
     }
 
-//    public static LocalResourceHttpServer getInstance(Project project) {
-//        return project.getService(LocalResourceHttpServer.class);
-//    }
+    public static LocalResourceHttpServer getInstance(Project project) {
+        return project.getService(LocalResourceHttpServer.class);
+    }
+
+
 
     private void startServer() throws IOException {
         server = HttpServer.create(new InetSocketAddress(0), 0);
@@ -46,7 +48,7 @@ public final class LocalResourceHttpServer implements Disposable {
         server.createContext("/", new ResourceHandler());
         server.setExecutor(null); // creates a default executor
         server.start();
-        System.out.println("Server started on port 8000");
+        System.out.println("Server started on port " + this.port);
     }
 
     public int getPort() {
@@ -56,10 +58,6 @@ public final class LocalResourceHttpServer implements Disposable {
         return port;
     }
 
-    @Override
-    public void dispose() {
-        server.stop(0);
-    }
 
     static class ResourceHandler implements HttpHandler {
         @Override
@@ -95,6 +93,10 @@ public final class LocalResourceHttpServer implements Disposable {
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
+        }
+
+        public static void main(String[] args) throws IOException {
+            new LocalResourceHttpServer(null);
         }
 
         private void setResponseHeaders(HttpExchange exchange, int contentLength, String path) throws IOException {

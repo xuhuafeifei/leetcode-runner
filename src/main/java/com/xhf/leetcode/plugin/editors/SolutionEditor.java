@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author feigebuge
@@ -35,6 +36,7 @@ public class SolutionEditor extends AbstractSplitTextEditor {
         myList.setCellRenderer(new SolutionCellRenderer<Solution>());
         // make list can interact with user and open to solution content by click
         myList.addMouseListener(new SolutionListener(project, myList, this));
+        myList.setFont(new Font("Monospaced", Font.PLAIN, 14));
         SolutionService.loadSolution(project, myList, ViewUtils.getLeetcodeEditorByVFile(file, project).getTitleSlug());
         jbSplitter.setFirstComponent(new JBScrollPane(myList));
     }

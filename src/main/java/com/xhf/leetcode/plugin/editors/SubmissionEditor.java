@@ -43,7 +43,7 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
         myList.setCellRenderer(new SubmissionCellRender());
         // make list can interact with user and open to solution content by click
         myList.addMouseListener(new SubmissionListener(project, myList, this));
-        myList.setFont(new Font("Courier New", Font.PLAIN, 14));
+        myList.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 14));
         SubmissionService.loadSolution(project, myList, ViewUtils.getLeetcodeEditorByVFile(file, project).getTitleSlug());
         jbSplitter.setFirstComponent(new JBScrollPane(myList));
     }

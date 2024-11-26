@@ -470,7 +470,7 @@ public class LeetcodeClient {
         body.setBySearchParams(new GraphqlReqBody.SearchParams.ParamsBuilder()
                 .setQuestionSlug(questionSlug)
                 .setSkip(0)
-                .setFirst(15)
+                .setFirst(50)
                 .setOrderBy("DEFAULT")
                 .build()
         );
