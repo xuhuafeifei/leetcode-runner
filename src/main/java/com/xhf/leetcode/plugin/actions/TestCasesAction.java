@@ -19,28 +19,6 @@ import org.apache.commons.lang.StringUtils;
 public class TestCasesAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
-        /* get file editor */
-        SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
-
-        // get example test cases
-        String path = editor.getFile().getPath();
-        path = FileUtils.unifyPath(path);
-        LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
-        assert lc != null;
-
-        // check testcase data input
-        if (lc.getExampleTestcases() == null || lc.getDefaultTestcases() == null) {
-            // load example
-            Question q = QuestionService.getInstance().queryQuestionInfo(lc.getTitleSlug(), project);
-            if (StringUtils.isBlank(q.getExampleTestcases())) {
-                throw new RuntimeException("No example test cases found...");
-            }
-            lc.setExampleTestcases(q.getExampleTestcases());
-            lc.setDefaultTestcases(q.getExampleTestcases());
-            // restore
-            StoreService.getInstance(project).addCache(path, lc);
-        }
-
-        CodeService.openTestCasesDialog(lc, path, project);
+        CodeService.openTestCasesDialog(project);
     }
 }

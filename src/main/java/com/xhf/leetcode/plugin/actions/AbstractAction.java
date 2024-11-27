@@ -43,16 +43,4 @@ public abstract class AbstractAction extends AnAction {
     }
 
     abstract void doActionPerformed(Project project, AnActionEvent e);
-
-    protected RunCode buildRunCode(LeetcodeEditor lc, String codeContent) {
-        // build run code
-        RunCode runCode = new RunCode();
-        runCode.setFrontendQuestionId(lc.getFrontendQuestionId());
-        runCode.setQuestionId(lc.getQuestionId());
-        runCode.setLang(lc.getLang());
-        runCode.setTypeCode(codeContent);
-        runCode.setTitleSlug(lc.getTitleSlug());
-        runCode.setDataInput(lc.getExampleTestcases());
-        return runCode;
-    }
 }

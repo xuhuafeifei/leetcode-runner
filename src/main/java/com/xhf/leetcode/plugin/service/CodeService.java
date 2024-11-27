@@ -7,23 +7,22 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.comp.TestCaseDialog;
+import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -116,33 +115,65 @@ public class CodeService {
         return filePath;
     }
 
+    private static RunCode buildRunCode(LeetcodeEditor lc, String codeContent) {
+        // build run code
+        RunCode runCode = new RunCode();
+        runCode.setFrontendQuestionId(lc.getFrontendQuestionId());
+        runCode.setQuestionId(lc.getQuestionId());
+        runCode.setLang(lc.getLang());
+        runCode.setTypeCode(codeContent);
+        runCode.setTitleSlug(lc.getTitleSlug());
+        runCode.setDataInput(lc.getExampleTestcases());
+        return runCode;
+    }
+
     /**
      * run code with a teat case through a leetcode platform
      * @param project
-     * @param codeContent
      */
-    public static void runCode(Project project, RunCode codeContent) {
+    public static void runCode(Project project) {
+        /* get file editor */
+        SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
+
+        // get file content
+        String codeContent = editor.getFileContent();
+        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByEditor(editor, project);
+
+        assert lc != null;
+        RunCode runCode = buildRunCode(lc, codeContent);
+
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Run Code", false){
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(codeContent);
+                RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(runCode);
                 // show it
-                AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(codeContent.getDataInput(), rcr);
+                AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(runCode.getDataInput(), rcr);
                 ConsoleUtils.getInstance(project).showInfo(rcrb.build());
             }
         });
     }
 
-    public static void submitCode(Project project, RunCode codeContent) {
+    public static void submitCode(Project project) {
+        /* get file editor */
+        SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
+
+        // get file content
+        String codeContent = editor.getFileContent();
+        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByEditor(editor, project);
+        assert lc != null;
+
+        // build run code
+        RunCode runCode = buildRunCode(lc, codeContent);
+
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Submit Code", false){
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(codeContent);
+                SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(runCode);
                 // show it
                 AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr);
                 ConsoleUtils.getInstance(project).showInfo(scrb.build());
                 // update question
-                QuestionService.getInstance().updateQuestionStatusByFqid(project, codeContent.getFrontendQuestionId(), scrb.isCorrectAnswer());
+                QuestionService.getInstance().updateQuestionStatusByFqid(project, runCode.getFrontendQuestionId(), scrb.isCorrectAnswer());
                 // post
                 LCEventBus.getInstance().post(new CodeSubmitEvent(project));
             }
@@ -152,7 +183,7 @@ public class CodeService {
 
 
     /**
-     * abstract result builder, used to build result string to show the run code result in console
+     * abstract result builder, used to build result string to show the run/submit code result in console
      * <p>
      * RunCodeResult encapsulates the result obtained from running the submitted Solution code on the leetcode platform.
      * However, to ensure extensibility, an abstract class was extracted in the design to accommodate the output requirements of
@@ -337,90 +368,34 @@ public class CodeService {
 
     /**
      * open test case dialog
-     * @param lc
-     * @param path
      * @param project
      */
-    public static void openTestCasesDialog(LeetcodeEditor lc, String path, Project project) {
+    public static void openTestCasesDialog(Project project) {
+        /* get file editor */
+        SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
+
+        // get example test cases
+        String path = editor.getFile().getPath();
+        path = FileUtils.unifyPath(path);
+        LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
+        assert lc != null;
+
+        // check testcase data input
+        if (lc.getExampleTestcases() == null || lc.getDefaultTestcases() == null) {
+            // load example
+            Question q = QuestionService.getInstance().queryQuestionInfo(lc.getTitleSlug(), project);
+            if (StringUtils.isBlank(q.getExampleTestcases())) {
+                throw new RuntimeException("No example test cases found...");
+            }
+            lc.setExampleTestcases(q.getExampleTestcases());
+            lc.setDefaultTestcases(q.getExampleTestcases());
+            // restore
+            StoreService.getInstance(project).addCache(path, lc);
+        }
+
         // create dialog
-        new TestCasesDialog(
+        new TestCaseDialog(
                 lc.getExampleTestcases(), path, project
         ).show();
-    }
-
-    static class TestCasesDialog extends DialogWrapper {
-        private String dataInput;
-        private JPanel contentPane;
-        private JTextArea textArea;
-        // java file path, which is used for a key in cache
-        private String path;
-        private Project project;
-        private JButton resetButton;
-
-        public TestCasesDialog(String dataInput, String path, Project project) {
-            super(true);
-            this.dataInput = dataInput;
-            this.path = path;
-            this.project = project;
-            init();
-            setTitle("Set Test Cases");
-            setSize(600, 400);
-        }
-
-        @Override
-        protected @Nullable JComponent createCenterPanel() {
-            contentPane = new JPanel(new BorderLayout());
-            textArea = new JTextArea(400, 400);
-            textArea.setText(this.dataInput);
-            textArea.setEditable(true);
-            textArea.setLineWrap(true);
-            textArea.setWrapStyleWord(true);
-
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            contentPane.add(scrollPane, BorderLayout.CENTER);
-
-            return contentPane;
-        }
-
-        @Override
-        protected @Nullable JComponent createSouthPanel() {
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
-            // create reset button
-            resetButton = new JButton("Reset");
-            resetButton.setBorderPainted(false);
-            resetButton.setContentAreaFilled(false);
-            resetButton.setFocusPainted(false);
-            resetButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            resetButton.addActionListener(e -> {
-                // get default data
-                LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
-                String defaultTestcases = lc.getDefaultTestcases();
-                textArea.setText(defaultTestcases);
-            });
-            buttonPanel.add(resetButton);
-
-
-            JButton okButton = new JButton("OK");
-            okButton.addActionListener(e -> doOKAction());
-            buttonPanel.add(okButton);
-
-            JButton cancelButton = new JButton("Cancel");
-            cancelButton.addActionListener(e -> doCancelAction());
-            buttonPanel.add(cancelButton);
-
-            return buttonPanel;
-        }
-
-        @Override
-        protected void doOKAction() {
-            String inputText = textArea.getText();
-            inputText = inputText.trim();
-            // update data
-            LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
-            lc.setExampleTestcases(inputText);
-            StoreService.getInstance(project).addCache(path, lc);
-            super.doOKAction();
-        }
     }
 }

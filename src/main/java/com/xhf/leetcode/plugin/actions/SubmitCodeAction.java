@@ -17,16 +17,6 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
 public class SubmitCodeAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
-        /* get file editor */
-        SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
-
-        // get file content
-        String codeContent = editor.getFileContent();
-        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByEditor(editor, project);
-        assert lc != null;
-
-        // build run code
-        RunCode runCode = super.buildRunCode(lc, codeContent);
-        CodeService.submitCode(project, runCode);
+        CodeService.submitCode(project);
     }
 }
