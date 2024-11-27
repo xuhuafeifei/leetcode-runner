@@ -22,18 +22,11 @@ public class SubmitCodeAction extends AbstractAction {
 
         // get file content
         String codeContent = editor.getFileContent();
-        // get cache
-        String path = editor.getFile().getPath();
-        path = FileUtils.unifyPath(path);
-        LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
+        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByEditor(editor, project);
         assert lc != null;
-        // build run code
-        RunCode runCode = new RunCode();
-        runCode.setQuestionId(lc.getQuestionId());
-        runCode.setLang(lc.getLang());
-        runCode.setTypeCode(codeContent);
-        runCode.setTitleSlug(lc.getTitleSlug());
 
+        // build run code
+        RunCode runCode = super.buildRunCode(lc, codeContent);
         CodeService.submitCode(project, runCode);
     }
 }

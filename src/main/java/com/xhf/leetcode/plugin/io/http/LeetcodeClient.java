@@ -157,13 +157,40 @@ public class LeetcodeClient {
         return httpResponse.getStatusCode() == 200 ? Boolean.TRUE : Boolean.FALSE;
     }
 
+
+    public void updateQuestionStatusByFqid(String fqid, boolean correctAnswer) {
+        if (ql == null) {
+            return;
+        }
+        for (Question question : ql) {
+            if (question.getFrontendQuestionId().equals(fqid)) {
+                String status = question.getStatus();
+                if (correctAnswer) {
+                    question.setStatus("AC");
+                }else if (status.equals("NOT_STARTED")) {
+                    question.setStatus("TRIED");
+                }
+                break;
+            }
+        }
+    }
+
     /**
-     * get all questions to need a lot of time
+     * get all questions need a lot of time, therefore, this method will read it from cache.
+     * if the cache does not exist, this method will query it from leetcode
+     * <p>
+     * get data from StoreService need to Gson parse, but data cached in current class no need to parse
+     * so to faster query the question, this method will also store the questions in
+     * current class to speed up the query process, not only store in StoreService
+     * <p>
+     * to keep the data consistency, this method will also update the cache in StoreService
      */
     public List<Question> getTotalQuestion() {
         // load cache
         List<Question> ans = loadQuestionCache();
         if (ans != null) {
+            // keep first cache is same with second cache
+            StoreService.getInstance(project).addCache(StoreService.QUESTION_LIST_KEY, ans, true);
             return ans;
         }
 

@@ -6,6 +6,8 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.impl.IdeFrameImpl;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LoginEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
@@ -65,9 +67,10 @@ public class LoginService {
     private static void loginSuccessAfter(Project project, MyList<Question> myList) {
         // load data
         loginFlag = Boolean.TRUE;
-        QuestionService.getInstance().loadAllQuestionData(project, myList);
         LogUtils.LOG.info("login success...");
         ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("login success...");
+        // post event
+        LCEventBus.getInstance().post(new LoginEvent(project));
     }
 
     private static boolean loginFlag = Boolean.FALSE;

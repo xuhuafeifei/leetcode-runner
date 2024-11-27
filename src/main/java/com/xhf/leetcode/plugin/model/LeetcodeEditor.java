@@ -10,6 +10,7 @@ public class LeetcodeEditor {
     private String questionId;
     private String lang;
     private String exampleTestcases;
+    private String frontendQuestionId;
 
     @Deprecated // not used
     private String markdownPath;
@@ -17,6 +18,14 @@ public class LeetcodeEditor {
     private String markdownContent;
     private String titleSlug;
     private String defaultTestcases;
+
+    public String getFrontendQuestionId() {
+        return frontendQuestionId;
+    }
+
+    public void setFrontendQuestionId(String frontendQuestionId) {
+        this.frontendQuestionId = frontendQuestionId;
+    }
 
     public String getMarkdownContent() {
         return markdownContent;

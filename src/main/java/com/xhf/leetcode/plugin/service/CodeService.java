@@ -10,6 +10,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
@@ -69,6 +71,7 @@ public class CodeService {
         le.setTitleSlug(question.getTitleSlug());
         le.setExampleTestcases(question.getExampleTestcases());
         le.setDefaultTestcases(question.getExampleTestcases());
+        le.setFrontendQuestionId(question.getFrontendQuestionId());
         // le.setMarkdownPath(markdownFilePath);
         le.setMarkdownContent(translatedContent);
         return le;
@@ -124,9 +127,8 @@ public class CodeService {
             public void run(@NotNull ProgressIndicator indicator) {
                 RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(codeContent);
                 // show it
-                ConsoleUtils.getInstance(project).showInfo(
-                        createRunCodeResultBuilder(codeContent.getDataInput(), rcr).build()
-                );
+                AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(codeContent.getDataInput(), rcr);
+                ConsoleUtils.getInstance(project).showInfo(rcrb.build());
             }
         });
     }
@@ -137,9 +139,12 @@ public class CodeService {
             public void run(@NotNull ProgressIndicator indicator) {
                 SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(codeContent);
                 // show it
-                ConsoleUtils.getInstance(project).showInfo(
-                        createSubmitCodeResultBuilder(scr).build()
-                );
+                AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr);
+                ConsoleUtils.getInstance(project).showInfo(scrb.build());
+                // update question
+                QuestionService.getInstance().updateQuestionStatusByFqid(project, codeContent.getFrontendQuestionId(), scrb.isCorrectAnswer());
+                // post
+                LCEventBus.getInstance().post(new CodeSubmitEvent(project));
             }
         });
     }

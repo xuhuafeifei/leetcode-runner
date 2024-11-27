@@ -12,6 +12,7 @@ import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
+import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.listener.SubmissionListener;
 import com.xhf.leetcode.plugin.model.Submission;
@@ -32,10 +33,13 @@ import java.beans.PropertyChangeListener;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class SubmissionEditor extends AbstractSplitTextEditor {
+public class SubmissionEditor extends AbstractSplitTextEditor implements LCSubscriber {
 
     public SubmissionEditor(Project project, VirtualFile file) {
         super(project, file);
+        // register
+        LCEventBus.getInstance().register(LoginEvent.class, this);
+        LCEventBus.getInstance().register(CodeSubmitEvent.class, this);
     }
 
     @Override
@@ -72,5 +76,10 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) @NotNull String getName() {
         return "Submission Editor";
+    }
+
+    @Override
+    public void onEvent(LCEvent event) {
+        this.initFirstComp();
     }
 }

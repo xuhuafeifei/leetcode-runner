@@ -19,6 +19,16 @@ public class RunCode {
     @SerializedName("title_slug")
     private String titleSlug;
 
+    private String frontendQuestionId;
+
+    public String getFrontendQuestionId() {
+        return frontendQuestionId;
+    }
+
+    public void setFrontendQuestionId(String frontendQuestionId) {
+        this.frontendQuestionId = frontendQuestionId;
+    }
+
     public String getLang() {
         return lang;
     }

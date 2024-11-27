@@ -11,6 +11,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
+import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.editors.MarkDownEditor;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
@@ -19,6 +20,8 @@ import com.xhf.leetcode.plugin.listener.QuestionListener;
 import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.service.LoginService;
+import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +37,7 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
+public class LCPanel extends SimpleToolWindowPanel implements DataProvider, LCSubscriber {
     private MyList<Question> questionList;
 
     private Project project;
@@ -45,18 +48,16 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
 
         final ActionManager actionManager = ActionManager.getInstance();
 
-        initLeetcodeClient();
-        initLocalServer();
+        // register
+        registerToLCEventBus();
 
         // get action toolbar
         ActionToolbar actionToolbar = actionManager.createActionToolbar("leetcode Toolbar",
                 (DefaultActionGroup) actionManager.getAction("leetcode.plugin.lcActionsToolbar"),
                 true);
 
-        // build question list
-        questionList = new MyList();
-        questionList.setCellRenderer(new QuestionCellRender());
-        questionList.addMouseListener(new QuestionListener(questionList, project));
+        initLeetcodeClient();
+        initMyList();
 
         // store to action toolbar
         actionToolbar.setTargetComponent(questionList);
@@ -64,16 +65,21 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
         setContent(new JBScrollPane(questionList));
     }
 
-    private void initLocalServer() {
-        LocalResourceHttpServer.getInstance(project);
+    /**
+     * register this class to EventBus
+     * if the event is fired, this class will be notified and reload or update MyList
+     */
+    private void registerToLCEventBus() {
+        LCEventBus.getInstance().register(LoginEvent.class, this);
+        LCEventBus.getInstance().register(CodeSubmitEvent.class, this);
     }
 
-//    private void initMarkdonwEditor() {
-//        String s = new String("this is preview content, which is used for init");
-//        LightVirtualFile lightVirtualFile = new LightVirtualFile("preview.md", s);
-//        MarkDownEditor markDownEditor = new MarkDownEditor(project, lightVirtualFile);
-//        // Disposer.register(this, markDownEditor);
-//    }
+    private void initMyList() {
+        // build question list
+        questionList = new MyList();
+        questionList.setCellRenderer(new QuestionCellRender());
+        questionList.addMouseListener(new QuestionListener(questionList, project));
+    }
 
     private void initLeetcodeClient() {
         LeetcodeClient.init(this.project);
@@ -85,5 +91,11 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
             return questionList;
         }
         return super.getData(dataId);
+    }
+
+    @Override
+    public void onEvent(LCEvent event) {
+        // load or update total question
+        QuestionService.getInstance().loadAllQuestionData(project, this.questionList);
     }
 }

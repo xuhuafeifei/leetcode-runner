@@ -4,6 +4,8 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.model.RunCode;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LoginPass;
@@ -41,4 +43,16 @@ public abstract class AbstractAction extends AnAction {
     }
 
     abstract void doActionPerformed(Project project, AnActionEvent e);
+
+    protected RunCode buildRunCode(LeetcodeEditor lc, String codeContent) {
+        // build run code
+        RunCode runCode = new RunCode();
+        runCode.setFrontendQuestionId(lc.getFrontendQuestionId());
+        runCode.setQuestionId(lc.getQuestionId());
+        runCode.setLang(lc.getLang());
+        runCode.setTypeCode(codeContent);
+        runCode.setTitleSlug(lc.getTitleSlug());
+        runCode.setDataInput(lc.getExampleTestcases());
+        return runCode;
+    }
 }

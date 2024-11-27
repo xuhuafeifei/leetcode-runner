@@ -160,4 +160,9 @@ public class QuestionService {
 
         CodeService.openCodeEditor(todayQuestion, project);
     }
+
+    public void updateQuestionStatusByFqid(Project project, String fqid, boolean correctAnswer) {
+        // update cache
+        LeetcodeClient.getInstance(project).updateQuestionStatusByFqid(fqid, correctAnswer);
+    }
 }

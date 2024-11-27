@@ -45,4 +45,10 @@ public class ViewUtils {
         return new LightVirtualFile(lc.getTitleSlug() + ".html", lc.getMarkdownContent());
     }
 
+    public static LeetcodeEditor getLeetcodeEditorByEditor(SplitTextEditorWithPreview editor, Project project) {
+        // get cache
+        String path = editor.getFile().getPath();
+        path = FileUtils.unifyPath(path);
+        return StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
+    }
 }
