@@ -68,6 +68,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, LCSu
     /**
      * register this class to EventBus
      * if the event is fired, this class will be notified and reload or update MyList
+     *
      */
     private void registerToLCEventBus() {
         LCEventBus.getInstance().register(LoginEvent.class, this);
