@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
@@ -27,6 +28,7 @@ public abstract class AbstractAction extends AnAction {
             AppSettings appSettings = AppSettings.getInstance();
             if (!appSettings.initOrNot()) {
                 ConsoleUtils.getInstance(project).showWaring("please init plugin setting");
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
                 return;
             }
         }
@@ -36,6 +38,7 @@ public abstract class AbstractAction extends AnAction {
             boolean login = LoginService.isLogin(project);
             if (! login) {
                 ConsoleUtils.getInstance(e.getProject()).showWaring("not login!");
+                LoginService.doLogin(project);
                 return;
             }
         }
