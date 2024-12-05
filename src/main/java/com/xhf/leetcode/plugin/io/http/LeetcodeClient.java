@@ -193,12 +193,20 @@ public class LeetcodeClient {
             StoreService.getInstance(project).addCache(StoreService.QUESTION_LIST_KEY, ans, true);
             return ans;
         }
+        ans = queryTotalQuestion();
+        // store in first cache
+        StoreService.getInstance(project).addCache(StoreService.QUESTION_LIST_KEY, ans, true);
+        // store in second cache
+        this.ql = ans;
+        return ans;
+    }
 
+    public List<Question> queryTotalQuestion() {
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.PROBLEM_SET_QUERY);
 
-        ans = new ArrayList<>();
+        List<Question> ans = new ArrayList<>();
         boolean flag = true;
         int skip = 0, limit = 100;
         while (flag) {
@@ -236,10 +244,6 @@ public class LeetcodeClient {
             skip = skip + limit;
         }
 
-        // store in first cache
-        StoreService.getInstance(project).addCache(StoreService.QUESTION_LIST_KEY, ans, true);
-        // store in second cache
-        this.ql = ans;
         return ans;
     }
 

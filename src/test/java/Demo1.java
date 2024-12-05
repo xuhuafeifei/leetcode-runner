@@ -7,7 +7,12 @@ import com.xhf.leetcode.plugin.utils.GsonUtils;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author feigebuge
@@ -52,5 +57,17 @@ public class Demo1 {
 //            String submissionCode = instance.getSubmissionCode(submission.getId());
 //            System.out.println("submissionCode = " + submissionCode);
 //        }
+    }
+
+    @Test
+    public void test5() throws Exception {
+        List<String> collect = instance.queryTotalQuestion().stream().map(e -> e.toString()).collect(Collectors.toList());
+        File file = new File("E:\\java_code\\leetcode-runner\\src\\test\\java\\eventbus\\titleSlug.txt");
+        FileOutputStream fos = new FileOutputStream(file);
+        for (String s : collect) {
+            System.out.println(s);
+            fos.write((s + '\n').getBytes(StandardCharsets.UTF_8));
+        }
+        fos.close();
     }
 }
