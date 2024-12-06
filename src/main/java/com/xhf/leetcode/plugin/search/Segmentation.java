@@ -2,12 +2,9 @@ package com.xhf.leetcode.plugin.search;
 
 import com.xhf.leetcode.plugin.search.process.Processor;
 import com.xhf.leetcode.plugin.search.process.ProcessorFactory;
-import com.xhf.leetcode.plugin.search.utils.CharType;
-import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Objects;
 
 /**
  * 分词处理器, 获取下一个分词
@@ -32,29 +29,10 @@ public class Segmentation {
         if (! sm.tryLoad()) return null;
         // 创建上下文
         Context context = new Context(itr.next(), itr);
-        // 判断当前处理的字符类型
-        CharType charType = judgeType(context);
-        // 过滤未识别的字符
-        while (Objects.equals(charType.getType(), CharType.NON.getType())) {
-            context.setC(itr.next());
-            charType = judgeType(context);
-        }
         // 获取处理器
-        Processor processor = pf.createProcessor(charType);
+        Processor processor = pf.createProcessor(context);
         // 处理字符
         processor.doProcess(context);
         return context.getToken();
-    }
-
-    private CharType judgeType(Context context) {
-        char c = context.getC();
-        if (CharacterHelper.isEnglishLetter(c)) {
-            return CharType.EN;
-        } else if (CharacterHelper.isCJKCharacter(c)) {
-            return CharType.CN;
-        } else if (CharacterHelper.isArabicNumber(c)) {
-            return CharType.DIGIT;
-        }
-        return CharType.NON;
     }
 }

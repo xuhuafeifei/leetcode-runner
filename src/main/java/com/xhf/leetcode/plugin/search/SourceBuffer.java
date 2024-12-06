@@ -9,9 +9,9 @@ import java.io.StringReader;
 import java.util.NoSuchElementException;
 
 /**
- * 数据源缓冲区, 用于存储从数据源分段加载的数据
- *
- * SourceBuffer通过迭代器返回需要处理的数据, 如果迭代器将所有数据迭代完成, 则表示SourceBuffer所有的数据均
+ * 数据源缓冲区, 用于维护从数据源加载到的分段数据
+ * <p>
+ * SourceBuffer通过迭代器返回正在被消费的数据, 如果迭代器将所有数据迭代完成, 则表示SourceBuffer所有的数据均
  * 被消费者处理完毕
  *
  * @author feigebuge
@@ -19,9 +19,9 @@ import java.util.NoSuchElementException;
  */
 public class SourceBuffer {
     // 缓冲区
-    private char[] buffer;
+    private final char[] buffer;
     // 迭代器, 负责迭代buffer
-    private Iterator it;
+    private final Iterator it;
     // 统计缓冲区内有效数据的数量, 如果为-1, 则表示缓冲区还未被加载
     private int totalCnt;
     private static final int DEFAULT_BUFFER_SIZE = 1024;
@@ -73,9 +73,7 @@ public class SourceBuffer {
     }
 
     private class Itr implements Iterator {
-        // 当前遍历到的元素下标
         private int cursor;
-        // 缓冲区有效数据的数量
         private int size;
 
         public Itr() {
@@ -94,7 +92,7 @@ public class SourceBuffer {
             if (i >= this.size)
                 throw new NoSuchElementException();
             this.cursor += 1;
-            return CharacterHelper.regularize(buffer[i]);
+            return buffer[i];
         }
 
         @Override
@@ -121,6 +119,14 @@ public class SourceBuffer {
             }
             this.cursor = -1;
             this.size = totalCnt;
+        }
+
+        @Override
+        public Iterator deepcopy() {
+            Itr itr = new Itr();
+            itr.size = this.size;
+            itr.cursor = this.cursor;
+            return itr;
         }
     }
 }

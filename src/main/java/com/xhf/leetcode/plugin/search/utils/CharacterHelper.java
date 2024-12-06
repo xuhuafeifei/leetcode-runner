@@ -68,5 +68,4 @@ public class CharacterHelper {
 		}
         return input;
 	}
-
 }

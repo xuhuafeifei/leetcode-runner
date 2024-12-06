@@ -9,6 +9,7 @@ public interface Iterator {
     char next();
     char peekNext();
     char current();
-
     void reset();
+
+    Iterator deepcopy();
 }

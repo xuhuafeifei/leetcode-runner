@@ -52,4 +52,14 @@ public class Context {
     public void setIterator(Iterator iterator) {
         this.iterator = iterator;
     }
+
+    public boolean hasNext() {
+        return getIterator().hasNext();
+    }
+
+    public char nextC() {
+        char next = getIterator().next();
+        setC(next);
+        return next;
+    }
 }
