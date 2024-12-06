@@ -224,5 +224,6 @@ public class TestSourceManager {
         assert '4' == itr.next();
 
         assert ! itr.hasNext();
+        
     }
 }
