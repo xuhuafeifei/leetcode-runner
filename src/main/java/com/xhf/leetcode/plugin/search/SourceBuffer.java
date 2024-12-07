@@ -73,7 +73,9 @@ public class SourceBuffer {
     }
 
     private class Itr implements Iterator {
+        // 当前遍历到的元素下标
         private int cursor;
+        // 缓冲区有效数据的数量
         private int size;
 
         public Itr() {

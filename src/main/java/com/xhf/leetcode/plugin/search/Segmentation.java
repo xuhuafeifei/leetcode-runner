@@ -28,7 +28,7 @@ public class Segmentation {
     public String next() throws IOException {
         if (! sm.tryLoad()) return null;
         // 创建上下文
-        Context context = new Context(itr.next(), itr);
+        Context context = new Context(itr.next(), itr, sm);
         // 获取处理器
         Processor processor = pf.createProcessor(context);
         // 处理字符

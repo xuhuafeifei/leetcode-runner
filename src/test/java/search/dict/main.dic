@@ -1,0 +1,2440 @@
+   # 原始数据
+   1 第一部分、计算机算法常用术语中英对照
+   2 Data Structures 基本数据结构
+   3 Dictionaries 字典
+   4 Priority Queues 堆
+   5 Graph Data Structures 图
+   6 Set Data Structures 集合
+   7 Kd-Trees 线段树
+   8 Numerical Problems 数值问题
+   9 Solving Linear Equations 线性方程组
+  10 Bandwidth Reduction 带宽压缩
+  11 Matrix Multiplication 矩阵乘法
+  12 Determinants and Permanents 行列式
+  13 Constrained and Unconstrained Optimization 最值问题
+  14 Linear Programming 线性规划
+  15 Random Number Generation 随机数生成
+  16 Factoring and Primality Testing 因子分解/质数判定
+  17 Arbitrary Precision Arithmetic 高精度计算
+  18 Knapsack Problem 背包问题
+  19 Discrete Fourier Transform 离散Fourier变换
+  20 Combinatorial Problems 组合问题
+  21 Sorting 排序
+  22 Searching 查找
+  23 Median and Selection 中位数
+  24 Generating Permutations 排列生成
+  25 Generating Subsets 子集生成
+  26 Generating Partitions 划分生成
+  27 Generating Graphs 图的生成
+  28 Calendrical Calculations 日期
+  29 Job Scheduling 工程安排
+  30 Satisfiability 可满足性
+  31 Graph Problems -- polynomial 图论-多项式算法
+  32 Connected Components 连通分支
+  33 Topological Sorting 拓扑排序
+  34 Minimum Spanning Tree 最小生成树
+  35 Shortest Path 最短路径
+  36 Transitive Closure and Reduction 传递闭包
+  37 Matching 匹配
+  38 Eulerian Cycle / Chinese Postman Euler回路/中国邮路
+  39 Edge and Vertex Connectivity 割边/割点
+  40 Network Flow 网络流
+  41 Drawing Graphs Nicely 图的描绘
+  42 Drawing Trees 树的描绘
+  43 Planarity Detection and Embedding 平面性检测和嵌入
+  44 Graph Problems -- hard 图论-NP问题
+  45 Clique 最大团
+  46 Independent Set 独立集
+  47 Vertex Cover 点覆盖
+  48 Traveling Salesman Problem 旅行商问题
+  49 Hamiltonian Cycle Hamilton回路
+  50 Graph Partition 图的划分
+  51 Vertex Coloring 点染色
+  52 Edge Coloring 边染色
+  53 Graph Isomorphism 同构
+  54 Steiner Tree Steiner树
+  55 Feedback Edge/Vertex Set 最大无环子图
+  56 Computational Geometry 计算几何
+  57 Convex Hull 凸包
+  58 Triangulation 三角剖分
+  59 Voronoi Diagrams Voronoi图
+  60 Nearest Neighbor Search 最近点对查询
+  61 Range Search 范围查询
+  62 Point Location 位置查询
+  63 Intersection Detection 碰撞测试
+  64 Bin Packing 装箱问题
+  65 Medial-Axis Transformation 中轴变换
+  66 Polygon Partitioning 多边形分割
+  67 Simplifying Polygons 多边形化简
+  68 Shape Similarity 相似多边形
+  69 Motion Planning 运动规划
+  70 Maintaining Line Arrangements 平面分割
+  71 Minkowski Sum Minkowski和
+  72 Set and String Problems 集合与串的问题
+  73 Set Cover 集合覆盖
+  74 Set Packing 集合配置
+  75 String Matching 模式匹配
+  76 Approximate String Matching 模糊匹配
+  77 Text Compression 压缩
+  78 Cryptography 密码
+  79 Finite State Machine Minimization 有穷自动机简化
+  80 Longest Common Substring 最长公共子串
+  81 Shortest Common Superstring 最短公共父串
+  82 DP——Dynamic Programming——动态规划
+  83 recursion —— 递归
+  84
+  85 第二部分、编程词汇
+  86 A2A integration A2A整合
+  87 abstract 抽象的
+  88 abstract base class (ABC)抽象基类
+  89 abstract class 抽象类
+  90 abstraction 抽象、抽象物、抽象性
+  91 access 存取、访问
+  92 access level访问级别
+  93 access function 访问函数
+  94 account 账户
+  95 action 动作
+  96 activate 激活
+  97 active 活动的
+  98 actual parameter 实参
+  99 adapter 适配器
+ 100 add-in 插件
+ 101 address 地址
+ 102 address space 地址空间
+ 103 address-of operator 取地址操作符
+ 104 ADL (argument-dependent lookup)
+ 105 ADO(ActiveX Data Object)ActiveX数据对象
+ 106 advanced
+ 107 aggregation 聚合、聚集
+ 108 algorithm 算法
+ 109 alias 别名
+ 110 align 排列、对齐
+ 111 allocate 分配、配置
+ 112 allocator分配器、配置器
+ 113 angle bracket 尖括号
+ 114 annotation 注解、评注
+ 115 API (Application Programming Interface) 应用(程序)编程接口
+ 116 app domain (application domain)应用域
+ 117 application 应用、应用程序
+ 118 application framework 应用程序框架
+ 119 appearance 外观
+ 120 append 附加
+ 121 architecture 架构、体系结构
+ 122 archive file 归档文件、存档文件
+ 123 argument引数(传给函式的值)。参见parameter
+ 124 array 数组
+ 125 arrow operator 箭头操作符
+ 126 ASP(Active Server Page)活动服务器页面
+ 127 ASP.NET worker process ASP.NET工作者进程
+ 128 assembly 装配件、配件
+ 129 assembly language 汇编语言
+ 130 assembly manifest 装配件清单
+ 131 assert(ion) 断言
+ 132 assign 赋值
+ 133 assignment 赋值、分配
+ 134 assignment operator 赋值操作符
+ 135 associated 相关的、相关联的
+ 136 associative container 关联式容器(对应sequential container)
+ 137 asynchronous 异步的
+ 138 atomic 原子的
+ 139 atomic operation 原子操作
+ 140 attribute 特性、属性
+ 141 authentication service 验证服务
+ 142 authorization 授权
+ 143 audio 音频
+ 144 A.I. 人工智能
+ 145 B2B integration B2B整合、B2B集成(business-to-business integration)
+ 146 background 背景、后台(进程)
+ 147 backward compatible 向后兼容、向下兼容
+ 148 backup 备份
+ 149 backup device备份设备
+ 150 backup file 备份文件
+ 151 bandwidth 带宽
+ 152 base class 基类
+ 153 base type 基类型
+ 154 batch 批处理
+ 155 BCL (base class library)基类库
+ 156 binary 二进制
+ 157 binary search 二分查找
+ 158 binary tree 二叉树
+ 159 binary function 双参函数
+ 160 binary large object二进制大对象
+ 161 binary operator 二元操作符
+ 162 binding 绑定
+ 163 bit 位
+ 164 bitmap 位图
+ 165 bitwise 按位...
+ 166 bitwise copy 为单元进行复制；位元逐一复制,按位拷
+ 167 bitwise operation 按位运算
+ 168 block 块、区块、语句块
+ 169 bookkeeping 簿记
+ 170 boolean 布林值(真假值，true或false)
+ 171 border 边框
+ 172 bounds checking 边界检查
+ 173 boxing 装箱、装箱转换
+ 174 brace (curly brace) 大括号、花括号
+ 175 bracket (square brakcet) 中括号、方括号
+ 176
+ 177 breakpoint 断点
+ 178 browser applications 浏览器应用(程序)
+ 179 browser-accessible application 可经由浏览器访问的应用程序
+ 180 build 编连(专指编译和连接
+ 181 built-in 内建、内置
+ 182 bus 总线
+ 183 business 业务、商务(看场合)
+ 184 business Logic 业务逻辑
+ 185 business rules 业务规则
+ 186 buttons 按钮
+ 187 bug 臭虫
+ 188 by/through 通过
+ 189 byte 位元组(由8 bits组成)
+ 190 cache 高速缓存
+ 191 calendar 日历
+ 192 call 调用
+ 193 callback 回调
+ 194 call-level interface (CLI)调用级接口(CLI)
+ 195 call operator 调用操作符
+ 196 candidate key 候选键 (for database)
+ 197 cascading delete 级联删除 (for database)
+ 198 cascading update 级联更新 (for database)
+ 199 casting 转型、造型转换
+ 200 catalog 目录
+ 201 chain 链(function calls)
+ 202 character 字符
+ 203 character format 字符格式
+ 204 character set 字符集
+ 205 CHECK constraints CHECK约束 (for database)
+ 206 checkpoint 检查点 (for database)
+ 207 check box 复选框
+ 208 check button 复选按钮
+ 209 child class 子类
+ 210 CIL (common intermediate language)通用中间语言、通用中介语言
+ 211 class 类
+ 212 class declaration 类声明
+ 213 class definition 类定义
+ 214 class derivation list 类继承列表
+ 215 class factory 类厂
+ 216 class hierarchy 类层次结构
+ 217 class library 类库
+ 218 class loader 类装载器
+ 219 class template 类模板
+ 220 class template partial specializations 类模板部分特化
+ 221 class template specializations 类模板特化
+ 222 classification 分类
+ 223 clause 子句
+ 224 client application 客户端应用程序
+ 225 client cursor 客户端游标 (for database)
+ 226 code page 代码页
+ 227 cleanup 清理、清除
+ 228 CLI (Common Language Infrastructure) 通用语言基础设施
+ 229 client 客户、客户端
+ 230 client area 客户区
+ 231 client-server 客户机/服务器、客户端/服务器
+ 232 clipboard 剪贴板
+ 233 clone 克隆
+ 234 CLS (common language specification) 通用语言规范
+ 235 code access security 代码访问安全
+ 236 COFF (Common Object File Format) 通用对象文件格式
+ 237 collection 集合
+ 238 COM (Component Object Model) 组件对象模型
+ 239 combo box 组合框
+ 240 command line 命令行
+ 241 comment 注释
+ 242 commit 提交 (for database)
+ 243 communication 通讯
+ 244 compatible 兼容
+ 245 compile time 编译期、编译时
+ 246 compiler 编译器
+ 247 component组件
+ 248 composite index 复合索引、组合索引 (for database)
+ 249 composite key 复合键、组合键 (for database)
+ 250 composition 复合、组合
+ 251 concept 概念
+ 252 concrete具体的
+ 253 concrete class 具体类
+ 254 concurrency 并发、并发机制
+ 255 constraint 约束 (for database)
+ 256 configuration 配置、组态
+ 257 connection 连接 (for database)
+ 258 connection pooling 连接池
+ 259 console 控制台
+ 260 constant 常量
+ 261 construct 构件、成分、概念、构造（for language）
+ 262 constructor (ctor) 构造函数、构造器
+ 263 container 容器
+ 264 containment包容
+ 265 context 环境、上下文
+ 266 control 控件
+ 267 cookie (不译)
+ 268 copy 拷贝
+ 269 CORBA 通用对象请求中介架构(Common Object Request Broker Architecture)
+ 270 cover 覆盖、涵盖
+ 271 create/creation 创建、生成
+ 272 crosstab query 交叉表查询 (for database)
+ 273 CRTP (curiously recurring template pattern)
+ 274 CTS (common type system)通用类型系统
+ 275 cube 多维数据集 (for database)
+ 276 cursor 光标
+ 277 cursor 游标 (for database)
+ 278 custom 定制、自定义
+ 279 data 数据
+ 280 data connection 数据连接 (for database)
+ 281 Data Control Language (DCL) 数据控制语言(DCL) (for database)
+ 282 Data Definition Language (DDL) 数据定义语言(DDL) (for database)
+ 283 data dictionary 数据字典 (for database)
+ 284 data dictionary view 数据字典视图 (for database)
+ 285 data file 数据文件 (for database)
+ 286 data integrity 数据完整性 (for database)
+ 287 data manipulation language (DML)数据操作语言(DML) (for database)
+ 288 data mart 数据集市 (for database)
+ 289 data pump 数据抽取 (for database)
+ 290 data scrubbing 数据清理 (for database)
+ 291 data source 数据源 (for database)
+ 292 Data source name (DSN) 数据源名称(DSN) (for database)
+ 293 data warehouse 数据仓库 (for database)
+ 294 dataset 数据集 (for database)
+ 295 database 数据库 (for database)
+ 296 database catalog 数据库目录 (for database)
+ 297 database diagram 数据关系图 (for database)
+ 298 database file 数据库文件 (for database)
+ 299 database object 数据库对象 (for database)
+ 300 database owner 数据库所有者 (for database)
+ 301 database project 数据库工程 (for database)
+ 302 database role 数据库角色 (for database)
+ 303 database schema 数据库模式、数据库架构 (for database)
+ 304 database scrīpt 数据库脚本 (for database)
+ 305 data-bound 数据绑定 (for database)
+ 306 data-aware control数据感知控件 (for database)
+ 307 data member 数据成员、成员变量
+ 308 dataset 数据集 (for database)
+ 309 data source 数据源 (for database)
+ 310 data structure数据结构
+ 311 data table 数据表 (for database)
+ 312 datagram 数据报文
+ 313 DBMS (database management system)数据库管理系统 (for database)
+ 314 DCOM (distributed COM)分布式COM
+ 315 dead lock 死锁 (for database)
+ 316 deallocate 归还
+ 317 debug 调试
+ 318 debugger 调试器
+ 319 decay 退化
+ 320 decision support 决策支持
+ 321 declaration 声明
+ 322 declarative referential integrity (DRI)声明引用完整性(DRI) (for database)
+ 323 deduction 推导
+ 324 DEFAULT constraint默认约束 (for database)
+ 325 default database 默认数据库 (for database)
+ 326 default instance 默认实例 (for database)
+ 327 default result set 默认结果集 (for database)
+ 328 default 缺省、默认值
+ 329 defer 推迟
+ 330 definition 定义
+ 331 delegate 委托
+ 332 delegation 委托
+ 333 dependent name
+ 334 deploy 部署
+ 335 dereference 解引用
+ 336 dereference operator (提领)运算子
+ 337 derived class 派生类
+ 338 design by contract 契约式设计
+ 339 design pattern 设计模式
+ 340 destroy 销毁
+ 341 destructor(dtor)析构函数、析构器
+ 342 device 设备
+ 343 DHTML (dynamic HyperText Markup Language)动态超文本标记语言
+ 344 dialog 对话框
+ 345 digest 摘要
+ 346 digital 数字的
+ 347 DIME (Direct Internet Message Encapsulation)直接Internet消息封装
+ 348 directive (编译)指示符
+ 349 directory 目录
+ 350 dirty pages脏页 (for database)
+ 351 dirty read 脏读 (for database)
+ 352 disassembler 反汇编器
+ 353 DISCO (Discovery of Web Services)Web Services的查找
+ 354 disk 盘
+ 355 dispatch 调度、分派、派发（我喜欢“调度”）
+ 356 DISPID (Dispatch Identifier)分派标识符
+ 357 distributed computing 分布式计算
+ 358 distributed query 分布式查询 (for database)
+ 359 DNA (Distributed interNet Application) 分布式网间应用程序
+ 360 document 文档
+ 361 DOM (Document Object Model)文档对象模型
+ 362 dot operator (圆)点操作符
+ 363 driver 驱动(程序)
+ 364 DTD (document type definition) 文档类型定义
+ 365 double-byte character set (DBCS)双字节字符集(DBCS)
+ 366 dump 转储
+ 367 dump file 转储文件
+ 368 dynamic cursor 动态游标 (for database)
+ 369 dynamic filter 动态筛选 (for database)
+ 370 dynamic locking 动态锁定 (for database)
+ 371 dynamic recovery 动态恢复 (for database)
+ 372 dynamic snapshot 动态快照 (for database)
+ 373 dynamic SQL statements 动态SQL语句 (for database)
+ 374 dynamic assembly 动态装配件、动态配件
+ 375 dynamic binding 动态绑定
+ 376 EAI (enterprise application integration)企业应用程序集成(整合)
+ 377 EBCO (empty base class optimization) 空基类优化（机制）
+ 378 e-business 电子商务
+ 379 EDI (Dlectronic Data Interchange)电子数据交换
+ 380 efficiency 效率
+ 381 efficient 高效
+ 382 end-to-end authentication 端对端身份验证
+ 383 end user 最终用户
+ 384 engine 引擎
+ 385 entity 实体
+ 386 encapsulation 封装
+ 387 enclosing class 外围类别(与巢状类别 nested class有关)
+ 388 enum (enumeration) 枚举
+ 389 enumerators 枚举成员、枚举器
+ 390 equal 相等
+ 391 equality 相等性
+ 392 equality operator 等号操作符
+ 393 error log 错误日志 (for database)
+ 394 escape code 转义码
+ 395 escape character 转义符、转义字符
+ 396 exclusive lock 排它锁 (for database)
+ 397 explicit transaction 显式事务 (for database)
+ 398 evaluate 评估
+ 399 event 事件
+ 400 event driven 事件驱动的
+ 401 event handler 事件处理器
+ 402 evidence 证据
+ 403 exception 异常
+ 404 exception declaration 异常声明
+ 405 exception handling 异常处理、异常处理机制
+ 406 exception-safe 异常安全的
+ 407 exception specification 异常规范
+ 408 exit 退出
+ 409 explicit 显式
+ 410 explicit specialization 显式特化
+ 411 export 导出
+ 412 expression 表达式
+ 413 facility 设施、设备
+ 414 fat client 胖客户端
+ 415 feature 特性、特征
+ 416 fetch 提取
+ 417 field 字段(java)
+ 418 field 字段 (for database)
+ 419 field length 字段长度 (for database)
+ 420 file 文件
+ 421 filter 筛选 (for database)
+ 422 finalization 终结
+ 423 firewall 防火墙
+ 424 finalizer 终结器
+ 425 firmware 固件
+ 426 flag 标记
+ 427 flash memory 闪存
+ 428 flush 刷新
+ 429 font 字体
+ 430 foreign key (FK) 外键(FK) (for database)
+ 431 form 窗体
+ 432 formal parameter 形参
+ 433 forward declaration 前置声明
+ 434 forward-only 只向前的
+ 435 forward-only cursor 只向前游标 (for database)
+ 436 fragmentation 碎片 (for database)
+ 437 framework 框架
+ 438 full specialization 完全特化
+ 439 function 函数
+ 440 function call operator (即operator ()) 函数调用操作符
+ 441 function object 函数对象
+ 442 function overloaded resolution函数重载决议
+ 443 functionality 功能
+ 444 function template函数模板
+ 445 functor 仿函数
+ 446 GAC (global assembly cache) 全局装配件缓存、全局配件缓存
+ 447 GC (Garbage collection) 垃圾回收(机制)、垃圾收集(机制)
+ 448 game 游戏
+ 449 generate 生成
+ 450 generic 泛化的、一般化的、通用的
+ 451 generic algorithm通用算法
+ 452 genericity 泛型
+ 453 getter (相对于 setter)取值函数
+ 454 global 全局的
+ 455 global object 全局对象
+ 456 global scope resolution operator 全局范围解析操作符
+ 457 grant 授权 (for database)
+ 458 granularity 粒度
+ 459 group 组、群
+ 460 group box 分组框
+ 461 GUI 图形界面
+ 462 GUID (Globally Unique Identifier) 全球唯一标识符
+ 463 hand shaking 握手
+ 464 handle 句柄
+ 465 handler 处理器
+ 466 hard-coded 硬编码的
+ 467 hard-copy 截屏图
+ 468 hard disk 硬盘
+ 469 hardware 硬件
+ 470 hash table 散列表、哈希表
+ 471 header file头文件
+ 472 heap 堆
+ 473 help file 帮助文件
+ 474 hierarchy 层次结构、继承体系
+ 475 hierarchical data 阶层式数据、层次式数据
+ 476 hook 钩子
+ 477 Host (application)宿主(应用程序)
+ 478 hot key 热键
+ 479 hyperlink 超链接
+ 480 HTML (HyperText Markup Language) 超文本标记语言
+ 481 HTTP pipeline HTTP管道
+ 482 HTTP (HyperText Transfer Protocol) 超文本传输协议
+ 483 icon 图标
+ 484 IDE (Integrated Development Environment)集成开发环境
+ 485 IDL (Interface Definition Language) 接口定义语言
+ 486 identifier 标识符
+ 487 idle time 空闲时间
+ 488 if and only if当且仅当
+ 489 IL (Intermediate Language) 中间语言、中介语言
+ 490 image 图象
+ 491 IME 输入法
+ 492 immediate base 直接基类
+ 493 immediate derived 直接派生类
+ 494 immediate updating 即时更新 (for database)
+ 495 implicit transaction隐式事务 (for database)
+ 496 incremental update 增量更新 (for database)
+ 497 index 索引 (for database)
+ 498 implement 实现
+ 499 implementation 实现、实现品
+ 500 implicit 隐式
+ 501 import 导入
+ 502 increment operator 增加操作符
+ 503 infinite loop 无限循环
+ 504 infinite recursive 无限递归
+ 505 information 信息
+ 506 infrastructure 基础设施
+ 507 inheritance 继承、继承机制
+ 508 inline 内联
+ 509 inline expansion 内联展开
+ 510 initialization 初始化
+ 511 initialization list 初始化列表、初始值列表
+ 512 initialize 初始化
+ 513 inner join 内联接 (for database)
+ 514 in-place active 现场激活
+ 515 instance 实例
+ 516 instantiated 具现化、实体化(常应用于template)
+ 517 instantiation 具现体、具现化实体(常应用于template)
+ 518 integrate 集成、整合
+ 519 integrity 完整性、一致性
+ 520 integrity constraint完整性约束 (for database)
+ 521 interprocess communication (IPC)进程间通讯(IPC)
+ 522 interacts 交互
+ 523 interface 接口
+ 524 for GUI 界面
+ 525 interoperability 互操作性、互操作能力
+ 526 interpreter 解释器
+ 527 introspection 自省
+ 528 invariants 不变性
+ 529 invoke 调用
+ 530 isolation level 隔离级别 (for database)
+ 531 iterate 迭代
+ 532 iterative 反复的、迭代的
+ 533 iterator 迭代器
+ 534 iteration 迭代(回圈每次轮回称为一个iteration)
+ 535 item 项、条款、项目
+ 536 JIT compilation JIT编译 即时编译
+ 537 key 键 (for database)
+ 538 key column 键列 (for database)
+ 539 laser 激光
+ 540 late binding 迟绑定
+ 541 left outer join 左向外联接 (for database)
+ 542 level 阶、层例
+ 543 high level 高阶、高层
+ 544 library 库
+ 545 lifetime 生命期、寿命
+ 546 link 连接、链接
+ 547 linkage 连接、链接
+ 548 linker 连接器、链接器
+ 549 literal constant 字面常数
+ 550 list 列表、表、链表
+ 551 list box 列表框
+ 552 livelock 活锁 (for database)
+ 553 load 装载、加载
+ 554 load balancing 负载平衡
+ 555 loader 装载器、载入器
+ 556 local 局部的
+ 557 local object 局部对象
+ 558 lock 锁
+ 559 log 日志
+ 560 login 登录
+ 561 login security mode登录安全模式 (for database)
+ 562 lookup table 查找表 (for database)
+ 563 loop 循环
+ 564 loose coupling 松散耦合
+ 565 lvalue 左值
+ 566 machine code 机器码、机器代码
+ 567 macro 宏
+ 568 maintain 维护
+ 569 managed code 受控代码、托管代码
+ 570 Managed Extensions 受控扩充件、托管扩展
+ 571 managed object 受控对象、托管对象
+ 572 mangled name
+ 573 manifest 清单
+ 574 manipulator 操纵器(iostream预先定义的一种东西)
+ 575 many-to-many relationship 多对多关系 (for database)
+ 576 many-to-one relationship 多对一关系 (for database)
+ 577 marshal 列集
+ 578 member 成员
+ 579 member access operator 成员取用运算子(有dot和arrow两种)
+ 580 member function 成员函数
+ 581 member initialization list成员初始值列表
+ 582 memberwise 以member为单元…、members 逐一…
+ 583 memberwise copy
+ 584 memory 内存
+ 585 memory leak 内存泄漏
+ 586 menu 菜单
+ 587 message 消息
+ 588 message based 基于消息的
+ 589 message loop 消息环
+ 590 message queuing消息队列
+ 591 metadata 元数据
+ 592 metaprogramming元编程
+ 593 method 方法
+ 594 micro 微
+ 595 middleware 中间件
+ 596 middle tier 中间层
+ 597 modeling 建模
+ 598 modeling language 建模语言
+ 599 modifier 修饰字、修饰符
+ 600 modem 调制解调器
+ 601 module 模块
+ 602 most derived class最底层的派生类
+ 603 mouse 鼠标
+ 604 mutable 可变的
+ 605 mutex 互斥元、互斥体
+ 606 multidimensional OLAP (MOLAP) 多维OLAP(MOLAP) (for database)
+ 607 multithreaded server application 多线程服务器应用程序
+ 608 multiuser 多用户
+ 609 multi-tasking 多任务
+ 610 multi-thread 多线程
+ 611 multicast delegate 组播委托、多点委托
+ 612 named parameter 命名参数
+ 613 named pipe 命名管道
+ 614 namespace 名字空间、命名空间
+ 615 native 原生的、本地的
+ 616 native code 本地码、本机码
+ 617 Native Image Generator (NGEN)本地映像生成器
+ 618 nested class 嵌套类
+ 619 nested query 嵌套查询 (for database)
+ 620 nested table 嵌套表 (for database)
+ 621 network 网络
+ 622 network card 网卡
+ 623 nondependent name
+ 624 object 对象
+ 625 object based 基于对象的
+ 626 object file 目标文件
+ 627 object model 对象模型
+ 628 object oriented 面向对象的
+ 629 object pooling 对象池化
+ 630 ODBC data source ODBC数据源 (for database)
+ 631 ODBC driver ODBC驱动程序 (for database)
+ 632 ODR (one-definition rule)
+ 633 OLE Automation objects OLE自动化对象 (for database)
+ 634 OLE Automation server OLE自动化服务器 (for database)
+ 635 OLE DB consumer OLE DB使用者 (for database)
+ 636 OLE DB for OLAP 用于OLAP的OLE DB (for database)
+ 637 OLE DB provider OLE DB提供者 (for database)
+ 638 one-to-many relationship 一对多关系 (for database)
+ 639 one-to-one relationship 一对一关系 (for database)
+ 640 online analytical processing (OLAP) 联机分析处理(OLAP) (for database)
+ 641 online redo log 联机重做日志 (for database)
+ 642 online transaction processing (OLTP) 联机事务处理(OLTP) (for database)
+ 643 Open Data Services (ODS) 开放式数据服务(ODS) (for database)
+ 644 Open Database Connectivity (ODBC) 开放式数据库连接(ODBC) (for database)
+ 645 operand 操作数
+ 646 operating system (OS) 操作系统
+ 647 operation 操作
+ 648 operator 操作符、运算符
+ 649 option 选项
+ 650 optimizer 优化器
+ 651 outer join 外联接 (for database)
+ 652 overflow 上限溢位(相对于underflow)
+ 653 overhead 额外开销
+ 654 overload 重载
+ 655 overload resolution 重载决议
+ 656 overloaded function 重载的函数
+ 657 overloaded operator 被重载的操作符
+ 658 override 覆写、重载、重新定义
+ 659 package 包
+ 660 packaging 打包
+ 661 palette 调色板
+ 662 parallel 并行
+ 663 parameter 参数、形式参数、形参
+ 664 parameter list 参数列表
+ 665 parameterize 参数化
+ 666 parent class 父类
+ 667 parentheses 圆括弧、圆括号
+ 668 parse 解析
+ 669 parser 解析器
+ 670 part 零件、部件
+ 671 partial specialization 局部特化
+ 672 pass by address 传址(函式引数的传递方式)(非正式用语)
+ 673 pass by reference 传地址、按引用传递
+ 674 pass by value 按值传递
+ 675 pattern 模式
+ 676 PDA (personal digital assistant)个人数字助理
+ 677 PE (Portable Executable) file 可移植可执行文件
+ 678 performance 性能
+ 679 persistence 持久性
+ 680 PInvoke (platform invoke service) 平台调用服务
+ 681 pixel 像素
+ 682 placement delete
+ 683 placement new
+ 684 placeholder 占位符
+ 685 platform 平台
+ 686 POD (plain old data (type))
+ 687 POI (point of instantiation)
+ 688 pointer 指针
+ 689 poll 轮询
+ 690 pooling 池化
+ 691 polymorphism 多态
+ 692 pop up 弹出式
+ 693 port 端口
+ 694 postfix 后缀
+ 695 precedence 优先序(通常用于运算子的优先执行次序)
+ 696 prefix 前缀
+ 697 preprocessor 预处理器
+ 698 primary key (PK)主键(PK) (for database)
+ 699 primary table 主表 (for database)
+ 700 primary template原始模板
+ 701 primitive type 原始类型
+ 702 print 打印
+ 703 printer 打印机
+ 704 procedure 过程
+ 705 procedural 过程式的、过程化的
+ 706 process 进程
+ 707 profile 评测
+ 708 profiler 效能(性能)评测器
+ 709 program 程序
+ 710 programmer 程序员
+ 711 programming编程、程序设计
+ 712 progress bar 进度指示器
+ 713 project 项目、工程
+ 714 property 属性
+ 715 protocol 协议
+ 716 pseudo code伪码
+ 717 qualified 经过资格修饰(例如加上scope运算子)
+ 718 qualifiedqualifier 修饰符
+ 719 quality 质量
+ 720 queue 队列
+ 721 race condition 竞争条件（多线程环境常用语）
+ 722 radian 弧度
+ 723 radio button 单选按钮
+ 724 raise 引发(常用来表示发出一个exception)
+ 725 random number 随机数
+ 726 range 范围、区间
+ 727 rank 等级
+ 728 raw 未经处理的
+ 729 readOnly只读
+ 730 record 记录 (for database)
+ 731 recordset 记录集 (for database
+ 732 recursive 递归
+ 733 re-direction 重定向
+ 734 refactoring 重构
+ 735 refer 引用、参考
+ 736 reference 引用、参考
+ 737 reference counting引用计数
+ 738 referential integrity (RI)引用完整性(RI) (for database)
+ 739 register 寄存器
+ 740 reflection 反射
+ 741 refresh data 刷新数据 (for database)
+ 742 regular expression 正则表达式
+ 743 relational database 关系数据库
+ 744 remote 远程
+ 745 remote request 远程请求
+ 746 represent 表述，表现
+ 747 resolve 解析、决议
+ 748 resolution 解析过程
+ 749 result set 结果集 (for database)
+ 750 retrieve data 检索数据
+ 751 return 返回
+ 752 return type 返回类型
+ 753 return value 返回值
+ 754 right outer join 右向外联接 (for database)
+ 755 revoke 撤销
+ 756 robust 健壮
+ 757 robustness 健壮性
+ 758 roll back 回滚 (for database)
+ 759 roll forward 前滚 (for database)
+ 760 routine 例程
+ 761 row 行 (for database)
+ 762 row lock 行锁 (for database)
+ 763 rowset 行集 (for database)
+ 764 RPC (remote procedure call)RPC(远程过程调用)
+ 765 runtime 执行期、运行期、执行时、运行时
+ 766 rvalue 右值
+ 767 save 保存
+ 768 savepoint 保存点 (for database)
+ 769 SAX (Simple API for XML)
+ 770 scalable 可伸缩的、可扩展的
+ 771 schedule 调度
+ 772 scheduler 调度程序
+ 773 schema 模式、纲目结构
+ 774 scroll bar滚动条
+ 775 scope 作用域、生存空间
+ 776 scope operator 生存空间操作符
+ 777 scope resolution operator 生存空间解析操作符
+ 778 screen 屏幕
+ 779 SDK (Software Development Kit)软件开发包
+ 780 sealed class 密封类
+ 781 search 查找
+ 782 semantics 语义
+ 783 semaphore 信号量
+ 784 sequential container序列式容器
+ 785 server 服务器、服务端
+ 786 serial 串行
+ 787 serialization/serialize 序列化
+ 788 server cursor服务端游标、服务器游标 (for database)
+ 789 session 会话 (for database)
+ 790 setter 设值函数
+ 791 shared lock 共享锁 (for database)
+ 792 sibling 同级
+ 793 side effect 副作用
+ 794 signature 签名
+ 795 single-threaded 单线程
+ 796 slider滑块
+ 797 slot 槽
+ 798 smart pointer 智能指针
+ 799 SMTP (Simple Mail Transfer Protocol) 简单邮件传输协议
+ 800 snapshot 截屏图
+ 801 snapshot 快照 (for database)
+ 802 specialization 特化
+ 803 specification 规范、规格
+ 804 splitter 切分窗口
+ 805 SOAP (simple object access protocol) 简单对象访问协议
+ 806 software 软件
+ 807 source code 源码、源代码
+ 808
+ 809 SQL (Structured Query Language) 结构化查询语言 (for database)
+ 810 stack 栈、堆栈
+ 811 stack unwinding 叠辗转开解(此词用于exception主题)
+ 812 standard library 标准库
+ 813 standard template library 标准模板库
+ 814 stateless 无状态的
+ 815 statement 语句、声明
+ 816 static cursor 静态游标 (for database)
+ 817 static SQL statements 静态SQL语句 (for database)
+ 818 stored procedure 存储过程 (for database)
+ 819 status bar 状态条
+ 820 stream 流
+ 821 string 字符串
+ 822 stub 存根
+ 823 subobject子对象
+ 824 subquery 子查询 (for database)
+ 825 subroutine 子例程
+ 826 subscrīpt operator 下标操作符
+ 827 subset 子集
+ 828 subtype 子类型
+ 829 support 支持
+ 830 suspend 挂起
+ 831 symbol 记号
+ 832 syntax 语法
+ 833 system databases 系统数据库 (for database)
+ 834 system tables 系统表 (for database)
+ 835 table 表 (for database)
+ 836 table lock 表锁 (for database)
+ 837 table-level constraint 表级约束 (for database)
+ 838 tape backup 磁带备份 (for database)
+ 839 target 标的,目标
+ 840 task switch 工作切换
+ 841 TCP (Transport Control Protocol) 传输控制协议
+ 842 template 模板
+ 843 template-id
+ 844 template argument deduction 模板参数推导
+ 845 template explicit specialization 模板显式特化
+ 846 template parameter 模板参数
+ 847 template template parameter
+ 848 temporary object 临时对象
+ 849 temporary table 临时表 (for database)
+ 850 text 文本
+ 851 text file 文本文件
+ 852 thin client 瘦客户端
+ 853 third-party 第三方
+ 854 thread 线程
+ 855 thread-safe 线程安全的
+ 856 throw 抛出、引发(常指发出一个exception)
+ 857 token 符号、标记、令牌（看场合）
+ 858 trace 跟踪
+ 859 transaction 事务 (for database)
+ 860 transaction log 事务日志 (for database)
+ 861 transaction rollback 事务回滚 (for database)
+ 862 transactional replication 事务复制 (for database)
+ 863 translation unit 翻译单元
+ 864 traverse 遍历
+ 865 trigger 触发器 (for database)
+ 866 two-phase commit 两阶段提交 (for database)
+ 867 tuple
+ 868 two-phase lookup 两阶段查找
+ 869 type 类型
+ 870 UDDI(Universary Descrīption, Discovery and Integration)统一描述、查询与集成
+ 871 UML (unified modeling language)统一建模语言
+ 872 unary function 单参函数
+ 873 unary operator 一元操作符
+ 874 unboxing 拆箱、拆箱转换
+ 875 underflow 下限溢位(相对于overflow)
+ 876 Union query 联合查询 (for database)
+ 877 UNIQUE constraints UNIQUE约束 (for database)
+ 878 unique index 唯一索引 (for database)
+ 879 unmanaged code 非受控代码、非托管代码
+ 880 unmarshal 散集
+ 881 unqualified 未经限定的、未经修饰的
+ 882 URI (Uniform Resource identifier) 统一资源标识符
+ 883 URL (Uniform Resource Locator) 统一资源定位器
+ 884 user 用户
+ 885 user interface 用户界面
+ 886 value types 值类型
+ 887 variable 变量
+ 888 vector 向量(一种容器，有点类似array)
+ 889 viable 可行的
+ 890 video 视频
+ 891 view 视图
+ 892 VEE (Virtual Execution Engine)虚拟执行引擎
+ 893 vendor 厂商
+ 894 view 视图 (for database)
+ 895 virtual function 虚函数
+ 896 virtual machine 虚拟机
+ 897 virtual memory 虚拟内存
+ 898 vowel 元音字母
+ 899 Web Services web服务
+ 900 WHERE clause WHERE子句 (for database)
+ 901 wildcard characters 通配符字符 (for database)
+ 902 wildcard search 通配符搜索 (for database)
+ 903 window 窗口
+ 904 window function 窗口函数
+ 905 window procedure 窗口过程
+ 906 Windows authentication Windows身份验证
+ 907 wizard 向导
+ 908 word 单词
+ 909 word processor 字处理器
+ 910 wrapper 包装、包装器
+ 911 write enable 写启用 (for database)
+ 912 write-ahead log 预写日志 (for database)
+ 913 write-only 只写
+ 914 WSDL (Web Service Descrīption Language)Web Service描述语言
+ 915 XML Message Interface (XMI) XML消息接口
+ 916 XML (eXtensible Markup Language) 可扩展标记语言
+ 917 XSD (XML Schema Definition) XML模式定义语言
+ 918 XSL (eXtensible Stylesheet Language) 可扩展样式表语言
+ 919 XSLT (eXtensible Stylesheet Language Transformation)可扩展样式表语言转换
+ 920 xxx based 基于xxx的
+ 921 xxx oriented 面向xxx
+ 922
+ 923
+ 924 other  1 :
+ 925
+ 926 application 应用程式 应用、应用程序
+ 927 application framework 应用程式框架、应用框架 应用程序框架
+ 928 architecture 架构、系统架构 体系结构
+ 929 argument 引数（传给函式的值）。叁见 parameter 叁数、实质叁数、实叁、自变量
+ 930 array 阵列 数组
+ 931 arrow operator arrow（箭头）运算子 箭头操作符
+ 932 assembly 装配件
+ 933 assembly language 组合语言 汇编语言
+ 934 assert(ion) 断言
+ 935 assign 指派、指定、设值、赋值 赋值
+ 936 assignment 指派、指定 赋值、分配
+ 937 assignment operator 指派（赋值）运算子 = 赋值操作符
+ 938 associated 相应的、相关的 相关的、关联、相应的
+ 939 associative container 关联式容器（对应 sequential container） 关联式容器
+ 940 atomic 不可分割的 原子的
+ 941 attribute 属性 属性、特性
+ 942 audio 音讯 音频
+ 943 A.I. 人工智慧 人工智能
+ 944 background 背景 背景（用於图形着色）
+ 945 後台（用於行程）
+ 946 backward compatible 回溯相容 向下兼容
+ 947 bandwidth 频宽 带宽
+ 948 base class 基础类别 基类
+ 949 base type 基础型别 (等同於 base class)
+ 950 batch 批次（意思是整批作业） 批处理
+ 951 benefit 利益 收益
+ 952 best viable function 最佳可行函式 最佳可行函式
+ 953 （从 viable functions 中挑出的最佳吻合者）
+ 954 binary search 二分搜寻法 二分查找
+ 955 binary tree 二元树 二叉树
+ 956 binary function 二元函式 双叁函数
+ 957 binary operator 二元运算子 二元操作符
+ 958 binding 系结 绑定
+ 959 bit 位元 位
+ 960 bit field 位元栏 位域
+ 961 bitmap 位元图 位图
+ 962 bitwise 以 bit 为单元逐一┅
+ 963 bitwise copy 以 bit 为单元进行复制；位元逐一复制 位拷贝
+ 964 block 区块,区段 块、区块、语句块
+ 965 boolean 布林值（真假值，true 或 false） 布尔值
+ 966 border 边框、框线 边框
+ 967 brace(curly brace) 大括弧、大括号 花括弧、花括号
+ 968 bracket(square brakcet) 中括弧、中括号 方括弧、方括号
+ 969 breakpoint 中断点 断点
+ 970 build 建造、构筑、建置（MS 用语）
+ 971 build－in 内建 内置
+ 972 bus 汇流排 总线
+ 973 business 商务,业务 业务
+ 974 buttons 按钮 按钮
+ 975 byte 位元组（由 8 bits 组成） 字节
+ 976 cache 快取 高速缓存
+ 977 call 呼叫、叫用 调用
+ 978 callback 回呼 回调
+ 979 call operator call（函式呼叫）运算子调用操作符
+ 980 （同 function call operator）
+ 981 candidate function 候选函式 候选函数
+ 982 （在函式多载决议程序中出现的候选函式）
+ 983 chain 串链（例 chain of function calls） 链
+ 984 character 字元 字符
+ 985 check box 核取方块 (i.e. check button) 复选框
+ 986 checked exception 可控式异常(Java)
+ 987 check button 方钮 (i.e. check box) 复选按钮
+ 988 child class 子类别（或称为derived class, subtype） 子类
+ 989 class 类别 类
+ 990 class body 类别本体 类体
+ 991 class declaration 类别宣告、类别宣告式 类声明
+ 992 class definition 类别定义、类别定义式 类定义
+ 993 class derivation list 类别衍化列 类继承列表
+ 994 class head 类别表头 类头
+ 995 class hierarchy 类别继承体系, 类别阶层 类层次体系
+ 996 class library 类别程式库、类别库 类库
+ 997 class template 类别模板、类别范本 类模板
+ 998 class template partial specializations
+ 999 类别模板偏特化 类模板部分特化
+1000 class template specializations
+1001 类别模板特化 类模板特化
+1002 cleanup 清理、善後 清理、清除
+1003 client 客端、客户端、客户 客户
+1004 client－server 主从架构 客户/服务器
+1005 clipboard 剪贴簿 剪贴板
+1006 clone 复制 克隆
+1007 collection 群集 集合
+1008 combo box 复合方块、复合框 组合框
+1009 command line 命令列 命令行
+1010 (系统文字模式下的整行执行命令)
+1011 communication 通讯 通讯
+1012 compatible 相容 兼容
+1013 compile time 编译期 编译期、编译时
+1014 compiler 编译器 编译器
+1015 component 组件 组件
+1016 composition 复合、合成、组合 组合
+1017 computer 电脑、计算机 计算机、电脑
+1018 concept 概念 概念
+1019 concrete 具象的 实在的
+1020 concurrent 并行 并发
+1021 configuration 组态 配置
+1022 connection 连接，连线（网络,资料库） 连接
+1023 constraint 约束（条件）
+1024 construct 构件 构件
+1025 container 容器 容器
+1026 （存放资料的某种结构如 list, vector...）
+1027 containment 内含 包容
+1028 context 背景关系、周遭环境、上下脉络 环境、上下文
+1029 control 控制元件、控件 控件
+1030 console 主控台 控制台
+1031 const 常数（constant 的缩写，C++ 关键字）
+1032 constant 常数（相对於 variable） 常量
+1033 constructor（ctor） 建构式 构造函数
+1034 （与class 同名的一种 member functions）
+1035 copy (v) 复制、拷贝 拷贝
+1036 copy (n) 复件, 副本
+1037 cover 涵盖 覆盖
+1038 create 创建、建立、产生、生成 创建
+1039 creation 产生、生成 创建
+1040 cursor 游标 光标
+1041 custom 订制、自定 定制
+1042 data 资料 数据
+1043 database 资料库 数据库
+1044 database schema 数据库结构纲目
+1045 data member 资料成员、成员变数 数据成员、成员变量
+1046 data structure 资料结构 数据结构
+1047 datagram 资料元 数据报文
+1048 dead lock 死结 死锁
+1049 debug 除错 调试
+1050 debugger 除错器 调试器
+1051 declaration 宣告、宣告式 声明
+1052 deduction 推导（例：template argument deduction） 推导、推断
+1053 default 预设 缺省、默认
+1054 defer 延缓 推迟
+1055 define 定义 预定义
+1056 definition 定义、定义区、定义式 定义
+1057 delegate 委派、委托、委任 委托
+1058 delegation （同上）
+1059 demarshal 反编列 散集
+1060 dereference 提领（取出指标所指物体的内容） 解叁考
+1061 dereference operator dereference（提领）运算子 * 解叁考操作符
+1062 derived class 衍生类别 派生类
+1063 design by contract 契约式设计
+1064 design pattern 设计范式、设计样式 设计模式
+1065 ※ 最近我比较喜欢「设计范式」一词
+1066 destroy 摧毁、销毁
+1067 destructor 解构式 析构函数
+1068 device 装置、设备 设备
+1069 dialog 对话窗、对话盒 对话框
+1070 directive 指令（例：using directive） (编译)指示符
+1071 directory 目录 目录
+1072 disk 碟 盘
+1073 dispatch 分派 分派
+1074 distributed computing 分布式计算 (分布式电算) 分布式计算
+1075 分散式计算 (分散式电算)
+1076 document 文件 文档
+1077 dot operator dot（句点）运算子 . (圆)点操作符
+1078 driver 驱动程式 驱动（程序）
+1079 dynamic binding 动态系结 动态绑定
+1080 efficiency 效率 效率
+1081 efficient 高效 高效
+1082 end user 终端用户
+1083 entity 物体 实体、物体
+1084 encapsulation 封装 封装
+1085 enclosing class 外围类别（与巢状类别 nested class 有关）外围类
+1086 enum (enumeration) 列举（一种 C++ 资料型别） 枚举
+1087 enumerators 列举元（enum 型别中的成员） 枚举成员、枚举器
+1088 equal 相等 相等
+1089 equality 相等性 相等性
+1090 equality operator equality（等号）运算子 == 等号操作符
+1091 equivalence 等价性、等同性、对等性 等价性
+1092 equivalent 等价、等同、对等 等价
+1093 escape code 转义码 转义码
+1094 evaluate 评估、求值、核定 评估
+1095 event 事件 事件
+1096 event driven 事件驱动的 事件驱动的
+1097 exception 异常情况 异常
+1098 exception declaration 异常宣告（ref. C++ Primer 3/e, 11.3） 异常声明
+1099 exception handling 异常处理、异常处理机制 异常处理、异常处理机制
+1100 exception specification 异常规格（ref. C++ Primer 3/e, 11.4） 异常规范
+1101 exit 退离（指离开函式时的那一个执行点） 退出
+1102 explicit 明白的、明显的、显式 显式
+1103 export 汇出 引出、导出
+1104 expression 运算式、算式 表达式
+1105 facility 设施、设备 设施、设备
+1106 feature 特性
+1107 field 栏位,资料栏（Java） 字段, 值域（Java）
+1108 file 档案 文件
+1109 firmware 韧体 固件
+1110 flag 旗标 标记
+1111 flash memory 快闪记忆体 闪存
+1112 flexibility 弹性 灵活性
+1113 flush 清理、扫清 刷新
+1114 font 字型 字体
+1115 form 表单（programming 用语） 窗体
+1116 formal parameter 形式叁数 形式叁数
+1117 forward declaration 前置宣告 前置声明
+1118 forwarding 转呼叫,转发 转发
+1119 forwarding function 转呼叫函式,转发函式 转发函数
+1120 fractal 碎形 分形
+1121 framework 框架 框架
+1122 full specialization 全特化（ref. partial specialization）
+1123 function 函式、函数 函数
+1124 function call operator 同 call operator
+1125 function object 函式物件（ref. C++ Primer 3/e, 12.3） 函数对象
+1126 function overloaded resolution
+1127 函式多载决议程序 函数重载解决（方案）
+1128 functionality 功能、机能 功能
+1129 function template 函式模板、函式范本 函数模板
+1130 functor 仿函式 仿函式、函子
+1131 game 游戏 游戏
+1132 generate 生成
+1133 generic 泛型、一般化的 一般化的、通用的、泛化
+1134 generic algorithm 泛型演算法 通用算法
+1135 getter (相对於 setter) 取值函式
+1136 global 全域的（对应於 local） 全局的
+1137 global object 全域物件 全局对象
+1138 global scope resolution operator
+1139 全域生存空间（范围决议）运算子 :: 全局范围解析操作符
+1140 group 群组
+1141 group box 群组方块 分组框
+1142 guard clause 卫述句 (Refactoring, p250) 卫语句
+1143 GUI 图形介面 图形界面
+1144 hand shaking 握手协商
+1145 handle 识别码、识别号、号码牌、权柄 句柄
+1146 handler 处理常式 处理函数
+1147 hard－coded 编死的 硬编码的
+1148 hard－copy 硬拷图 屏幕截图
+1149 hard disk 硬碟 硬盘
+1150 hardware 硬体 硬件
+1151 hash table 杂凑表 哈希表、散列表
+1152 header file 表头档、标头档 头文件
+1153 heap 堆积 堆
+1154 hierarchy 阶层体系 层次结构（体系）
+1155 hook 挂钩 钩子
+1156 hyperlink 超链结 超链接
+1157 icon 图示、图标 图标
+1158 IDE 整合开发环境 集成开发环境
+1159 identifier 识别字、识别符号 标识符
+1160 if and only if 若且唯若 当且仅当
+1161 Illinois 伊利诺 伊利诺斯
+1162 image 影像 图象
+1163 immediate base 直接的（紧临的）上层 base class。 直接上层基类
+1164 immediate derived 直接的（紧临的）下层 derived class。 直接下层派生类
+1165 immutability 不变性
+1166 immutable 不可变（的）
+1167 implement 实作、实现 实现
+1168 implementation 实作品、实作体、实作码、实件 实现
+1169 implicit 隐喻的、暗自的、隐式 隐式
+1170 import 汇入 导入
+1171 increment operator 累加运算子 ++ 增加操作符
+1172 infinite loop 无穷回圈 无限循环
+1173 infinite recursive 无穷递回 无限递归
+1174 information 资讯 信息
+1175 infrastructure 公共基础建设
+1176 inheritance 继承、继承机制 继承、继承机制
+1177 inline 行内 内联
+1178 inline expansion 行内展开 内联展开
+1179 initialization 初始化（动作） 初始化
+1180 initialization list 初值列 初始值列表
+1181 initialize 初始化 初始化
+1182 inner class 内隐类别 内嵌类
+1183 instance 实体 实例
+1184 （根据某种表述而实际产生的「东西」）
+1185 instantiated 具现化、实体化（常应用於 template） 实例化
+1186 instantiation 具现体、具现化实体（常应用於 template） 实例
+1187 integer (integral) 整数（的） 整型（的）
+1188 integrate 整合 集成
+1189 interacts 交谈、互动 交互
+1190 interface 介面 接口
+1191 for GUI 介面 界面
+1192 interpreter 直译器 解释器
+1193 invariants 恒常性,约束条件 约束条件
+1194 invoke 唤起 调用
+1195 iterate 迭代（回圈一个轮回一个轮回地进行） 迭代
+1196 exception 异常情况 异常
+1197 exception declaration 异常宣告（ref. C++ Primer 3/e, 11.3） 异常声明
+1198 exception handling 异常处理、异常处理机制 异常处理、异常处理机制
+1199 exception specification 异常规格（ref. C++ Primer 3/e, 11.4） 异常规范
+1200 exit 退离（指离开函式时的那一个执行点） 退出
+1201 explicit 明白的、明显的、显式 显式
+1202 export 汇出 引出、导出
+1203 expression 运算式、算式 表达式
+1204 facility 设施、设备 设施、设备
+1205 feature 特性
+1206 field 栏位,资料栏（Java） 字段, 值域（Java）
+1207 file 档案 文件
+1208 firmware 韧体 固件
+1209 flag 旗标 标记
+1210 flash memory 快闪记忆体 闪存
+1211 flexibility 弹性 灵活性
+1212 flush 清理、扫清 刷新
+1213 font 字型 字体
+1214 form 表单（programming 用语） 窗体
+1215 formal parameter 形式叁数 形式叁数
+1216 forward declaration 前置宣告 前置声明
+1217 forwarding 转呼叫,转发 转发
+1218 forwarding function 转呼叫函式,转发函式 转发函数
+1219 fractal 碎形 分形
+1220 framework 框架 框架
+1221 full specialization 全特化（ref. partial specialization）
+1222 function 函式、函数 函数
+1223 function call operator 同 call operator
+1224 function object 函式物件（ref. C++ Primer 3/e, 12.3） 函数对象
+1225 function overloaded resolution
+1226 函式多载决议程序 函数重载解决（方案）
+1227 functionality 功能、机能 功能
+1228 function template 函式模板、函式范本 函数模板
+1229 functor 仿函式 仿函式、函子
+1230 game 游戏 游戏
+1231 generate 生成
+1232 generic 泛型、一般化的 一般化的、通用的、泛化
+1233 generic algorithm 泛型演算法 通用算法
+1234 getter (相对於 setter) 取值函式
+1235 global 全域的（对应於 local） 全局的
+1236 global object 全域物件 全局对象
+1237 global scope resolution operator
+1238 全域生存空间（范围决议）运算子 :: 全局范围解析操作符
+1239 group 群组
+1240 group box 群组方块 分组框
+1241 guard clause 卫述句 (Refactoring, p250) 卫语句
+1242 GUI 图形介面 图形界面
+1243 hand shaking 握手协商
+1244 handle 识别码、识别号、号码牌、权柄 句柄
+1245 handler 处理常式 处理函数
+1246 hard－coded 编死的 硬编码的
+1247 hard－copy 硬拷图 屏幕截图
+1248 hard disk 硬碟 硬盘
+1249 hardware 硬体 硬件
+1250 hash table 杂凑表 哈希表、散列表
+1251 header file 表头档、标头档 头文件
+1252 heap 堆积 堆
+1253 hierarchy 阶层体系 层次结构（体系）
+1254 hook 挂钩 钩子
+1255 hyperlink 超链结 超链接
+1256 icon 图示、图标 图标
+1257 IDE 整合开发环境 集成开发环境
+1258 identifier 识别字、识别符号 标识符
+1259 if and only if 若且唯若 当且仅当
+1260 Illinois 伊利诺 伊利诺斯
+1261 image 影像 图象
+1262 immediate base 直接的（紧临的）上层 base class。 直接上层基类
+1263 immediate derived 直接的（紧临的）下层 derived class。 直接下层派生类
+1264 immutability 不变性
+1265 immutable 不可变（的）
+1266 implement 实作、实现 实现
+1267 implementation 实作品、实作体、实作码、实件 实现
+1268 implicit 隐喻的、暗自的、隐式 隐式
+1269 import 汇入 导入
+1270 increment operator 累加运算子 ++ 增加操作符
+1271 infinite loop 无穷回圈 无限循环
+1272 infinite recursive 无穷递回 无限递归
+1273 information 资讯 信息
+1274 infrastructure 公共基础建设
+1275 inheritance 继承、继承机制 继承、继承机制
+1276 inline 行内 内联
+1277 inline expansion 行内展开 内联展开
+1278 initialization 初始化（动作） 初始化
+1279 initialization list 初值列 初始值列表
+1280 initialize 初始化 初始化
+1281 inner class 内隐类别 内嵌类
+1282 instance 实体 实例
+1283 （根据某种表述而实际产生的「东西」）
+1284 instantiated 具现化、实体化（常应用於 template） 实例化
+1285 instantiation 具现体、具现化实体（常应用於 template） 实例
+1286 integer (integral) 整数（的） 整型（的）
+1287 integrate 整合 集成
+1288 interacts 交谈、互动 交互
+1289 interface 介面 接口
+1290 for GUI 介面 界面
+1291 interpreter 直译器 解释器
+1292 invariants 恒常性,约束条件 约束条件
+1293 invoke 唤起 调用
+1294 iterate 迭代（回圈一个轮回一个轮回地进行） 迭代
+1295 iterative 反覆的，迭代的
+1296 iterator 迭代器（一种泛型指标） 迭代器
+1297 iteration 迭代（回圈每次轮回称为一个 iteration） 迭代
+1298 item 项目、条款 项、条款、项目
+1299 laser 雷射 激光
+1300 level 阶 层 (级)
+1301 例 high level 高阶 高层
+1302 library 程式库、函式库 库、函数库
+1303 lifetime 生命期、寿命 生命期、寿命
+1304 link 联结、连结 连接,链接
+1305 linker 联结器、连结器 连接器
+1306 literal constant 字面常数（例 3.14 或 "hi" 这等常数值） 字面常数
+1307 list 串列（linked－list） 列表、表、链表
+1308 list box 列表方块、列表框 列表框
+1309 load 载入 装载
+1310 loader 载入器 装载器、载入器
+1311 local 区域的（对应於 global） 局部的
+1312 local object 区域物件 局部对象
+1313 lock 机锁
+1314 loop 回圈 循环
+1315 lvalue 左值 左值
+1316 macro 巨集 宏
+1317 magic number 魔术数字 魔法数
+1318 maintain 维护 维护
+1319 manipulator 操纵器（iostream 预先定义的一种东西） 操纵器
+1320 marshal 编列 列集
+1321 叁考 demarshal
+1322 mechanism 机制 机制
+1323 member 成员 成员
+1324 member access operator 成员取用运算子（有 dot 和 arrow 两种） 成员存取操作符
+1325 member function 成员函式 成员函数
+1326 member initialization list
+1327 成员初值列 成员初始值列表
+1328 memberwise 以 member 为单元┅、members 逐一┅ 以成员为单位
+1329 memberwise copy 以 members 为单元逐一复制
+1330 memory 记忆体 内存
+1331 menu 表单、选单 菜单
+1332 message 讯息 消息
+1333 message based 以讯息为基础的 基於消息的
+1334 message loop 讯息回圈 消息环
+1335 method (java) 方法、行为、函式 方法
+1336 meta－ 超－ 元－
+1337 例 meta－programming 超编程 元编程
+1338 micro 微 微
+1339 middleware 中介层 中间件
+1340 modeling 模塑
+1341 modeling language 塑模语言，建模语言
+1342 modem 数据机 调制解调器
+1343 module 模组 模块
+1344 modifier 饰词 修饰符
+1345 most derived class 最末层衍生类别 最底层的派生类
+1346 mouse 滑鼠 鼠标
+1347 mutable 可变的 可变的
+1348 multi－tasking 多工 多任务
+1349 namespace 命名空间 名字空间、命名空间
+1350 native 原生的 本地的、固有的
+1351 nested class 巢状类别 嵌套类
+1352 network 网路 网络
+1353 network card 网路卡 网卡
+1354 object 物件 对象
+1355 object based 以物件为基础的 基於对象的
+1356 object file 目的档 目标文件
+1357 object model 物件模型 对象模型
+1358 object oriented 物件导向的 面向对象的
+1359 online 线上 在线
+1360 opaque 不透明的
+1361 operand 运算元 操作数
+1362 operating system (OS) 作业系统 操作系统
+1363 operation 操作、操作行为 操作
+1364 operator 运算子 操作符、运算符
+1365 option 选项，可选方案 选项
+1366 ordinary 常规的 常规的
+1367 overflow 上限溢位（相对於 underflow） 溢出（underflow:下溢）
+1368 overhead 额外负担、额外开销 额外开销
+1369 overload 多载化、多载化、重载 重载
+1370 overloaded function 多载化函式 重载的函数
+1371 overloaded operator 多载化运算子 被重载的操作符
+1372 overloaded set 多载集合 重载集合
+1373 override 改写、覆写 重载、改写、重新定义
+1374 （在 derived class 中重新定义虚拟函式
+1375 package 套件 包
+1376 pair 对组
+1377 palette 调色盘、组件盘、工具箱
+1378 pane 窗格 窗格
+1379 （有时为嵌板之意，例 Java Content Pane）
+1380 parallel 平行 并行
+1381 parameter 叁数（函式叁数列上的变数） 叁数、形式叁数、形叁
+1382 parameter list 叁数列 叁数列表
+1383 parent class 父类别（或称 base class） 父类
+1384 parentheses 小括弧、小括号 圆括弧、圆括号
+1385 parse 解析 解析
+1386 part 零件 部件
+1387 partial specialization 偏特化（ref. C++ Primer 3/e, 16.10） 局部特化
+1388 （ref. full specialization）
+1389 pass by address 传址（函式引数的传递方式）（非正式用语）传地址
+1390 pass by reference 传址（函式引数的一种传递方式） 传地址, 按引用传递
+1391 pass by value 传值（函式引数的一种传递方式） 按值传递
+1392 pattern 范式、样式 模式
+1393 performance 效率、性能兼而有之 性能
+1394 persistence 永续性 持久性
+1395 pixel 图素、像素 像素
+1396 placement delete ref. C++ Primer 3/e, 15.8.2
+1397 placement new ref. C++ Primer 3/e, 15.8.2
+1398 platform 平台 平台
+1399 pointer 指标 指针
+1400 址位器（和址叁器 reference 形成对映，满好）
+1401 poll 轮询 轮询
+1402 polymorphism 多型 多态
+1403 pop up 冒起式、弹出式 弹出式
+1404 port 埠 端口
+1405 postfix 後置式、後序式 後置式
+1406 precedence 优先序（通常用於运算子的优先执行次序）
+1407 prefix 前置式、前序式 前置式
+1408 preprocessor 前处理器 预处理器
+1409 prime 质数 素数
+1410 primitive type 基本型别 (不同於 base class,基础类别)
+1411 print 列印 打印
+1412 printer 印表机 打印机
+1413 priority 优先权 (通常用於执行绪获得 CPU 时间的优先次序）
+1414 procedure 程序 过程
+1415 procedural 程序性的、程序式的 过程式的、过程化的
+1416 process 行程 进程
+1417 profile 评测 评测
+1418 profiler 效能（效率）评测器 效能（性能）评测器
+1419 programmer 程式员 程序员
+1420 programming 编程、程式设计、程式化 编程
+1421 progress bar 进度指示器 进度指示器
+1422 project 专案 项目、工程
+1423 property 属性
+1424 protocol 协定 协议
+1425 pseudo code 假码、虚拟码、伪码 伪码
+1426 qualified 经过资格修饰（例如加上 scope 运算子） 限定
+1427 qualifier 资格修饰词、饰词 限定修饰词
+1428 quality 品质 质量
+1429 queue 伫列 队列
+1430 radian 径度 弧度
+1431 radio button 圆钮 单选按钮
+1432 raise 引发（常用来表示发出一个 exception） 引起、引发
+1433 random number 随机数、乱数 随机数
+1434 range 范围、区间（用於 STL 时） 范围、区间
+1435 rank 等级、分等（ref. C++Primer 3/e 9,15章） 等级
+1436 raw 生鲜的、未经处理的 未经处理的
+1437 record 记录 记录
+1438 recordset 记录集 记录集
+1439 recursive 递回 递归
+1440 re－direction 重导向 重定向
+1441 refactoring 重构、重整 重构
+1442 refer 取用 叁考
+1443 refer to 指向、指涉、指代
+1444 reference （C++ 中类似指标的东西，相当於 "化身"） 引用、叁考
+1445 址叁器, see pointer
+1446 register 暂存器 寄存器
+1447 reflection 反射 反射、映像
+1448 relational database 关联式资料库 关系数据库
+1449 represent 表述，表现 表述，表现
+1450 resolve 决议（为算式中的符号名称寻找 解析
+1451 对应之宣告式的过程）
+1452 resolution 决议程序、决议过程 解析过程
+1453 resolution 解析度 分辨率
+1454 restriction 局限
+1455 return 传回、回返 返回
+1456 return type 回返型别 返回类型
+1457 return value 回返值 返回值
+1458 robust 强固、稳健 健壮
+1459 robustness 强固性、稳健性 健壮性
+1460 routine 常式 例程
+1461 runtime 执行期 运行期、运行时
+1462 common language runtime (CLR) 译为「通用语言执行层」
+1463 rvalue 右值 右值
+1464 save 储存 存储
+1465 schedule 排程 调度
+1466 scheduler 排程器 调度程序
+1467 scheme 结构纲目、组织纲目
+1468 scroll bar 卷轴 滚动条
+1469 scope 生存空间、生存范围、范畴、作用域 生存空间
+1470 scope operator 生存空间（范围决议）运算子 :: 生存空间操作符
+1471 scope resolution operator
+1472 生存空间决议运算子 生存空间解析操作符
+1473 （与scope operator同）
+1474 screen 萤幕 屏幕
+1475 search 搜寻 查找
+1476 semantics 语意 语义
+1477 sequential container 序列式容器 顺序式容器
+1478 （对应於 associative container）
+1479 server 伺服器、伺服端 服务器、服务端
+1480 serial 串行
+1481 serialization 次第读写,序列化 序列化
+1482 (serialize)
+1483 setter (相对於 getter) 设值函式
+1484 signal 信号
+1485 signature 标记式、签名式、署名式 签名
+1486 slider 滚轴 滑块
+1487 slot 条孔、槽 槽
+1488 smart pointer 灵巧指标、精灵指标 智能指针
+1489 snapshot 萤幕快照（图） 屏幕截图
+1490 specialization 特殊化、特殊化定义、特殊化宣告 特化
+1491 specification 规格 规格、规范
+1492 splitter 分裂视窗 切分窗口
+1493 software 软体 软件
+1494 solution 解法,解决方案 方案
+1495 source 原始码 源码、源代码
+1496 stack 堆叠 栈
+1497 stack unwinding 堆叠辗转开解（此词用於 exception 主题） 栈辗转开解 *
+1498 standard library 标准程式库
+1499 standard template library 标准模板程式库
+1500 statement 述句 语句、声明
+1501 status bar 状态列、状态栏 状态条
+1502 STL 见 standard template library
+1503 stream 资料流、串流 流
+1504 string 字串 字符串
+1505 subroutine
+1506 subscript operator 下标运算子 [ ] 下标操作符
+1507 subtype 子型别 子类型
+1508 support 支援 支持
+1509 suspend 虚悬 挂起
+1510 symbol 符号 记号
+1511 syntax 语法 语法
+1512 tag 标签 标记
+1513 索引标签,页签
+1514 target 标的（例 target pointer：标的指标） 目标
+1515 task switch 工作切换 任务切换
+1516 template 模板、范本 模板
+1517 template argument deduction
+1518 模板引数推导 模板叁数推导
+1519 template explicit specialization
+1520 模板显式特化（版本） 模板显式特化
+1521 template parameter 模板叁数 模板叁数
+1522 temporary object 暂时物件 临时对象
+1523 text 文字 文本
+1524 text file 程式本文档（放置程式原始码的档案） 文本文件
+1525 thread 执行绪 线程
+1526 thread safe 多绪安全 多线程安全
+1527 throw 丢掷（常指发出一个 exception） 丢掷、引发
+1528 token 语汇单元 符号、标记
+1529 transaction 交易 事务
+1530 transparent(ly) 透通的(地)
+1531 traverse 巡访（来回走动） 遍历
+1532 trigger 触发 触发
+1533 type 型别 类型
+1534 UML unified modeling language 统一建模语言
+1535 unary function 一元函式 单叁函数
+1536 unary operator 一元运算子 一元操作符
+1537 underflow 下限溢位（相对於 overflow） 下溢
+1538 unchecked exception 不可控异常(Java)
+1539 unqualified 未经资格修饰（而直接取用）
+1540 unwinding ref. stack unwinding
+1541 user 使用者、用户 用户
+1542 user interface 使用者介面、用户介面、人机介面 用户界面
+1543 variable 变数（相对於常数 const） 变量
+1544 vector 向量（一种容器，有点类似 array） 向量、矢量
+1545 viable 可实行的、可行的 可行的
+1546 viable function 可行函式 可行函数
+1547 （从 candidate functions 中挑出者）
+1548 video 视讯 视频
+1549 view (1) 视图
+1550 (document/view) 文档/视图
+1551 view (2) 映件
+1552 virtual function 虚拟函式 虚函数
+1553 virtual machine 虚拟机器 虚拟机
+1554 virtual memory 虚拟记忆体 虚内存, 虚存
+1555 volatile 易挥发的、易变的
+1556 vowel 母音 元音字母
+1557 window 视窗 窗口
+1558 window function 视窗函式 窗口函数
+1559 window procedure 视窗函式 窗口过程
+1560 word 字 单词
+1561 word processor 文书处理器 字处理器
+1562 wrapper 外覆、外包 包装absence 缺席
+1563 access 访问存取通路进入
+1564 achieve 实现完成
+1565 acquire 获得
+1566 adjacency list method 邻接表表示法
+1567 adjacency matrix method 邻接矩阵表示法
+1568 algorithm 算法
+1569 allocate 留下分配
+1570 analog 推论
+1571 append 添加
+1572 archive 档案归档
+1573 array 数组
+1574 assign 分配
+1575 assume 假设
+1576 assurance 确信信任
+1577 ATM(asynchronous transfer mode) 异步传输模式
+1578 b.. real programs kernels 实程序核心程序
+1579 b.. toy benchmark synthetic benchmark 简单基准程序复合基准程序
+1580 balance 平衡
+1581 bandwidth 带宽
+1582 batch 一批一组
+1583 benchmark 基准测试程序
+1584 best-fit algorithm 最佳适应算法
+1585 BFS(breadth first search) 广度优先搜索法
+1586 binary 二进制
+1587 binary relation 二元关系
+1588 binary tree 二叉树
+1589 bit series 比特序列
+1590 black-box white-box 黑盒白盒
+1591 block miss 块失效
+1592 blocked 阻塞(等待状态也称阻塞或封锁状态)
+1593 boundary 界线分界
+1594 bridge 网桥
+1595 bubble sort 冒泡排序
+1596 calculation 计算
+1597 candidate key 候选键(辅键)
+1598 capability 能力才能
+1599 capacity 容量
+1600 cartesian product 笛卡尔积
+1601 CASE(com.. aided sof.. engineering) 计算机辅助软件工程
+1602 CCP(communication control processor) 通信控制处理机
+1603 cell 信元
+1604 characteristic 特征特性
+1605 circuit switching 线路交换
+1606 circular wait 循环等待
+1607 CISC(complex instruction set computer) 复杂指令集计算机
+1608 class 类
+1609 Client/Server 客户机/服务器
+1610 clock cycle clock rate 时钟周期时钟频率
+1611 coaxial cable 同轴电缆
+1612 cohesion coupling 内聚耦合
+1613 coincidental logical procedural functional 偶然内聚逻辑内聚过程内聚功能内聚
+1614 combination 联合配合
+1615 common 公用的共同的
+1616 communication 通信
+1617 complement number 补码
+1618 component 成分
+1619 concept 概念观念
+1620 condition 情况状况
+1621 conform 符合
+1622 consist 组成存在
+1623 constrain 约束
+1624 contain 包含
+1625 correspond (corresponding) 相符合(相应的一致的)
+1626 CPETT 计算机性能评价工具与技术
+1627 CPI 每条指令需要的周期数
+1628 CSMA/CD 带冲突检测的载波监听多路访问
+1629 cursor 游标
+1630 cyclic redundency check 循环冗余检校
+1631 database: integrity consistency restory 完整性一致性可恢复性
+1632 database: security efficiency 数据库设计的目标: 安全性效率
+1633 deadlock: mutual exclusion 死锁条件: 互斥
+1634 deadlock: circular wait no preemption 死锁条件: 循环等待狗熊先权
+1635 decimal 十进位的
+1636 decision 决定判断
+1637 decomposition 双重的混合的
+1638 decrease 减少
+1639 definition 定义
+1640 definition phase 定义阶段
+1641 demonstrate 证明
+1642 design phase 设计阶段
+1643 determine 限定
+1644 development phase 开发阶段
+1645 DFS(depth first search) 深度优先搜索法
+1646 diagram 图表
+1647 Difference Manchester 差分曼彻斯特
+1648 directed graph undirected graph 有向图无向图
+1649 distinguish 辩认区别
+1650 distributed system 分布式系统
+1651 divide division 分开除除法
+1652 divide union intersection difference 除并交差
+1653 document 文件文档
+1654 DQDB(distributed queue dual bus) 分布队列双总线
+1655 draw 绘制
+1656 dual 二元的双的
+1657 dynamic design process 动态定义过程
+1658 element 元素要素
+1659 elevator (scan) algorithm 电梯算法又称扫描算法
+1660 encapsulation inheritance 封装(压缩) 继承(遗传)
+1661 encode 译成密码
+1662 entity 实体
+1663 entity integrity rule 实体完整性规则
+1664 equal 相等的
+1665 equation 方程式等式
+1666 estimate 估计判断
+1667 Ethernet 以太网
+1668 evolution 发展演化
+1669 exceed 超过
+1670 exchange sort 交换排序
+1671 exclusive locks 排它锁(简记为X 锁)
+1672 execute 实现执行
+1673 exhibit 表现展示陈列
+1674 existence 存在发生
+1675 expertise 专门技术
+1676 external(internal) fragmentation 外(内)碎片
+1677 fault page fault 中断过错页中断
+1678 FDDI(fiber distributed data interface) 光纤分布式数据接口
+1679 FDM(frequency division multiplexing 频分多路复用
+1680 fiber optic cable 光缆
+1681 FIFO replacement policy 先进先出替换算法
+1682 figure 数字图形
+1683 final 最后的最终的
+1684 first normal form 第一范式
+1685 floppy 活动盘片(软盘)
+1686 foreign key domain tuple 外来键值域元组
+1687 form 形状形式
+1688 formula 公式表达式
+1689 foundation 基础根据基金
+1690 frame page frame 帧结构页结构
+1691 frequency 频率
+1692 FTP 文件传送服务
+1693 function 函数
+1694 functionally dependent 函数依赖
+1695 gateway 网间连接器
+1696 gather 聚集采集推测
+1697 general-purose registers 通用寄存器
+1698 generate 产生
+1699 grade 等级标准
+1700 graph (graphic) 图
+1701 Gropher 将用户的请求自动转换成
+1702 FTP
+1703 guarantee 保证确定
+1704 hash table hash function collision 哈希表哈希函数(散列函数) 碰撞
+1705 HDLC 面向比特型数据链路层协议
+1706 hit rate 命中率
+1707 host 主计算机
+1708 host language statement 主语言语句
+1709 hypertext 超级文本
+1710 illustrate 举例说明
+1711 independent 独立的
+1712 index 索引
+1713 indirect 间接的
+1714 influence 有影响的
+1715 initially 最初开头
+1716 insertion sort 插入排序
+1717 instruction format 指令格式
+1718 instruction set 指令集
+1719 interface 接口分界面连接体
+1720 internal 内部的内在的
+1721 interrupt 中断
+1722 IPC 工业过程控制
+1723 ISAM VSAM 索引顺序存取方法虚拟存储存取方法
+1724 join natural join semijoin 连接自然连接半连接
+1725 judgment 判断
+1726 kernel executive supervisor user 核心执行管理用户
+1727 kernels 核心程序
+1728 key comparison 键(码)值比较
+1729 LAN(local area network) 局域网
+1730 load 负载载入
+1731 logical functional 逻辑内聚功能内聚
+1732 longitudinal 水平的
+1733 loop 圈环状
+1734 maintain 维护保养供给
+1735 maintanence phase 维护(保养)阶段
+1736 MAN(metropclitan area network) 城域网
+1737 Manchester 曼彻斯特
+1738 map 地图映射图
+1739 matrix 矩阵点阵
+1740 memory reference 存储器参量
+1741 message switching 报文交换
+1742 method 方法技巧
+1743 MFLOP(million floating point operate p s 每秒百万次浮点运算
+1744 minimum 最小的
+1745 MIPS(millions of instructions per second 每秒百万条指令
+1746 module 单位基准
+1747 monitor (model benchmark physcal) method 监视(模型基准物理)法
+1748 multilevel data flow chart 分层数据流图
+1749 multiple 复合的多样的
+1750 multiple-term formula 多项式
+1751 multiplexing 多路复用技术
+1752 multiplication 乘法
+1753 mutual exclusion 互相排斥
+1754 non-key attributes 非码属性
+1755 null 零空
+1756 Nyquist 奈奎斯特
+1757 object oriented 对象趋向的使适应的
+1758 object oriented analysis 面向对象的分析
+1759 object oriented databases 面向对象数据库
+1760 object oriented design 面向对象的设计
+1761 object oriented implementation 面向对象的实现
+1762 obtain 获得
+1763 occupy 占有居住于
+1764 occurrence 事件
+1765 odd 奇数的
+1766 one-dimensional array 一维数组
+1767 OODB(object oriented data base) 面向对象数据库
+1768 OOM(object oriented method) 面向对象的方法
+1769 oom: information object message class 信息对象消息类
+1770 oom: instance method message passing 实例方法消息传递
+1771 open system 开放系统
+1772 operand 操作数
+1773 optimized 尽量充分利用
+1774 optional 任选的非强制的
+1775 organize 组织
+1776 overflow 溢出
+1777 overlapping register windows 重叠寄存器窗口
+1778 packet switching 报文分组交换
+1779 page fault 页面失效
+1780 page replacement algorithm 页替换算法
+1781 paged segments 段页式管理
+1782 PCB(process control block) 进程控制块
+1783 peer entites 对等实体
+1784 perform 表演执行
+1785 period 时期周期
+1786 permit 许可准许
+1787 phase 阶段局面状态
+1788 physical data link network layer 物理层数据链路层网络层
+1789 pipeline 管道
+1790 platter track cluster 面磁道簇
+1791 predicate 谓语
+1792 preemption 有优先权的
+1793 prefix (Polish form) 前缀(波兰表达式)
+1794 preorder inorder postorder 前序中序后序
+1795 presentation application layer 表示层应用层
+1796 primary key attributes 主码属性
+1797 principle 原则方法
+1798 procedural coincidental 过程内聚偶然内聚
+1799 process 过程加工处理
+1800 proficient 精通
+1801 program debugging 程序排错
+1802 projection selection join 投影选择连接
+1803 proposition 主张建议陈述
+1804 protocal 协议
+1805 prototype 原型样板
+1806 prototyping method (model) 原型化周期(模型)
+1807 pseudo-code 伪码(又称程序设计语言PDL)
+1808 punctuation 标点
+1809 purpose 目的意图
+1810 quality 质量品质
+1811 queue 队列
+1812 ready blocked running 就绪阻塞(等待) 运行
+1813 real page number 实页数
+1814 real programs 实程序
+1815 redirected 重定向
+1816 redundency 冗余
+1817 reference integrity rule 引用完整性规则
+1818 referred to as 把.....当作
+1819 regarde 关于
+1820 register(registry) 寄存器登记注册挂号
+1821 regularly 定期的常规的
+1822 relation 关系
+1823 relay 中继
+1824 reliability 可信赖的
+1825 repeater 中继器
+1826 replacement 替换
+1827 represent 代表象征
+1828 request indication response confirm 请求指示响应确认
+1829 resource 资源
+1830 respon 回答响应
+1831 RISC(reduced instruction set computer) 精简指令集计算机
+1832 robustness 健壮性
+1833 router 路由器
+1834 scheme 计划图表
+1835 sector head cylinder 扇区磁头柱面
+1836 selection sort 选择排序
+1837 semaphores 信号
+1838 sequence 序列顺序
+1839 Shanon 香农
+1840 share locks 共享锁(简记为S 锁)
+1841 short path critical path 最短路径关键路径
+1842 signal 信号
+1843 signal-to-noise ratio 信噪比B/N
+1844 similar 相似的
+1845 SISD SIMD MISD MIMD * 指令流* 数据流
+1846 SMDS 交换多兆位数据服务
+1847 software development phase 软件开发阶段
+1848 software engineering 软件工程
+1849 software portability 软件可移植性
+1850 software requirements specification 软件需求说明书
+1851 solve 解决
+1852 sort 种类方式分类排序
+1853 spanning tree 跨越树(生成树)
+1854 specify 指定说明
+1855 speedup 加速比
+1856 SSTF(shortest-seek-time-first) 最短寻道时间优先(磁盘调度算法)
+1857 stack strategy non-stack strategy 堆栈型非堆栈型
+1858 starvation 饥饿匮乏
+1859 statement 陈述
+1860 storage 贮藏库
+1861 store procdures 存储过程
+1862 strategy 战略兵法计划
+1863 strict 严密的
+1864 styles 文体风格
+1865 subgroup 循环的
+1866 subset 子集子设备
+1867 superclass subclass abstract class 超类子类抽象类
+1868 suppose 假定
+1869 symbolic 象征的符号的
+1870 synthetic benchmark 复合基准程序
+1871 system testing 系统测试
+1872 Systolic 脉动阵列
+1873 table 表表格桌子
+1874 TDM(time division multiplexing) 时分多路复用
+1875 technology 工艺技术
+1876 terminal 终端
+1877 testing phase 测试阶段
+1878 theta select project theta join θ选择投影θ连接
+1879 time complexity 时间复杂度
+1880 timestamping 时标技术
+1881 Token Bus 令牌总线
+1882 Token Ring 令牌环
+1883 toy benchmark 简单基准程序
+1884 transaction 事务记录
+1885 transmite 传送
+1886 transport layer session layer 传输层会话层
+1887 traversal method 遍历方法
+1888 triggers store procedures 触发器存储过程
+1889 (ORACLE 系统)
+1890 underflow 下溢
+1891 unique 唯一的
+1892 unit system acceptance testing 单元测试系统测试确认测试
+1893 universe 宇宙全世界
+1894 update 更新
+1895 value [数]值
+1896 variable 变量
+1897 vertical 垂直的
+1898 vertice edge 顶点(结点) 边
+1899 via 经过
+1900 virtual memory system 虚拟存储系统
+1901 WAN(wide area network) 广域网
+1902 waterfall model 瀑布模型
+1903 white noise 白噪声
+1904 write-back(copy-back) 写回法
+1905 write-through(store-through) 写直达法
+1906 WWW(world wide web) 万维网
+1907
+1908 other 2 :
+1909
+1910 A
+1911 Active-matrix主动距陈
+1912 Adapter cards适配卡
+1913 Advanced application高级应用
+1914 Analytical graph分析图表
+1915 Analyze分析
+1916 Animations动画
+1917 Application software 应用软件
+1918 Arithmetic operations算术运算
+1919 Audio-output device音频输出设备
+1920 Access time存取时间
+1921 access存取
+1922 accuracy准确性
+1923 ad network cookies广告网络信息记录软件
+1924 Add-ons附软件
+1925 Address地址
+1926 Agents代理
+1927 Analog signals模拟信号
+1928 Applets程序
+1929 Asynchronous communications port异步通信端口
+1930 Attachment附件
+1931
+1932 B
+1933 Bar code条形码
+1934 Bar code reader条形码读卡器
+1935 Basic application基础程序
+1936 Binary coding schemes二进制译码方案
+1937 Binary system二进制系统
+1938 Bit比特
+1939 Browser浏览器
+1940 Bus line总线
+1941 Backup tape cartridge units备份磁带盒单元
+1942 Bandwidth带宽
+1943 Bluetooth蓝牙
+1944 Broadband宽带
+1945 Browser浏览器
+1946 Business-to-business企业对企业电子商务
+1947 Business-to-consumer企业对消费者
+1948 Bus总线
+1949
+1950 C
+1951 Cables连线
+1952 Cell单元箱
+1953 Chain printer链式打印机
+1954 Character and recognition device字符标识识别设备
+1955 Chart图表
+1956 Chassis支架
+1957 Chip芯片
+1958 Clarity清晰度
+1959 Closed architecture封闭式体系结构
+1960 Column列
+1961 Combination key结合键
+1962 computer competency计算机能力
+1963 connectivity连接，结点
+1964 Continuous-speech recognition system连续语言识别系统
+1965 Control unit操纵单元
+1966 Cordless or wireless mouse无线鼠标
+1967 Cable modems有线调制解调器
+1968 carpal tunnel syndrome腕骨神经综合症
+1969 CD-ROM可记录光盘
+1970 CD-RW可重写光盘
+1971 CD-R可记录压缩光盘
+1972 Channel信道
+1973 Chat group谈话群组
+1974 chlorofluorocarbons(CFCs) ]氯氟甲烷
+1975 Client客户端
+1976 Coaxial cable同轴电缆
+1977 cold site冷战
+1978 Commerce servers商业服务器
+1979 Communication channel信道
+1980 Communication systems信息系统
+1981 Compact disc rewritable
+1982 Compact disc光盘
+1983 computer abuse amendments act of 19941994计算机滥用法案
+1984 computer crime计算机犯罪
+1985 computer ethics计算机道德
+1986 computer fraud and abuse act of 1986计算机欺诈和滥用法案
+1987 computer matching and privacy protection act of 1988计算机查找和隐私保护法案
+1988 Computer network计算机网络
+1989 computer support specialist计算机支持专家
+1990 computer technician计算机技术人员
+1991 computer trainer计算机教师
+1992 Connection device连接设备
+1993 Connectivity连接
+1994 Consumer-to-consumer个人对个人
+1995 cookies-cutter programs信息记录截取程序
+1996 cookies信息记录程序
+1997 cracker解密高手
+1998 cumulative trauma disorder积累性损伤错乱
+1999 Cybercash电子现金
+2000 Cyberspace计算机空间
+2001 cynic愤世嫉俗者
+2002
+2003 D
+2004 Database数据库
+2005 database files数据库文件
+2006 Database manager数据库管理
+2007 Data bus数据总线
+2008 Data projector数码放映机
+2009 Desktop system unit台式电脑系统单元
+2010 Destination file目标文件
+2011 Digital cameras数码照相机
+2012 Digital notebooks数字笔记本
+2013 Digital bideo camera数码摄影机
+2014 Discrete-speech recognition system不连续语言识别系统
+2015 Document文档
+2016 document files文档文件
+2017 Dot-matrix printer点矩阵式打印机
+2018 Dual-scan monitor双向扫描显示器
+2019 Dumb terminal非智能终端
+2020 data security数据安全
+2021 Data transmission specifications数据传输说明
+2022 database administrator数据库管理员
+2023 Dataplay数字播放器
+2024 Demodulation解调
+2025 denial of service attack拒绝服务攻击
+2026 Dial-up service拨号服务
+2027 Digital cash数字现金
+2028 Digital signals数字信号
+2029 Digital subscriber line数字用户线路
+2030 Digital versatile disc数字化通用磁盘
+2031 Digital video disc数字化视频光盘
+2032 Direct access直接存取
+2033 Directory search目录搜索
+2034 disaster recovery plan灾难恢复计划
+2035 Disk caching磁盘驱动器高速缓存
+2036 Diskette磁盘
+2037 Disk磁碟
+2038 Distributed data processing system分部数据处理系统
+2039 Distributed processing分布处理
+2040 Domain code域代码
+2041 Downloading下载
+2042 DVD 数字化通用磁盘
+2043 DVD-R 可写DVD
+2044 DVD-RAM DVD随机存取器
+2045 DVD-ROM 只读DVD
+2046
+2047 E
+2048 e-book电子阅读
+2049 Expansion cards扩展卡
+2050 end user终端用户
+2051 e-cash电子现金
+2052 e-commerce电子商务
+2053 electronic cash电子现金
+2054 electronic commerce电子商务
+2055 electronic communications privacy act of1986电子通信隐私法案
+2056 encrypting加密术
+2057 energy star能源之星
+2058 Enterprise computing企业计算化
+2059 environment环境
+2060 Erasable optical disks可擦除式光盘
+2061 ergonomics人类工程学
+2062 ethics道德规范
+2063 External modem外置调制解调器
+2064 extranet企业外部网
+2065
+2066 F
+2067 Fax machine传真机
+2068 Field域
+2069 Find搜索
+2070 FireWire port port火线端口
+2071 Firmware固件
+2072 Flash RAM闪存
+2073 Flatbed scanner台式扫描器
+2074 Flat-panel monitor纯平显示器
+2075 floppy disk软盘
+2076 Formatting toolbar格式化工具条
+2077 Formula公式
+2078 Function函数
+2079 fair credit reporting act of 1970公平信用报告法案
+2080 Fiber-optic cable光纤电缆
+2081 File compression文件压缩
+2082 File decompression文件解压缩
+2083 filter过滤
+2084 firewall防火墙
+2085 firewall防火墙
+2086 Fixed disk固定硬盘
+2087 Flash memory闪存
+2088 Flexible disk可折叠磁盘
+2089 Floppies磁盘
+2090 Floppy disk软盘
+2091 Floppy-disk cartridge磁盘盒
+2092 Formatting格式化
+2093 freedom of information act of 1970信息自由法案
+2094 frustrated受挫折
+2095 Full-duplex communication全双通通信
+2096
+2097 G
+2098 General-purpose application通用运用程序
+2099 Gigahertz千兆赫
+2100 Graphic tablet绘图板
+2101 green pc绿色个人计算机
+2102
+2103 H
+2104 handheld computer手提电脑
+2105 Hard copy硬拷贝
+2106 hard disk硬盘
+2107 hardware硬件
+2108 Help帮助
+2109 Host computer主机
+2110 Home page主页
+2111 Hyperlink超链接
+2112 hacker黑客
+2113 Half-duplex communication半双通通信
+2114 Hard disk硬盘
+2115 Hard-disk cartridge硬盘盒
+2116 Hard-disk pack硬盘组
+2117 Head crash磁头碰撞
+2118 header标题
+2119 help desk specialist帮助办公专家
+2120 helper applications帮助软件
+2121 Hierarchical network层次型网络
+2122 history file历史文件
+2123 hits匹配记录
+2124 horizontal portal横向用户
+2125 hot site热战
+2126 Hybrid network混合网络
+2127 hyperlinks超连接
+2128
+2129 I
+2130 Image capturing device图像获取设备
+2131 information technology信息技术
+2132 Ink-jet printer墨水喷射印刷机
+2133 Integrated package综合性组件
+2134 Intelligent terminal智能终端设备
+2135 Intergrated circuit集成电路
+2136 Interface cards接口卡
+2137 Internal modem内部调制解调器
+2138 internet telephony网络电话
+2139 internet terminal互联网终端
+2140 Identification识别
+2141 i-drive网络硬盘驱动器
+2142 illusion of anonymity匿名幻想
+2143 index search索引搜索
+2144 information pushers信息推送器
+2145 initializing 初始化
+2146 instant messaging计时信息
+2147 internal hard disk内置硬盘
+2148 Internal modem内部调制解调器
+2149 Internet hard drive 网络硬盘驱动器
+2150 intranet企业内部网
+2151
+2152 J
+2153 joystick操纵杆
+2154
+2155 K
+2156 keyword search关键字搜索
+2157
+2158 L
+2159 laser printer激光打印机
+2160 Layout files版式文件
+2161 Light pen光笔
+2162 Locate定位
+2163 Logical operations逻辑运算
+2164 Lands凸面
+2165 Line of sight communication视影通信
+2166 Low bandwidth低带宽
+2167 lurking潜伏
+2168
+2169 M
+2170 Main board主板
+2171 Mark sensing标志检测
+2172 Mechanical mouse机械鼠标
+2173 Memory内存
+2174 Menu菜单
+2175 Menu bar菜单条
+2176 Microprocessor微处理器
+2177 Microseconds微秒
+2178 Modem card调制解调器
+2179 Monitor显示器
+2180 Motherboard主板
+2181 Mouse 鼠标
+2182 Multifunctional device多功能设备
+2183 Magnetic tape reels磁带卷
+2184 Magnetic tape streamers磁带条
+2185 mailing list邮件列表
+2186 Medium band媒质带宽
+2187 metasearch engine整合搜索引擎
+2188 Microwave微波
+2189 Modem解调器
+2190 Modulation解调
+2191
+2192 N
+2193 Net PC网络计算机
+2194 Network adapter card网卡
+2195 Network personal computer网络个人电脑
+2196 Network terminal 网络终端
+2197 Notebook computer笔记本电脑
+2198 Notebook system unit笔记本系统单元
+2199 Numeric entry数字输入
+2200 na?ve天真的人
+2201 national information infrastructure protection act of1996国际信息保护法案
+2202 national service provider全国性服务供应商
+2203 Network architecture网络体系结构
+2204 Network bridge网桥
+2205 Network gateway网关
+2206 network manager网络管理员
+2207 newsgroup新闻组
+2208 no electronic theft act of1997无电子盗窃法
+2209 Node节点
+2210 Nonvolatile storage非易失性存储
+2211
+2212 O
+2213 Object embedding对象嵌入
+2214 Object linking目标链接
+2215 Open architecture开放式体系结构
+2216 Optical disk光盘
+2217 Optical mouse光电鼠标
+2218 Optical scanner光电扫描仪
+2219 Outline大纲
+2220 off-line browsers离线浏览器
+2221 Online storage联机存储
+2222
+2223 P
+2224 palmtop computer掌上电脑
+2225 Parallel ports并行端口
+2226 Passive-matrix被动矩阵
+2227 PC card个人计算机卡
+2228 Personal laser printer个人激光打印机
+2229 Personal video recorder card个人视频记录卡
+2230 Photo printer照片打印机
+2231 Pixel像素
+2232 Platform scanner平版式扫描仪
+2233 Plotter绘图仪
+2234 Plug and play即插即用
+2235 Plug-in boards插件卡
+2236 Pointer指示器
+2237 Pointing stick指示棍
+2238 Port端口
+2239 Portable scanner便携式扫描仪
+2240 Presentation files演示文稿
+2241 Presentation graphics电子文稿程序
+2242 Primary storage主存
+2243 Procedures规程
+2244 Processor处理机
+2245 Programming control lanugage程序控制语言
+2246 Packets数据包
+2247 Parallel data transmission平行数据传输
+2248 Peer-to-peer network system得等网络系统
+2249 person-person auction site个人对个人拍卖站点
+2250 physical security物理安全
+2251 Pits凹面
+2252 plug-in插件程序
+2253 Polling轮询
+2254 privacy隐私权
+2255 proactive主动地
+2256 programmer程序员
+2257 Protocols协议
+2258 provider供应商
+2259 proxy server代理服务
+2260 pull products推取程序
+2261 push products推送程序
+2262
+2263 R
+2264 RAM cache随机高速缓冲器
+2265 Range范围
+2266 Record记录
+2267 Relational database关系数据库
+2268 Replace替换
+2269 Resolution分辨率
+2270 Row行
+2271 Read-only只读
+2272 Reformatting重组
+2273 regional service provider区域性服务供应商
+2274 repetitive motion injury反复性动作损伤
+2275 reverse directory反向目录
+2276 right to financial privacy act of 1979财产隐私法案
+2277
+2278 S
+2279 Scanner扫描器
+2280 Search查找
+2281 Secondary storage device助存储设备
+2282 Semiconductor半导体
+2283 Serial ports串行端口
+2284 Server服务器
+2285 Shared laser printer共享激光打印机
+2286 Sheet表格
+2287 Silicon chip硅片
+2288 Slots插槽
+2289 Smart card智能卡
+2290 Soft copy软拷贝
+2291 Software suite软件协议
+2292 Sorting排序分类
+2293 Source file源文件
+2294 Special-purpose application专用文件
+2295 Spreadsheet电子数据表
+2296 Standard toolbar标准工具栏
+2297 Supercomputer巨型机
+2298 System cabine 系统箱
+2299 System clock时钟
+2300 System software系统软件
+2301 Satellite/air connection services卫星无线连接服务
+2302 search engines搜索引擎
+2303 search providers搜索供应者
+2304 search services 搜索服务器
+2305 Sectors扇区
+2306 security安全
+2307 Sending and receiving devices发送接收设备
+2308 Sequential access顺序存取
+2309 Serial data transmission单向通信
+2310 signature line签名档
+2311 snoopware监控软件
+2312 software copyright act of1980软件版权法案
+2313 software piracy软件盗版
+2314 Solid-state storage固态存储器
+2315 specialized search engine专用搜索引擎
+2316 spiders网页爬虫
+2317 spike尖峰电压
+2318 Star network星型网
+2319 Strategy方案
+2320 subject主题
+2321 subscription address预定地址
+2322 Superdisk超级磁盘
+2323 surfing网上冲浪
+2324 surge protector浪涌保护器
+2325 systems analyst系统分析师
+2326
+2327 T
+2328 Table二维表
+2329 Telephony电话学
+2330 Television boards电视扩展卡
+2331 Terminal 终端
+2332 Template模板
+2333 Text entry文本输入
+2334 Thermal printer 热印刷
+2335 Thin client瘦客
+2336 Toggle key触发键
+2337 Toolbar工具栏
+2338 Touch screen触摸屏
+2339 Trackball追踪球
+2340 TV tuner card电视调谐卡
+2341 Two-state system双状态系统
+2342 technical writer技术协作者
+2343 technostress重压技术
+2344 telnet远程登录
+2345 Time-sharing system分时系统
+2346 Topology拓扑结构
+2347 Tracks磁道
+2348 traditional cookies传统的信息记录程序
+2349 Twisted pair双绞线
+2350
+2351 U
+2352 Unicode统一字符标准
+2353 uploading上传
+2354 usenet世界性新闻组网络
+2355
+2356 V
+2357 Virtual memory虚拟内存
+2358 Video display screen视频显示屏
+2359 Voice recognition system声音识别系统
+2360 vertical portal纵向门户
+2361 video privacy protection act of 1988视频隐私权保护法案
+2362 virus checker病毒检测程序
+2363 virus病毒
+2364 Voiceband音频带宽
+2365 Volatile storage易失性存储
+2366 voltage surge冲击性电压
+2367
+2368 W
+2369 Wand reader 条形码读入
+2370 Web 网络
+2371 Web appliance 环球网设备
+2372 Web page网页
+2373 Web site address网络地址
+2374 Web terminal环球网终端
+2375 Webcam摄像头
+2376 What-if analysis假定分析
+2377 Wireless revolution无线革命
+2378 Word字长
+2379 Word processing文字处理
+2380 Word wrap自动换行
+2381 Worksheet file 工作表文件
+2382 web auctions网上拍卖
+2383 web broadcasters网络广播
+2384 web portals门户网站
+2385 web sites网站
+2386 web storefront creation packages网上商店创建包
+2387 web storefronts网上商店
+2388 web utilities网上应用程序
+2389 web-downloading utilities网页下载应用程序
+2390 webmaster web站点管理员
+2391 web万维网
+2392 Wireless modems无线调制解调器
+2393 wireless service provider无线服务供应商
+2394 world wide web万维网
+2395 worm蠕虫病毒
+2396 Write-protect notch写保护口
+2397
+2398 其他缩写
+2399 DVD digital bersatile 数字化通用光盘
+2400 IT ingormation technology信息技术
+2401 CD compact disc 压缩盘
+2402 PDA personal digital assistant个人数字助理
+2403 RAM random access memory随机存储器
+2404 WWW World Wide Web 万维网
+2405 DBMS database management system数据库管理系统
+2406 HTML Hypertext Markup Language超文本标示语言
+2407 OLE object linking and embedding对象链接潜入
+2408 SQL structured query language结构化查询语言
+2409 URL uniform resouice locator统一资源定位器
+2410 AGP accelerated graphics port加速图形接口
+2411 ALU arithmetic-logic unit算术逻辑单元
+2412 CPU central processing unit中央处理器
+2413 CMOS complementary metal-oxide semiconductor互补金属氧化物半导体
+2414 CISC complex instruction set computer复杂指令集计算机
+2415 HPSB high performance serial bus高性能串行总线
+2416 ISA industry standard architecture工业标准结构体系
+2417 PCI peripheral component interconnect外部设备互连总线
+2418 PCMCIA Personal Memory Card International Association个人计算机存储卡国际协会
+2419 RAM random-access memory随机存储器
+2420 ROM read-only memory只读存储器
+2421 USB universal serial bus通用串行总线
+2422 CRT cathode-ray tube阴极射线管
+2423 HDTV high-definition television高清晰度电视
+2424 LCD liquid crystal display monitor液晶显示器
+2425 MICRmagnetic-ink character recognition磁墨水字符识别器
+2426 OCR optical-character recognition光电字符识别器
+2427 OMR optical-mark recognition光标阅读器
+2428 TFT thin film transistor monitor薄膜晶体管显示器
+2430 其他
+2431 Zip disk压缩磁盘
+2432 Domain name system（DNS）域名服务器
+2433 file transfer protocol(FTP)文件传送协议
+2434 hypertext markup language(HTML)超文本链接标识语言
+2435 Local area network（LAN）局域网
+2436 internet relay chat(IRC)互联网多线交谈
+2437 Metropolitan area network(MAN)城域网
+2438 Network operation system(NOS)网络操作系统
+2439 uniform resource locator(URL)统一资源定位器
+2440 Wide area network(WAN)广域网

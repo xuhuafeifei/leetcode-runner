@@ -7,6 +7,7 @@ package com.xhf.leetcode.plugin.search;
  * @email 2508020102@qq.com
  */
 public class Context {
+    private final SourceManager sm;
     // 当前处理的字符
     private char c;
     // 当前文本处理得到的token
@@ -16,9 +17,14 @@ public class Context {
     // 迭代器
     private Iterator iterator;
 
-    public Context(Character c, Iterator itr) {
+    public Context(Character c, Iterator itr, SourceManager sm) {
         this.c = c;
         this.iterator = itr;
+        this.sm = sm;
+    }
+
+    public SourceManager getSm() {
+        return sm;
     }
 
     public char getC() {

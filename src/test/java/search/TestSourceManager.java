@@ -79,12 +79,13 @@ public class TestSourceManager {
         String s = "AbCd";
         sm.setSource(s);
 
+        itr.hasNext();
         assert 'a' == itr.next();
         assert 'b' == itr.next();
         assert 'c' == itr.next();
         assert 'd' == itr.next();
 
-        // 测试增强后的hasNext, 能否在迭代完成BUFFER_SIZE个数据后, 尝试从source中加载剩余数据
+        // 测试增强后的hasNext, 在迭代完成BUFFER_SIZE个数据后, 尝试从source中加载剩余数据
         s = RandomUtils.nextString(SourceManager.BUFFER_SIZE + 1);
         sm.setSource(new StringReader(s));
 
@@ -224,6 +225,17 @@ public class TestSourceManager {
         assert '4' == itr.next();
 
         assert ! itr.hasNext();
-        
+
+        sm.setSource(s);
+        for (int i = 0; i < SourceManager.BUFFER_SIZE; i++) {
+            itr.next();
+        }
+
+        captureItr = sm.captureIterator();
+        assert captureItr.hasNext();
+        for (int i = 0; i < 4; i++) {
+            assert "`ij&".charAt(i) == captureItr.next();
+        }
+        assert ! captureItr.hasNext();
     }
 }

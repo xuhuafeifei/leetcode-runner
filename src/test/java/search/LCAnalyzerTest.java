@@ -5,6 +5,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.junit.Test;
 
+import java.io.FileReader;
 import java.io.StringReader;
 
 /**
@@ -70,6 +71,21 @@ public class LCAnalyzerTest {
             System.out.println("ans = " + ans[i] + " attr = " + attribute.toString());
             assert ans[i].equals(attribute.toString());
         }
+        tokenStream.end();
+    }
+
+    @Test
+    public void test4() throws Exception {
+        LCAnalyzer lcAnalyzer = new LCAnalyzer();
+        FileReader reader = new FileReader("E:\\java_code\\leetcode-runner\\src\\test\\java\\eventbus\\titleSlug.txt");
+        TokenStream tokenStream = lcAnalyzer.tokenStream("titleSlug", reader);
+
+        tokenStream.reset();
+        while (tokenStream.incrementToken()) {
+            CharTermAttribute attr = tokenStream.getAttribute(CharTermAttribute.class);
+            System.out.println(attr.toString());
+        }
+
         tokenStream.end();
     }
 }
