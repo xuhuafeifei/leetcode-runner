@@ -50,6 +50,10 @@ public class DictTree {
         return INSTANCE;
     }
 
+    public static void init() {
+        INSTANCE.init();
+    }
+
     public void addWords(String words) {
         if (StringUtils.isBlank(words)) {
             return;

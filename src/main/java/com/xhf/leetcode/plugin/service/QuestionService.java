@@ -47,6 +47,10 @@ public class QuestionService {
         });
     }
 
+    public List<Question> getTotalQuestion(Project project) {
+        return LeetcodeClient.getInstance(project).getTotalQuestion();
+    }
+
     /**
      * query question by titleSlug
      *

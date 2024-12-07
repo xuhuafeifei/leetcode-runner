@@ -3,6 +3,7 @@ package search;
 import com.xhf.leetcode.plugin.search.lucence.LCAnalyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.junit.Test;
 
 import java.io.FileReader;
@@ -27,9 +28,9 @@ public class LCAnalyzerTest {
         String[] ans = new String[] {"123", "168", "9", "10"};
         for (int i = 0; i < 4; i++) {
             tokenStream.incrementToken();
-            CharTermAttribute attribute = tokenStream.getAttribute(CharTermAttribute.class);
-            System.out.println("ans = " + ans[i] + " attr = " + attribute.toString());
-            assert ans[i].equals(attribute.toString());
+            TermAttribute attribute = tokenStream.getAttribute(TermAttribute.class);
+            System.out.println("ans = " + ans[i] + " attr = " + attribute.toString().substring(5));
+            assert ans[i].equals(attribute.toString().substring(5));
         }
         tokenStream.end();
     }
@@ -47,9 +48,9 @@ public class LCAnalyzerTest {
         String[] ans = new String[] {"this", "is", "a", "letter", "context"};
         for (int i = 0; i < ans.length; i++) {
             tokenStream.incrementToken();
-            CharTermAttribute attribute = tokenStream.getAttribute(CharTermAttribute.class);
-            System.out.println("ans = " + ans[i] + " attr = " + attribute.toString());
-            assert ans[i].equals(attribute.toString());
+            TermAttribute attribute = tokenStream.getAttribute(TermAttribute.class);
+            System.out.println("ans = " + ans[i] + " attr = " + attribute.toString().substring(5));
+            assert ans[i].equals(attribute.toString().substring(5));
         }
         tokenStream.end();
     }
@@ -67,9 +68,9 @@ public class LCAnalyzerTest {
         String[] ans = new String[] {"129", "this", "137", "is", "8", "a", "letter", "context"};
         for (int i = 0; i < ans.length; i++) {
             tokenStream.incrementToken();
-            CharTermAttribute attribute = tokenStream.getAttribute(CharTermAttribute.class);
-            System.out.println("ans = " + ans[i] + " attr = " + attribute.toString());
-            assert ans[i].equals(attribute.toString());
+            TermAttribute attribute = tokenStream.getAttribute(TermAttribute.class);
+            System.out.println("ans = " + ans[i] + " attr = " + attribute.toString().substring(5));
+            assert ans[i].equals(attribute.toString().substring(5));
         }
         tokenStream.end();
     }
@@ -82,7 +83,7 @@ public class LCAnalyzerTest {
 
         tokenStream.reset();
         while (tokenStream.incrementToken()) {
-            CharTermAttribute attr = tokenStream.getAttribute(CharTermAttribute.class);
+            TermAttribute attr = tokenStream.getAttribute(TermAttribute.class);
             System.out.println(attr.toString());
         }
 

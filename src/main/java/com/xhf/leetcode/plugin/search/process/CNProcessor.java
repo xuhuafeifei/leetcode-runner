@@ -28,20 +28,24 @@ public class CNProcessor implements Processor {
         // 迭代获取
         char searchC = context.getC();
         Hit preHit = dt.match(searchC);
+        hs.add(preHit);
         // 如果未命中, 直接返回
         if (! preHit.isHit()) {
-            hs.add(preHit);
-            setContext(context );
+            setContext(context);
             return;
         }
         // 迭代
         while (captureItr.hasNext() && preHit.isHit()) {
-            hs.add(preHit);
             searchC = captureItr.next();
             Hit hit = dt.match(searchC, preHit);
+            hs.add(hit);
             preHit = hit;
         }
-        // 获取最后一个是结尾的Hit
+        // 弹出未命中的hit
+        while (hs.getTotalSize() != 1 && ! hs.peek().isHit()) {
+            hs.pop();
+        }
+        // 弹出直到最后一个是结尾的Hit
         while (hs.getTotalSize() != 1 && ! hs.peek().isEnd()) {
             hs.pop();
         }
