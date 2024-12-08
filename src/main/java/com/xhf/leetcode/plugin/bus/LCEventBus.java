@@ -1,19 +1,22 @@
 package com.xhf.leetcode.plugin.bus;
 
+import com.google.common.eventbus.EventBus;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 /**
+ * 使用guava的EventBus, LCEventBus对其api做出封装, 适配当前项目
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class LCEventBus {
-    Map<Class<? extends LCEvent>, Set<LCSubscriber>> subscriberMap;
+    private final EventBus eventBus;
 
     private LCEventBus() {
-        subscriberMap = new HashMap<>();
+        eventBus = new EventBus();
     }
 
     private static class SingletonHolder {
@@ -24,22 +27,11 @@ public class LCEventBus {
         return SingletonHolder.INSTANCE;
     }
 
-    public void post(LCEvent event) {
-        Set<LCSubscriber> subscribers = subscriberMap.get(event.getTopic());
-        if (subscribers != null) {
-            for (LCSubscriber subscriber : subscribers) {
-                subscriber.onEvent(event);
-            }
-        }
+    public void post(Object event) {
+        eventBus.post(event);
     }
 
-    public void register(Class<? extends LCEvent> topic, LCSubscriber subscriber) {
-        if (subscriberMap.containsKey(topic)) {
-            subscriberMap.get(topic).add(subscriber);
-        }else {
-            Set<LCSubscriber> lcSubscribers = new HashSet<>();
-            lcSubscribers.add(subscriber);
-            subscriberMap.put(topic, lcSubscribers);
-        }
+    public void register(Object listener) {
+        eventBus.register(listener);
     }
 }

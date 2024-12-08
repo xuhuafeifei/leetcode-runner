@@ -1,10 +1,8 @@
 package com.xhf.leetcode.plugin.comp;
 
 import com.intellij.ui.components.JBList;
-import com.xhf.leetcode.plugin.bus.LCEvent;
-import com.xhf.leetcode.plugin.bus.LCSubscriber;
-import com.xhf.leetcode.plugin.service.QuestionService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MyList<T> extends JBList<T> {
@@ -14,5 +12,9 @@ public class MyList<T> extends JBList<T> {
             data[i] = listData.get(i);
         }
         this.setListData(data);
+    }
+
+    public void setNonData() {
+        setListData(new ArrayList<T>());
     }
 }

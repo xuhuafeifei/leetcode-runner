@@ -35,10 +35,10 @@ public abstract class AbstractAction extends AnAction {
         // login check
         LoginPass annotation = this.getClass().getAnnotation(LoginPass.class);
         if (annotation == null) {
-            boolean login = LoginService.isLogin(project);
+            boolean login = LoginService.getInstance(project).isLogin();
             if (! login) {
                 ConsoleUtils.getInstance(e.getProject()).showWaring("not login!");
-                LoginService.doLogin(project);
+                LoginService.getInstance(project).doLogin();
                 return;
             }
         }

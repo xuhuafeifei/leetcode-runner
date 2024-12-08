@@ -76,9 +76,9 @@ public class CodeEditor implements FileEditor {
         this.vFile = file;
         this.textPane = new JTextPane();
         this.textPane.setText(String.valueOf(vFile.getContent())); // set history code to text pane
-        this.textPane.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 15));
-        this.textPane.setForeground(new Color(110, 107, 107));
-        this.textPane.setBackground(new Color(253, 255, 255));
+//        this.textPane.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 15));
+//        this.textPane.setForeground(new Color(110, 107, 107));
+//        this.textPane.setBackground(new Color(253, 255, 255));
         this.textPane.setEditable(false);
         this.borderLayoutPanel = JBUI.Panels.simplePanel();
         this.borderLayoutPanel.addToTop(createToolbarWrapper(this.textPane));

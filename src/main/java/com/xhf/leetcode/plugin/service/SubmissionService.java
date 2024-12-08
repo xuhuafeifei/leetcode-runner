@@ -16,7 +16,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class SubmissionService {
-    public static void loadSolution(Project project, MyList<Submission> myList, String slug) {
+    public static void loadSubmission(Project project, MyList<Submission> myList, String slug) {
         // query
         List<Submission> submissionList = LeetcodeClient.getInstance(project).getSubmissionList(slug);
         myList.setListData(submissionList);

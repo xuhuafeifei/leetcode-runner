@@ -205,6 +205,11 @@ public class FileUtils {
         return content.matches(regex);
     }
 
+    public static void deleteFile(String path) {
+        File file = new File(path);
+        file.deleteOnExit();
+    }
+
     /**
      * build a file path and make sure the path is unified
      */

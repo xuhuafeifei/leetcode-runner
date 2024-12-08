@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.window;
 
+import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DataProvider;
@@ -25,6 +26,7 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.queryParser.ParseException;
 import org.jetbrains.annotations.NonNls;
@@ -39,24 +41,24 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class LCPanel extends SimpleToolWindowPanel implements DataProvider, LCSubscriber {
+@LCSubscriber(events = {LoginEvent.class, ClearCacheEvent.class, CodeSubmitEvent.class})
+public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
     private MyList<Question> questionList;
 
     private Project project;
+    private SearchPanel searchPanel;
 
     public LCPanel(ToolWindow toolWindow, Project project) {
         super(Boolean.TRUE, Boolean.TRUE);
         this.project = project;
 
         final ActionManager actionManager = ActionManager.getInstance();
-
-        // register
-        registerToLCEventBus();
 
         // get action toolbar
         ActionToolbar actionToolbar = actionManager.createActionToolbar("leetcode Toolbar",
@@ -66,25 +68,19 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, LCSu
         initLeetcodeClient();
         initMyList();
 
-
         // search panel
-        SearchPanel searchPanel = new SearchPanel();
+        searchPanel = new SearchPanel();
         searchPanel.add(new JBScrollPane(questionList), BorderLayout.CENTER);
 
         // store to action toolbar
         actionToolbar.setTargetComponent(questionList);
         setToolbar(actionToolbar.getComponent());
         setContent(searchPanel);
-    }
 
-    /**
-     * register this class to EventBus
-     * if the event is fired, this class will be notified and reload or update MyList
-     *
-     */
-    private void registerToLCEventBus() {
-        LCEventBus.getInstance().register(LoginEvent.class, this);
-        LCEventBus.getInstance().register(CodeSubmitEvent.class, this);
+        // register
+        LCEventBus.getInstance().register(this);
+
+        LogUtils.info("demo test...");
     }
 
     private void initMyList() {
@@ -92,6 +88,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, LCSu
         questionList = new MyList();
         questionList.setCellRenderer(new QuestionCellRender());
         questionList.addMouseListener(new QuestionListener(questionList, project));
+        questionList.setEmptyText("Please login first...");
     }
 
     private void initLeetcodeClient() {
@@ -106,31 +103,60 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, LCSu
         return super.getData(dataId);
     }
 
-    @Override
-    public void onEvent(LCEvent event) {
-        // load or update total question
-        QuestionService.getInstance().loadAllQuestionData(project, this.questionList);
+    @Subscribe
+    public void loginEventListeners(LoginEvent event) {
+        searchPanel.indexLock();
+        questionList.setEmptyText("loading data, please wait a second...");
+        questionList.setNonData();
+        // load or update total question and build index
+        QuestionService.getInstance().loadAllQuestionData(project, this.questionList, questions -> {
+            searchPanel.buildIndex(questions);
+            searchPanel.unLock();
+        });
     }
 
+    @Subscribe
+    public void codeSubmitEventListener(CodeSubmitEvent event) {
+        searchPanel.indexLock();
+        questionList.setEmptyText("loading data, please wait a second...");
+        questionList.setNonData();
+        // load or update total question and build index
+        QuestionService.getInstance().loadAllQuestionData(project, this.questionList, questions -> {
+            searchPanel.buildIndex(questions);
+            searchPanel.unLock();
+        });
+    }
+
+    @Subscribe
+    public void clearCacheEventListeners(ClearCacheEvent event) {
+        searchPanel.loginLock();
+        questionList.setNonData();
+        questionList.setEmptyText("Please login first...");
+    }
+
+    /**
+     * 搜索面板, 提供题目搜索的能力. 内部封装了一个搜索引擎, 提供高效的搜索能力
+     */
     private class SearchPanel extends SimpleToolWindowPanel {
-        private JTextField searchField;
-        private QuestionEngine engine;
+        private final JTextField searchField;
+        private final QuestionEngine engine;
+        // 锁定标志位, lock == true, 当前搜索面板的状态处于锁定状态, 不提供搜索服务
+        // lock == false, 解锁
+        private boolean lock;
 
         public SearchPanel() {
             super(Boolean.TRUE, Boolean.TRUE);
+            engine = new QuestionEngine(project);
+            searchField = new JTextField();
             init();
         }
 
         private void init() {
-            engine = new QuestionEngine(project);
-            try {
-                engine.buildIndex(QuestionService.getInstance().getTotalQuestion(project));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            lock = true;
 
             setLayout(new BorderLayout());
-            searchField = new JTextField();
+            loginLock();
+            // 回车事件, 回车触发后, 执行搜索逻辑
             searchField.addActionListener(e -> {
                 updateText();
             });
@@ -160,8 +186,52 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, LCSu
             add(iconPanel, BorderLayout.NORTH);
         }
 
+        // 为搜索引擎提供数据源, 同时创建索引
+        public void buildIndex(List<Question> source) {
+            try {
+                engine.buildIndex(source);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // 登陆锁定. 该方法表示当前项目处于未登录状态, 不提供搜索服务
+        public void loginLock() {
+            lock = true;
+            searchField.setEnabled(false);
+            searchField.setFont(searchField.getFont().deriveFont(Font.ITALIC));
+            searchField.setText("please login first");
+            searchField.setForeground(Color.RED);
+            searchField.repaint(); // 强制重绘
+        }
+
+
+        // 索引锁定, 该方法表示搜索引擎目前正在构建索引, 不提供搜索服务
+        public void indexLock() {
+            lock = true;
+            searchField.setEnabled(false);
+            searchField.setFont(searchField.getFont().deriveFont(Font.ITALIC));
+            searchField.setText("indexing...");
+            searchField.setForeground(Color.RED);
+            searchField.repaint(); // 强制重绘
+        }
+
+        // 释放锁资源, 提供搜索服务. 值得注意的是, 锁(lock)的释放需要在最后执行
+        public void unLock() {
+            searchField.setEnabled(true);
+            searchField.setText("");
+            searchField.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+            searchField.setFont(UIManager.getFont("TextField.font")); // 设置为默认字体
+            searchField.setForeground(UIManager.getColor("TextField.foreground"));
+            lock = false;
+        }
+
+        // 更新文本
         private void updateText() {
+            // 如果处于锁定状态, 则直接返回
+            if (lock) return;
             String searchText = searchField.getText();
+            // 如果是空白内容, 查询全部内容
             if (StringUtils.isBlank(searchText)) {
                 QuestionService.getInstance().loadAllQuestionData(project, questionList);
                 return;

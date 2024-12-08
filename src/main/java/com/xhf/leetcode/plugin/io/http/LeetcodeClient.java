@@ -1,11 +1,15 @@
 package com.xhf.leetcode.plugin.io.http;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
@@ -23,6 +27,8 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
+// 订阅clearCache事件, 当该事件触发后, 清除cookie和ql(List<Question>, 是题目数据的二级缓存)
+@LCSubscriber(events = {ClearCacheEvent.class})
 public class LeetcodeClient {
 
     private Project project;
@@ -36,6 +42,13 @@ public class LeetcodeClient {
         // loadCache
         httpClient = HttpClient.getInstance();
         this.loadCache(project);
+        LCEventBus.getInstance().register(this);
+    }
+
+    @Subscribe
+    public void clearCacheListener(ClearCacheEvent event) {
+        clearCookies();
+        ql = null;
     }
 
     private void loadCache(Project project) {

@@ -1,12 +1,7 @@
 package com.xhf.leetcode.plugin.editors;
 
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorLocation;
-import com.intellij.openapi.fileEditor.FileEditorState;
-import com.intellij.openapi.fileEditor.TextEditor;
-import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
+import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.components.JBScrollPane;
@@ -15,36 +10,38 @@ import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.listener.SubmissionListener;
+import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Submission;
 import com.xhf.leetcode.plugin.render.SubmissionCellRender;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.SubmissionService;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.beans.PropertyChangeListener;
 
 /**
+ * 订阅login, clearCache, codeSubmit事件
+ * login、codeSubmit, 将会触发加载逻辑, 重新获取登录用户的submission数据
+ * clearCache逻辑触发, 则会加载openError()方法, 其作用和SolotionEditor中的openError()方法功能一致
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class SubmissionEditor extends AbstractSplitTextEditor implements LCSubscriber {
+@LCSubscriber(events = {LoginEvent.class, ClearCacheEvent.class, CodeSubmitEvent.class})
+public class SubmissionEditor extends AbstractSplitTextEditor {
 
     public SubmissionEditor(Project project, VirtualFile file) {
         super(project, file);
         // register
-        LCEventBus.getInstance().register(LoginEvent.class, this);
-        LCEventBus.getInstance().register(CodeSubmitEvent.class, this);
+        LCEventBus.getInstance().register(this);
     }
 
     @Override
     protected void initFirstComp() {
-        if (! LoginService.isLogin(project)) {
+        if (! LoginService.getInstance(project).isLogin()) {
             JTextPane jTextPane = this.showNotingTextPane();
             jTextPane.setText("Please Login First...");
             jbSplitter.setFirstComponent(jTextPane);
@@ -56,16 +53,38 @@ public class SubmissionEditor extends AbstractSplitTextEditor implements LCSubsc
         // make list can interact with user and open to solution content by click
         myList.addMouseListener(new SubmissionListener(project, myList, this));
         myList.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 14));
-        SubmissionService.loadSolution(project, myList, ViewUtils.getLeetcodeEditorByVFile(file, project).getTitleSlug());
+        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
+        if (lc == null) {
+            openError();
+            return;
+        }
+        SubmissionService.loadSubmission(project, myList, lc.getTitleSlug());
         myList.setEmptyText("No Submission");
         jbSplitter.setFirstComponent(new JBScrollPane(myList));
+    }
+
+    /**
+     * 创建打开错误提示
+     */
+    private void openError() {
+        JTextPane jTextPane = showNotingTextPane();
+        jTextPane.setText("Submission Editor open error! please close all file and try again");
+        BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(jTextPane);
+        jTextPane.setForeground(Color.RED);
+        jbSplitter.setFirstComponent(secondComponent);
+        jbSplitter.setSecondComponent(null);
     }
 
     @Override
     public void openSecond(String content) {
         // build light virtual file
+        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
+        if (lc == null) {
+            openError();
+            return;
+        }
         LightVirtualFile submissionFile = new LightVirtualFile(
-                ViewUtils.getLeetcodeEditorByVFile(file, project).getTitleSlug() + ".code", content
+                lc.getTitleSlug() + ".code", content
         );
         CodeEditor codeEditor = new CodeEditor(project, submissionFile);
         BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(codeEditor.getComponent());
@@ -78,8 +97,18 @@ public class SubmissionEditor extends AbstractSplitTextEditor implements LCSubsc
         return "Submission Editor";
     }
 
-    @Override
-    public void onEvent(LCEvent event) {
+    @Subscribe
+    public void loginEventLister(LoginEvent event) {
         this.initFirstComp();
+    }
+
+    @Subscribe
+    public void codeSubmitListener(CodeSubmitEvent event) {
+        this.initFirstComp();
+    }
+
+    @Subscribe
+    public void clearCacheListener(ClearCacheEvent event) {
+        openError();
     }
 }

@@ -1,15 +1,20 @@
 package com.xhf.leetcode.plugin.service;
 
+import com.google.common.eventbus.Subscribe;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.impl.IdeFrameImpl;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.bus.LoginEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
@@ -38,8 +43,22 @@ import java.util.Objects;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class LoginService {
-    public static void doLogin(Project project) {
+@Service(Service.Level.PROJECT)
+@LCSubscriber(events = {ClearCacheEvent.class})
+public final class LoginService {
+
+    private final Project project;
+
+    public LoginService(Project project) {
+        this.project = project;
+        LCEventBus.getInstance().register(this);
+    }
+
+    public static LoginService getInstance(Project project) {
+        return project.getService(LoginService.class);
+    }
+
+    public void doLogin() {
         MyList<Question> myList = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_QUESTION_LIST);
         // do not call isLogin function in this class
         if (LeetcodeClient.getInstance(project).isLogin()) {
@@ -51,12 +70,12 @@ public class LoginService {
         try {
             jcefLoginWindow.start();
         } catch (Exception e) {
-            LogUtils.LOG.error("JCEF Login Failed, Start Cookie Login...", e);
+            LogUtils.error("JCEF Login Failed, Start Cookie Login...", e);
             startCookieLogin(project, myList);
         }
     }
 
-    private static void startCookieLogin(Project project, MyList<Question> myList) {
+    private void startCookieLogin(Project project, MyList<Question> myList) {
         try {
             new CookieLoginWindow(project, myList).start();
         } catch (Exception e) {
@@ -64,16 +83,16 @@ public class LoginService {
         }
     }
 
-    private static void loginSuccessAfter(Project project, MyList<Question> myList) {
+    private void loginSuccessAfter(Project project, MyList<Question> myList) {
         // load data
         loginFlag = Boolean.TRUE;
-        LogUtils.LOG.info("login success...");
+        LogUtils.info("login success...");
         ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("login success...");
         // post event
         LCEventBus.getInstance().post(new LoginEvent(project));
     }
 
-    private static boolean loginFlag = Boolean.FALSE;
+    private boolean loginFlag = Boolean.FALSE;
 
     /**
      * judge whether the client is login
@@ -88,11 +107,11 @@ public class LoginService {
      * loginFlag is a flag to check whether the user has clicked the login button and login succussfully
      *
      */
-    public static boolean isLogin(Project project) {
+    public boolean isLogin() {
         return loginFlag && LeetcodeClient.getInstance(project).isLogin();
     }
 
-    static abstract class BasicWindow {
+    abstract class BasicWindow {
         protected Project project;
         protected MyList<Question> myList;
         public BasicWindow(Project project, MyList<Question> myList) {
@@ -123,7 +142,7 @@ public class LoginService {
         abstract void loadComponent(JFrame frame) throws Exception;
     }
 
-    static class CookieLoginWindow extends BasicWindow {
+    class CookieLoginWindow extends BasicWindow {
 
         private JPanel contentPane;
         private JTextArea textArea;
@@ -202,7 +221,7 @@ public class LoginService {
         }
 
         @Deprecated
-        static class HelpDialog extends DialogWrapper {
+        class HelpDialog extends DialogWrapper {
             @Override
             protected void init() {
                 super.init();
@@ -236,7 +255,7 @@ public class LoginService {
         }
     }
 
-    static class JcefLoginWindow extends BasicWindow {
+    class JcefLoginWindow extends BasicWindow {
 
         public JcefLoginWindow(Project project, MyList<Question> myList) {
             super(project, myList);
@@ -296,5 +315,11 @@ public class LoginService {
 
             frame.add(jbcebrowser.getComponent(), BorderLayout.CENTER);
         }
+    }
+
+    // 清除本地登陆状态的标志位
+    @Subscribe
+    public void clearCacheListeners(ClearCacheEvent event) {
+        loginFlag = false;
     }
 }

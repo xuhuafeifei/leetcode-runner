@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * deal with http module and question ui module
@@ -43,6 +44,27 @@ public class QuestionService {
                 List<Question> totalQuestion = LeetcodeClient.getInstance(project).getTotalQuestion();
                 myList.setListData(totalQuestion);
                 myList.updateUI();
+            }
+        });
+    }
+
+    /**
+     * load questions data and to something
+     * consumer是为了让数据加载操作和accept内部代码逻辑串行执行提出的解决方案
+     * 因为getTotalQuestion很耗费时间, 因此数据加载是异步操作. 但存在部分逻辑需要数据加载完毕后才能执行
+     * 通过consumer回调函数的形式, 提供执行需要和数据加载逻辑同步进行的业务
+     */
+    public void loadAllQuestionData(Project project, MyList<Question> myList, Consumer<List<Question>> consumer) {
+        // do not use another thread to get dataContext by DataManager
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                // query
+                List<Question> totalQuestion = LeetcodeClient.getInstance(project).getTotalQuestion();
+                myList.setListData(totalQuestion);
+                myList.updateUI();
+                // 执行需要等待题目数据全部加载完后, 才能执行的逻辑
+                consumer.accept(totalQuestion);
             }
         });
     }

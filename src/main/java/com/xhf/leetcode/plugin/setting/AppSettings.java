@@ -21,7 +21,6 @@ public final class AppSettings
 
   public static final String EMPTY_FILE_PATH = "";
   public static final String EMPTY_LANGUAGE_TYPE = "";
-  public static final String cacheFileName = "app.properties";
 
   static class State {
 
@@ -57,9 +56,9 @@ public final class AppSettings
       return EMPTY_FILE_PATH;
     }
     if (myState.coreFilePath.equals(EMPTY_FILE_PATH)) {
-      return new FileUtils.PathBuilder(myState.filePath).append("cache").append(cacheFileName).build();
+      return new FileUtils.PathBuilder(myState.filePath).append("cache").build();
     }
-    return new FileUtils.PathBuilder(myState.coreFilePath).append("cache").append(cacheFileName).build();
+    return new FileUtils.PathBuilder(myState.coreFilePath).append("cache").build();
   }
 
   private State myState = new State();

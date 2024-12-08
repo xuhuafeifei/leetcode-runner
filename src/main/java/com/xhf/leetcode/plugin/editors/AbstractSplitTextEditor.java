@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.editors;
 
+import com.google.common.eventbus.Subscribe;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -11,6 +12,8 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBSplitter;
 import com.intellij.util.ui.JBUI;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.service.LoginService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,9 +76,9 @@ public abstract class AbstractSplitTextEditor implements FileEditor {
 
     protected JTextPane showNotingTextPane() {
         JTextPane textPane = new JTextPane();
-        textPane.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 15));
-        textPane.setForeground(new Color(110, 107, 107));
-        textPane.setBackground(new Color(253, 255, 255));
+//        textPane.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 15));
+//        textPane.setForeground(new Color(110, 107, 107));
+//        textPane.setBackground(new Color(253, 255, 255));
         textPane.setEditable(false);
         return textPane;
     }

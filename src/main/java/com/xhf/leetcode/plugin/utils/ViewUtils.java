@@ -3,12 +3,15 @@ package com.xhf.leetcode.plugin.utils;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+
+import javax.swing.*;
 
 /**
  * @author feigebuge
@@ -31,7 +34,12 @@ public class ViewUtils {
     public static LeetcodeEditor getLeetcodeEditorByVFile(VirtualFile file, Project project) {
         String key = file.getPath();
         key = FileUtils.unifyPath(key);
-        return StoreService.getInstance(project).getCache(key, LeetcodeEditor.class);
+        LeetcodeEditor cache = StoreService.getInstance(project).getCache(key, LeetcodeEditor.class);
+        if (cache == null) {
+            LogUtils.warn("LeetcodeEditor load failed! this may caused by two reason. 1.cache file is crashed. 2.key is wrong. Here " +
+                    "are detail infomation : key="+key + " cache_file_path=" + StoreService.getInstance(project).getCacheFilePath());
+        }
+        return cache;
     }
 
     public static LightVirtualFile getHTMLContent(VirtualFile file, Project project) {
@@ -50,5 +58,9 @@ public class ViewUtils {
         String path = editor.getFile().getPath();
         path = FileUtils.unifyPath(path);
         return StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
+    }
+
+    public static void showDialog(Project project, String message, String title) {
+        JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
     }
 }

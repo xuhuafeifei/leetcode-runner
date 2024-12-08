@@ -51,6 +51,9 @@
         <action id="leetcode.plugin.Settings" class="com.xhf.leetcode.plugin.actions.SettingAction"
                 text="Setting" icon="/icons/config.svg">
         </action>
+        <action id="leetcode.plugin.Clear" class="com.xhf.leetcode.plugin.actions.ClearAction"
+                text="Clear Cache" icon="/icons/clear.svg">
+        </action>
 
 
         <group id="leetcode.plugin.lcActionsToolbar">
@@ -61,6 +64,7 @@
             <reference id="leetcode.plugin.TodayQuestionAction"/>
             <separator/>
             <reference id="leetcode.plugin.Settings"/>
+            <reference id="leetcode.plugin.Clear"/>
         </group>
 
         <group id="leetcode.plugin.editor.group">

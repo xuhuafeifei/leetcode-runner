@@ -2,9 +2,13 @@ package com.xhf.leetcode.plugin.io.file;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
@@ -39,8 +43,11 @@ public final class StoreService implements Disposable {
         this.loadCache();
     }
 
+    public static final String cacheFileName = "app.properties";
+
     public String getCacheFilePath() {
-        return AppSettings.getInstance().getCoreFilePath();
+        String path = AppSettings.getInstance().getCoreFilePath();
+        return new FileUtils.PathBuilder(path).append(cacheFileName).build();
     }
 
     public static StoreService getInstance(Project project) {
@@ -50,6 +57,12 @@ public final class StoreService implements Disposable {
     @Override
     public void dispose() {
         this.persistCache();
+    }
+
+    public void clearCache() {
+        cache.invalidateAll();
+        durableCache.invalidateAll();
+        FileUtils.deleteFile(getCacheFilePath());
     }
 
     public static class StoreContent {

@@ -1,10 +1,8 @@
 package com.xhf.leetcode.plugin.bus;
 
 /**
- * @author feigebuge
- * @email 2508020102@qq.com
+ * 该注解没什么实际作用, 主要是提醒开发者, 当前类是订阅者, 以及他订阅了哪些事件
  */
-public interface LCSubscriber {
-
-    void onEvent(LCEvent event);
+public @interface LCSubscriber {
+    Class[] events();
 }

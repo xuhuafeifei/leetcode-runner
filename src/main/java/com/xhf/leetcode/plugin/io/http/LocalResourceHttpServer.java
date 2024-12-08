@@ -32,7 +32,7 @@ public final class LocalResourceHttpServer {
             this.startServer();
         } catch (IOException e) {
             e.printStackTrace();
-            LogUtils.LOG.error("Start LocalResourceHttpServer Failed", e);
+            LogUtils.error("Start LocalResourceHttpServer Failed", e);
         }
     }
 
