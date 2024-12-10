@@ -11,6 +11,7 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
+import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -20,21 +21,36 @@ import java.io.IOException;
  */
 public class DemoAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e)  {
+    void doActionPerformed(Project project, AnActionEvent e) {
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
-
+        /*
+          强制为true, 而且要骗过idea的检测. 毕竟我想保留一开始的垃圾代码. 但又不想要执行. 毕竟执行了铁定报错, 我又不想改, 就这么干了
+         */
         if (1 != 2) {
             // 加载图片资源
-            ImageIcon icon = new ImageIcon(getClass().getResource("/icons/jiejie.jpg"));
+            ImageIcon imageIcon = new ImageIcon(getClass().getResource("/icons/jiejie.jpg"));
 
             // 创建一个 JPanel 来容纳图片和文本
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-            panel.add(new JLabel(icon));
-            panel.add(new JLabel("这是作者编写的第一个demoAction, 保留只为做纪念, 不会执行任何逻辑, 桀桀"));
+
+            // 居中对齐图片
+            JLabel imageLabel = new JLabel(imageIcon);
+            imageLabel.setHorizontalAlignment(SwingConstants.CENTER); // 居中对齐图片
+            panel.add(imageLabel);
+
+            // 创建一个 JLabel 来显示文本并设置字体
+            JLabel textLabel = new JLabel("这是作者编写的第一个demoAction, 保留只为做纪念, 不会执行任何逻辑, 桀桀");
+            // 设置字体，使用更好看的字体
+            textLabel.setFont(new Font("微软雅黑", Font.PLAIN, 24)); // 设置字体为微软雅黑，避免中文乱码
+            textLabel.setHorizontalAlignment(SwingConstants.CENTER); // 居中对齐文字
+            panel.add(textLabel);
+
+            // 播放hahaha音频, 桀桀
+            startJieJie();
 
             // 显示自定义对话框
-            int result = JOptionPane.showOptionDialog(
+            JOptionPane.showOptionDialog(
                     null,
                     panel,
                     "桀桀",
@@ -44,35 +60,6 @@ public class DemoAction extends AbstractAction {
                     new Object[]{"确定", "取消"},
                     "确定"
             );
-            new Thread(() -> {
-                // 获取音频文件的 URL
-                java.net.URL url = getClass().getResource("/MP3/hahaha.mp3");
-                if (url == null) {
-                    LogUtils.warn("路径未找到...");
-                    return;
-                }
-                LogUtils.info("准备播放音频");
-                // 打开音频输入流
-                try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(url)) {
-                    // 获取音频格式
-                    AudioFormat format = audioStream.getFormat();
-                    // 获取数据行信息
-                    DataLine.Info info = new DataLine.Info(Clip.class, format);
-                    // 打开数据行
-                    Clip clip = (Clip) AudioSystem.getLine(info);
-                    clip.open(audioStream);
-                    // 开始播放
-                    clip.start();
-                    // 等待音频播放完成
-                    while (!clip.isRunning())
-                        Thread.sleep(10);
-                    while (clip.isRunning())
-                        Thread.sleep(10);
-                }catch (UnsupportedAudioFileException | IOException | LineUnavailableException |
-                         InterruptedException ex) {
-                    LogUtils.error("播放音频失败: ", ex);
-                }
-            }).start();
             return;
         }
 
@@ -88,6 +75,37 @@ public class DemoAction extends AbstractAction {
                 fileEditorManager.openTextEditor(ofd, false);
             }
         });
+    }
 
+    public void startJieJie() {
+        // 获取音频文件的 URL
+        java.net.URL url = getClass().getResource("/MP3/hahaha.wav");
+        if (url == null) {
+            LogUtils.warn("路径未找到...");
+            return;
+        }
+        new Thread(() -> {
+            LogUtils.info("准备播放音频");
+            // 打开音频输入流
+            try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(url)) {
+                // 获取音频格式
+                AudioFormat format = audioStream.getFormat();
+                // 获取数据行信息
+                DataLine.Info info = new DataLine.Info(Clip.class, format);
+                // 打开数据行
+                Clip clip = (Clip) AudioSystem.getLine(info);
+                clip.open(audioStream);
+                // 开始播放
+                clip.start();
+                // 等待音频播放完成
+                while (!clip.isRunning())
+                    Thread.sleep(10);
+                while (clip.isRunning())
+                    Thread.sleep(10);
+            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException |
+                     InterruptedException ex) {
+                LogUtils.error("播放音频失败: ", ex);
+            }
+        }).start();
     }
 }

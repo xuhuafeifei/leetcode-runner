@@ -24,28 +24,35 @@ public class LogUtils {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    private static String formatLogMessage(String level, String message) {
+    private static final StringBuilder sb = new StringBuilder();
+
+    private static String formatLogMessage(String message, String level, int idx) {
+        sb.delete(0, sb.length());
         // 获取当前时间
         String timestamp = DATE_FORMAT.format(new Date());
 
         // 获取调用信息
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        StackTraceElement caller = stackTrace[3]; // 调用者信息在栈跟踪中的第4个元素（索引为3）
-        String className = caller.getClassName();
-        int lineNumber = caller.getLineNumber();
+        idx = idx + 1;
+        StackTraceElement caller = stackTrace[idx];
+
+        String prefix = String.format("%s [%s] ", timestamp, level);
+        String whiteSpace = String.format("%" + prefix.length() + "s", "");
+        sb.append(prefix);
+        sb.append(caller).append(" ").append(message).append("\n");
+
+        for (int i = 1; i < 3 && idx + i < stackTrace.length; ++i) {
+            sb.append(whiteSpace);
+            sb.append(stackTrace[idx + i]);
+            sb.append("\n");
+        }
 
         // 格式化日志消息
-        return String.format("%s [%s] %s.%s:%d - %s",
-                timestamp,
-                level,
-                className,
-                caller.getMethodName(),
-                lineNumber,
-                message);
+        return sb.toString();
     }
 
     private static void consoleLog(String message, String info) {
-        System.out.println(formatLogMessage(message, info));
+        System.out.print(formatLogMessage(message, info, 3));
     }
     public static void info(String message) {
         IDEA_LOGGER.info(message);
@@ -63,11 +70,11 @@ public class LogUtils {
     }
 
     public static void error(String message, Throwable e) {
-        IDEA_LOGGER.error(message, e);
+//        IDEA_LOGGER.error(message, e);
     }
 
     public static void warn(String message) {
-        IDEA_LOGGER.warn(message);
+//        IDEA_LOGGER.warn(message);
         consoleLog(message, "WARN");
     }
 }

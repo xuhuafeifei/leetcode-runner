@@ -7,6 +7,9 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
+import com.xhf.leetcode.plugin.bus.QLoadStartEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.GraphqlReqBody;
@@ -35,25 +38,28 @@ public class QuestionService {
     /**
      * load questions data
      */
-    public void loadAllQuestionData(Project project, MyList<Question> myList) {
-        // do not use another thread to get dataContext by DataManager
+    public void loadAllQuestionData(Project project) {
+        LCEventBus.getInstance().post(new QLoadStartEvent(project));
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 // query
-                List<Question> totalQuestion = LeetcodeClient.getInstance(project).getTotalQuestion();
-                myList.setListData(totalQuestion);
-                myList.updateUI();
+                LeetcodeClient.getInstance(project).getTotalQuestion();
+                LCEventBus.getInstance().post(new QLoadEndEvent(project));
             }
         });
     }
 
     /**
+     * @Deprecated: 当前版本废弃该方法, 该方法通过consumer引入别的模块的逻辑, 耦合性太强.
+     * 此外, 为了解决异步加载question导致其余模块不知道question什么时候加载完毕的问题, 引入QLoadStartEvent和QLoadEndEvent事件, 通过EventBus进行通知
+     * <p>
      * load questions data and to something
      * consumer是为了让数据加载操作和accept内部代码逻辑串行执行提出的解决方案
      * 因为getTotalQuestion很耗费时间, 因此数据加载是异步操作. 但存在部分逻辑需要数据加载完毕后才能执行
      * 通过consumer回调函数的形式, 提供执行需要和数据加载逻辑同步进行的业务
      */
+    @Deprecated
     public void loadAllQuestionData(Project project, MyList<Question> myList, Consumer<List<Question>> consumer) {
         // do not use another thread to get dataContext by DataManager
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
@@ -69,7 +75,7 @@ public class QuestionService {
         });
     }
 
-    public List<Question> getTotalQuestion(Project project) {
+    public synchronized List<Question> getTotalQuestion(Project project) {
         return LeetcodeClient.getInstance(project).getTotalQuestion();
     }
 
@@ -193,13 +199,17 @@ public class QuestionService {
     }
 
     public void reloadTotalQuestion(Project project) {
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
+        // 通知开始加载数据
+        LCEventBus.getInstance().post(new QLoadStartEvent(project));
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "ReLoading...", false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 // query
                 LeetcodeClient instance = LeetcodeClient.getInstance(project);
-                List<Question> totalQuestion = instance.getTotalQuestion();
+                List<Question> totalQuestion = instance.queryTotalQuestion();
                 instance.cacheQuestionList(totalQuestion);
+                // 数据加载完毕, 通知别的模块处理后续逻辑
+                LCEventBus.getInstance().post(new QLoadEndEvent(project));
             }
         });
     }

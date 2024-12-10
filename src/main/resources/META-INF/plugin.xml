@@ -54,10 +54,14 @@
         <action id="leetcode.plugin.Clear" class="com.xhf.leetcode.plugin.actions.ClearAction"
                 text="Clear Cache" icon="/icons/clear.svg">
         </action>
+        <action id="leetcode.plugin.Reload" class="com.xhf.leetcode.plugin.actions.ReloadQuestionAction"
+                text="Reload Question" icon="/icons/refresh.svg">
+        </action>
 
 
         <group id="leetcode.plugin.lcActionsToolbar">
             <reference id="leetcode.plugin.LoginAction"/>
+            <reference id="leetcode.plugin.Reload"/>
             <separator/>
             <reference id="leetcode.plugin.DemoAction"/>
             <reference id="leetcode.plugin.PickOneAction"/>

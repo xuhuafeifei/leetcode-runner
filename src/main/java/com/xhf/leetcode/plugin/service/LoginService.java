@@ -84,12 +84,13 @@ public final class LoginService {
     }
 
     private void loginSuccessAfter(Project project, MyList<Question> myList) {
-        // load data
         loginFlag = Boolean.TRUE;
         LogUtils.info("login success...");
         ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("login success...");
         // post event
         LCEventBus.getInstance().post(new LoginEvent(project));
+        // load data
+        QuestionService.getInstance().loadAllQuestionData(project);
     }
 
     private boolean loginFlag = Boolean.FALSE;

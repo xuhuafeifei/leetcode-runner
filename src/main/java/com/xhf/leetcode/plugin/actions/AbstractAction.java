@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.RunCode;
@@ -12,6 +13,8 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LoginPass;
 import com.xhf.leetcode.plugin.utils.SettingPass;
 import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
 
 /**
  * @author feigebuge
@@ -38,7 +41,15 @@ public abstract class AbstractAction extends AnAction {
             boolean login = LoginService.getInstance(project).isLogin();
             if (! login) {
                 ConsoleUtils.getInstance(e.getProject()).showWaring("not login!");
-                LoginService.getInstance(project).doLogin();
+                // LoginService.getInstance(project).doLogin();
+                Messages.showOkCancelDialog(
+                        project,
+                        "Please login first...",
+                        "INFO",
+                        Messages.getOkButton(),
+                        Messages.getCancelButton(),
+                        Messages.getQuestionIcon()
+                );
                 return;
             }
         }

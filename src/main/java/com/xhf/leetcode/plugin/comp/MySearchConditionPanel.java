@@ -7,6 +7,7 @@ import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.QFilter;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ public abstract class MySearchConditionPanel extends JPanel {
             } else {
                 // 否则，更新选中的项
                 previousSelection = selectedItem;
-                // 添加filter内容
+                // 根据ComboBox显示的内容, 为filter添加不同的过滤条件
                 myFilter.addItem(convert.doConvert(selectedItem));
             }
             // 执行后置操作, 按照道理, 此处方法应该执行SearchPanel::updateText
@@ -94,12 +95,22 @@ public abstract class MySearchConditionPanel extends JPanel {
         return myFilter;
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        conditionComb.setEnabled(enabled);
+    }
 
     /**
      * 选项转换器, 服务于ComboBox显示的选项和实际内容之间的转换
      */
     public interface OptionConvert {
         void addPair(String option);
+
+        /**
+         * @param option 用于显示的选项
+         * @param converted 显示选项对应的实际内容
+         */
         void addPair(String option, String converted);
         String[] getOptions();
         String doConvert(String option);
@@ -107,6 +118,14 @@ public abstract class MySearchConditionPanel extends JPanel {
 
     public class MapOptionConverter implements OptionConvert {
         private Map<String, String> map = new HashMap<>();
+
+        public MapOptionConverter() {
+            this(20);
+        }
+
+        public MapOptionConverter(int size) {
+            map = new HashMap<>(size);
+        }
 
         @Override
         public void addPair(String operation) {
@@ -145,7 +164,7 @@ public abstract class MySearchConditionPanel extends JPanel {
         private int actualSize;
 
         public ArrayOptionConverter(int size) {
-            if (size > 5) {
+            if (size > 6) {
                 LogUtils.warn("option may be large, this may lead to slow");
             }
             array = new Pair[size];
