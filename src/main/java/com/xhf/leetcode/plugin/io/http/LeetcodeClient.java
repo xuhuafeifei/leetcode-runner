@@ -186,6 +186,17 @@ public class LeetcodeClient {
                 break;
             }
         }
+        // keep first cache is same with second cache
+        asyncPersistQuestionCache();
+    }
+
+    /**
+     * 异步更新缓存, 同步1级-2级缓存内容
+     */
+    private void asyncPersistQuestionCache() {
+        new Thread(() -> {
+            StoreService.getInstance(project).addCache(StoreService.QUESTION_LIST_KEY, ql, true);
+        }).start();
     }
 
     /**
@@ -202,8 +213,6 @@ public class LeetcodeClient {
         // load cache
         List<Question> ans = loadQuestionCache();
         if (ans != null) {
-            // keep first cache is same with second cache
-            StoreService.getInstance(project).addCache(StoreService.QUESTION_LIST_KEY, ans, true);
             return ans;
         }
         ans = queryTotalQuestion();
@@ -615,5 +624,10 @@ public class LeetcodeClient {
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
 
         return jsonObject.getAsJsonObject("data").getAsJsonObject("submissionDetail").get("code").getAsString();
+    }
+
+    public void cacheQuestionList(List<Question> totalQuestion) {
+        ql = totalQuestion;
+        asyncPersistQuestionCache();
     }
 }

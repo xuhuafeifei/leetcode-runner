@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.model;
 
+import java.util.List;
+
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -27,11 +29,19 @@ public class Question {
     private String title;
     private String titleCn;
     private String titleSlug;
-
+    private List<TopicTag> topicTags;
     private String translatedTitle;
     private String translatedContent;
     private String codeSnippets;
     private String exampleTestcases;
+
+    public List<TopicTag> getTopicTags() {
+        return topicTags;
+    }
+
+    public void setTopicTags(List<TopicTag> topicTags) {
+        this.topicTags = topicTags;
+    }
 
     public void setExampleTestcases(String exampleTestcases) {
         this.exampleTestcases = exampleTestcases;

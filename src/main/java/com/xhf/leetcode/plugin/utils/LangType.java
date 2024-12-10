@@ -7,11 +7,11 @@ package com.xhf.leetcode.plugin.utils;
 public enum LangType {
     JAVA("java", ".java"),
     PYTHON("python", ".py"),
-    CPP("cpp", ".cpp"),
+    CPP("c++", ".cpp"),
     JAVASCRIPT("javascript", ".js"),
     C("c", ".c"),
     PYTHON3("python3", ".py"),
-    GO("golang", ".go"),
+    GO("go", ".go"),
     ;
 
     private LangType(String langType, String suffix) {

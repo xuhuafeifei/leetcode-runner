@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>org.example.leetcode-runner</id>
     <name>leetcode-runner</name>
-    <version>2.0</version>
+    <version>2.4</version>
     <vendor email="2508020102@qq.com" url="https://github.com/xuhuafeifei/leetcode-runner">feigebuge</vendor>
 
     <description><![CDATA[

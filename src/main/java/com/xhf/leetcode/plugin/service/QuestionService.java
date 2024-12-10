@@ -191,4 +191,16 @@ public class QuestionService {
         // update cache
         LeetcodeClient.getInstance(project).updateQuestionStatusByFqid(fqid, correctAnswer);
     }
+
+    public void reloadTotalQuestion(Project project) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                // query
+                LeetcodeClient instance = LeetcodeClient.getInstance(project);
+                List<Question> totalQuestion = instance.getTotalQuestion();
+                instance.cacheQuestionList(totalQuestion);
+            }
+        });
+    }
 }
