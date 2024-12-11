@@ -34,9 +34,13 @@ public class CNProcessor implements Processor {
             setContext(context);
             return;
         }
+//        System.err.println("start c = " + searchC);
         // 迭代
         while (captureItr.hasNext() && preHit.isHit()) {
             searchC = captureItr.next();
+
+//            System.err.println("iter c = " + searchC);
+
             Hit hit = dt.match(searchC, preHit);
             hs.add(hit);
             preHit = hit;

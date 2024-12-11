@@ -2,12 +2,9 @@ package com.xhf.leetcode.plugin.comp;
 
 import com.intellij.openapi.ui.ComboBox;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.window.filter.DifficultyFilter;
-import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.QFilter;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,13 +24,11 @@ public abstract class MySearchConditionPanel extends JPanel {
     /**
      * 创建convert, 该方法下放到子类, 由具体实现类进行创建.
      * 该方法提供转换器, 允许Combox显示的文本和实际过滤的内容不一致
-     * @return
      */
     public abstract OptionConvert createConvert();
 
     /**
      * 创建不同的过滤器, 执行不同过滤行为
-     * @return
      */
     public abstract QFilter createFilter();
 
@@ -101,6 +96,10 @@ public abstract class MySearchConditionPanel extends JPanel {
         conditionComb.setEnabled(enabled);
     }
 
+    public String getDefaultText() {
+        return defaultText;
+    }
+
     /**
      * 选项转换器, 服务于ComboBox显示的选项和实际内容之间的转换
      */
@@ -116,7 +115,7 @@ public abstract class MySearchConditionPanel extends JPanel {
         String doConvert(String option);
     }
 
-    public class MapOptionConverter implements OptionConvert {
+    public static class MapOptionConverter implements OptionConvert {
         private Map<String, String> map = new HashMap<>();
 
         public MapOptionConverter() {
@@ -148,8 +147,8 @@ public abstract class MySearchConditionPanel extends JPanel {
         }
     }
 
-    public class ArrayOptionConverter implements OptionConvert {
-        private class Pair {
+    public static class ArrayOptionConverter implements OptionConvert {
+        private static class Pair {
             String option;
             String converted;
 

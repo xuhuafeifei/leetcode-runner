@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  * @email 2508020102@qq.com
  */
 public class QuestionService {
-    private static QuestionService qs = new QuestionService();
+    private static final QuestionService qs = new QuestionService();
 
     public static QuestionService getInstance() {
         return qs;
@@ -51,11 +51,11 @@ public class QuestionService {
     }
 
     /**
-     * @Deprecated: 当前版本废弃该方法, 该方法通过consumer引入别的模块的逻辑, 耦合性太强.
-     * 此外, 为了解决异步加载question导致其余模块不知道question什么时候加载完毕的问题, 引入QLoadStartEvent和QLoadEndEvent事件, 通过EventBus进行通知
+     * {@code @Deprecated} 当前版本废弃该方法, 该方法通过consumer引入别的模块的逻辑, 耦合性太强, qs内部逻辑和外部逻辑耦合
+     * 为了解决异步加载question导致其余模块不知道question什么时候加载完毕的问题, 引入QLoadStartEvent和QLoadEndEvent事件, 通过EventBus进行通知
      * <p>
      * load questions data and to something
-     * consumer是为了让数据加载操作和accept内部代码逻辑串行执行提出的解决方案
+     * consumer是为了让数据加载操作和Consumer.accept内部代码逻辑串行执行提出的解决方案
      * 因为getTotalQuestion很耗费时间, 因此数据加载是异步操作. 但存在部分逻辑需要数据加载完毕后才能执行
      * 通过consumer回调函数的形式, 提供执行需要和数据加载逻辑同步进行的业务
      */
@@ -82,9 +82,9 @@ public class QuestionService {
     /**
      * query question by titleSlug
      *
-     * @param titleSlug
-     * @param project
-     * @return
+     * @param titleSlug titleSlug
+     * @param project project
+     * @return 返回Question的额外信息, 具体可参考{@link #parseRespForFillingQuestion(Question, String)}
      */
     public Question queryQuestionInfo(@NotNull String titleSlug, Project project) {
         GraphqlReqBody.SearchParams params = new GraphqlReqBody.SearchParams();
@@ -99,12 +99,19 @@ public class QuestionService {
     }
 
     /**
-     * query question
-     * @param params
-     * @param project
-     * @return
+     * 查询指定titleSlug的question, 并返回相关信息的json
+     * 该方法服务于{@link #queryQuestionInfo(String, Project)}
+     * 之所以该方法只返回json, 是因为最开始设计Question的时候, 没有设计好codeSnippets字段
+     * 因而导致查询Question的详细信息无法直接使用Gson解析, 需要手动处理'额外信息'
+     * <p>
+     * 请注意, Gson无法直接解析的是Question的详细信息, 而不是题目列表信息(题目列表信息并没有完全显示question的全部信息).
+     * 因此{@link #getTotalQuestion(Project)}方法可以使用Gson自动解析, 而不用手动提取
+     *
+     * @param params query params
+     * @param project project
+     * @return 查询json信息
      */
-    public String queryQuestionInfo(GraphqlReqBody.SearchParams params, Project project) {
+    private String queryQuestionInfo(GraphqlReqBody.SearchParams params, Project project) {
         if (StringUtils.isBlank(params.getTitleSlug())) {
             throw new RuntimeException("title slug is null ! " + GsonUtils.toJsonStr(params));
         }
@@ -112,8 +119,8 @@ public class QuestionService {
     }
 
     /**
-     * fill question with code snippets, translated title and content
-     * @param question
+     * fill question with code snippets, translated title etc...
+     * @param question question
      */
     public void fillQuestion(Question question, Project project) {
         /* check if the question needs to fill content */
@@ -138,8 +145,16 @@ public class QuestionService {
 
     /**
      * parse json resp and extract certain field to fill the question
-     * @param question
-     * @param resp
+     * 从json中解析提取的字段数据如下:
+     * <p>
+     * translatedTitle
+     * translatedContent
+     * questionId
+     * exampleTestcases
+     * codeSnippets
+     *
+     * @param question 需要填充的Question对象
+     * @param resp json
      */
     private void parseRespForFillingQuestion(Question question, String resp) {
         // get a lang type
@@ -173,8 +188,8 @@ public class QuestionService {
 
     /**
      * pick on question for random
-     * @param project
-     * @return
+     * @param project project
+     * @return 返回随即题目
      */
     public Question pickOne(Project project) {
         LeetcodeClient instance = LeetcodeClient.getInstance(project);
@@ -184,7 +199,7 @@ public class QuestionService {
 
     /**
      * choose daily question
-     * @param project
+     * @param project project
      */
     public void todayQuestion(Project project) {
         LeetcodeClient instance = LeetcodeClient.getInstance(project);

@@ -40,15 +40,15 @@ public class GraphqlReqBody {
     }
 
     /**
-     * use search params to build graphql request body
-     * especially for variable items
+     * 使用{@link SearchParams}构建 GraphQL 请求体
+     * 特别是针对variables变量项
      * <p>
-     * each field will be added to variables, and item's key is filedName, item's value is filedValue
+     * 每个字段将被添加到variables中，键是 filedName，值是 filedValue
      * <p>
-     * additionally, if the field is not annotated with @Filters, it will be added to variables directly,
-     * otherwise, it will be added to filters, and then filters will be added to variables
+     * 此外，如果字段没有使用 @Filters 注解，则会直接添加到variables中，
+     * 否则，会先将其添加到过filters中，然后再将filters添加到variables中
      *
-     * @param params
+     * @param params 搜索参数
      */
     public void setBySearchParams(SearchParams params) {
         Class aClass = params.getClass();

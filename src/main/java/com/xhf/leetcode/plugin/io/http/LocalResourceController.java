@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.io.http;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.io.FileUtilRt;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,6 +13,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
+ * 处理http请求, 返回当前路径下的vditor框架文件
+ * <p>
+ * 当前类服务于{@link com.xhf.leetcode.plugin.editors.MarkDownEditor}. 并在{@link LocalHttpRequestHandler}中调用
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

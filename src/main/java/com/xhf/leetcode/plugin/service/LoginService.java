@@ -6,23 +6,18 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.impl.IdeFrameImpl;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.bus.LoginEvent;
-import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
-import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
-import com.xhf.leetcode.plugin.model.Question;
-import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.window.LCPanel;
-import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.cef.browser.CefBrowser;
@@ -59,31 +54,30 @@ public final class LoginService {
     }
 
     public void doLogin() {
-        MyList<Question> myList = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_QUESTION_LIST);
         // do not call isLogin function in this class
         if (LeetcodeClient.getInstance(project).isLogin()) {
-            loginSuccessAfter(project, myList);
+            loginSuccessAfter(project);
             return;
         }
 
-        JcefLoginWindow jcefLoginWindow = new JcefLoginWindow(project, myList);
+        JcefLoginWindow jcefLoginWindow = new JcefLoginWindow(project);
         try {
             jcefLoginWindow.start();
         } catch (Exception e) {
             LogUtils.error("JCEF Login Failed, Start Cookie Login...", e);
-            startCookieLogin(project, myList);
+            startCookieLogin(project);
         }
     }
 
-    private void startCookieLogin(Project project, MyList<Question> myList) {
+    private void startCookieLogin(Project project) {
         try {
-            new CookieLoginWindow(project, myList).start();
+            new CookieLoginWindow(project).start();
         } catch (Exception e) {
             throw new RuntimeException("Cookie Login Failed", e);
         }
     }
 
-    private void loginSuccessAfter(Project project, MyList<Question> myList) {
+    private void loginSuccessAfter(Project project) {
         loginFlag = Boolean.TRUE;
         LogUtils.info("login success...");
         ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("login success...");
@@ -112,12 +106,10 @@ public final class LoginService {
         return loginFlag && LeetcodeClient.getInstance(project).isLogin();
     }
 
-    abstract class BasicWindow {
+    abstract static class BasicWindow {
         protected Project project;
-        protected MyList<Question> myList;
-        public BasicWindow(Project project, MyList<Question> myList) {
+        public BasicWindow(Project project) {
             this.project = project;
-            this.myList = myList;
         }
 
         protected void start() throws Exception {
@@ -151,8 +143,8 @@ public final class LoginService {
         private final JButton cancelButton;
         private final JButton helpButton;
 
-        public CookieLoginWindow(Project project, MyList<Question> myList) {
-            super(project, myList);
+        public CookieLoginWindow(Project project) {
+            super(project);
             this.contentPane = new JPanel();
             this.textArea = new JTextArea();
             this.loginButton = new JButton("Login");
@@ -213,7 +205,7 @@ public final class LoginService {
                 LeetcodeClient instance = LeetcodeClient.getInstance(project);
                 instance.setCookie(new BasicClientCookie2(LeetcodeApiUtils.LEETCODE_SESSION, text));
                 if (instance.isLogin()) {
-                    loginSuccessAfter(project, myList);
+                    loginSuccessAfter(project);
                     frame.dispose();
                 } else {
                     JOptionPane.showMessageDialog(contentPane, "Cookie Error, Please Try Again", "Error", JOptionPane.ERROR_MESSAGE);
@@ -243,7 +235,7 @@ public final class LoginService {
                 helpContentPane.setText(getHelpContent());
                 helpContentPane.setEditable(false);
 
-                JScrollPane scrollPane = new JScrollPane(helpContentPane);
+                JBScrollPane scrollPane = new JBScrollPane(helpContentPane);
                 panel.add(scrollPane, BorderLayout.CENTER);
 
                 return panel;
@@ -258,8 +250,8 @@ public final class LoginService {
 
     class JcefLoginWindow extends BasicWindow {
 
-        public JcefLoginWindow(Project project, MyList<Question> myList) {
-            super(project, myList);
+        public JcefLoginWindow(Project project) {
+            super(project);
         }
 
         @Override
@@ -268,7 +260,7 @@ public final class LoginService {
         }
 
         @Override
-        void loadComponent(JFrame frame) throws Exception {
+        void loadComponent(JFrame frame) {
             final JBCefBrowser jbcebrowser = new JBCefBrowser(LeetcodeApiUtils.getLeetcodeLogin());
             JBCefClient jbCefClient = jbcebrowser.getJBCefClient();
             CefCookieManager cefCookieManager = jbcebrowser.getJBCefCookieManager().getCefCookieManager();
@@ -303,7 +295,7 @@ public final class LoginService {
                                 LeetcodeClient.getInstance(project).clearCookies();
                                 // store cookies
                                 LeetcodeClient.getInstance(project).setCookies(cookieList);
-                                loginSuccessAfter(project, myList);
+                                loginSuccessAfter(project);
                                 frame.dispose();
                             } else {
                                 cookieList.clear();

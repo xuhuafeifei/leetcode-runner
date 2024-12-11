@@ -2,11 +2,6 @@ package com.xhf.leetcode.plugin.bus;
 
 import com.google.common.eventbus.EventBus;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * 使用guava的EventBus, LCEventBus对其api做出封装, 适配当前项目
  * @author feigebuge

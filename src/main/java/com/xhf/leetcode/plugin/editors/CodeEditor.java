@@ -7,14 +7,11 @@ import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.SplitEditorToolbar;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.util.Key;
 import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
-import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
+import com.xhf.leetcode.plugin.utils.Constants;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,17 +21,20 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeListener;
-import java.net.URL;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class CodeEditor implements FileEditor {
-    private Project project;
-    private LightVirtualFile vFile;
-    private JTextPane textPane;
-    private final BorderLayoutPanel borderLayoutPanel;
+    /**
+     * 填充code内容的容器
+     */
+    private final JTextPane textPane;
+    /**
+     * 核心容器
+     */
+    private final BorderLayoutPanel myComponent;
 
 
     /**
@@ -44,7 +44,7 @@ public class CodeEditor implements FileEditor {
         DefaultActionGroup actionGroup = new DefaultActionGroup(copyAction(), copyToContentEditor());
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("Solution", actionGroup, true);
         actionToolbar.setTargetComponent(comp);
-        return new SplitEditorToolbar(null, actionToolbar);
+        return new SplitEditorToolbar(actionToolbar, ActionManager.getInstance().createActionToolbar("Empty", new DefaultActionGroup(), true));
     }
 
     private AnAction copyAction() {
@@ -72,31 +72,29 @@ public class CodeEditor implements FileEditor {
     }
 
     public CodeEditor(@NotNull Project project, @NotNull LightVirtualFile file) {
-        this.project = project;
-        this.vFile = file;
         this.textPane = new JTextPane();
-        this.textPane.setText(String.valueOf(vFile.getContent())); // set history code to text pane
-//        this.textPane.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 15));
-//        this.textPane.setForeground(new Color(110, 107, 107));
-//        this.textPane.setBackground(new Color(253, 255, 255));
+        this.textPane.setText(String.valueOf(file.getContent())); // set history code to text pane
+        this.textPane.setFont(Constants.ENGLISH_FONT);
+        this.textPane.setForeground(Constants.FOREGROUND_COLOR);
+        this.textPane.setBackground(Constants.BACKGROUND_COLOR);
         this.textPane.setEditable(false);
-        this.borderLayoutPanel = JBUI.Panels.simplePanel();
-        this.borderLayoutPanel.addToTop(createToolbarWrapper(this.textPane));
-        JBScrollPane jsp = new JBScrollPane(this.textPane);
-        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        this.borderLayoutPanel.addToCenter(jsp);
+        this.myComponent = JBUI.Panels.simplePanel();
+        this.myComponent.addToTop(createToolbarWrapper(this.textPane));
+//        JBScrollPane jsp = new JBScrollPane(this.textPane);
+//        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+//        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        this.myComponent.addToCenter(this.textPane);
     }
 
     @Override
     public @NotNull JComponent getComponent() {
         // return jcefHtmlPanel.getComponent();
-        return this.borderLayoutPanel;
+        return this.myComponent;
     }
 
     @Override
     public @Nullable JComponent getPreferredFocusedComponent() {
-        return this.borderLayoutPanel;
+        return this.myComponent;
     }
 
     @Override

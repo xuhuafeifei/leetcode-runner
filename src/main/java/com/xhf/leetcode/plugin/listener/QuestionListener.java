@@ -6,7 +6,6 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
@@ -21,6 +20,10 @@ public class QuestionListener extends AbstractMouseAdapter {
         this.questionList = questionList;
     }
 
+    /**
+     * 创建题目
+     * @param e
+     */
     @Override
     protected void doubleClicked(MouseEvent e) {
         Point point = e.getPoint();

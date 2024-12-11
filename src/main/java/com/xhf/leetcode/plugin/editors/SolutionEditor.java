@@ -8,15 +8,14 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
-import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
 import com.xhf.leetcode.plugin.bus.LCSubscriber;
-import com.xhf.leetcode.plugin.bus.LoginEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.listener.SolutionListener;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Solution;
 import com.xhf.leetcode.plugin.render.SolutionCellRenderer;
 import com.xhf.leetcode.plugin.service.SolutionService;
+import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
@@ -24,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * @author feigebuge
@@ -43,8 +41,8 @@ public class SolutionEditor extends AbstractSplitTextEditor {
      */
     private void openError() {
         JTextPane jTextPane = showNotingTextPane();
-        jTextPane.setText("Submission Editor open error! please close all file and try again");
-        jTextPane.setForeground(Color.RED);
+        jTextPane.setText(Constants.SOLUTION_OPEN_ERROR);
+        jTextPane.setForeground(Constants.RED_COLOR);
         BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(jTextPane);
         jbSplitter.setFirstComponent(secondComponent);
         jbSplitter.setSecondComponent(null);
@@ -57,7 +55,7 @@ public class SolutionEditor extends AbstractSplitTextEditor {
         myList.setCellRenderer(new SolutionCellRenderer<Solution>());
         // make list can interact with user and open to solution content by click
         myList.addMouseListener(new SolutionListener(project, myList, this));
-        myList.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        myList.setFont(Constants.CN_FONT);
         LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
         if (lc == null) {
             openError();
@@ -81,7 +79,7 @@ public class SolutionEditor extends AbstractSplitTextEditor {
         );
         if (StringUtils.isBlank(content)) {
             JTextPane jTextPane = showNotingTextPane();
-            jTextPane.setText("This content is not supported to show yet..., please choose another solution");
+            jTextPane.setText(Constants.SOLUTION_CONTENT_NOT_SUPPORT);
             secondComponent = JBUI.Panels.simplePanel(jTextPane);
             secondComponent.addToTop(createToolbarWrapper(jTextPane));
         }else {

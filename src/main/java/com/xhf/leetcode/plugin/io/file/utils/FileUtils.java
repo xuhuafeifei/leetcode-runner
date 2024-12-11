@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.io.file.utils;
 
+import com.xhf.leetcode.plugin.utils.LogUtils;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -76,7 +78,7 @@ public class FileUtils {
         try (FileInputStream fis = new FileInputStream(path)) {
             properties.load(fis);
         } catch (IOException e) {
-            System.err.println("no properties file exist in path = " + path);
+            LogUtils.warn("no properties file exist in path = " + path);
         }
         return properties;
     }

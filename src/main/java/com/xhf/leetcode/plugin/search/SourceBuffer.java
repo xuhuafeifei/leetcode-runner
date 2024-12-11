@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.search;
 
-import com.intellij.openapi.externalSystem.service.execution.NotSupportedException;
 import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
 
 import java.io.IOException;
@@ -11,23 +10,28 @@ import java.util.NoSuchElementException;
 /**
  * 数据源缓冲区, 用于维护从数据源加载到的分段数据
  * <p>
- * SourceBuffer通过迭代器返回正在被消费的数据, 如果迭代器将所有数据迭代完成, 则表示SourceBuffer所有的数据均
+ * {@link SourceBuffer}通过迭代器返回正在被消费的数据, 如果迭代器将所有数据迭代完成, 则表示SourceBuffer所有的数据均
  * 被消费者处理完毕
  *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class SourceBuffer {
-    // 缓冲区
+    /**
+     * 缓冲区
+     */
     private final char[] buffer;
-    // 迭代器, 负责迭代buffer
-    private final Iterator it;
-    // 统计缓冲区内有效数据的数量, 如果为-1, 则表示缓冲区还未被加载
+    /**
+     * 迭代器, 负责迭代buffer
+     */
+    private final Itr it;
+    /**
+     * 统计缓冲区内有效数据的数量, 如果为-1, 则表示缓冲区还未被加载
+     */
     private int totalCnt;
-    private static final int DEFAULT_BUFFER_SIZE = 1024;
 
     public SourceBuffer() {
-        this(DEFAULT_BUFFER_SIZE);
+        this(SourceManager.DEFAULT_BUFFER_SIZE);
     }
 
     public SourceBuffer(int BUFFER_SIZE) {
@@ -45,6 +49,17 @@ public class SourceBuffer {
         }
     }
 
+    /**
+     * 分段加载数据. 同时重置迭代器状态
+     * <p>
+     * 需要注意的是, SourceBuffer不允许在数据迭代过程中调用该方法, 否则会在Itr内部重置时抛出异常
+     *
+     * @param source 数据源, 分段数据的来源. SourceBuffer从source中分段加载数据
+     * @param offset 详见{@link Reader}的read方法.
+     * @param length 详见{@link Reader}的read方法.
+     * @return
+     * @throws IOException
+     */
     public int segLoad(Reader source, int offset, int length) throws IOException {
         if (length > buffer.length) {
             throw new IllegalArgumentException("length cannot be greater than buffer length, source buffer length is "
@@ -72,10 +87,17 @@ public class SourceBuffer {
         return getBufferStr(0, buffer.length);
     }
 
+    /**
+     * 迭代器. 维护分段数据{@link #buffer}消费情况. 被迭代过的数据, 会被标记为已消费
+     */
     private class Itr implements Iterator {
-        // 当前遍历到的元素下标
+        /**
+         * 当前遍历到的元素下标
+         */
         private int cursor;
-        // 缓冲区有效数据的数量
+        /**
+         * 缓冲区有效数据的数量
+         */
         private int size;
 
         public Itr() {

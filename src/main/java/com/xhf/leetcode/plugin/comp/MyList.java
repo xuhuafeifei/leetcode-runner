@@ -8,8 +8,6 @@ import java.util.List;
 
 public class MyList<T> extends JBList<T> {
 
-    private List<T> showList;
-
     public MyList() {
 
     }
@@ -19,7 +17,6 @@ public class MyList<T> extends JBList<T> {
     }
 
     public void setListData(List<T> listData) {
-        showList = listData;
         T[] data = (T[]) new Object[listData.size()];
         for (int i = 0; i < data.length; i++) {
             data[i] = listData.get(i);
@@ -30,9 +27,5 @@ public class MyList<T> extends JBList<T> {
 
     public void setNonData() {
         setListData(new ArrayList<T>());
-    }
-
-    public List<T> getShowList() {
-        return showList;
     }
 }

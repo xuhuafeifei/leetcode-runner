@@ -6,10 +6,8 @@ import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.testFramework.LightVirtualFile;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
-import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,28 +60,4 @@ public class SplitTextEditorProvider implements AsyncFileEditorProvider, DumbAwa
             }
         };
     }
-
-
-    /*
-    @Override
-    public @NotNull Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile file) {
-        // get preview file
-        String key = file.getPath();
-        key = FileUtils.unifyPath(key);
-        LeetcodeEditor lc = StoreService.getInstance(project).getCache(key, LeetcodeEditor.class);
-
-        // need to refresh a current file system. otherwise, it will take a lot of time to find the file
-        // VirtualFile previewFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(contentPath);
-        file.refresh(true, false);
-        assert lc != null;
-        LightVirtualFile previewFile = new LightVirtualFile(lc.getTitleSlug() + ".md", lc.getMarkdownContent());
-        return new Builder() {
-            @Override
-            public FileEditor build() {
-                return new SplitTextEditorWithPreview((TextEditor) first.createEditor(project, file),
-                        second.createEditor(project, previewFile));
-            }
-        };
-    }
-    */
 }

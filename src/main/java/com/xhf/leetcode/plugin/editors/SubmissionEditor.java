@@ -15,12 +15,12 @@ import com.xhf.leetcode.plugin.model.Submission;
 import com.xhf.leetcode.plugin.render.SubmissionCellRender;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.SubmissionService;
+import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * 订阅login, clearCache, codeSubmit事件
@@ -43,7 +43,7 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
     protected void initFirstComp() {
         if (! LoginService.getInstance(project).isLogin()) {
             JTextPane jTextPane = this.showNotingTextPane();
-            jTextPane.setText("Please Login First...");
+            jTextPane.setText(Constants.PLEASE_LOGIN);
             jbSplitter.setFirstComponent(jTextPane);
             return;
         }
@@ -52,14 +52,14 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
         myList.setCellRenderer(new SubmissionCellRender());
         // make list can interact with user and open to solution content by click
         myList.addMouseListener(new SubmissionListener(project, myList, this));
-        myList.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 14));
+        myList.setFont(Constants.CN_FONT);
         LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
         if (lc == null) {
             openError();
             return;
         }
         SubmissionService.loadSubmission(project, myList, lc.getTitleSlug());
-        myList.setEmptyText("No Submission");
+        myList.setEmptyText(Constants.NOTING_TO_SHOW);
         jbSplitter.setFirstComponent(new JBScrollPane(myList));
     }
 
@@ -68,9 +68,9 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
      */
     private void openError() {
         JTextPane jTextPane = showNotingTextPane();
-        jTextPane.setText("Submission Editor open error! please close all file and try again");
+        jTextPane.setText(Constants.SUBMISSION_EDITOR_OPEN_ERROR);
         BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(jTextPane);
-        jTextPane.setForeground(Color.RED);
+        jTextPane.setForeground(Constants.RED_COLOR);
         jbSplitter.setFirstComponent(secondComponent);
         jbSplitter.setSecondComponent(null);
     }
@@ -87,7 +87,12 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
                 lc.getTitleSlug() + ".code", content
         );
         CodeEditor codeEditor = new CodeEditor(project, submissionFile);
-        BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(codeEditor.getComponent());
+        // 设置水平滚轮
+        JBScrollPane jsp = new JBScrollPane(codeEditor.getComponent());
+        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+        BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(jsp);
         secondComponent.addToTop(createToolbarWrapper(codeEditor.getComponent()));
         jbSplitter.setSecondComponent(secondComponent);
     }

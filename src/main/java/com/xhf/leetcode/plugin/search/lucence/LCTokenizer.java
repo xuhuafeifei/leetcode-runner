@@ -35,6 +35,12 @@ public final class LCTokenizer extends Tokenizer {
         termAtt = addAttribute(TermAttribute.class);
     }
 
+    public LCTokenizer(Reader reader, int bufferSize) {
+        super(reader);
+        segmentation = new Segmentation(reader, bufferSize);
+        termAtt = addAttribute(TermAttribute.class);
+    }
+
     @Override
     public boolean incrementToken() throws IOException {
         // 清空属性

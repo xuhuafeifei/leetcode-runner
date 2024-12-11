@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.editors;
 
-import com.google.common.eventbus.Subscribe;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -10,11 +9,9 @@ import com.intellij.openapi.fileEditor.SplitEditorToolbar;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
 import com.intellij.util.ui.JBUI;
-import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
-import com.xhf.leetcode.plugin.bus.LCEventBus;
-import com.xhf.leetcode.plugin.service.LoginService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,13 +20,27 @@ import java.awt.*;
 import java.beans.PropertyChangeListener;
 
 /**
+ * 抽象分割文本编辑器: 提供分屏显示功能. 当前版本主要用于CodeEditor 和 SolutionEditor的内容构建
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public abstract class AbstractSplitTextEditor implements FileEditor {
+    /**
+     * idea核心工程对象
+     */
     protected Project project;
+    /**
+     * 维护的核心面板组件
+     */
     protected JComponent myComponent;
+    /**
+     * editor目前打开的文件
+     */
     protected VirtualFile file;
+    /**
+     * 分割器
+     */
     protected JBSplitter jbSplitter;
 
     public AbstractSplitTextEditor(Project project, VirtualFile file) {
@@ -46,10 +57,13 @@ public abstract class AbstractSplitTextEditor implements FileEditor {
     }
 
     /**
-     * when the second editor of splitter is not visible, the toolbar will be displayed in the second editor which contains close action
+     * 当拆分器（splitter）的第二个编辑器可见时，工具栏将会显示在第二个编辑器中，并且该工具栏包含关闭操作
      * <p>
-     * if the close action is activated, the second editor will be closed
-     * @return
+     * 如果激活了关闭操作，第二个编辑器将会被关闭
+     * <p>
+     * 该方法返回一个指示是否成功关闭第二个编辑器的布尔值。
+     *
+     * @return 返回Toolbar工具栏
      */
     protected final SplitEditorToolbar createToolbarWrapper(JComponent comp) {
         DefaultActionGroup actionGroup = new DefaultActionGroup(new AnAction("Close Solution", "Close solution", AllIcons.Actions.Close) {
@@ -67,6 +81,9 @@ public abstract class AbstractSplitTextEditor implements FileEditor {
         jbSplitter.getSecondComponent().setVisible(false);
     }
 
+    /**
+     * 初始化分割器的第一块面板的内容
+     */
     protected abstract void initFirstComp();
 
     @Override
@@ -76,9 +93,9 @@ public abstract class AbstractSplitTextEditor implements FileEditor {
 
     protected JTextPane showNotingTextPane() {
         JTextPane textPane = new JTextPane();
-//        textPane.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 15));
-//        textPane.setForeground(new Color(110, 107, 107));
-//        textPane.setBackground(new Color(253, 255, 255));
+        textPane.setFont(new Font("DejaVu Sans Mono", Font.PLAIN, 15));
+        textPane.setForeground(new JBColor(Color.darkGray, new Color(253, 255, 255)));
+        textPane.setBackground(new JBColor(new Color(253, 255, 255), Color.darkGray));
         textPane.setEditable(false);
         return textPane;
     }

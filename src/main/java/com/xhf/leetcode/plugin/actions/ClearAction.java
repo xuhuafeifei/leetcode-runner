@@ -2,16 +2,11 @@ package com.xhf.leetcode.plugin.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.io.file.StoreService;
-import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.utils.LoginPass;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
 
 /**
  * 清除缓存文件

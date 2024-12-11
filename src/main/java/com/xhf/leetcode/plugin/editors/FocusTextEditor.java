@@ -20,10 +20,18 @@ import java.beans.PropertyChangeListener;
  * @email 2508020102@qq.com
  */
 public class FocusTextEditor implements FileEditor {
-    private Project project;
+    /**
+     * idea项目对象
+     */
+    private final Project project;
+    /**
+     * 核心容器
+     */
     private JComponent myComponent;
-    private VirtualFile file;
-    private JBTabbedPane tabbedPane;
+    /**
+     * 打开的文件
+     */
+    private final VirtualFile file;
 
     public FocusTextEditor(Project project, @NotNull VirtualFile file) {
         this.project = project;
@@ -31,8 +39,11 @@ public class FocusTextEditor implements FileEditor {
         initComponent();
     }
 
+    /**
+     * 初始化三个tab
+     */
     private void initComponent() {
-        tabbedPane = new JBTabbedPane();
+        JBTabbedPane tabbedPane = new JBTabbedPane();
 
         JComponent contentPanel = new MarkDownEditor(project, ViewUtils.getHTMLContent(file, project)).getComponent();
         JComponent solutionPanel = new SolutionEditor(project, file).getComponent();
@@ -83,11 +94,6 @@ public class FocusTextEditor implements FileEditor {
     @Override
     public void removePropertyChangeListener(@NotNull PropertyChangeListener listener) {
 
-    }
-
-    @Override
-    public @Nullable FileEditorLocation getCurrentLocation() {
-        return null;
     }
 
     @Override

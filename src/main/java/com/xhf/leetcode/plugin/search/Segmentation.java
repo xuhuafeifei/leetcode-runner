@@ -24,6 +24,13 @@ public class Segmentation {
         pf = ProcessorFactory.getInstance();
     }
 
+    public Segmentation(Reader reader, int bufferSize) {
+        sm = new SourceManager(bufferSize);
+        sm.setSource(reader);
+        itr = sm.iterator();
+        pf = ProcessorFactory.getInstance();
+    }
+
     // 获取下一个分词
     public String next() throws IOException {
         if (! sm.tryLoad()) return null;

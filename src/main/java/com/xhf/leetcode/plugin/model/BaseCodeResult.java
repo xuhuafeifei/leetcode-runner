@@ -3,7 +3,7 @@ package com.xhf.leetcode.plugin.model;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * extract base info from the run code result and submit code result
+ * extract base info from the {@link RunCodeResult} result and {@link SubmitCodeResult} result
  *
  * @author feigebuge
  * @email 2508020102@qq.com

@@ -28,6 +28,10 @@ public class DictNode {
         this.isEnd = isEnd;
     }
 
+    public char getC() {
+        return c;
+    }
+
     public boolean contains(Character c) {
         return children.containsKey(c);
     }
@@ -45,6 +49,6 @@ public class DictNode {
     }
 
     public boolean isEnd() {
-        return isEnd ? true : false;
+        return isEnd;
     }
 }

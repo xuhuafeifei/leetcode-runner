@@ -7,7 +7,6 @@ import com.xhf.leetcode.plugin.model.Submission;
 import com.xhf.leetcode.plugin.service.SubmissionService;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
@@ -24,6 +23,10 @@ public class SubmissionListener extends AbstractMouseAdapter {
         this.solutionEditor = solutionEditor;
     }
 
+    /**
+     * 打开提交记录
+     * @param e
+     */
     @Override
     protected void doubleClicked(MouseEvent e) {
         Point point = e.getPoint();

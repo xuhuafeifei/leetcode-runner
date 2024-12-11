@@ -86,11 +86,11 @@ public class TestSourceManager {
         assert 'd' == itr.next();
 
         // 测试增强后的hasNext, 在迭代完成BUFFER_SIZE个数据后, 尝试从source中加载剩余数据
-        s = RandomUtils.nextString(SourceManager.BUFFER_SIZE + 1);
+        s = RandomUtils.nextString(SourceManager.DEFAULT_BUFFER_SIZE + 1);
         sm.setSource(new StringReader(s));
 
         // 消费buffer中的1024个数据
-        for (int i = 0; i < SourceManager.BUFFER_SIZE; i++) {
+        for (int i = 0; i < SourceManager.DEFAULT_BUFFER_SIZE ; i++) {
             itr.next();
         }
         // 此时缓冲区已经为空, 但source中还有数据, 因此可以继续调用next(因为是SourceManager增强后的itr)
@@ -150,7 +150,7 @@ public class TestSourceManager {
     @Test
     public void test8() throws Exception {
         // 测试快照迭代器的hasNext方法
-        String s = RandomUtils.nextString(SourceManager.BUFFER_SIZE);
+        String s = RandomUtils.nextString(SourceManager.DEFAULT_BUFFER_SIZE);
         s += "`ij&";
 
         SourceManager sm = new SourceManager();
@@ -161,7 +161,7 @@ public class TestSourceManager {
         Iterator captureItr = sm.captureIterator();
 
         // 迭代器迭代BUFFER_SIZE次
-        for (int i = 0; i < SourceManager.BUFFER_SIZE; i++) {
+        for (int i = 0; i < SourceManager.DEFAULT_BUFFER_SIZE; i++) {
             itr.next();
         }
 
@@ -227,7 +227,7 @@ public class TestSourceManager {
         assert ! itr.hasNext();
 
         sm.setSource(s);
-        for (int i = 0; i < SourceManager.BUFFER_SIZE; i++) {
+        for (int i = 0; i < SourceManager.DEFAULT_BUFFER_SIZE; i++) {
             itr.next();
         }
 

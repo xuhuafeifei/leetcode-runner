@@ -183,18 +183,18 @@ public class CodeService {
 
 
     /**
-     * abstract result builder, used to build result string to show the run/submit code result in console
+     * 抽象结果构建器，用于构建结果字符串以在控制台显示RunCode/SubmitCode的结果
      * <p>
-     * RunCodeResult encapsulates the result obtained from running the submitted Solution code on the leetcode platform.
-     * However, to ensure extensibility, an abstract class was extracted in the design to accommodate the output requirements of
-     * SubmitCodeResult.
+     * RunCodeResult 封装了在 leetcode 平台上运行提交的解决方案代码所获得的结果。
+     * <p>
+     * 然而，为了确保可扩展性，在设计中提取了一个抽象类，以适应 SubmitCodeResult 和 RunCodeResult 的输出需求。
      *
      * @param <T>
      */
     private static abstract class AbstractResultBuilder<T extends BaseCodeResult> {
         protected T cr; // code result
         protected final StringBuilder sb = new StringBuilder();
-        protected static final String splitter = "--------------";
+        protected final String splitter = "--------------";
 
         public AbstractResultBuilder (T cr) {
             this.cr = cr;
@@ -212,6 +212,29 @@ public class CodeService {
                     StringUtils.isNotBlank(cr.getTotalTestcases());
         }
 
+        /*
+         * 创建头部:
+         * ========================== example 1 ============================
+         *  ✅ Accept...
+         *  total test cases: 3
+         *  total correct: 3
+         *
+         * ========================== example 2 ============================
+         *  ❌ Wrong Answer...
+         *  total test cases: 3
+         *  total correct: 0
+         *
+         * ========================== example 3 ============================
+         * ❌ Runtime Error...
+         *  NameError: name 'abab' is not defined
+         *      abab
+         *  Line 5 in semiOrderedPermutation (Solution.py)
+         *            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+         *      ret = Solution().semiOrderedPermutation(param_1)
+         *  Line 31 in _driver (Solution.py)
+         *      _driver()
+         *  Line 46 in <module> (Solution.py)
+         */
         private void createHead() {
             boolean correctAnswer = isCorrectAnswer();
             if (correctAnswer) {
@@ -243,9 +266,68 @@ public class CodeService {
                 }
             }
         }
+
+        /**
+         * 创建body
+         * ========================== example 1 ============================
+         * --------------CASE 1: ✅--------------
+         * Input:
+         * [2,1,4,3]
+         * Code Answer:
+         * 2
+         * Expect Answer:
+         * 2
+         * --------------CASE 2: ✅--------------
+         * Input:
+         * [2,4,1,3]
+         * Code Answer:
+         * 3
+         * Expect Answer:
+         * 3
+         * --------------CASE 3: ✅--------------
+         * Input:
+         * [1,3,4,2,5]
+         * Code Answer:
+         * 0
+         * Expect Answer:
+         * 0
+         * <p>
+         * ========================== example 2 ============================
+         * --------------CASE 1: ❌--------------
+         * Input:
+         * [2,1,4,3]
+         * Code Answer:
+         * 4
+         * Expect Answer:
+         * 2
+         * --------------CASE 2: ❌--------------
+         * Input:
+         * [2,4,1,3]
+         * Code Answer:
+         * 5
+         * Expect Answer:
+         * 3
+         * --------------CASE 3: ❌--------------
+         * Input:
+         * [1,3,4,2,5]
+         * Code Answer:
+         * 2
+         * Expect Answer:
+         * 0
+         *
+         * ========================== example 3 ============================
+         * null
+         */
         protected abstract void createBody();
     }
 
+    /**
+     * 创建负责输出RunCode结果的类
+     *
+     * @param dataInput 输入测试案例
+     * @param cr RunCode结果, 来自于leetcode platform
+     * @return 返回builder, 用于build创建string, 输出到LCConsole
+     */
     private static AbstractResultBuilder<RunCodeResult> createRunCodeResultBuilder(String dataInput, RunCodeResult cr) {
         return new AbstractResultBuilder<RunCodeResult>(cr) {
             @Override
@@ -309,6 +391,12 @@ public class CodeService {
         };
     }
 
+    /**
+     * 创建负责输出SubmitCode结果的类
+     *
+     * @param scr SubmitCodeResult, 来自于leetcode platform
+     * @return 返回builder, 用于build创建string, 输出到LCConsole
+     */
     private static AbstractResultBuilder<SubmitCodeResult> createSubmitCodeResultBuilder(SubmitCodeResult scr) {
         return new AbstractResultBuilder<SubmitCodeResult>(scr) {
             @Override

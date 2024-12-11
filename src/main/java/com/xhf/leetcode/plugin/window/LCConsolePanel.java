@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvider {
 
-    private ConsoleView consoleView;
+    private final ConsoleView consoleView;
 
     public LCConsolePanel(ToolWindow toolWindow, Project project) {
         super(Boolean.FALSE, Boolean.TRUE);

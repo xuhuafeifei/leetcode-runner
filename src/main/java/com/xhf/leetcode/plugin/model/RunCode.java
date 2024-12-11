@@ -15,6 +15,9 @@ public class RunCode {
     private String question_id;
     /* code content */
     private String typed_code;
+    /**
+     * 运行代码的输入测试案例
+     */
     private String data_input;
     @SerializedName("title_slug")
     private String titleSlug;

@@ -15,13 +15,11 @@ import java.awt.*;
  */
 public class TestCaseDialog extends DialogWrapper {
 
-    private String dataInput;
-    private JPanel contentPane;
+    private final String dataInput;
     private JTextArea textArea;
     // java file path, which is used for a key in cache
-    private String path;
-    private Project project;
-    private JButton resetButton;
+    private final String path;
+    private final Project project;
 
     public TestCaseDialog(String dataInput, String path, Project project) {
         super(true);
@@ -35,7 +33,7 @@ public class TestCaseDialog extends DialogWrapper {
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
-        contentPane = new JPanel(new BorderLayout());
+        JPanel contentPane = new JPanel(new BorderLayout());
         textArea = new JTextArea(400, 400);
         textArea.setText(this.dataInput);
         textArea.setEditable(true);
@@ -53,7 +51,7 @@ public class TestCaseDialog extends DialogWrapper {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         // create reset button
-        resetButton = new JButton("Reset");
+        JButton resetButton = new JButton("Reset");
         resetButton.setBorderPainted(false);
         resetButton.setContentAreaFilled(false);
         resetButton.setFocusPainted(false);
@@ -61,6 +59,11 @@ public class TestCaseDialog extends DialogWrapper {
         resetButton.addActionListener(e -> {
             // get default data
             LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
+            if (lc == null) {
+                JOptionPane.showMessageDialog(null,
+                        "get default cases failed! please close all file and try again");
+                return;
+            }
             String defaultTestcases = lc.getDefaultTestcases();
             textArea.setText(defaultTestcases);
         });
@@ -84,6 +87,11 @@ public class TestCaseDialog extends DialogWrapper {
         inputText = inputText.trim();
         // update data
         LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
+        if (lc == null) {
+            JOptionPane.showMessageDialog(null,
+                    "set cases failed! please close all file and try again");
+            return;
+        }
         lc.setExampleTestcases(inputText);
         StoreService.getInstance(project).addCache(path, lc);
         super.doOKAction();

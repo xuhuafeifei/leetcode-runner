@@ -9,11 +9,21 @@ import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
  * @email 2508020102@qq.com
  */
 public class Hit {
-    // 用于查询得到hit的字符c
+    /**
+     * 用于查询得到hit的字符c
+     */
     private char c;
-    // node指向字典树中的某一个节点, 表示搜索开始的位置
+    /**
+     * node指向字典树中的某一个节点, 表示搜索开始的位置
+     */
     private DictNode node;
+    /**
+     * c是否再字典树中命中
+     */
     private boolean isHit;
+    /**
+     * c是否是词组的结束
+     */
     private boolean isEnd;
 
     public Hit() {

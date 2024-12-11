@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.io.http;
 
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.sun.net.httpserver.HttpExchange;

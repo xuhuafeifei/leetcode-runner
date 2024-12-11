@@ -1,13 +1,14 @@
 package com.xhf.leetcode.plugin.search;
 
 /**
- * 预加载缓冲区, 配合快照迭代器使用. PreBuffer(简称PB)维护preBuffer数组, 以及缓冲区内有效数据长度, PB的有效性
+ * 预加载缓冲区, 配合快照迭代器使用. {@link PreBuffer}(简称PB)维护preBuffer数组, 以及缓冲区内有效数据长度, PB的有效性
  * <p>
  * PB是为了解决capture iterator(简称ci)在迭代边界数据时, 进一步迭代数据遇到诸多问题而提出的解决方案
- * PB的出现允许ci在不修改底层SourceBuffer(简称SB)内部数据的情况下, 让ci具有迭代后续分段数据的能力
+ * PB的出现允许ci在不修改底层{@link SourceBuffer}(简称SB)内部数据的情况下, 让ci具有迭代后续分段数据的能力
  * <p>
- * 与此同时, PB的出现也带来了全新的问题: source读取位置发生偏移. 这就导致PB提前加载了SB因该
- * 加载source的那部分分段数据. 因此在PB内部存在合法数据的情况下, SB因该先从PB内部读取数据
+ * 与此同时, PB的出现也带来了全新的问题: 如果数据源source将数据写入preBuffer, 那么下一轮读取, source的偏移量将发生改变
+ * 这就导致PB提前加载了SB因该加载source的那部分分段数据.
+ * 因此在PB内部存在合法数据的情况下, SB因该先从PB内部读取数据. 而这也就是{@link SourceManager}的预加载机制
  * <p>
  *
  * 为了更好的解释PB引入的必要性, 需要先介绍业务背景:
@@ -33,7 +34,7 @@ package com.xhf.leetcode.plugin.search;
  * 上述问题产生的原因是: 中文字符存在语境, 当多个字符组合在一起可能组成非法CN_Token. 因此在迭代的时候不能真的进行数据消费.
  * 只有在完成匹配后, 才能进行数据消费.
  * <p>
- * 为了解决上述问题, SourceManager(简称SM)引入快照迭代器(CaptureIterator, 简称ci), 通过迭代快照的形式, 避免SB把原始数据消费.
+ * 为了解决上述问题, {@link SourceManager}(简称SM)引入快照迭代器(CaptureIterator, 简称ci), 通过迭代快照的形式, 避免SB把原始数据消费.
  * 需要注意的是, 为了保证效率, 此处的快照只是对SB迭代器的快照, 而不是对SB本身的快照. 相当于SB被两个迭代器迭代, 一个是
  * SB内部的iterator, 另一个是SM的ci
  * <p>
@@ -60,11 +61,15 @@ class PreBuffer {
     private int size;
 
     public PreBuffer() {
-        init();
+        init(SourceManager.DEFAULT_BUFFER_SIZE);
     }
 
-    public void init() {
-        preBuffer = SourceManager.DEFAULT_PRE_BUFFER;
+    public PreBuffer(int bufferSize) {
+        init(bufferSize);
+    }
+
+    private void init(int bufferSize) {
+        preBuffer = new char[bufferSize];
         preBufferValid = false;
     }
 

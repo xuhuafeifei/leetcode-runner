@@ -27,13 +27,23 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
+ * Question问题查询引擎, 索引问题题目. 对外提供题目搜索能力
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class QuestionEngine implements SearchEngine<Question> {
-
+    /**
+     * 文本分析器
+     */
     private final LCAnalyzer analyzer;
+    /**
+     * 索引目录
+     */
     private final Directory directory;
+    /**
+     * idea 项目
+     */
     private final Project project;
 
     public QuestionEngine(Project project) {
@@ -73,8 +83,13 @@ public class QuestionEngine implements SearchEngine<Question> {
 
         int length = topDocs.scoreDocs.length;
         List<Question> ans = new ArrayList<>(length);
+        /*
+            通过查询得到的对象, 通过索引构建时存储的idx信息
+            从原始题目中找到对应的题目对象
+         */
         for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
             Document targetDoc = isearcher.doc(scoreDoc.doc);
+            // 通过id在原始数据中找到匹配得到的题目对象
             int idx = Integer.parseInt(targetDoc.get("id"));
             ans.add(totalQuestion.get(idx));
         }
