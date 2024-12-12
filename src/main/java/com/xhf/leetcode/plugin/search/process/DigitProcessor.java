@@ -39,7 +39,6 @@ public class DigitProcessor implements Processor {
                 break;
             }
         }
-        context.setToken(sb.toString());
-        context.setLen(len);
+        context.addToken(sb.toString(), len);
     }
 }

@@ -24,6 +24,7 @@ public class SourceManager {
      * 缓冲区大小
      */
     public final static int DEFAULT_BUFFER_SIZE = 1024 * 2;
+    public final static int MIN_BUFFER_SIZE = 10;
     /**
      * 缓冲区大小
      */
@@ -58,10 +59,10 @@ public class SourceManager {
     }
 
     public SourceManager(int bufferSize) {
-        if (bufferSize < 10) {
+        if (bufferSize < MIN_BUFFER_SIZE) {
             throw new IllegalArgumentException("bufferSize is too small!");
         }
-        if (bufferSize > 1024 * 30) {
+        if (bufferSize > DEFAULT_BUFFER_SIZE) {
             throw new IllegalArgumentException("bufferSize is too large!");
         }
         this.bufferSize = bufferSize;
@@ -256,18 +257,43 @@ public class SourceManager {
         }
 
         /**
-         * 获取{@link CaptureIterator}(简称ci), 对底层{@link #sourceBuffer}的迭代器拍摄快照
+         * 获取快照迭代器{@link CaptureIterator}(简称ci)
          * <p>
-         * {@link #captureIterator}内部维护两个指针, 其一是指向sB, 并且和sB的迭代器拍摄快照时指向相同位置.
-         * 另一个是指向preBuffer
+         * {@link #captureIterator}内部维护两个迭代器, 每个迭代器指向不同的分段数据, 其一是指向{@link #preBuffer}, 是preBuffer内部维护迭代器的快照.
+         * 另一个是指向preBuffer. 因此ci可以同时迭代preBuffer和sB的数据, 同时还负责触发预加载机制. 预加载机制的引入原因可以参考{@link PreBuffer}的注释
          * <p>
          * 需要注意的是, 每次获取快照迭代器时都需要对{@link #sourceBuffer}(简称sB)的iterator进行快照拍摄
-         * 此外, captureIterator需要进行状态重置, 调用reset()方法. 这非常重要. 如果不重置则预加载机制会发生错误.
+         * 此外, 获取captureIterator需要进行状态重置,也就是调用reset()方法. 这非常重要. 如果不重置, 预加载机制会发生错误.
          * <p>
          * eg:
          * 以下为例
+         * 为了更好的解释案例, 先介绍一些必要的背景信息.
+         * 1. iterator和消费者
+         *      1. iterator: 是{@link SourceManager}对外提供数据的一种手段, 消费者如果想要消费数据, 需要通过iterator获取
+         *      2. 消费者: 在中分词的处理逻辑中, 消费数据的是{@link com.xhf.leetcode.plugin.search.process.CNProcessor}. CNProcessor通过
+         *               CaptureIterator获取数据, 然后对数据进行分词处理. 因为CaptureIterator并不会真正消费底层sB的数据, 因此CNProcessor
+         *               使用ci时, 只会消费一个字符. 换言之, 每次调用CNProcessor, 字符消费数量为1.
+         * 2. 中文分析器{@link com.xhf.leetcode.plugin.search.process.CNProcessor}
+         *      1. CNProcessor专门处理中文分词, 其分词原理是: 以每一个中文字符为start, 尽可能的匹配最长的合法Token, 也就是能够组成词组的Token
+         *         为了实现此功能, SourceManager专门提供ci迭代器, 运行CNProcessor在获取字符数据时, 不会消费底层数据. 从而实现让每个中文字符
+         *         都能进行匹配
+         * 3. CaptureIterator
+         *      1. ci内部维护两个迭代器
+         *          1. sB迭代器快照: 通过sourceBuffer.iterator().deepcopy()获取sB的迭代器快照
+         *          2. preBuffer迭代器: ci内部维护cursor和size变量, 两个变量为迭代PreBuffer提供基础能力
+         *      2. ci迭代数据的逻辑
+         *          1. 优先迭代sB迭代器快照
+         *          2. 如果sB迭代器快照已经消费完, 判断preBuffer内部是否有合法数据
+         *          3. 如果preBuffer内部数据合法, 迭代preBuffer.
+         * 4. 符号含义
+         *      1. @ : sB迭代器指向位置
+         *      2. ^ : ci内部维护的sourceBuffer的深拷贝迭代器指向位置
+         *      3. * : ci内部维护的preBuffer迭代器指向位置
          * <p>
-         * <第一轮匹配, 以'中'为start>
+         * 现在开始介绍案例:
+         * 现有如下所示的数据, 第一个[]内的数据被导入sourceBuffer中, 第二个[]数据未被加载. 并且sB迭代器和ci迭代器指向位置如下图所示
+         * <p>
+         * <CNProcessor第一轮中文分词处理, 以'中'为start>
          * <p>
          *      sourceBuffer           未加载
          * [, , , , , , , 中, 位]   [数, ' ', ......]
@@ -275,37 +301,41 @@ public class SourceManager {
          *                ^
          *                       *(preBuffer未加载, *指向-1)
          * <p>
-         * 假设SourceBuffer的迭代器指向'中'(@指向的位置), 此时CNProcessor进行中文分词
-         * CNProcessor获取ci(CaptureIterator, ci所在位置是^, *. ^是对sB的快照, *是ci本身维护的指针)
-         * 在'中'的基础上迭代后续字符
+         * sB的迭代器指向位置是@. 此时创建ci迭代器, ci指向位置是^和*. ^是sB的快照, *是迭代preBuffer的指针
+         * CNProcessor在'中'的基础上迭代后续字符
          * <p>
          * [, , , , , , , 中, 位]   [数, ' ', ......]
          *                 @  ^
          *                       *
          * <p>
-         * 当处理到'位'的时候, 发现ci内部维护的sourceBuffer的深拷贝迭代器位于分段数据边界(^所指的位置),
-         * 此时触发预加载机制, 将下一段分段数据读入preBuffer中.
+         * 当ci处理到'位'的时候, 发现迭代到位于分段数据边界(^所指的位置),
+         * 此时触发预加载机制, 将下一段分段数据读入preBuffer中. ci开始通过*迭代数据
+         *       sourceBuffer          preBuffer
+         * [, , , , , , , 中, 位]   [数, ' ', ......]
+         *                 @  ^
+         *                       *
          * <p>
-         *     sourceBuffer           未加载
+         *     sourceBuffer            preBuffer
          * [, , , , , , , 中, 位]   [数, ' ', ......]
          *                @   ^          *
-         * 预加载完成后, ci继续迭代. ci本身的指针在preBuffer中迭代, 直到指向' '(*所指的位置), 遇到空格, 分词结束, 返回false
+         * 当ci指向*所处位置时, 发现字符' '无法匹配成为以'中'为start的合法词组, 因此终止匹配, 第一轮CNProcessor处理完毕, 得到Token: 中位数
          * <p>
-         * <第二轮匹配, 以'位'为start>
+         * <CNProcessor第二轮匹配, 以'位'为start>
          *     sourceBuffer           preBuffer
          * [, , , , , , , 中, 位] [数, ' ', ......]
          *                    @
          *                    ^        *
-         * CNProcessor获取快照迭代器. 如果不触发reset(), 则在第二轮匹配中, 会导致ci指向的是字符' '(*所在位置)
-         * 而ci内部维护的sB的快照则指向'中'(^所在位置)
+         * CNProcessor获取快照迭代器. 如果不触发reset(), 则在第二轮匹配中, 会导致ci内部两个指针指向的位置是^, *
+         * ^位置正确, 但*位置错误, 因为他指向的是上轮preBuffer迭代的位置. 它的位置没有重置
          * <p>
-         * 此刻的迭代逻辑是, 先判断底层sB是否还有未迭代的数据, 如果有, 则直接返回true, 否则尝试迭代preBuffer
-         * 当前案例, sB的数据已经被ci维护的深拷贝迭代器消费完毕. 需要迭代preBuffer. 但在获取ci时，没有调用reset()方法
-         * 导致ci自己的迭代器指向的时' '(*所在位置), 因此'数'将会被跳过, 从而导致数据的丢失. 因此, 获取ci时必须调用
+         * 此刻的迭代逻辑是, ci先移动^, 判断是否有数据. 如果有, 则直接返回true, 否则移动*, 尝试迭代preBuffer
+         * 当前案例, ci的^无法迭代sB. 需要移动*迭代preBuffer. 但在获取ci时，没有调用reset()方法
+         * 导致ci的*指向的位置是' ', 因此'数'将会被跳过, 从而导致数据的丢失. 所以, 获取ci时必须调用
          * reset()方法, 归位ci迭代器
          *
          */
         public void updateCapture() {
+            // 对sB迭代器拍摄快照
             itr = sourceBuffer.iterator().deepcopy();
             /*
                 必须调用reset(), 详细原因可参考本方法注释

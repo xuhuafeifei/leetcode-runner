@@ -8,6 +8,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -157,5 +158,20 @@ public class LCAnalyzerTest {
 //            System.out.println(size_10.get(i) + " " + size_1024.get(i));
             assert size_10.get(i).equals(size_1024.get(i)) && size_10.get(i).equals(size_1024_30.get(i));
         }
+    }
+
+    @Test
+    public void test6() throws Exception {
+        LCAnalyzer lcAnalyzer = new LCAnalyzer(1024);
+        FileReader reader = new FileReader("E:\\java_code\\leetcode-runner\\src\\test\\java\\eventbus\\titleSlug.txt");
+        TokenStream tokenStream = lcAnalyzer.tokenStream("titleSlug", reader);
+
+        tokenStream.reset();
+
+        while (tokenStream.incrementToken()) {
+            TermAttribute attr = tokenStream.getAttribute(TermAttribute.class);
+            System.out.println(attr.toString());
+        }
+        tokenStream.end();
     }
 }

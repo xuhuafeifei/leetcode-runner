@@ -1,22 +1,13 @@
 package com.xhf.leetcode.plugin.search.lucence;
 
-import com.vladsch.flexmark.util.sequence.builder.Seg;
-import com.xhf.leetcode.plugin.search.Context;
-import com.xhf.leetcode.plugin.search.Iterator;
 import com.xhf.leetcode.plugin.search.Segmentation;
-import com.xhf.leetcode.plugin.search.SourceManager;
-import com.xhf.leetcode.plugin.search.process.Processor;
-import com.xhf.leetcode.plugin.search.process.ProcessorFactory;
-import com.xhf.leetcode.plugin.search.utils.CharType;
-import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
+import com.xhf.leetcode.plugin.search.Token;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Objects;
 
 /**
  * @author feigebuge
@@ -46,10 +37,10 @@ public final class LCTokenizer extends Tokenizer {
         // 清空属性
         clearAttributes();
         // 获取下一个分词
-        String token = segmentation.next();
-        if (StringUtils.isNotBlank(token)) {
-            termAtt.setTermBuffer(token);
-            termAtt.setTermLength(token.length());
+        Token token = segmentation.next();
+        if (token != null && StringUtils.isNotBlank(token.getToken())) {
+            termAtt.setTermBuffer(token.getToken());
+            termAtt.setTermLength(token.getLen());
             return true;
         }
         return false;

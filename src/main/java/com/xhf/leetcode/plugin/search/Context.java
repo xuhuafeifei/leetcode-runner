@@ -1,5 +1,9 @@
 package com.xhf.leetcode.plugin.search;
 
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Stack;
+
 /**
  * 上下文数据, 保留文本处理过程中的上下文信息
  *
@@ -10,15 +14,19 @@ public class Context {
     private final SourceManager sm;
     // 当前处理的字符
     private char c;
-    // 当前文本处理得到的token
-    private String token;
-    // 当前处理的字符长度(等于处理的字符次数)
-    private int len;
     // 迭代器
     private Iterator iterator;
+    // tokens
+    private final Queue<Token> tokens = new LinkedList<>();
+
+
 
     public Context(Character c, Iterator itr, SourceManager sm) {
+        this(itr, sm);
         this.c = c;
+    }
+
+    public Context(Iterator itr, SourceManager sm) {
         this.iterator = itr;
         this.sm = sm;
     }
@@ -35,20 +43,15 @@ public class Context {
         this.c = c;
     }
 
-    public String getToken() {
-        return token;
+    public boolean hasToken() {
+        return ! tokens.isEmpty();
+    }
+    public Token getToken() {
+        return tokens.poll();
     }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public int getLen() {
-        return len;
-    }
-
-    public void setLen(int len) {
-        this.len = len;
+    public void addToken(String token, int len) {
+        tokens.add(new Token(token, len));
     }
 
     public Iterator getIterator() {

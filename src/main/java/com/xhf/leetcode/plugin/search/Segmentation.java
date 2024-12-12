@@ -16,12 +16,15 @@ public class Segmentation {
     private final SourceManager sm;
     private final Iterator itr;
     private final ProcessorFactory pf;
+    private final Context ctx;
 
     public Segmentation(Reader reader) {
+        // 设置默认大小
         sm = new SourceManager();
         sm.setSource(reader);
         itr = sm.iterator();
         pf = ProcessorFactory.getInstance();
+        ctx = new Context(itr, sm);
     }
 
     public Segmentation(Reader reader, int bufferSize) {
@@ -29,17 +32,22 @@ public class Segmentation {
         sm.setSource(reader);
         itr = sm.iterator();
         pf = ProcessorFactory.getInstance();
+        ctx = new Context(itr, sm);
     }
 
     // 获取下一个分词
-    public String next() throws IOException {
+    public Token next() throws IOException {
+        // ctx内还有剩余token没有完成处理
+        if (ctx.hasToken()) {
+            return ctx.getToken();
+        }
         if (! sm.tryLoad()) return null;
-        // 创建上下文
-        Context context = new Context(itr.next(), itr, sm);
+        // 赋值上下文
+        ctx.setC(itr.next());
         // 获取处理器
-        Processor processor = pf.createProcessor(context);
+        Processor processor = pf.createProcessor(ctx);
         // 处理字符
-        processor.doProcess(context);
-        return context.getToken();
+        processor.doProcess(ctx);
+        return ctx.getToken();
     }
 }

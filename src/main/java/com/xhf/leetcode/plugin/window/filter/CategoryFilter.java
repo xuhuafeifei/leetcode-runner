@@ -27,12 +27,15 @@ public class CategoryFilter implements QFilter {
 
     @Override
     public boolean doFilter(Question q) {
-        if (q == null || q.getTopicTags() == null) {
+        if (q == null) {
             return false;
         }
         // 包含algorithm 过滤条件, 全部放行(这个就偷懒判断了, 毕竟广义来讲, 所有coding都算算法)
         if (contains("algorithms")) {
             return true;
+        }
+        if (q.getTopicTags() == null) {
+            return false;
         }
         // 包含过滤条件包含javascript过滤条件(这个需要特判)
         if (contains("javascript")) {

@@ -7,6 +7,13 @@ import com.xhf.leetcode.plugin.search.dict.DictTree;
 import com.xhf.leetcode.plugin.search.dict.Hit;
 
 /**
+ * 最长匹配 + 最细粒度匹配
+ * CNProcessor会以每一个中文字符为start, 尝试以该字符为start, 匹配出最长的词组CN_Token
+ * 如果匹配得到的CN_Token长度大于1, 则同时将start作为单独的Token进行存储
+ * <p>
+ * 比如[两, 数]: 以'两'为start可以匹配出的最长Token是'两数'. 两数的长度为2, 所以CNProcessor会存储
+ * '两数', '两'这两个Token
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
@@ -27,6 +34,7 @@ public class CNProcessor implements Processor {
         Iterator captureItr = sm.captureIterator();
         // 迭代获取
         char searchC = context.getC();
+        char startC = searchC;
         Hit preHit = dt.match(searchC);
         hs.add(preHit);
         // 如果未命中, 直接返回
@@ -34,13 +42,9 @@ public class CNProcessor implements Processor {
             setContext(context);
             return;
         }
-//        System.err.println("start c = " + searchC);
         // 迭代
         while (captureItr.hasNext() && preHit.isHit()) {
             searchC = captureItr.next();
-
-//            System.err.println("iter c = " + searchC);
-
             Hit hit = dt.match(searchC, preHit);
             hs.add(hit);
             preHit = hit;
@@ -55,6 +59,10 @@ public class CNProcessor implements Processor {
         }
         // 返回Token
         setContext(context);
+        if (hs.getTotalSize() != 1) {
+            // 以searchC为开始, 能够匹配出长度大于1的词组, 将startC单独添加为Token
+            context.addToken(String.valueOf(startC), 1);
+        }
         // 消费迭代器内的数据
         // consumeItr(sm);
     }
@@ -68,8 +76,7 @@ public class CNProcessor implements Processor {
     }
 
     private void setContext(Context context) {
-        context.setToken(hs.getToken());
-        context.setLen(hs.getTotalSize());
+        context.addToken(hs.getToken(), hs.getTotalSize());
     }
 
     public static class SimpleHitStack {

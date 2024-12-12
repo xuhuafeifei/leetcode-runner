@@ -14,10 +14,10 @@ public class LCAnalyzer extends Analyzer {
     private final int bufferSize;
 
     public LCAnalyzer(int bufferSize) {
-        if (bufferSize < 10) {
+        if (bufferSize < SourceManager.MIN_BUFFER_SIZE) {
             throw new IllegalArgumentException("bufferSize is too small!");
         }
-        if (bufferSize > 1024 * 30) {
+        if (bufferSize > SourceManager.DEFAULT_BUFFER_SIZE) {
             throw new IllegalArgumentException("bufferSize is too large!");
         }
         this.bufferSize = bufferSize;
