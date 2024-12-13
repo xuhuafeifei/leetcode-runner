@@ -11,6 +11,9 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler;
+import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.utils.RandomUtils;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +30,7 @@ import java.net.URL;
  * @email 2508020102@qq.com
  */
 public class MarkDownEditor implements FileEditor {
+    private final Project project;
     /**
      * 用于显示的MarkDown格式的文件
      */
@@ -50,11 +54,17 @@ public class MarkDownEditor implements FileEditor {
      * 项目当前启动的服务地址, 该数据将会写入HTML文件中
      */
     private final String serverPath = "http://localhost:" + BuiltInServerManager.getInstance().getPort() + LocalHttpRequestHandler.PREFIX;
+    /**
+     * lc存储service于editor之间沟通的数据信息
+     */
+    private final LeetcodeEditor lc;
 
-    public MarkDownEditor(@NotNull Project project, @NotNull LightVirtualFile file) {
+    public MarkDownEditor(@NotNull Project project, @NotNull LightVirtualFile file, @Nullable LeetcodeEditor lc) {
+        this.project = project;
         this.vFile = file;
         this.myComponent = JBUI.Panels.simplePanel();
         this.jcefHtmlPanel = new JCEFHtmlPanel(this.vFile.getUrl());
+        this.lc = lc;
 
         Disposer.register(this, this.jcefHtmlPanel);
         this.jcefHtmlPanel.loadHTML(loadHTMLContent());
@@ -73,12 +83,57 @@ public class MarkDownEditor implements FileEditor {
             String html = FileUtils.readContentFromFile(url);
             // Update resource paths to use the custom scheme
             html = html.replace("{{serverUrl}}", serverPath);
+            if (lc != null) {
+                html = html.replace("{{title}}", lc.getFrontendQuestionId() + "." + lc.getTranslatedTitle())
+                        .replace("{{tag}}", getTag(lc.getDifficulty()));
+            } else {
+                html = html.replace("{{title}}", "")
+                        .replace("{{tag}}", "");
+            }
             // handle html
             return html.replace("{{content}}", vFile.getContent());
         } catch (Exception e) {
             throw new RuntimeException("Failed to load HTML content", e);
         }
     }
+
+    public String getTag(String difficulty) {
+        /*
+          EASY
+          MEDIUM
+          HARD
+        */
+        String color;
+        String text;
+        String[] easy = {"(ˉ▽￣～) 切~~, 有手就行", "洒洒水啦", "简简单单"};
+        String[] medium = {"呦, 有点意思", "rua圾题目", "小小中等题"};
+        String[] hard = {"溜了溜了", "这啥玩意儿这是", "cv题目"};
+        String translatedDifficulty;
+        switch (difficulty.toUpperCase()) { // 将输入转换为大写以确保匹配不区分大小写
+            case "EASY":
+                color = "green";
+                text = easy[RandomUtils.nextInt(0, easy.length - 1)];
+                translatedDifficulty = "【简单题】";
+                break;
+            case "MEDIUM":
+                color = "orange";
+                text = medium[RandomUtils.nextInt(0, medium.length - 1)];
+                translatedDifficulty = "【中等题】";
+                break;
+            case "HARD":
+                color = "red";
+                text = hard[RandomUtils.nextInt(0, hard.length - 1)];
+                translatedDifficulty = "【困难题】";
+                break;
+            default:
+                color = "gray";
+                text = "未知";
+                translatedDifficulty = "【未知题】";
+                break;
+        }
+        return "<span style='color: " + color + ";'>" + text + translatedDifficulty + "</span><p>";
+    }
+
 
     @Override
     public @NotNull JComponent getComponent() {

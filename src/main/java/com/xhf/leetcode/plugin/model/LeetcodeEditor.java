@@ -11,6 +11,7 @@ public class LeetcodeEditor {
     private String lang;
     private String exampleTestcases;
     private String frontendQuestionId;
+    private String translatedTitle;
 
     @Deprecated // not used
     private String markdownPath;
@@ -18,6 +19,15 @@ public class LeetcodeEditor {
     private String markdownContent;
     private String titleSlug;
     private String defaultTestcases;
+    private String difficulty;
+
+    public String getTranslatedTitle() {
+        return translatedTitle;
+    }
+
+    public void setTranslatedTitle(String translateTitle) {
+        this.translatedTitle = translateTitle;
+    }
 
     public String getFrontendQuestionId() {
         return frontendQuestionId;
@@ -84,4 +94,11 @@ public class LeetcodeEditor {
         this.markdownPath = markdownPath;
     }
 
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public String getDifficulty() {
+        return difficulty;
+    }
 }

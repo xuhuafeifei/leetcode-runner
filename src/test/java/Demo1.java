@@ -3,14 +3,18 @@ import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.model.Solution;
 import com.xhf.leetcode.plugin.model.Submission;
-import com.xhf.leetcode.plugin.utils.GsonUtils;
 import org.apache.http.impl.cookie.BasicClientCookie2;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.WhitespaceTokenizer;
+import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,5 +73,27 @@ public class Demo1 {
             fos.write((s + '\n').getBytes(StandardCharsets.UTF_8));
         }
         fos.close();
+    }
+
+    public static void main(String[] args) throws Exception {
+        // 创建分词器
+        Analyzer analyzer = new Analyzer() {
+            @Override
+            public TokenStream tokenStream(String fieldName, Reader reader) {
+                // 按照空格分词的Tokenizer
+                return new WhitespaceTokenizer(reader);
+            }
+        };
+        // 获取Tokenizer(它继承TokenStream, 并且只接受Reader作为输入)
+        TokenStream ts = analyzer.tokenStream("test", new StringReader("this is a apple !!"));
+
+        ts.reset();
+        while (ts.incrementToken()) {
+            // 获取ts分词枚举的token
+            TermAttribute attr = ts.getAttribute(TermAttribute.class);
+            System.out.println(attr.toString());
+        }
+        ts.end();
+        ts.close();
     }
 }

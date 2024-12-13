@@ -73,6 +73,8 @@ public class CodeService {
         le.setFrontendQuestionId(question.getFrontendQuestionId());
         // le.setMarkdownPath(markdownFilePath);
         le.setMarkdownContent(translatedContent);
+        le.setTranslatedTitle(question.getTranslatedTitle());
+        le.setDifficulty(question.getDifficulty());
         return le;
     }
 

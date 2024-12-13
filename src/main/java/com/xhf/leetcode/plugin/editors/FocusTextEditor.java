@@ -45,7 +45,7 @@ public class FocusTextEditor implements FileEditor {
     private void initComponent() {
         JBTabbedPane tabbedPane = new JBTabbedPane();
 
-        JComponent contentPanel = new MarkDownEditor(project, ViewUtils.getHTMLContent(file, project)).getComponent();
+        JComponent contentPanel = new MarkDownEditor(project, ViewUtils.getHTMLContent(file, project), ViewUtils.getLeetcodeEditorByVFile(file, project)).getComponent();
         JComponent solutionPanel = new SolutionEditor(project, file).getComponent();
         JComponent submissionPanel = new SubmissionEditor(project, file).getComponent();
 

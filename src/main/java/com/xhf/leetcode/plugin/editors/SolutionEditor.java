@@ -83,7 +83,7 @@ public class SolutionEditor extends AbstractSplitTextEditor {
             secondComponent = JBUI.Panels.simplePanel(jTextPane);
             secondComponent.addToTop(createToolbarWrapper(jTextPane));
         }else {
-            MarkDownEditor markDownEditor = new MarkDownEditor(project, solutionFile);
+            MarkDownEditor markDownEditor = new MarkDownEditor(project, solutionFile, null);
             secondComponent = JBUI.Panels.simplePanel(markDownEditor.getComponent());
             secondComponent.addToTop(createToolbarWrapper(markDownEditor.getComponent()));
         }
