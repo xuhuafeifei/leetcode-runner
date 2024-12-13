@@ -9,11 +9,12 @@ import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
-import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -93,7 +94,9 @@ public class MarkDownEditor implements FileEditor {
             // handle html
             return html.replace("{{content}}", vFile.getContent());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load HTML content", e);
+            LogUtils.error("Failed to load HTML content", e);
+            ConsoleUtils.getInstance(project).showWaring("Failed to load HTML content");
+            return "Failed to load HTML content !!";
         }
     }
 

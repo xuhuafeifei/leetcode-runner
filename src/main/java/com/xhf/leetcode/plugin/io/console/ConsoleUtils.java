@@ -7,6 +7,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
@@ -50,7 +51,12 @@ public final class ConsoleUtils implements Disposable {
         // avoid concurrent question
         ApplicationManager.getApplication().invokeLater(() -> {
             if (consoleView == null) {
-                this.consoleView = LCConsoleWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CONSOLE_VIEW);
+                try {
+                    this.consoleView = LCConsoleWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CONSOLE_VIEW);
+                } catch (Exception e) {
+                    LogUtils.error("consoleView load error", e);
+                    return;
+                }
             }
             runnable.run();
         });

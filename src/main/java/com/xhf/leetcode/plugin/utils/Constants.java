@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.utils;
 
-import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 
 import javax.swing.*;
