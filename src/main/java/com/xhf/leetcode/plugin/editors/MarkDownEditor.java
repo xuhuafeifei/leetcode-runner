@@ -75,7 +75,6 @@ public class MarkDownEditor implements FileEditor {
         this.lc = lc;
         this.contentType = contentType;
 
-        Disposer.register(this, this.jcefHtmlPanel);
         this.jcefHtmlPanel.loadHTML(loadHTMLContent());
 
         this.myComponent.addToCenter(jcefHtmlPanel.getComponent());
