@@ -208,9 +208,17 @@ public class QuestionService {
         CodeService.openCodeEditor(todayQuestion, project);
     }
 
-    public void updateQuestionStatusByFqid(Project project, String fqid, boolean correctAnswer) {
+    /**
+     * 根据frontedQuestionId修改题目状态
+     *
+     * @param project idea project对象
+     * @param fqid question前端显示的id: frontedQuestionId
+     * @param correctAnswer 代码运行结果是否通过
+     * @return update成功, 返回true. 否则false
+     */
+    public boolean updateQuestionStatusByFqid(Project project, String fqid, boolean correctAnswer) {
         // update cache
-        LeetcodeClient.getInstance(project).updateQuestionStatusByFqid(fqid, correctAnswer);
+        return LeetcodeClient.getInstance(project).updateQuestionStatusByFqid(fqid, correctAnswer);
     }
 
     public void reloadTotalQuestion(Project project) {

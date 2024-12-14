@@ -171,9 +171,9 @@ public class LeetcodeClient {
     }
 
 
-    public void updateQuestionStatusByFqid(String fqid, boolean correctAnswer) {
+    public boolean updateQuestionStatusByFqid(String fqid, boolean correctAnswer) {
         if (ql == null) {
-            return;
+            return false;
         }
         for (Question question : ql) {
             if (question.getFrontendQuestionId().equals(fqid)) {
@@ -183,11 +183,12 @@ public class LeetcodeClient {
                 }else if (status.equals("NOT_STARTED")) {
                     question.setStatus("TRIED");
                 }
-                break;
+                return true;
             }
         }
         // keep first cache is same with second cache
         asyncPersistQuestionCache();
+        return false;
     }
 
     /**

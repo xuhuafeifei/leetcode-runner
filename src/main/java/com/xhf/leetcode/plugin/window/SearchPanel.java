@@ -369,6 +369,7 @@ public class SearchPanel extends SimpleToolWindowPanel {
         questionList.setNonData();
         buildIndex(QuestionService.getInstance().getTotalQuestion(project));
         unLock();
+        updateText();
     }
 
     @Subscribe

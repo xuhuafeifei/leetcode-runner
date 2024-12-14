@@ -14,6 +14,7 @@ import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.comp.TestCaseDialog;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
@@ -141,7 +142,17 @@ public class CodeService {
         String codeContent = editor.getFileContent();
         LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByEditor(editor, project);
 
-        assert lc != null;
+        if (lc == null) {
+            ConsoleUtils.getInstance(project).showWaring(
+                    "Some error happens, please close all file and try again!",
+                    false,
+                    true,
+                    "Some error happens, please close all file and try again!",
+                    "Run Code Error",
+                    ConsoleDialog.ERROR
+            );
+            return;
+        }
         RunCode runCode = buildRunCode(lc, codeContent);
 
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Run Code", false){
@@ -150,7 +161,12 @@ public class CodeService {
                 RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(runCode);
                 // show it
                 AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(runCode.getDataInput(), rcr);
-                ConsoleUtils.getInstance(project).showInfo(rcrb.build());
+                boolean correctAnswer = rcrb.isCorrectAnswer();
+                if (correctAnswer) {
+                    ConsoleUtils.getInstance(project).showInfo(rcrb.build(), true, true, "Congratulations!", "Run Code Result", ConsoleDialog.INFO);
+                } else {
+                    ConsoleUtils.getInstance(project).showInfo(rcrb.build(), true, true, "Oh No! Not Accept", "Run Code Result", ConsoleDialog.ERROR);
+                }
             }
         });
     }
@@ -162,7 +178,18 @@ public class CodeService {
         // get file content
         String codeContent = editor.getFileContent();
         LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByEditor(editor, project);
-        assert lc != null;
+
+        if (lc == null) {
+            ConsoleUtils.getInstance(project).showWaring(
+                    "Some error happens, please close all file and try again!",
+                    false,
+                    true,
+                    "Some error happens, please close all file and try again!",
+                    "Submit Code Error",
+                    ConsoleDialog.ERROR
+            );
+            return;
+        }
 
         // build run code
         RunCode runCode = buildRunCode(lc, codeContent);
@@ -173,11 +200,20 @@ public class CodeService {
                 SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(runCode);
                 // show it
                 AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr);
+                boolean correctAnswer = scrb.isCorrectAnswer();
+                if (correctAnswer) {
+                    ConsoleUtils.getInstance(project).showInfo(scrb.build(), true, true, "Congratulations!", "Submit Code Result", ConsoleDialog.INFO);
+                } else {
+                    ConsoleUtils.getInstance(project).showInfo(scrb.build(), true, true, "Oh No! Not Accept!", "Submit Code Result", ConsoleDialog.ERROR);
+                }
+
                 ConsoleUtils.getInstance(project).showInfo(scrb.build());
                 // update question
-                QuestionService.getInstance().updateQuestionStatusByFqid(project, runCode.getFrontendQuestionId(), scrb.isCorrectAnswer());
+                boolean update = QuestionService.getInstance().updateQuestionStatusByFqid(project, runCode.getFrontendQuestionId(), scrb.isCorrectAnswer());
                 // post
-                LCEventBus.getInstance().post(new CodeSubmitEvent(project));
+                if (update) {
+                    LCEventBus.getInstance().post(new CodeSubmitEvent(project));
+                }
             }
         });
     }
@@ -465,10 +501,21 @@ public class CodeService {
         SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
 
         // get example test cases
-        String path = editor.getFile().getPath();
+        String path = Objects.requireNonNull(editor.getFile()).getPath();
         path = FileUtils.unifyPath(path);
         LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
-        assert lc != null;
+
+        if (lc == null) {
+            ConsoleUtils.getInstance(project).showWaring(
+                    "Some error happens, please close all file and try again!",
+                    false,
+                    true,
+                    "Some error happens, please close all file and try again!",
+                    "Test Cases Set Error",
+                    ConsoleDialog.ERROR
+            );
+            return;
+        }
 
         // check testcase data input
         if (lc.getExampleTestcases() == null || lc.getDefaultTestcases() == null) {

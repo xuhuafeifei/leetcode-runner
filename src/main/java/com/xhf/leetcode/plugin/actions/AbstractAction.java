@@ -6,6 +6,7 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LoginPass;
@@ -26,7 +27,7 @@ public abstract class AbstractAction extends AnAction {
         if (settingPass == null) {
             AppSettings appSettings = AppSettings.getInstance();
             if (!appSettings.initOrNot()) {
-                ConsoleUtils.getInstance(project).showWaring("please init plugin setting");
+                ConsoleUtils.getInstance(project).showWaring("please init plugin setting", false, false, "Please init Setting", null, ConsoleDialog.WARNING);
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
                 return;
             }
@@ -36,7 +37,7 @@ public abstract class AbstractAction extends AnAction {
         if (annotation == null) {
             boolean login = LoginService.getInstance(project).isLogin();
             if (! login) {
-                ConsoleUtils.getInstance(e.getProject()).showWaring("not login!");
+                ConsoleUtils.getInstance(e.getProject()).showWaring("not login!", false);
                 // LoginService.getInstance(project).doLogin();
                 Messages.showOkCancelDialog(
                         project,
