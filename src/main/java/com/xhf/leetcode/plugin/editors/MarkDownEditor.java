@@ -12,9 +12,12 @@ import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler;
+import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.MarkdownContentType;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,13 +62,18 @@ public class MarkDownEditor implements FileEditor {
      * lc存储service于editor之间沟通的数据信息
      */
     private final LeetcodeEditor lc;
+    /**
+     * 打开内容的类型
+     */
+    private final MarkdownContentType contentType;
 
-    public MarkDownEditor(@NotNull Project project, @NotNull LightVirtualFile file, @Nullable LeetcodeEditor lc) {
+    public MarkDownEditor(@NotNull Project project, @NotNull LightVirtualFile file, @Nullable LeetcodeEditor lc, @NotNull MarkdownContentType contentType) {
         this.project = project;
         this.vFile = file;
         this.myComponent = JBUI.Panels.simplePanel();
         this.jcefHtmlPanel = new JCEFHtmlPanel(this.vFile.getUrl());
         this.lc = lc;
+        this.contentType = contentType;
 
         Disposer.register(this, this.jcefHtmlPanel);
         this.jcefHtmlPanel.loadHTML(loadHTMLContent());
@@ -84,12 +92,20 @@ public class MarkDownEditor implements FileEditor {
             String html = FileUtils.readContentFromFile(url);
             // Update resource paths to use the custom scheme
             html = html.replace("{{serverUrl}}", serverPath);
-            if (lc != null) {
-                html = html.replace("{{title}}", lc.getFrontendQuestionId() + "." + lc.getTranslatedTitle())
-                        .replace("{{tag}}", getTag(lc.getDifficulty()));
-            } else {
-                html = html.replace("{{title}}", "")
-                        .replace("{{tag}}", "");
+            switch (contentType) {
+                case QUESTION:
+                    html = html.replace("{{title}}", lc.getFrontendQuestionId() + "." + lc.getTranslatedTitle())
+                            .replace("{{tag}}", getTag(lc.getDifficulty()))
+                            .replace("{{webUrl}}", getWebUrl())
+                    ;
+                    break;
+                case SOLUTION:
+                    html = html.replace("{{title}}", "")
+                            .replace("{{tag}}", "")
+                            .replace("{{webUrl}}", getWebUrl())
+                    ;
+                    break;
+                default:
             }
             // handle html
             return html.replace("{{content}}", vFile.getContent());
@@ -98,6 +114,60 @@ public class MarkDownEditor implements FileEditor {
             ConsoleUtils.getInstance(project).showWaring("Failed to load HTML content");
             return "Failed to load HTML content !!";
         }
+    }
+
+
+    /**
+     * 获取当前渲染界面的leetcode web url
+     * @return
+     */
+    private String getWebUrl() {
+        if (contentType == MarkdownContentType.SOLUTION) {
+            return solutionWebUrl();
+        } else if (contentType == MarkdownContentType.QUESTION) {
+            return questionWebUrl();
+        }
+        return "";
+    }
+
+    /**
+     * 返回题目内容对应的web url
+     * @return web url
+     */
+    private String questionWebUrl() {
+        if (lc == null) {
+            return "";
+        }
+        String titleSlug = lc.getTitleSlug();
+        if (StringUtils.isBlank(titleSlug)) {
+            return "";
+        }
+        String html = "<a rel=\"stylesheet\" href=\"" + LeetcodeApiUtils.getQuestionUrl(titleSlug) + "\">在浏览器上访问</a><p>";
+        return html;
+    }
+
+    /**
+     * 返回solution的web url
+     * @return web url
+     */
+    private String solutionWebUrl() {
+        if (lc == null) {
+            return "";
+        }
+        String titleSlug = lc.getTitleSlug();
+        String topicId = lc.getTopicId();
+        String solutionSlug = lc.getSolutionSlug();
+        // 要求三者全部不为blank
+        if (StringUtils.isBlank(titleSlug) ||
+                StringUtils.isBlank(topicId) ||
+                StringUtils.isBlank(solutionSlug)
+        ) {
+            return "";
+        }
+
+//        String html = "<a rel=\"stylesheet\" href=\"" + LeetcodeApiUtils.getSolutionUrl(titleSlug, topicId, solutionSlug) + "\">在浏览器上访问</a><p>";
+        String markdown = "> [在浏览器上访问](" + LeetcodeApiUtils.getSolutionUrl(titleSlug, topicId, solutionSlug)+ ")";
+        return markdown;
     }
 
     public String getTag(String difficulty) {
@@ -134,7 +204,7 @@ public class MarkDownEditor implements FileEditor {
                 translatedDifficulty = "【未知题】";
                 break;
         }
-        return "<span style='color: " + color + ";'>" + text + translatedDifficulty + "</span><p>";
+        return "<span style='color: " + color + ";'>" + text + translatedDifficulty + "</span>";
     }
 
 

@@ -32,6 +32,6 @@ public class SolutionListener extends AbstractMouseAdapter {
         Point point = e.getPoint();
         int idx = solutionList.locationToIndex(point);
         Solution solution = solutionList.getModel().getElementAt(idx);
-        SolutionService.openSolutionContent(project, solution.getSlug(), solutionEditor);
+        SolutionService.openSolutionContent(project, solution, solutionEditor);
     }
 }

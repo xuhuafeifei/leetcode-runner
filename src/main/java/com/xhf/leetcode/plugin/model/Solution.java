@@ -15,8 +15,17 @@ public class Solution {
     private String translatedTitle;
     private String translatedContent;
     private String summary;
+    private Topic topic;
 
     private static final String whiteSpace = "       ";
+
+    public Topic getTopic() {
+        return topic;
+    }
+
+    public void setTopic(Topic topic) {
+        this.topic = topic;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();

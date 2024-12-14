@@ -38,6 +38,14 @@ public class LeetcodeApiUtils {
         return leetcodeUrl + getLeetcodeHost();
     }
 
+    public static String getQuestionUrl(String titleSlug) {
+        return getLeetcodeUrl() + "/problems/" + titleSlug + "/description";
+    }
+
+    public static String getSolutionUrl(String titleSlug, String topicId, String solutionSlug) {
+        return getLeetcodeUrl() + "/problems/" + titleSlug + "/solutions/" + topicId + "/" + solutionSlug;
+    }
+
     public static String getRunCodeUrl(String titleSlug) {
         return getLeetcodeUrl() + "/problems/" + titleSlug + "/interpret_solution/";
     }

@@ -556,7 +556,7 @@ public class LeetcodeClient {
     }
 
     public String getSolutionContent(String solutionSlug) {
-         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SOLUTION_CONTENT_QUERY);
         body.addVariable("slug", solutionSlug);

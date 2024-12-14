@@ -16,6 +16,7 @@ import com.xhf.leetcode.plugin.model.Solution;
 import com.xhf.leetcode.plugin.render.SolutionCellRenderer;
 import com.xhf.leetcode.plugin.service.SolutionService;
 import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.MarkdownContentType;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
@@ -34,6 +35,11 @@ public class SolutionEditor extends AbstractSplitTextEditor {
 
     public SolutionEditor(Project project, VirtualFile file) {
         super(project, file);
+    }
+
+    @Override
+    public VirtualFile getFile() {
+        return this.file;
     }
 
     /**
@@ -78,12 +84,14 @@ public class SolutionEditor extends AbstractSplitTextEditor {
                 lc.getTitleSlug()+ ".solution.md", content
         );
         if (StringUtils.isBlank(content)) {
+            // 不支持当前的solution格式
             JTextPane jTextPane = showNotingTextPane();
             jTextPane.setText(Constants.SOLUTION_CONTENT_NOT_SUPPORT);
             secondComponent = JBUI.Panels.simplePanel(jTextPane);
             secondComponent.addToTop(createToolbarWrapper(jTextPane));
         }else {
-            MarkDownEditor markDownEditor = new MarkDownEditor(project, solutionFile, null);
+            // 显示solution
+            MarkDownEditor markDownEditor = new MarkDownEditor(project, solutionFile, lc, MarkdownContentType.SOLUTION);
             secondComponent = JBUI.Panels.simplePanel(markDownEditor.getComponent());
             secondComponent.addToTop(createToolbarWrapper(markDownEditor.getComponent()));
         }

@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBTabbedPane;
+import com.xhf.leetcode.plugin.utils.MarkdownContentType;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +46,11 @@ public class FocusTextEditor implements FileEditor {
     private void initComponent() {
         JBTabbedPane tabbedPane = new JBTabbedPane();
 
-        JComponent contentPanel = new MarkDownEditor(project, ViewUtils.getHTMLContent(file, project), ViewUtils.getLeetcodeEditorByVFile(file, project)).getComponent();
+        JComponent contentPanel = new MarkDownEditor(project,
+                ViewUtils.getHTMLContent(file, project),
+                ViewUtils.getLeetcodeEditorByVFile(file, project),
+                MarkdownContentType.QUESTION
+        ).getComponent();
         JComponent solutionPanel = new SolutionEditor(project, file).getComponent();
         JComponent submissionPanel = new SubmissionEditor(project, file).getComponent();
 

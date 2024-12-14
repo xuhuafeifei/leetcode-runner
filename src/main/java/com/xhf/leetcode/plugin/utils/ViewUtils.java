@@ -32,14 +32,24 @@ public class ViewUtils {
     }
 
     public static LeetcodeEditor getLeetcodeEditorByVFile(VirtualFile file, Project project) {
-        String key = file.getPath();
-        key = FileUtils.unifyPath(key);
+        String key = getCacheKeyByVFile(file);
         LeetcodeEditor cache = StoreService.getInstance(project).getCache(key, LeetcodeEditor.class);
         if (cache == null) {
             LogUtils.warn("LeetcodeEditor load failed! this may caused by two reason. 1.cache file is crashed. 2.key is wrong. Here " +
                     "are detail infomation : key="+key + " cache_file_path=" + StoreService.getInstance(project).getCacheFilePath());
         }
         return cache;
+    }
+
+    /**
+     * 通过vFile构造cache的key
+     * @param file 当前editor打开的虚拟文件(项目创建的code文件)
+     * @return
+     */
+    public static String getCacheKeyByVFile(VirtualFile file) {
+        String key = file.getPath();
+        key = FileUtils.unifyPath(key);
+        return key;
     }
 
     public static LightVirtualFile getHTMLContent(VirtualFile file, Project project) {
@@ -62,5 +72,15 @@ public class ViewUtils {
 
     public static void showDialog(Project project, String message, String title) {
         JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
+    }
+
+    /**
+     * 通过vFile更新lc内容
+     * @param file
+     * @param lc
+     */
+    public static void updateLeetcodeEditorByVFile(Project project, VirtualFile file, LeetcodeEditor lc) {
+        String key = getCacheKeyByVFile(file);
+        StoreService.getInstance(project).addCache(key, lc);
     }
 }

@@ -79,7 +79,7 @@ public final class LoginService {
 
     private void loginSuccessAfter(Project project) {
         loginFlag = Boolean.TRUE;
-        LogUtils.info("login success...");
+        LogUtils.info("login success, try to loading data");
         // 此处不能弹出对话框, 因为对话框会凝固线程. 登录逻辑涉及不少多线程问题, 不适合弹框
         ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("login success...", false);
         // post event

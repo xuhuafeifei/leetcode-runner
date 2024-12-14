@@ -17,9 +17,25 @@ public class LeetcodeEditor {
     private String markdownPath;
 
     private String markdownContent;
+    /**
+     * 题目的slug(question的slug)
+     */
     private String titleSlug;
     private String defaultTestcases;
     private String difficulty;
+    /**
+     * 详见{@link Topic}
+     */
+    private String topicId;
+    private String solutionSlug;
+
+    public String getTopicId() {
+        return topicId;
+    }
+
+    public void setTopicId(String topicId) {
+        this.topicId = topicId;
+    }
 
     public String getTranslatedTitle() {
         return translatedTitle;
@@ -100,5 +116,13 @@ public class LeetcodeEditor {
 
     public String getDifficulty() {
         return difficulty;
+    }
+
+    public void setSolutionSlug(String solutionSlug) {
+        this.solutionSlug = solutionSlug;
+    }
+
+    public String getSolutionSlug() {
+        return solutionSlug;
     }
 }
