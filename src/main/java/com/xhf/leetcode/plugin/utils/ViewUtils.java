@@ -83,4 +83,31 @@ public class ViewUtils {
         String key = getCacheKeyByVFile(file);
         StoreService.getInstance(project).addCache(key, lc);
     }
+
+    /**
+     * 获取当前打开的虚拟文件
+     * @param project
+     * @return
+     */
+    public static VirtualFile getCurrentOpenVirtualFile(Project project) {
+        FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+        VirtualFile[] selectedFiles = fileEditorManager.getSelectedFiles();
+        if (selectedFiles.length > 0) {
+            return selectedFiles[0];
+        }
+        return null;
+    }
+
+    public static String getUnifyFilePathByVFile(VirtualFile file) {
+        String key = file.getPath(); // file separator is /
+        key = FileUtils.unifyPath(key);
+        return key;
+    }
+
+    public static void closeVFile(VirtualFile virtualFile, Project project) {
+        if (project != null && virtualFile != null) {
+            FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+            fileEditorManager.closeFile(virtualFile);
+        }
+    }
 }

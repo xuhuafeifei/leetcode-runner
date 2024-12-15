@@ -13,7 +13,9 @@ import com.xhf.leetcode.plugin.listener.QuestionListener;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
+import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.filter.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.queryParser.ParseException;
@@ -377,5 +379,33 @@ public class SearchPanel extends SimpleToolWindowPanel {
         loginLock();
         questionList.setEmptyText("Please login first...");
         questionList.setNonData();
+    }
+
+    @Subscribe
+    public void rePositionEventListeners(RePositionEvent event) {
+        String titleSlug = event.getTitleSlug();
+        String fid = event.getFrontendQuestionId();
+        ListModel<Question> model = questionList.getModel();
+        int size = model.getSize();
+        // 遍历, 匹配fid
+        for (int i = 0; i < size; ++i) {
+            Question question = model.getElementAt(i);
+            if (question.getFrontendQuestionId().equals(fid) &&
+                    question.getTitleSlug().equals(titleSlug)
+            ) {
+                JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
+                // 选择匹配到的题目
+                questionList.setSelectedIndex(i);
+                // 滚动到选中的题目位置
+                Rectangle cellRect = questionList.getCellBounds(i, i);
+                if (cellRect != null) {
+                    questionList.scrollRectToVisible(cellRect);
+                }
+                // 重新打开文件
+                CodeService.reOpenCodeEditor(question, project, event.getFile(), event.getLangType());
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(null, "current file can not reposition");
     }
 }

@@ -11,6 +11,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.RePositionEvent;
 import com.xhf.leetcode.plugin.comp.TestCaseDialog;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
@@ -20,11 +21,15 @@ import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,7 +54,7 @@ public class CodeService {
         // create content file
         // String markdownFilePath = createContentFile(question);
 
-        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent());
+        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), AppSettings.getInstance().getLangType());
 
         // store path info
         StoreService.getInstance(project).addCache(codeFilePath, le);
@@ -61,12 +66,31 @@ public class CodeService {
                 FileEditorManager.getInstance(project).openTextEditor(ofd, false);
             }
         });
-
     }
 
-    private static LeetcodeEditor buildLeetcodeEditor(Question question, String translatedContent) {
+    public static void reOpenCodeEditor(Question question, Project project, VirtualFile file, String langType) {
+        QuestionService.getInstance().fillQuestion(question, project);
+
+        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
+        // get current file path
+        String currentFilePath = ViewUtils.getUnifyFilePathByVFile(file);
+        // restore
+        StoreService.getInstance(project).addCache(currentFilePath, le);
+        // close
+        ViewUtils.closeVFile(file, project);
+        // reopen
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            VirtualFile reFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(currentFilePath);
+            if (reFile != null) {
+                OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+            }
+        });
+    }
+
+    private static LeetcodeEditor buildLeetcodeEditor(Question question, String translatedContent, String lang) {
         LeetcodeEditor le = new LeetcodeEditor();
-        le.setLang(AppSettings.getInstance().getLangType());
+        le.setLang(lang);
         le.setQuestionId(question.getQuestionId());
         le.setTitleSlug(question.getTitleSlug());
         le.setExampleTestcases(question.getExampleTestcases());
@@ -103,7 +127,7 @@ public class CodeService {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)
                 // .append("temp")
-                .append(question.getFileName() + AppSettings.getInstance().getFileTypeSuffix())
+                .append(getCodeFileName(question))
                 .build();
 
         try {
@@ -116,6 +140,47 @@ public class CodeService {
         }
 
         return filePath;
+    }
+
+    /**
+     * 通过question创建文件名
+     * @param question
+     * @return
+     */
+    public static String getCodeFileName(Question question) {
+        return question.getFileName() + AppSettings.getInstance().getFileTypeSuffix();
+    }
+
+    /**
+     * 通过文件名称反解析question.fid
+     * @param filePath
+     * @return
+     */
+    public static String parseFidFromFileName(String filePath) {
+        Path path = Paths.get(filePath);
+        String fileName = path.getFileName().toString();
+        return Question.parseFrontendQuestionId(fileName);
+    }
+
+    /**
+     * 通过文件名称反解析question.titleSlug
+     * @param filePath
+     * @return
+     */
+    public static String parseTitleSlugFromFileName(String filePath) {
+        Path path = Paths.get(filePath);
+        String fileName = path.getFileName().toString();
+        return Question.parseTitleSlug(fileName);
+    }
+
+    /**
+     * 通过文件名反解析question的langType
+     * @param filePath
+     */
+    private static String parseLangType(String filePath) {
+        Path path = Paths.get(filePath);
+        String fileName = path.getFileName().toString();
+        return Question.parseLangType(fileName);
     }
 
     private static RunCode buildRunCode(LeetcodeEditor lc, String codeContent) {
@@ -218,6 +283,37 @@ public class CodeService {
         });
     }
 
+    /**
+     * 重新定位question
+     * @param project
+     */
+    public static void rePosition(Project project) {
+        VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
+        if (cFile == null) {
+            JOptionPane.showMessageDialog(null, "No file was choose");
+            return;
+        }
+        String filePath = ViewUtils.getUnifyFilePathByVFile(cFile);
+        // 获取当前打开文件的fid
+        String fid = parseFidFromFileName(filePath);
+        // 获取当前打开文件的titleSlug
+        String titleSlug = parseTitleSlugFromFileName(filePath);
+        // 获取当前打开文件的语言类型
+        String langType = parseLangType(filePath);
+        if (fid == null || titleSlug == null) {
+            JOptionPane.showMessageDialog(null, "current file is not support to reposition");
+            return;
+        }
+        if (! LangType.contains(langType)) {
+            JOptionPane.showMessageDialog(null, "current code type is not support. Your type = " + langType
+                    + "\n"
+                    + "Supported types: " + LangType.getAllLangType()
+            );
+            return;
+        }
+        // 遍历myList
+        LCEventBus.getInstance().post(new RePositionEvent(fid, titleSlug, cFile, langType));
+    }
 
 
     /**
@@ -501,8 +597,7 @@ public class CodeService {
         SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
 
         // get example test cases
-        String path = Objects.requireNonNull(editor.getFile()).getPath();
-        path = FileUtils.unifyPath(path);
+        String path = ViewUtils.getUnifyFilePathByVFile(Objects.requireNonNull(editor.getFile()));
         LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
 
         if (lc == null) {

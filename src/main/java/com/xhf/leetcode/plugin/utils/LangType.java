@@ -22,6 +22,24 @@ public enum LangType {
     private String langType;
     private String suffix;
 
+    public static String getAllLangType() {
+        LangType[] values = LangType.values();
+        StringBuilder sb = new StringBuilder();
+        for (LangType langType : values) {
+            sb.append(langType.getLangType()).append(",");
+        }
+        return sb.toString();
+    }
+
+    public static boolean contains(String langType) {
+        for (LangType lt : LangType.values()) {
+            if (lt.langType.equalsIgnoreCase(langType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public String getLangType() {
         return langType;
     }

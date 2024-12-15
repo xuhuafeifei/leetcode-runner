@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.model;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author feigebuge
@@ -172,5 +174,34 @@ public class Question {
 
     public String getFileName() {
         return  "[" + getFrontendQuestionId() + "]" + getTitleSlug();
+    }
+
+    private static final Pattern pattern = Pattern.compile("\\[(.*?)]");
+    public static String parseFrontendQuestionId(String fileName) {
+        Matcher matcher = pattern.matcher(fileName);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null; // 如果没有找到匹配的内容，返回 null 或者其他适当的值
+    }
+
+    public static String parseTitleSlug(String fileName) {
+        int closingBracketIndex = fileName.indexOf(']');
+        if (closingBracketIndex != -1 && closingBracketIndex < fileName.length() - 1) {
+            fileName = fileName.substring(closingBracketIndex + 1);
+        }
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex != -1) {
+            return fileName.substring(0, dotIndex);
+        }
+        return null; // 如果没有找到匹配的内容，返回 null 或者其他适当的值
+    }
+
+    public static String parseLangType(String fileName) {
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex != -1) {
+            return fileName.substring(dotIndex + 1);
+        }
+        return null;
     }
 }

@@ -57,7 +57,9 @@
         <action id="leetcode.plugin.Reload" class="com.xhf.leetcode.plugin.actions.ReloadQuestionAction"
                 text="Reload Question" icon="/icons/refresh.svg">
         </action>
-
+        <action id="leetcode.plugin.Reposition" class="com.xhf.leetcode.plugin.actions.RePositionAction"
+                text="Reload Reposition" icon="/icons/position.svg">
+        </action>
 
         <group id="leetcode.plugin.lcActionsToolbar">
             <reference id="leetcode.plugin.LoginAction"/>
@@ -69,6 +71,8 @@
             <separator/>
             <reference id="leetcode.plugin.Settings"/>
             <reference id="leetcode.plugin.Clear"/>
+            <separator/>
+            <reference id="leetcode.plugin.Reposition"/>
         </group>
 
         <group id="leetcode.plugin.editor.group">

@@ -139,3 +139,25 @@ Reset按钮可以恢复题目的默认测试样例
 5. 当出现Restart IDE按钮时，就表示插件安装成功！
 
 <img src="README.assets/image-20241213161719788.png" alt="image-20241213161719788" style="zoom:50%;" />
+
+
+
+## 辅助功能介绍
+
+### 1. Reposition
+
+该功能所在位置如图所示
+
+![image-20241215154455937](README.assets/image-20241215154455937.png)
+
+在插件使用的时候，可能出现如下情况。原本的code文件无法通过插件提供的编辑器形式打开，具体如下图所示
+
+<img src="README.assets/image-20241215154420353.png" alt="image-20241215154420353" style="zoom:50%;" />
+
+
+
+`Reposition`允许用户重新定位当前文件所代表的问题，重新加载文件，通过插件提供的编辑器打开
+
+![image-20241215154642283](README.assets/image-20241215154642283.png)
+
+![image-20241215154655400](README.assets/image-20241215154655400.png)
