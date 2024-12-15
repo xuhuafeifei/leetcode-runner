@@ -320,7 +320,6 @@ public class LeetcodeClient {
         httpClient.clearCookies();
     }
 
-
     /**
      * query question info, which contains more info such as code snippets, translated content, etc.
      * <p>

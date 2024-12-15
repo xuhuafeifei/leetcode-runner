@@ -23,6 +23,8 @@ import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeListener;
 
 /**
+ * 显示submission里的history code
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

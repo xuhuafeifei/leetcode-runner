@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.model;
 
+import com.xhf.leetcode.plugin.utils.LangType;
+
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -200,7 +202,7 @@ public class Question {
     public static String parseLangType(String fileName) {
         int dotIndex = fileName.lastIndexOf('.');
         if (dotIndex != -1) {
-            return fileName.substring(dotIndex + 1);
+            return LangType.convertBySuffix(fileName.substring(dotIndex));
         }
         return null;
     }

@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.service;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -28,10 +30,14 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+
+import static javax.swing.JOptionPane.CLOSED_OPTION;
 
 /**
  * @author feigebuge
@@ -163,6 +169,16 @@ public class CodeService {
     }
 
     /**
+     * 通过vFile反解析question.fid
+     * @param file
+     * @return
+     */
+    public static String parseFidFromVFile(VirtualFile file) {
+        String filePath = ViewUtils.getUnifyFilePathByVFile(file);
+        return parseFidFromFileName(filePath);
+    }
+
+    /**
      * 通过文件名称反解析question.titleSlug
      * @param filePath
      * @return
@@ -174,6 +190,16 @@ public class CodeService {
     }
 
     /**
+     * 通过vFile反解析question.titleSlug
+     * @param file
+     * @return
+     */
+    public static String parseTitleSlugFromVFile(VirtualFile file) {
+        String filePath = ViewUtils.getUnifyFilePathByVFile(file);
+        return parseTitleSlugFromFileName(filePath);
+    }
+
+    /**
      * 通过文件名反解析question的langType
      * @param filePath
      */
@@ -181,6 +207,16 @@ public class CodeService {
         Path path = Paths.get(filePath);
         String fileName = path.getFileName().toString();
         return Question.parseLangType(fileName);
+    }
+
+    /**
+     * 通过vFile反解析langType
+     * @param file
+     * @return
+     */
+    public static String parseLangTypeFromVFile(VirtualFile file) {
+        String filePath = ViewUtils.getUnifyFilePathByVFile(file);
+        return parseLangType(filePath);
     }
 
     private static RunCode buildRunCode(LeetcodeEditor lc, String codeContent) {
@@ -293,13 +329,12 @@ public class CodeService {
             JOptionPane.showMessageDialog(null, "No file was choose");
             return;
         }
-        String filePath = ViewUtils.getUnifyFilePathByVFile(cFile);
         // 获取当前打开文件的fid
-        String fid = parseFidFromFileName(filePath);
+        String fid = parseFidFromVFile(cFile);
         // 获取当前打开文件的titleSlug
-        String titleSlug = parseTitleSlugFromFileName(filePath);
+        String titleSlug = parseTitleSlugFromVFile(cFile);
         // 获取当前打开文件的语言类型
-        String langType = parseLangType(filePath);
+        String langType = parseLangTypeFromVFile(cFile);
         if (fid == null || titleSlug == null) {
             JOptionPane.showMessageDialog(null, "current file is not support to reposition");
             return;
@@ -313,6 +348,83 @@ public class CodeService {
         }
         // 遍历myList
         LCEventBus.getInstance().post(new RePositionEvent(fid, titleSlug, cFile, langType));
+    }
+
+    /**
+     * 获取默认代码, 并写入当前打开文件
+     * <p>
+     * 该方法会通过当前打开的文件解析出fid和titleSlug, 并且根据这两个值获取默认代码
+     *
+     * @param project project
+     */
+    public static void getDefaultContent(Project project) {
+        VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
+        if (cFile == null) {
+            JOptionPane.showMessageDialog(null, "no file open");
+            return;
+        }
+        String titleSlug = parseTitleSlugFromVFile(cFile);
+        String langType = parseLangTypeFromVFile(cFile);
+        // 插件设置时, 设定的langType
+        String settingLangType = AppSettings.getInstance().getLangType();
+
+        // 文件所代表的code类型
+        if (! LangType.contains(langType)) {
+            JOptionPane.showMessageDialog(null, "current code file type can not be identified." +
+                    "\r\n" +
+                    "plugin will load content type from your plugin setting.\r\nyour code file type = " + langType +
+                    "Setting LangType = " + settingLangType
+            );
+        }
+        else if (! LangType.equals(langType, settingLangType)) {
+            int result = JOptionPane.showOptionDialog(
+                    null,
+                    "Are you sure to load content from setting?" + "\r\n" +
+                            "Your code file type = " + langType + "\r\n" +
+                            "Setting LangType = " + settingLangType + "\r\n"
+                    ,
+                    "Load Default Code",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new Object[]{"Yes", "No"},
+                    "Yes"
+            );
+            if (result == CLOSED_OPTION) {
+                return;
+            }
+        }
+        // 通过titleSlug查询question的content
+        Question question = QuestionService.getInstance().queryQuestionInfo(titleSlug, project);
+
+        /*
+            查询默认代码, 并写入当前打开的文件
+         */
+        if (question != null && StringUtils.isNotBlank(question.getCodeSnippets())) {
+            String defaultCode = question.getCodeSnippets();
+
+            // 获取文件的文档
+            Document document = FileDocumentManager.getInstance().getDocument(cFile);
+            if (document != null) {
+                ApplicationManager.getApplication().runWriteAction(() -> {
+                    document.setText(defaultCode);
+                    // 将 JOptionPane 显示移到 EDT 线程
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(null, "load default content success!");
+                    });
+                });
+            } else {
+                // 如果无法获取文档，则使用OutputStream写入文件
+                try (OutputStream outputStream = cFile.getOutputStream(CodeService.class)) {
+                    outputStream.write(defaultCode.getBytes(StandardCharsets.UTF_8));
+                    JOptionPane.showMessageDialog(null, "load default content success!");
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, "Failed to write to file: " + e.getMessage());
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Question not found for title slug: " + titleSlug);
+        }
     }
 
 
