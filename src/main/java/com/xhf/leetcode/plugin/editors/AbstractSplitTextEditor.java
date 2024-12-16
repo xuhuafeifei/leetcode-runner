@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
+import java.util.Map;
 
 /**
  * 抽象分割文本编辑器: 提供分屏显示功能. 当前版本主要用于CodeEditor 和 SolutionEditor的内容构建
@@ -102,8 +103,9 @@ public abstract class AbstractSplitTextEditor implements FileEditor {
 
     /**
      * support open content ability
+     * 为了拓展content提供的信息, 采用Map封装数据
      */
-    public abstract void openSecond(String content);
+    public abstract void openSecond(Map<String, Object> content);
 
     @Override
     public @Nullable JComponent getPreferredFocusedComponent() {

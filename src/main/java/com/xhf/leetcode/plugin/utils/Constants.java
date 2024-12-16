@@ -21,4 +21,15 @@ public interface Constants {
     String NOTING_TO_SHOW = "Noting To Show";
 
     String SUBMISSION_EDITOR_OPEN_ERROR = "Submission Editor open error! please close all file and try again";
+
+    /*-------------用于openSecond(Map)的key--------------*/
+    String SOLUTION_CONTENT = "SOLUTION_CONTENT";
+    String FRONTEND_QUESTION_ID = "FRONTEND_QUESTION_ID";
+    String TRANSLATED_TITLE = "TRANSLATED_TITLE";
+    String DIFFICULTY = "DIFFICULTY";
+    String TITLE_SLUG = "TITLE_SLUG";
+    String TOPIC_ID = "TOPIC_ID";
+    String SOLUTION_SLUG = "SOLUTION_SLUG";
+    String SUBMISSION_ID = "SUBMISSION_ID";
+    String QUESTION_CONTENT = "QUESTION_CONTENT";
 }

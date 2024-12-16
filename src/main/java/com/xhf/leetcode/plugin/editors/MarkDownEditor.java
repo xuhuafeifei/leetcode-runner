@@ -14,9 +14,11 @@ import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.MarkdownContentType;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +28,7 @@ import org.jetbrains.ide.BuiltInServerManager;
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * support html or markdown show ability
@@ -35,10 +38,7 @@ import java.net.URL;
  */
 public class MarkDownEditor implements FileEditor {
     private final Project project;
-    /**
-     * 用于显示的MarkDown格式的文件
-     */
-    private final LightVirtualFile vFile;
+
     /**
      * 采用JCEF技术+前端vditor框架渲染MarkDown内容
      * <p>
@@ -61,19 +61,18 @@ public class MarkDownEditor implements FileEditor {
     /**
      * lc存储service于editor之间沟通的数据信息
      */
-    private final LeetcodeEditor lc;
     /**
      * 打开内容的类型
      */
     private final MarkdownContentType contentType;
+    private final Map<String, Object> content;
 
-    public MarkDownEditor(@NotNull Project project, @NotNull LightVirtualFile file, @Nullable LeetcodeEditor lc, @NotNull MarkdownContentType contentType) {
+    public MarkDownEditor(@NotNull Project project, Map<String, Object> content, @NotNull MarkdownContentType contentType) {
         this.project = project;
-        this.vFile = file;
         this.myComponent = JBUI.Panels.simplePanel();
-        this.jcefHtmlPanel = new JCEFHtmlPanel(this.vFile.getUrl());
-        this.lc = lc;
+        this.jcefHtmlPanel = new JCEFHtmlPanel("url");
         this.contentType = contentType;
+        this.content = content;
 
         this.jcefHtmlPanel.loadHTML(loadHTMLContent());
 
@@ -93,21 +92,24 @@ public class MarkDownEditor implements FileEditor {
             html = html.replace("{{serverUrl}}", serverPath);
             switch (contentType) {
                 case QUESTION:
-                    html = html.replace("{{title}}", lc.getFrontendQuestionId() + "." + lc.getTranslatedTitle())
-                            .replace("{{tag}}", getTag(lc.getDifficulty()))
+                    html = html.replace("{{title}}", MapUtils.getString(content, Constants.FRONTEND_QUESTION_ID) + "." + MapUtils.getString(content, Constants.TRANSLATED_TITLE))
+                            .replace("{{tag}}", getTag(MapUtils.getString(content, Constants.DIFFICULTY)))
                             .replace("{{webUrl}}", getWebUrl())
+                            .replace("{{content}}", MapUtils.getString(content, Constants.QUESTION_CONTENT))
                     ;
                     break;
                 case SOLUTION:
                     html = html.replace("{{title}}", "")
                             .replace("{{tag}}", "")
                             .replace("{{webUrl}}", getWebUrl())
+                            .replace("{{content}}", MapUtils.getString(content, Constants.SOLUTION_CONTENT))
                     ;
                     break;
                 default:
+
             }
             // handle html
-            return html.replace("{{content}}", vFile.getContent());
+            return html;
         } catch (Exception e) {
             LogUtils.error("Failed to load HTML content", e);
             ConsoleUtils.getInstance(project).showWaring("Failed to load HTML content");
@@ -134,10 +136,10 @@ public class MarkDownEditor implements FileEditor {
      * @return web url
      */
     private String questionWebUrl() {
-        if (lc == null) {
+        if (content.isEmpty()) {
             return "";
         }
-        String titleSlug = lc.getTitleSlug();
+        String titleSlug = MapUtils.getString(content, Constants.TITLE_SLUG);
         if (StringUtils.isBlank(titleSlug)) {
             return "";
         }
@@ -150,12 +152,12 @@ public class MarkDownEditor implements FileEditor {
      * @return web url
      */
     private String solutionWebUrl() {
-        if (lc == null) {
+        if (content.isEmpty()) {
             return "";
         }
-        String titleSlug = lc.getTitleSlug();
-        String topicId = lc.getTopicId();
-        String solutionSlug = lc.getSolutionSlug();
+        String titleSlug = MapUtils.getString(content, Constants.TITLE_SLUG);
+        String topicId = MapUtils.getString(content, Constants.TOPIC_ID);
+        String solutionSlug = MapUtils.getString(content, Constants.SOLUTION_SLUG);
         // 要求三者全部不为blank
         if (StringUtils.isBlank(titleSlug) ||
                 StringUtils.isBlank(topicId) ||

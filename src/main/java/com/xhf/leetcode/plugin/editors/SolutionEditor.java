@@ -18,12 +18,14 @@ import com.xhf.leetcode.plugin.service.SolutionService;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.MarkdownContentType;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.Map;
 
 /**
  * @author feigebuge
@@ -72,18 +74,12 @@ public class SolutionEditor extends AbstractSplitTextEditor {
     }
 
     @Override
-    public void openSecond(String content) {
+    public void openSecond(Map<String, Object> content) {
         // build light virtual file
-        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
         BorderLayoutPanel secondComponent;
-        if (lc == null) {
-            openError();
-            return;
-        }
-        LightVirtualFile solutionFile = new LightVirtualFile(
-                lc.getTitleSlug()+ ".solution.md", content
-        );
-        if (StringUtils.isBlank(content)) {
+        // 获取content
+        String solutionContent = MapUtils.getString(content, Constants.SOLUTION_CONTENT);
+        if (StringUtils.isBlank(solutionContent)) {
             // 不支持当前的solution格式
             JTextPane jTextPane = showNotingTextPane();
             jTextPane.setText(Constants.SOLUTION_CONTENT_NOT_SUPPORT);
@@ -91,7 +87,7 @@ public class SolutionEditor extends AbstractSplitTextEditor {
             secondComponent.addToTop(createToolbarWrapper(jTextPane));
         }else {
             // 显示solution
-            MarkDownEditor markDownEditor = new MarkDownEditor(project, solutionFile, lc, MarkdownContentType.SOLUTION);
+            MarkDownEditor markDownEditor = new MarkDownEditor(project, content, MarkdownContentType.SOLUTION);
             secondComponent = JBUI.Panels.simplePanel(markDownEditor.getComponent());
             secondComponent.addToTop(createToolbarWrapper(markDownEditor.getComponent()));
         }

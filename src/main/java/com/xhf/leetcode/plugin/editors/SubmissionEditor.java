@@ -9,18 +9,23 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.listener.SubmissionListener;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Submission;
+import com.xhf.leetcode.plugin.model.SubmissionDetail;
 import com.xhf.leetcode.plugin.render.SubmissionCellRender;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.SubmissionService;
 import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import org.apache.commons.collections.MapUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.util.Map;
 
 /**
  * 订阅login, clearCache, codeSubmit事件
@@ -75,18 +80,32 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
         jbSplitter.setSecondComponent(null);
     }
 
+    /**
+     * submissionEditor通过获取submission_id, 从storeService中获取submission_detail, 并构建codeEditor
+     * @param content
+     */
     @Override
-    public void openSecond(String content) {
+    public void openSecond(Map<String, Object> content) {
         // build light virtual file
-        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
-        if (lc == null) {
+        if (content == null) {
+            LogUtils.error("content is null!");
             openError();
             return;
         }
-        LightVirtualFile submissionFile = new LightVirtualFile(
-                lc.getTitleSlug() + ".code", content
+        if (content.get(Constants.SUBMISSION_ID) == null) {
+            LogUtils.error("submission id is null");
+            openError();
+            return;
+        }
+        SubmissionDetail submissionDetail = StoreService.getInstance(project).getCache(
+                MapUtils.getString(content, Constants.SUBMISSION_ID), SubmissionDetail.class
         );
-        CodeEditor codeEditor = new CodeEditor(project, submissionFile);
+        if (submissionDetail == null) {
+            LogUtils.error("submissionDetail is null");
+            openError();
+            return;
+        }
+        CodeEditor codeEditor = new CodeEditor(project, submissionDetail.getCode());
         // 设置水平滚轮
         JBScrollPane jsp = new JBScrollPane(codeEditor.getComponent());
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);

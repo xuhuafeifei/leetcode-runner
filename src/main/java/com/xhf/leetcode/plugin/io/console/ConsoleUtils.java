@@ -55,7 +55,6 @@ public final class ConsoleUtils implements Disposable {
      * 显示info信息
      * @param content
      */
-
     public void showInfo(String content) {
         showInfo(content, false, false, null, null, ConsoleDialog.UNKNOWN);
     }
@@ -68,6 +67,11 @@ public final class ConsoleUtils implements Disposable {
     @Safe
     public void showInfo(String content, boolean clear) {
         showInfo(content, clear, false, null, null, ConsoleDialog.UNKNOWN);
+    }
+
+    @UnSafe
+    public void showInfo(String content, boolean clear, boolean showDialog) {
+        showInfo(content, clear, showDialog, content, null, ConsoleDialog.INFO);
     }
 
 
@@ -84,6 +88,11 @@ public final class ConsoleUtils implements Disposable {
     @Safe
     public void showWaring(String content) {
         showWaring(content, false, false, null, null, ConsoleDialog.UNKNOWN);
+    }
+
+    @UnSafe
+    public void showWaring(String content, boolean clear, boolean showDialog) {
+        showWaring(content, clear, showDialog, content, null, ConsoleDialog.WARNING);
     }
 
     /**

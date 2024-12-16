@@ -1,20 +1,23 @@
 package com.xhf.leetcode.plugin.editors;
 
 import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBTabbedPane;
-import com.xhf.leetcode.plugin.utils.MarkdownContentType;
-import com.xhf.leetcode.plugin.utils.ViewUtils;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.utils.*;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author feigebuge
@@ -45,12 +48,23 @@ public class FocusTextEditor implements FileEditor {
      */
     private void initComponent() {
         JBTabbedPane tabbedPane = new JBTabbedPane();
-
-        JComponent contentPanel = new MarkDownEditor(project,
-                ViewUtils.getHTMLContent(file, project),
-                ViewUtils.getLeetcodeEditorByVFile(file, project),
-                MarkdownContentType.QUESTION
-        ).getComponent();
+        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
+        // lc检测. lc存储了service和editor之间沟通的重要数据, 这些数据会在editor显示内容是使用
+        if (lc == null) {
+            ConsoleUtils.getInstance(project).showWaring("open failed! please close all file and try again!", true, true);
+            return;
+        }
+        // 参数检测
+        if (StringUtils.isBlank(lc.getFrontendQuestionId()) ||
+                StringUtils.isBlank(lc.getTranslatedTitle()) ||
+                StringUtils.isBlank(lc.getDifficulty()) ||
+                StringUtils.isBlank(lc.getTitleSlug())
+        ) {
+            ConsoleUtils.getInstance(project).showWaring("open failed! please close all file and try again!", true, true);
+            LogUtils.error("在创建code file并打开的过程中, LeetcodeEditor的{frontedQuestionId, translatedTitle, difficulty, titleSlug}参数不齐全: " + GsonUtils.toJsonStr(lc));
+            return;
+        }
+        JComponent contentPanel = new MarkDownEditor(project, buildMarkDownContent(lc), MarkdownContentType.QUESTION).getComponent();
         JComponent solutionPanel = new SolutionEditor(project, file).getComponent();
         JComponent submissionPanel = new SubmissionEditor(project, file).getComponent();
 
@@ -59,6 +73,16 @@ public class FocusTextEditor implements FileEditor {
         tabbedPane.addTab("submission", submissionPanel);
 
         myComponent = tabbedPane;
+    }
+
+    private Map<String, Object> buildMarkDownContent(LeetcodeEditor lc) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.FRONTEND_QUESTION_ID, lc.getFrontendQuestionId());
+        map.put(Constants.TRANSLATED_TITLE, lc.getTranslatedTitle());
+        map.put(Constants.DIFFICULTY, lc.getDifficulty());
+        map.put(Constants.TITLE_SLUG, lc.getTitleSlug());
+        map.put(Constants.QUESTION_CONTENT, lc.getMarkdownContent());
+        return map;
     }
 
     @Override

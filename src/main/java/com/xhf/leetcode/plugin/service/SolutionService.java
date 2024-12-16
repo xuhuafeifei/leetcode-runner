@@ -10,9 +10,12 @@ import com.xhf.leetcode.plugin.editors.SolutionEditor;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Solution;
+import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author feigebuge
@@ -45,17 +48,12 @@ public class SolutionService {
      */
     public static void openSolutionContent(Project project, Solution solution, SolutionEditor solutionEditor) {
         String solutionContent = LeetcodeClient.getInstance(project).getSolutionContent(solution.getSlug());
-
-        // 向lc存入solution相关信息
-        VirtualFile file = solutionEditor.getFile();
-        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
         // 添加solution相关信息, 为后续创建solution提供数据支持
-        if (lc != null) {
-            lc.setTopicId(solution.getTopic().getId());
-            lc.setSolutionSlug(solution.getSlug());
-        }
-        // 更新lc内容
-        ViewUtils.updateLeetcodeEditorByVFile(project, file, lc);
-        solutionEditor.openSecond(solutionContent);
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.TOPIC_ID, solution.getTopic().getId());
+        map.put(Constants.SOLUTION_SLUG, solution.getSlug());
+        map.put(Constants.SOLUTION_CONTENT, solutionContent);
+        // 打开第二个面板
+        solutionEditor.openSecond(map);
     }
 }

@@ -70,7 +70,7 @@ public class LogUtils {
     }
 
     public static void error(String message, Throwable e) {
-//        IDEA_LOGGER.error(message, e);
+        IDEA_LOGGER.error(message, e);
     }
 
     public static void warn(String message) {

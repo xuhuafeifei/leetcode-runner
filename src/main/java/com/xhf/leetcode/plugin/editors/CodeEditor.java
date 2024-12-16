@@ -11,7 +11,12 @@ import com.intellij.openapi.util.Key;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
+import jnr.constants.Constant;
+import org.apache.commons.collections.MapUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +26,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeListener;
+import java.util.Map;
 
 /**
  * 显示submission里的history code
@@ -46,7 +52,9 @@ public class CodeEditor implements FileEditor {
         DefaultActionGroup actionGroup = new DefaultActionGroup(copyAction(), copyToContentEditor());
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("Solution", actionGroup, true);
         actionToolbar.setTargetComponent(comp);
-        return new SplitEditorToolbar(actionToolbar, ActionManager.getInstance().createActionToolbar("Empty", new DefaultActionGroup(), true));
+        ActionToolbar empty = ActionManager.getInstance().createActionToolbar("Empty", new DefaultActionGroup(), true);
+        empty.setTargetComponent(comp);
+        return new SplitEditorToolbar(actionToolbar, empty);
     }
 
     private AnAction copyAction() {
@@ -67,24 +75,33 @@ public class CodeEditor implements FileEditor {
         return new AnAction("Copy to Content Editor", "Copy to content editor", AllIcons.Actions.Back) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
-                // todo: copy to clipboard and paste code to editor
-                JOptionPane.showMessageDialog(null, "Not Supported Yet.");
+                String content = textPane.getText();
+                Project project = e.getProject();
+                if (project == null) {
+                    JOptionPane.showMessageDialog(null, "Copy error because project is null");
+                    return;
+                }
+                ConsoleUtils instance = ConsoleUtils.getInstance(project);
+                boolean flag = ViewUtils.writeContentToCurrentVFile(project, content);
+                if (flag) {
+                    instance.showInfo("Copy To Editor Success", false, true);
+                }else {
+                    instance.showWaring("Copy To Editor Error", false, true);
+                }
             }
         };
     }
 
-    public CodeEditor(@NotNull Project project, @NotNull LightVirtualFile file) {
+    public CodeEditor(@NotNull Project project, @NotNull String code) {
         this.textPane = new JTextPane();
-        this.textPane.setText(String.valueOf(file.getContent())); // set history code to text pane
+        this.textPane.setText(code); // set history code to text pane
         this.textPane.setFont(Constants.ENGLISH_FONT);
         this.textPane.setForeground(Constants.FOREGROUND_COLOR);
         this.textPane.setBackground(Constants.BACKGROUND_COLOR);
         this.textPane.setEditable(false);
         this.myComponent = JBUI.Panels.simplePanel();
-        this.myComponent.addToTop(createToolbarWrapper(this.textPane));
-//        JBScrollPane jsp = new JBScrollPane(this.textPane);
-//        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-//        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        SplitEditorToolbar toolbarWrapper = createToolbarWrapper(this.textPane);
+        this.myComponent.addToTop(toolbarWrapper);
         this.myComponent.addToCenter(this.textPane);
     }
 

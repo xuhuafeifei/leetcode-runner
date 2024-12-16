@@ -49,8 +49,8 @@ public class CodeService {
     /**
      * fill question and open code editor with preview content function
      *
-     * @param question
-     * @param project
+     * @param question question
+     * @param project project
      */
     public static void openCodeEditor(Question question, Project project) {
         QuestionService.getInstance().fillQuestion(question, project);
@@ -150,8 +150,8 @@ public class CodeService {
 
     /**
      * 通过question创建文件名
-     * @param question
-     * @return
+     * @param question question
+     * @return 获取文件名
      */
     public static String getCodeFileName(Question question) {
         return question.getFileName() + AppSettings.getInstance().getFileTypeSuffix();
@@ -159,8 +159,8 @@ public class CodeService {
 
     /**
      * 通过文件名称反解析question.fid
-     * @param filePath
-     * @return
+     * @param filePath 打开的虚拟文件的路径
+     * @return frontedQuestionId
      */
     public static String parseFidFromFileName(String filePath) {
         Path path = Paths.get(filePath);
@@ -170,8 +170,8 @@ public class CodeService {
 
     /**
      * 通过vFile反解析question.fid
-     * @param file
-     * @return
+     * @param file idea打开的虚拟文件
+     * @return frontedQuestionId
      */
     public static String parseFidFromVFile(VirtualFile file) {
         String filePath = ViewUtils.getUnifyFilePathByVFile(file);
@@ -180,8 +180,8 @@ public class CodeService {
 
     /**
      * 通过文件名称反解析question.titleSlug
-     * @param filePath
-     * @return
+     * @param filePath 打开的虚拟文件的路径
+     * @return 解析出titleSlug
      */
     public static String parseTitleSlugFromFileName(String filePath) {
         Path path = Paths.get(filePath);
@@ -191,8 +191,8 @@ public class CodeService {
 
     /**
      * 通过vFile反解析question.titleSlug
-     * @param file
-     * @return
+     * @param file idea打开的虚拟文件
+     * @return 解析titleSlug
      */
     public static String parseTitleSlugFromVFile(VirtualFile file) {
         String filePath = ViewUtils.getUnifyFilePathByVFile(file);
@@ -201,7 +201,7 @@ public class CodeService {
 
     /**
      * 通过文件名反解析question的langType
-     * @param filePath
+     * @param filePath 打开的虚拟文件的路径
      */
     private static String parseLangType(String filePath) {
         Path path = Paths.get(filePath);
@@ -211,8 +211,8 @@ public class CodeService {
 
     /**
      * 通过vFile反解析langType
-     * @param file
-     * @return
+     * @param file idea打开的虚拟文件
+     * @return langType
      */
     public static String parseLangTypeFromVFile(VirtualFile file) {
         String filePath = ViewUtils.getUnifyFilePathByVFile(file);
@@ -224,7 +224,11 @@ public class CodeService {
         RunCode runCode = new RunCode();
         runCode.setFrontendQuestionId(lc.getFrontendQuestionId());
         runCode.setQuestionId(lc.getQuestionId());
-        runCode.setLang(lc.getLang());
+        // runCode.setLang(lc.getLang());
+        /*
+            一切提交代码类型按照setting中的设置确定
+         */
+        runCode.setLang(AppSettings.getInstance().getLangType());
         runCode.setTypeCode(codeContent);
         runCode.setTitleSlug(lc.getTitleSlug());
         runCode.setDataInput(lc.getExampleTestcases());
@@ -233,7 +237,7 @@ public class CodeService {
 
     /**
      * run code with a teat case through a leetcode platform
-     * @param project
+     * @param project project
      */
     public static void runCode(Project project) {
         /* get file editor */
@@ -256,7 +260,7 @@ public class CodeService {
         }
         RunCode runCode = buildRunCode(lc, codeContent);
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Run Code", false){
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Run code", false){
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(runCode);
@@ -295,7 +299,7 @@ public class CodeService {
         // build run code
         RunCode runCode = buildRunCode(lc, codeContent);
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Submit Code", false){
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Submit code", false){
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(runCode);
@@ -321,12 +325,12 @@ public class CodeService {
 
     /**
      * 重新定位question
-     * @param project
+     * @param project project
      */
     public static void rePosition(Project project) {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
-            JOptionPane.showMessageDialog(null, "No file was choose");
+            JOptionPane.showMessageDialog(null, "No file is chosen");
             return;
         }
         // 获取当前打开文件的fid
@@ -336,13 +340,14 @@ public class CodeService {
         // 获取当前打开文件的语言类型
         String langType = parseLangTypeFromVFile(cFile);
         if (fid == null || titleSlug == null) {
-            JOptionPane.showMessageDialog(null, "current file is not support to reposition");
+            JOptionPane.showMessageDialog(null, "Current file is not support to reposition");
             return;
         }
         if (! LangType.contains(langType)) {
-            JOptionPane.showMessageDialog(null, "current code type is not support. Your type = " + langType
+            JOptionPane.showMessageDialog(null, "Current code type is not support. Your type = " + langType
                     + "\n"
                     + "Supported types: " + LangType.getAllLangType()
+                    + "Please remove this file and choose question again!"
             );
             return;
         }
@@ -360,7 +365,7 @@ public class CodeService {
     public static void getDefaultContent(Project project) {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
-            JOptionPane.showMessageDialog(null, "no file open");
+            JOptionPane.showMessageDialog(null, "No file open");
             return;
         }
         String titleSlug = parseTitleSlugFromVFile(cFile);
@@ -403,25 +408,13 @@ public class CodeService {
         if (question != null && StringUtils.isNotBlank(question.getCodeSnippets())) {
             String defaultCode = question.getCodeSnippets();
 
-            // 获取文件的文档
-            Document document = FileDocumentManager.getInstance().getDocument(cFile);
-            if (document != null) {
-                ApplicationManager.getApplication().runWriteAction(() -> {
-                    document.setText(defaultCode);
-                    // 将 JOptionPane 显示移到 EDT 线程
-                    SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(null, "load default content success!");
-                    });
-                });
-            } else {
-                // 如果无法获取文档，则使用OutputStream写入文件
-                try (OutputStream outputStream = cFile.getOutputStream(CodeService.class)) {
-                    outputStream.write(defaultCode.getBytes(StandardCharsets.UTF_8));
-                    JOptionPane.showMessageDialog(null, "load default content success!");
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, "Failed to write to file: " + e.getMessage());
-                }
+            boolean flag = ViewUtils.writeContentToVFile(cFile, defaultCode);
+            if (flag) {
+                JOptionPane.showMessageDialog(null, "load default content success!");
+            }else {
+                JOptionPane.showMessageDialog(null, "load default content error!");
             }
+
         } else {
             JOptionPane.showMessageDialog(null, "Question not found for title slug: " + titleSlug);
         }
@@ -441,6 +434,7 @@ public class CodeService {
         protected T cr; // code result
         protected final StringBuilder sb = new StringBuilder();
         protected final String splitter = "--------------";
+        private final String codeTypeSplitter = "===============";
 
         public AbstractResultBuilder (T cr) {
             this.cr = cr;
@@ -483,6 +477,7 @@ public class CodeService {
          */
         private void createHead() {
             boolean correctAnswer = isCorrectAnswer();
+            sb.append("\n").append(codeTypeSplitter).append(" ").append("⚙ Setting Code Type : ").append(AppSettings.getInstance().getLangType()).append(" ").append(codeTypeSplitter).append("\n\n");
             if (correctAnswer) {
                 // true
                 sb.append("✅ Accept...").append("\n");
@@ -560,7 +555,7 @@ public class CodeService {
          * 2
          * Expect Answer:
          * 0
-         *
+         * <p>
          * ========================== example 3 ============================
          * null
          */
@@ -575,7 +570,7 @@ public class CodeService {
      * @return 返回builder, 用于build创建string, 输出到LCConsole
      */
     private static AbstractResultBuilder<RunCodeResult> createRunCodeResultBuilder(String dataInput, RunCodeResult cr) {
-        return new AbstractResultBuilder<RunCodeResult>(cr) {
+        return new AbstractResultBuilder<>(cr) {
             @Override
             protected void createBody() {
                 String totalTestcases = cr.getTotalTestcases();
@@ -586,16 +581,17 @@ public class CodeService {
                 for (int i = 0; i < total; i++) {
                     sb.append(splitter).append("CASE ").append(i + 1).append(": ").append(cr.getCompareResult().charAt(i) == '1' ? "✅" : "❌").append(splitter).append("\n");
                     // extract std_output
-                    extractStdoutput(i, total);
+                    extractStdoutput(i);
                     // extract input
                     extractInput(i, total);
                     // extract answer
-                    extractAnswer(i, total);
+                    extractAnswer(i);
                     // extract expected answer
-                    extractExpectedAnswer(i, total);
+                    extractExpectedAnswer(i);
                 }
             }
-            private void extractExpectedAnswer(int i, int total) {
+
+            private void extractExpectedAnswer(int i) {
                 List<String> expectedCodeAnswer = cr.getExpectedCodeAnswer();
                 if (i >= expectedCodeAnswer.size()) return;
 
@@ -603,7 +599,7 @@ public class CodeService {
                 sb.append(expectedCodeAnswer.get(i)).append("\n");
             }
 
-            private void extractAnswer(int i, int total) {
+            private void extractAnswer(int i) {
                 List<String> codeAnswer = cr.getCodeAnswer();
                 if (i >= codeAnswer.size()) return;
 
@@ -611,7 +607,7 @@ public class CodeService {
                 sb.append(codeAnswer.get(i)).append("\n");
             }
 
-            private void extractStdoutput(int i, int total) {
+            private void extractStdoutput(int i) {
                 List<String> stdOutputList = cr.getStdOutputList();
                 if (i >= stdOutputList.size()) return;
                 if (StringUtils.isBlank(stdOutputList.get(i))) return;
@@ -644,7 +640,7 @@ public class CodeService {
      * @return 返回builder, 用于build创建string, 输出到LCConsole
      */
     private static AbstractResultBuilder<SubmitCodeResult> createSubmitCodeResultBuilder(SubmitCodeResult scr) {
-        return new AbstractResultBuilder<SubmitCodeResult>(scr) {
+        return new AbstractResultBuilder<>(scr) {
             @Override
             protected void createBody() {
                 boolean correctAnswer = isCorrectAnswer();
@@ -702,7 +698,7 @@ public class CodeService {
 
     /**
      * open test case dialog
-     * @param project
+     * @param project project
      */
     public static void openTestCasesDialog(Project project) {
         /* get file editor */

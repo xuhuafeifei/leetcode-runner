@@ -1,17 +1,25 @@
 package com.xhf.leetcode.plugin.utils;
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.service.CodeService;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author feigebuge
@@ -86,8 +94,8 @@ public class ViewUtils {
 
     /**
      * 获取当前打开的虚拟文件
-     * @param project
-     * @return
+     * @param project project
+     * @return 虚拟文件
      */
     public static VirtualFile getCurrentOpenVirtualFile(Project project) {
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
@@ -109,5 +117,43 @@ public class ViewUtils {
             FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
             fileEditorManager.closeFile(virtualFile);
         }
+    }
+
+    /**
+     * 将内容写入vFile
+     * @param cFile 要写入的虚拟文件
+     * @param content 要写入的内容
+     * @return 是否写入成功
+     */
+    public static boolean writeContentToVFile(VirtualFile cFile, String content) {
+        // 获取文件的文档
+        Document document = FileDocumentManager.getInstance().getDocument(cFile);
+        if (document != null) {
+            Application application = ApplicationManager.getApplication();
+            application.invokeAndWait(() -> {
+                application.runWriteAction(() -> {
+                    document.setText(content);
+                });
+            });
+        } else {
+            // 如果无法获取文档，则使用OutputStream写入文件
+            try (OutputStream outputStream = cFile.getOutputStream(CodeService.class)) {
+                outputStream.write(content.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException ignored) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 将内容写入当前打开的虚拟文件
+     * @param project project
+     * @param content 写入内容
+     * @return 是否写入成功
+     */
+    public static boolean writeContentToCurrentVFile(@Nullable Project project, String content) {
+        VirtualFile cFile = getCurrentOpenVirtualFile(project);
+        return writeContentToVFile(cFile, content);
     }
 }
