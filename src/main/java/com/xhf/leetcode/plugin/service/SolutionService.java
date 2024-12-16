@@ -11,7 +11,9 @@ import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Solution;
 import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +55,18 @@ public class SolutionService {
         map.put(Constants.TOPIC_ID, solution.getTopic().getId());
         map.put(Constants.SOLUTION_SLUG, solution.getSlug());
         map.put(Constants.SOLUTION_CONTENT, solutionContent);
+        LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByCurrentVFile(project);
+        if (lc == null) {
+            LogUtils.warn("LeetcodeEditor is null...");
+            // 打开第二个面板
+            solutionEditor.openSecond(map);
+            return;
+        }
+        if (StringUtils.isNotBlank(lc.getTitleSlug())) {
+            map.put(Constants.TITLE_SLUG, lc.getTitleSlug());
+        }else {
+            LogUtils.warn("LeetcodeEditor is null or titleSlug is blank... leetcodeEditor = " + lc);
+        }
         // 打开第二个面板
         solutionEditor.openSecond(map);
     }

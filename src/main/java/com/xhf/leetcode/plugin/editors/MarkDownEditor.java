@@ -13,11 +13,7 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
-import com.xhf.leetcode.plugin.model.LeetcodeEditor;
-import com.xhf.leetcode.plugin.utils.Constants;
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.MarkdownContentType;
-import com.xhf.leetcode.plugin.utils.RandomUtils;
+import com.xhf.leetcode.plugin.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nls;
@@ -111,9 +107,11 @@ public class MarkDownEditor implements FileEditor {
             // handle html
             return html;
         } catch (Exception e) {
-            LogUtils.error("Failed to load HTML content", e);
-            ConsoleUtils.getInstance(project).showWaring("Failed to load HTML content");
-            return "Failed to load HTML content !!";
+            LogUtils.warn("load Markdown content!!\n" + "content = " + GsonUtils.toJsonStr(content) + "\n\r" +
+                    "contentType = " + contentType.toString() + "\n\r" + "serverPath = " + serverPath);
+            LogUtils.error("Failed to load Markdown content", e);
+            ConsoleUtils.getInstance(project).showWaring("Failed to load Markdown content");
+            return "Failed to load Markdown content !!";
         }
     }
 
@@ -141,6 +139,7 @@ public class MarkDownEditor implements FileEditor {
         }
         String titleSlug = MapUtils.getString(content, Constants.TITLE_SLUG);
         if (StringUtils.isBlank(titleSlug)) {
+            LogUtils.warn("question web url failed!!\n\r" + "titleSlug = " + titleSlug);
             return "";
         }
         String html = "<a rel=\"stylesheet\" href=\"" + LeetcodeApiUtils.getQuestionUrl(titleSlug) + "\">在浏览器上访问</a><p>";
@@ -163,6 +162,10 @@ public class MarkDownEditor implements FileEditor {
                 StringUtils.isBlank(topicId) ||
                 StringUtils.isBlank(solutionSlug)
         ) {
+            LogUtils.warn("solution web url failed!!\n\r" +
+                    "titleSlug = " + titleSlug + " " +
+                    "topicId = " + topicId + " " +
+                    "solutionSlug = " + solutionSlug);
             return "";
         }
 

@@ -58,7 +58,8 @@ public class FocusTextEditor implements FileEditor {
         if (StringUtils.isBlank(lc.getFrontendQuestionId()) ||
                 StringUtils.isBlank(lc.getTranslatedTitle()) ||
                 StringUtils.isBlank(lc.getDifficulty()) ||
-                StringUtils.isBlank(lc.getTitleSlug())
+                StringUtils.isBlank(lc.getTitleSlug()) ||
+                StringUtils.isBlank(lc.getMarkdownContent())
         ) {
             ConsoleUtils.getInstance(project).showWaring("open failed! please close all file and try again!", true, true);
             LogUtils.error("在创建code file并打开的过程中, LeetcodeEditor的{frontedQuestionId, translatedTitle, difficulty, titleSlug}参数不齐全: " + GsonUtils.toJsonStr(lc));

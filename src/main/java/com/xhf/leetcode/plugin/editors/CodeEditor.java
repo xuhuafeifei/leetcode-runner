@@ -34,7 +34,7 @@ import java.util.Map;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class CodeEditor implements FileEditor {
+public class CodeEditor extends CopyToolBarEditor {
     /**
      * 填充code内容的容器
      */
@@ -45,19 +45,8 @@ public class CodeEditor implements FileEditor {
     private final BorderLayoutPanel myComponent;
 
 
-    /**
-     * support copy code ability
-     */
-    protected final SplitEditorToolbar createToolbarWrapper(JComponent comp) {
-        DefaultActionGroup actionGroup = new DefaultActionGroup(copyAction(), copyToContentEditor());
-        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("Solution", actionGroup, true);
-        actionToolbar.setTargetComponent(comp);
-        ActionToolbar empty = ActionManager.getInstance().createActionToolbar("Empty", new DefaultActionGroup(), true);
-        empty.setTargetComponent(comp);
-        return new SplitEditorToolbar(actionToolbar, empty);
-    }
-
-    private AnAction copyAction() {
+    @Override
+    protected AnAction copyAction() {
         return new AnAction("Copy", "Copy", AllIcons.Actions.Copy) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
@@ -71,7 +60,8 @@ public class CodeEditor implements FileEditor {
         };
     }
 
-    private AnAction copyToContentEditor() {
+    @Override
+    protected AnAction copyToAction() {
         return new AnAction("Copy to Content Editor", "Copy to content editor", AllIcons.Actions.Back) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {

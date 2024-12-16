@@ -127,6 +127,9 @@ public final class StoreService implements Disposable {
      * @return
      */
     public String getCacheJson(String key) {
+        if (key == null) {
+            return null;
+        }
         StoreContent content = cache.getIfPresent(key);
         if (content != null) {
             return getIfNotExpireTime(content);

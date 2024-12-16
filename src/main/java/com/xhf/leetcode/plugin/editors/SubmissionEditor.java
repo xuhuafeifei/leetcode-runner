@@ -82,7 +82,7 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
 
     /**
      * submissionEditor通过获取submission_id, 从storeService中获取submission_detail, 并构建codeEditor
-     * @param content
+     * @param content submission_id
      */
     @Override
     public void openSecond(Map<String, Object> content) {
@@ -105,15 +105,49 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
             openError();
             return;
         }
+
+        // 使用 BorderLayoutPanel 实现上下布局
+        BorderLayoutPanel centerPanel = JBUI.Panels.simplePanel();
+        // 添加codeEditor
+        centerPanel.addToCenter(createCodePanel(submissionDetail));
+        // 如果提交结果不是Accepted，则显示错误信息
+        if (! submissionDetail.getStatusDisplay().equals("Accepted")) {
+            centerPanel.addToTop(createErrorInfoPanel(submissionDetail));
+        }
+
+        BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(centerPanel);
+        secondComponent.addToTop(createToolbarWrapper(centerPanel));
+        jbSplitter.setSecondComponent(secondComponent);
+    }
+
+    /**
+     * 创建codeEditor
+     * @param submissionDetail 提交信息
+     * @return CodeEditor
+     */
+    public JComponent createCodePanel(SubmissionDetail submissionDetail) {
         CodeEditor codeEditor = new CodeEditor(project, submissionDetail.getCode());
         // 设置水平滚轮
         JBScrollPane jsp = new JBScrollPane(codeEditor.getComponent());
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
-        BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(jsp);
-        secondComponent.addToTop(createToolbarWrapper(codeEditor.getComponent()));
-        jbSplitter.setSecondComponent(secondComponent);
+        return jsp;
+    }
+
+    /**
+     * 创建错误信息editor
+     * @param submissionDetail submission的信息
+     * @return ErrorInfoEditor
+     */
+    public JComponent createErrorInfoPanel(SubmissionDetail submissionDetail) {
+        ErrorInfoEditor errorInfoEditor = new ErrorInfoEditor(project, submissionDetail);
+        // 设置水平滚轮
+        JBScrollPane jsp = new JBScrollPane(errorInfoEditor.getComponent());
+        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+        return jsp;
     }
 
     @Override

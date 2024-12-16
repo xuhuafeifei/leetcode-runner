@@ -49,12 +49,20 @@ public class ViewUtils {
         return cache;
     }
 
+    public static LeetcodeEditor getLeetcodeEditorByCurrentVFile(Project project) {
+        VirtualFile cFile = getCurrentOpenVirtualFile(project);
+        return getLeetcodeEditorByVFile(cFile, project);
+    }
+
     /**
      * 通过vFile构造cache的key
      * @param file 当前editor打开的虚拟文件(项目创建的code文件)
      * @return
      */
     public static String getCacheKeyByVFile(VirtualFile file) {
+        if (file == null) {
+            return null;
+        }
         String key = file.getPath();
         key = FileUtils.unifyPath(key);
         return key;
@@ -84,12 +92,15 @@ public class ViewUtils {
 
     /**
      * 通过vFile更新lc内容
+     *
      * @param file
      * @param lc
+     * @return
      */
-    public static void updateLeetcodeEditorByVFile(Project project, VirtualFile file, LeetcodeEditor lc) {
+    public static boolean updateLeetcodeEditorByVFile(Project project, VirtualFile file, LeetcodeEditor lc) {
         String key = getCacheKeyByVFile(file);
         StoreService.getInstance(project).addCache(key, lc);
+        return true;
     }
 
     /**
@@ -155,5 +166,11 @@ public class ViewUtils {
     public static boolean writeContentToCurrentVFile(@Nullable Project project, String content) {
         VirtualFile cFile = getCurrentOpenVirtualFile(project);
         return writeContentToVFile(cFile, content);
+    }
+
+    public static boolean updateLeetcodeEditorByCurrentVFile(Project project, LeetcodeEditor lc) {
+        VirtualFile cFile = getCurrentOpenVirtualFile(project);
+        if (cFile == null) return false;
+        return updateLeetcodeEditorByVFile(project, cFile, lc);
     }
 }

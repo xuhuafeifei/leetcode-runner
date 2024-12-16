@@ -4,9 +4,21 @@ public enum MarkdownContentType {
     /**
      * 题解
      */
-    SOLUTION,
+    SOLUTION("SOLUTION"),
     /**
      * 题目
      */
-    QUESTION;
+    QUESTION("QUESTION");
+
+    MarkdownContentType(String type) {
+        this.type = type;
+    }
+    private final String type;
+
+    @Override
+    public String toString() {
+        return "MarkdownContentType{" +
+                "type='" + type + '\'' +
+                '}';
+    }
 }

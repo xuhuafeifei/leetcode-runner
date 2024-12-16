@@ -125,4 +125,22 @@ public class LeetcodeEditor {
     public String getSolutionSlug() {
         return solutionSlug;
     }
+
+    @Override
+    public String toString() {
+        return "LeetcodeEditor{" +
+                "questionId='" + questionId + '\'' +
+                ", lang='" + lang + '\'' +
+                ", exampleTestcases='" + exampleTestcases + '\'' +
+                ", frontendQuestionId='" + frontendQuestionId + '\'' +
+                ", translatedTitle='" + translatedTitle + '\'' +
+                ", markdownPath='" + markdownPath + '\'' +
+                ", markdownContent='" + markdownContent + '\'' +
+                ", titleSlug='" + titleSlug + '\'' +
+                ", defaultTestcases='" + defaultTestcases + '\'' +
+                ", difficulty='" + difficulty + '\'' +
+                ", topicId='" + topicId + '\'' +
+                ", solutionSlug='" + solutionSlug + '\'' +
+                '}';
+    }
 }
