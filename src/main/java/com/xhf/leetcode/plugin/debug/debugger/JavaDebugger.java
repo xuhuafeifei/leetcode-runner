@@ -84,10 +84,23 @@ public class JavaDebugger implements Debugger {
 
         // 连接到目标 JVM
         VirtualMachine vm = null;
-        try {
-            vm = connector.attach(arguments);
-        } catch (IOException | IllegalConnectorArgumentsException e) {
-            throw new RuntimeException(e);
+        // 3次连接尝试
+        int tryCount = 1;
+        do {
+            try {
+                LogUtils.debug("第 " + tryCount + " 次连接, 尝试中...");
+                vm = connector.attach(arguments);
+                LogUtils.simpleDebug("连接成功!");
+                break;
+            } catch (IOException | IllegalConnectorArgumentsException e) {
+                LogUtils.simpleDebug(e.toString());
+            }
+            tryCount++;
+        } while (tryCount <= 3);
+
+        if (vm == null) {
+            LogUtils.error("vm 连接失败");
+            return;
         }
 
         // 获取当前类的调试信息
@@ -156,9 +169,19 @@ public class JavaDebugger implements Debugger {
             JavaInstFactory instance = JavaInstFactory.getInstance();
             InstExecutor instExecutor = instance.create(parse);
 
-            ExecuteResult r = instExecutor.execute(parse, context);
-            if (r.isHasResult()) {
-                output.output(r.getResult());
+            ExecuteResult r;
+            try {
+                r = instExecutor.execute(parse, context);
+            } catch (Exception e) {
+                LogUtils.simpleDebug("指令执行异常: " + e);
+                continue;
+            }
+            if (r.isSuccess()) {
+                if (r.isHasResult()) {
+                    output.output(r.getResult());
+                }
+            }else {
+                output.output(r.getMsg());
             }
 
             // 如果是运行类的指令, 则跳出循环, 运行vm
@@ -195,7 +218,13 @@ public class JavaDebugger implements Debugger {
             stepRequest = erm.createStepRequest(breakpointEvent.thread(), StepRequest.STEP_LINE, StepRequest.STEP_INTO);
             context.setStepRequest(stepRequest);
         }
-        stepRequest.enable();
+        try {
+            stepRequest.enable();
+        } catch (Exception e) {
+            // 未知错误, 就很干. 我都不知道为啥出错, fuck
+            LogUtils.simpleDebug(e.toString());
+            return;
+        }
 
         doRun();
     }

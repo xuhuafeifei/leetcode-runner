@@ -9,6 +9,7 @@ public class ExecuteResult {
     private boolean success;
     private boolean hasResult;
     private String result;
+    private String msg;
 
     public boolean isSuccess() {
         return success;
@@ -52,6 +53,22 @@ public class ExecuteResult {
     public static ExecuteResult fail() {
         ExecuteResult r = new ExecuteResult();
         r.success = false;
+        r.msg = "Some error happens!";
         return r;
+    }
+
+    public static ExecuteResult fail(String msg) {
+        ExecuteResult r = new ExecuteResult();
+        r.success = false;
+        r.msg = msg;
+        return r;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public String getMsg() {
+        return this.msg;
     }
 }

@@ -17,25 +17,21 @@ import java.util.List;
 public class JavaBInst implements InstExecutor{
     @Override
     public ExecuteResult execute(Instrument inst, Context context) {
-        // ClassType currentClass = context.getCurrentClass();
-        StepEvent stepEvent = context.getStepEvent();
-        Location location = stepEvent.location();
+        Location location = context.getLocation();
 
         ReferenceType referenceType = location.declaringType();
         ClassType classType = (ClassType) referenceType;
         int lineNumber = Integer.parseInt(inst.getParam());
 
         try {
-            boolean flag = setBreakpointAtLine(classType, lineNumber, context.getErm(), context);
-            return flag ? ExecuteResult.success() : ExecuteResult.fail();
+            return setBreakpointAtLine(classType, lineNumber, context.getErm(), context);
         } catch (AbsentInformationException e) {
-            LogUtils.error("", e);
-            return ExecuteResult.fail();
+            return ExecuteResult.fail(e.toString());
         }
     }
 
     // 在指定行设置断点
-    private static boolean setBreakpointAtLine(ClassType currentClass, int lineNumber, EventRequestManager erm, Context context) throws AbsentInformationException {
+    private static ExecuteResult setBreakpointAtLine(ClassType currentClass, int lineNumber, EventRequestManager erm, Context context) throws AbsentInformationException {
         List<Method> methods = currentClass.methods();
         // 获取methods的所有location
         List<Location> locations = new ArrayList<>();
@@ -51,10 +47,10 @@ public class JavaBInst implements InstExecutor{
                 breakpointRequest.enable();
                 context.addBreakpointRequest(breakpointRequest);
 
-                LogUtils.debug("Breakpoint set at line " + lineNumber);
-                return true;
+                LogUtils.simpleDebug("Breakpoint set at line " + lineNumber);
+                return ExecuteResult.success();
             }
         }
-        return false;
+        return ExecuteResult.fail("no valid location found");
     }
 }
