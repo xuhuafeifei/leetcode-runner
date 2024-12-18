@@ -173,4 +173,19 @@ public class ViewUtils {
         if (cFile == null) return false;
         return updateLeetcodeEditorByVFile(project, cFile, lc);
     }
+
+    public static String getContentOfCurrentOpenVFile(Project project) {
+        // 获取当前打开的 VirtualFile
+        VirtualFile currentFile = ViewUtils.getCurrentOpenVirtualFile(project);
+        if (currentFile == null) {
+            return null;
+        }
+        // 获取文件的 Document
+        Document document = FileDocumentManager.getInstance().getDocument(currentFile);
+        if (document == null) {
+            return null;
+        }
+        // 获取文件内容
+        return document.getText();
+    }
 }

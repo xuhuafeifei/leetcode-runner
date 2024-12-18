@@ -91,6 +91,9 @@
             </action>
             <separator/>
             <reference id="leetcode.plugin.Reposition"/>
+            <action id="leetcode.plugin.Debug" class="com.xhf.leetcode.plugin.actions.DebugAction"
+                    text="Debug Code" description="Debug code" icon="AllIcons.Debugger.AttachToProcess">
+            </action>
         </group>
     </actions>
 

@@ -132,7 +132,9 @@ public class QuestionService {
         ) {
             return;
         }
-
+        if (StringUtils.isBlank(question.getTitleSlug())) {
+            throw new RuntimeException("title slug is null ! " + GsonUtils.toJsonStr(question));
+        }
 
         GraphqlReqBody.SearchParams params = new GraphqlReqBody.SearchParams();
         params.setTitleSlug(question.getTitleSlug());

@@ -228,4 +228,16 @@ public final class StoreService implements Disposable {
             }
         });
     }
+
+    /**
+     * 暴露写文件的能力
+     */
+    public boolean writeFile(String filePath, String content) {
+        try {
+            FileUtils.createAndWriteFile(filePath, content);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
 }

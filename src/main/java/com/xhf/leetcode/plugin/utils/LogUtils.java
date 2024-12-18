@@ -65,6 +65,18 @@ public class LogUtils {
         consoleLog(message, "DEBUG");
     }
 
+    public static void simpleDebug(String message) {
+        simpleConsoleLog(message, "DEBUG");
+    }
+
+    private static void simpleConsoleLog(String message, String level) {
+        // 获取当前时间
+        String timestamp = DATE_FORMAT.format(new Date());
+        String formatted = String.format("%s [%s] %s", timestamp, level, message);
+        System.out.println(formatted);
+    }
+
+
     public static void error(String message) {
         IDEA_LOGGER.error(message);
     }
