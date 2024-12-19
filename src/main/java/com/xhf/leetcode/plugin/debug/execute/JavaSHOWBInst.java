@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.debug.execute;
 import com.sun.jdi.Location;
 import com.sun.jdi.request.BreakpointRequest;
 import com.xhf.leetcode.plugin.debug.params.Instrument;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
@@ -24,11 +25,19 @@ public class JavaSHOWBInst implements InstExecutor{
             String className = location.declaringType().name();
             String methodName = location.method().name();
             int lineNumber = location.lineNumber();
+            // 只有开启的断点才有效
+            if (! breakpointRequest.isEnabled()) {
+                continue;
+            }
             sb.append("Breakpoint at ").append(className).append(".").append(methodName).append(" line ").append(lineNumber);
             if (i != breakpointRequests.size() - 1) {
                 sb.append("\n");
             }
         }
-        return ExecuteResult.success(sb.toString());
+        String res = sb.toString();
+        if (StringUtils.isBlank(res)) {
+            res = "No enabled breakpoints";
+        }
+        return ExecuteResult.success(res);
     }
 }

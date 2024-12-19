@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.debug.debugger;
 
+import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.project.Project;
 import com.sun.jdi.*;
 import com.sun.jdi.connect.AttachingConnector;
@@ -22,11 +23,15 @@ import com.xhf.leetcode.plugin.debug.params.Instrument;
 import com.xhf.leetcode.plugin.debug.params.Operation;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
 import com.xhf.leetcode.plugin.debug.reader.StdInReader;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +43,7 @@ import java.util.Map;
  */
 public class JavaDebugger implements Debugger {
     private final Project project;
+    private final JavaDebugConfig config;
     private JavaDebugEnv env;
     private EventRequestManager erm;
     private VirtualMachine vm;
@@ -47,27 +53,53 @@ public class JavaDebugger implements Debugger {
     private Output output;
     private InstReader reader;
     private List<BreakpointRequest> breakpointRequests;
+    /**
+     * 服务启动端口
+     */
+    private int port;
 
 
-    public JavaDebugger(Project project) {
+    public JavaDebugger(Project project, JavaDebugConfig config) {
         this.project = project;
+        this.config = config;
     }
 
     @Override
     public void start() {
-        env = new JavaDebugEnv();
+//        env = new JavaDebugEnv();
         // 为了测试方便, 暂时不调用Prepare
-        // env.prepare();
+        env = new JavaDebugEnv(project);
+        try {
+            if (!env.prepare()) {
+                env.stopDebug();
+                return;
+            }
+        } catch (Exception e) {
+            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
+            LogUtils.error(e);
+            return;
+        }
         // 启动debug
-        this.output = new StdOutput();
-        this.reader = new StdInReader();
+        this.output = config.getOutput();
+        this.reader = config.getReader();
         this.breakpointRequests = new ArrayList<>();
-        startDebug();
+        // 需要开启新线程, 否则会阻塞idea渲染UI的主线程
+        new Thread(this::startDebug).start();
     }
 
     private void startDebug() {
-        startVMService();
-        connectVM();
+        env.startDebug();
+        try {
+            startVMService();
+            connectVM();
+        } catch (DebugError ex) {
+            ConsoleUtils.getInstance(project).showWaring(ex.toString(), false, true, ex.toString(), "debug异常", ConsoleDialog.ERROR);
+            LogUtils.error(ex);
+        } catch (Exception e) {
+            ConsoleUtils.getInstance(project).showWaring(e.toString(), false, true, e.toString(), "未知异常", ConsoleDialog.ERROR);
+            LogUtils.error(e);
+        }
+        env.stopDebug();
     }
 
     /**
@@ -80,7 +112,7 @@ public class JavaDebugger implements Debugger {
 
         // 配置调试连接信息
         Map<String, Connector.Argument> arguments = connector.defaultArguments();
-        arguments.get("port").setValue("5005");
+        arguments.get("port").setValue(String.valueOf(port));
 
         // 连接到目标 JVM
         VirtualMachine vm = null;
@@ -88,19 +120,23 @@ public class JavaDebugger implements Debugger {
         int tryCount = 1;
         do {
             try {
-                LogUtils.debug("第 " + tryCount + " 次连接, 尝试中...");
+                DebugUtils.simpleDebug("第 " + tryCount + " 次连接, 尝试中...", project);
                 vm = connector.attach(arguments);
-                LogUtils.simpleDebug("连接成功!");
+                DebugUtils.simpleDebug("连接成功", project);
                 break;
             } catch (IOException | IllegalConnectorArgumentsException e) {
-                LogUtils.simpleDebug(e.toString());
+                DebugUtils.simpleDebug("连接失败: " + e, project);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignored) {
+                }
             }
             tryCount++;
         } while (tryCount <= 3);
 
         if (vm == null) {
-            LogUtils.error("vm 连接失败");
-            return;
+            LogUtils.warn("vm 连接失败");
+            throw new DebugError("vm 连接失败");
         }
 
         // 获取当前类的调试信息
@@ -116,7 +152,7 @@ public class JavaDebugger implements Debugger {
         try {
             processEvent();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new DebugError("事件处理失败", e);
         }
     }
 
@@ -133,10 +169,11 @@ public class JavaDebugger implements Debugger {
         EventQueue eventQueue = vm.eventQueue();
         while (true) {
             EventSet eventSet;
+            // vm断开连接, 结束断点
             try {
                 eventSet = eventQueue.remove();
             } catch (VMDisconnectedException e) {
-                LogUtils.simpleDebug("done !");
+                LogUtils.simpleDebug("vm disconnected, done !");
                 return;
             }
             for (Event event : eventSet) {
@@ -160,10 +197,14 @@ public class JavaDebugger implements Debugger {
 
         while (true) {
             res = reader.readInst();
+            DebugUtils.simpleDebug("command = " + res, project, ConsoleViewContentType.USER_INPUT);
+            if (res == null || res.equals("bk") || res.equals("exit")) {
+                return;
+            }
             // 解析指令, 并执行
             Instrument parse = new InstParserImpl().parse(res);
             if (parse == null) {
-                LogUtils.simpleDebug("指令解析失败");
+                DebugUtils.simpleDebug("指令解析失败", project);
                 continue;
             }
             JavaInstFactory instance = JavaInstFactory.getInstance();
@@ -173,7 +214,7 @@ public class JavaDebugger implements Debugger {
             try {
                 r = instExecutor.execute(parse, context);
             } catch (Exception e) {
-                LogUtils.simpleDebug("指令执行异常: " + e);
+                DebugUtils.simpleDebug("指令执行异常: " + e, project);
                 continue;
             }
             if (r.isSuccess()) {
@@ -182,6 +223,8 @@ public class JavaDebugger implements Debugger {
                 }
             }else {
                 output.output(r.getMsg());
+                // 错误结果日志记录
+                LogUtils.simpleDebug(r.getMsg());
             }
 
             // 如果是运行类的指令, 则跳出循环, 运行vm
@@ -208,7 +251,7 @@ public class JavaDebugger implements Debugger {
 
         String res = className + "." + methodName + ":" + lineNumber;
 
-        LogUtils.simpleDebug("Hit breakpoint at: " + res);
+        DebugUtils.simpleDebug("Hit breakpoint at: " + res, project);
 
         context.setBreakpointEvent(breakpointEvent);
         context.setLocation(location);
@@ -232,12 +275,11 @@ public class JavaDebugger implements Debugger {
     private void InitBreakPoint(Event event) {
         ClassPrepareEvent classPrepareEvent = (ClassPrepareEvent) event;
         String className = classPrepareEvent.referenceType().name();
-        LogUtils.simpleDebug(className);
         if (className.equals("Solution")) {
             // 获取Main类
             ClassType mainClass = (ClassType) classPrepareEvent.referenceType();
             // todo: 这块写"findMedianSortedArrays"死了, 记得改回来: env.getMethodName()
-            String methodName = "findMedianSortedArrays";
+            String methodName = env.getMethodName();
             Method mainMethod = mainClass.methodsByName(methodName).get(0);
             Location location = mainMethod.location();
 
@@ -245,7 +287,7 @@ public class JavaDebugger implements Debugger {
             breakpointRequest.enable();
             this.breakpointRequests.add(breakpointRequest);
 
-            LogUtils.simpleDebug("break point set at Solution." + mainMethod + " line " + location.lineNumber());
+            DebugUtils.simpleDebug("break point set at Solution." + mainMethod + " line " + location.lineNumber(), project);
         }
     }
 
@@ -259,42 +301,41 @@ public class JavaDebugger implements Debugger {
         throw new RuntimeException("No suitable connector found.");
     }
 
+    /**
+     * 获取可用端口
+     * @return port
+     */
+    public static int findAvailablePort() {
+        // socket使用完后立刻关闭
+        try (ServerSocket socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            throw new DebugError("Failed to find an available port", e);
+        }
+    }
     private void startVMService() {
         // 测试
-        int port = 5005;
+        this.port = findAvailablePort();
+        LogUtils.simpleDebug("get available port : " + this.port);
+
         String cdCmd = "cd " + env.getFilePath();
         String startCmd = String.format("%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=%d %s",
                 env.getJava(), port, "Main");
 
-        String combinedCmd = "cmd /c \"" + cdCmd + " & " + startCmd + "\"";
+        String combinedCmd = "cmd /c " + cdCmd + " & " + startCmd;
 
         LogUtils.simpleDebug(combinedCmd);
 
         try {
             Process exec = Runtime.getRuntime().exec(combinedCmd);
             getRunInfo(exec);
-
-            // 获取cmd执行输出的结果, 并打印在控制台
+        } catch(InterruptedException ignored) {
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DebugError(e.toString(), e);
         }
     }
 
     private void getRunInfo(Process exec) throws InterruptedException {
-        new Thread(() -> {
-            try {
-                LogUtils.simpleDebug("cmd result = " + IOUtils.toString(exec.getInputStream(), StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }).start();
-        new Thread(() -> {
-            try {
-                LogUtils.simpleDebug("cmd error result = " + IOUtils.toString(exec.getErrorStream(), StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }).start();
-        Thread.sleep(1000);
+        DebugUtils.printProcess(exec, true);
     }
 }

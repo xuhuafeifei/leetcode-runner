@@ -47,8 +47,7 @@ public class JavaBInst implements InstExecutor{
                 breakpointRequest.enable();
                 context.addBreakpointRequest(breakpointRequest);
 
-                LogUtils.simpleDebug("Breakpoint set at line " + lineNumber);
-                return ExecuteResult.success();
+                return ExecuteResult.success("Breakpoint set at line " + lineNumber);
             }
         }
         return ExecuteResult.fail("no valid location found");

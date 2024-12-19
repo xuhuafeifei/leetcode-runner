@@ -81,6 +81,10 @@ public class LogUtils {
         IDEA_LOGGER.error(message);
     }
 
+    public static void error(Throwable e) {
+        IDEA_LOGGER.error(e);
+    }
+
     public static void error(String message, Throwable e) {
         IDEA_LOGGER.error(message, e);
     }

@@ -26,6 +26,10 @@ public class LCEventBus {
         eventBus.post(event);
     }
 
+    public void postSync(Object event) {
+        eventBus.post(event);
+    }
+
     public void register(Object listener) {
         eventBus.register(listener);
     }

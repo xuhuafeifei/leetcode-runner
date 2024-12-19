@@ -7,6 +7,10 @@ package com.xhf.leetcode.plugin.debug.output;
 public class StdOutput implements Output{
     @Override
     public void output(String output) {
+        // 检测末尾是否是换行
+        if (!output.endsWith("\n")) {
+            output += "\n";
+        }
         System.out.println(output);
     }
 }

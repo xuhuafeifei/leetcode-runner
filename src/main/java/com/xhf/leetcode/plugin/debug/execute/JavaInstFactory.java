@@ -9,7 +9,7 @@ import com.xhf.leetcode.plugin.debug.params.Operation;
  */
 public class JavaInstFactory {
     // 单例
-    private static JavaInstFactory instance = new JavaInstFactory();
+    private static final JavaInstFactory instance = new JavaInstFactory();
     private JavaInstFactory() {
     }
     public static JavaInstFactory getInstance() {
@@ -37,6 +37,12 @@ public class JavaInstFactory {
                 break;
             case SHOWB:
                 instExecutor = new JavaSHOWBInst();
+                break;
+            case RB:
+                instExecutor = new JavaRBInst();
+                break;
+            case RBA:
+                instExecutor = new JavaRBAInst();
                 break;
             default:
                 break;

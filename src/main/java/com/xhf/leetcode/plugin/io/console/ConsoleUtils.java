@@ -20,6 +20,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author feigebuge
@@ -45,9 +47,9 @@ public final class ConsoleUtils implements Disposable {
             "所以在多线程的情况下, 尽可能不要使用该方法. 在本项目中, 设计多线程情况多是触发Event")
     public void showInfo(String content, boolean clear, boolean showDialog, String message, String dialogTitle, ConsoleDialog consoleDialog) {
         showConsole(() -> {
-            consoleView.print("> " + DateFormatUtils.format(new Date(), "yyyy/MM/dd' 'HH:mm:ss") + "\n", ConsoleViewContentType.LOG_INFO_OUTPUT);
-            consoleView.print(content, ConsoleViewContentType.LOG_INFO_OUTPUT);
-            consoleView.print("\n", ConsoleViewContentType.LOG_INFO_OUTPUT);
+            consoleView.print("> " + DateFormatUtils.format(new Date(), "yyyy/MM/dd' 'HH:mm:ss") + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
+            consoleView.print(content, ConsoleViewContentType.NORMAL_OUTPUT);
+            consoleView.print("\n", ConsoleViewContentType.NORMAL_OUTPUT);
         }, clear, showDialog, message, dialogTitle, consoleDialog);
     }
 
@@ -74,14 +76,13 @@ public final class ConsoleUtils implements Disposable {
         showInfo(content, clear, showDialog, content, null, ConsoleDialog.INFO);
     }
 
-
     @UnSafe("该方法在多线程的情况下并不安全. 因为他在底层可能会弹出对话框. 而该操作会凝固线程, 导致EDT阻塞." +
             "所以在多线程的情况下, 尽可能不要使用该方法. 在本项目中, 设计多线程情况多是触发Event")
     public void showWaring(String content, boolean clear, boolean showDialog, String message, String dialogTitle, ConsoleDialog consoleDialog) {
         showConsole(() -> {
-            consoleView.print("> " + DateFormatUtils.format(new Date(), "yyyy/MM/dd' 'HH:mm:ss") + "\n", ConsoleViewContentType.LOG_WARNING_OUTPUT);
-            consoleView.print(content, ConsoleViewContentType.LOG_WARNING_OUTPUT);
-            consoleView.print("\n", ConsoleViewContentType.LOG_WARNING_OUTPUT);
+            consoleView.print("> " + DateFormatUtils.format(new Date(), "yyyy/MM/dd' 'HH:mm:ss") + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
+            consoleView.print(content, ConsoleViewContentType.NORMAL_OUTPUT);
+            consoleView.print("\n", ConsoleViewContentType.NORMAL_OUTPUT);
         },  clear, showDialog, message, dialogTitle, consoleDialog);
     }
 
@@ -103,6 +104,26 @@ public final class ConsoleUtils implements Disposable {
     @Safe
     public void showWaring(String content, boolean clear) {
         showWaring(content, clear, false, null, null, ConsoleDialog.UNKNOWN);
+    }
+
+    @Safe
+    public void showError(String content, boolean clear) {
+        showError(content, clear, false, null, null, ConsoleDialog.ERROR);
+    }
+
+    @UnSafe
+    public void showError(String content, boolean clear, boolean showDialog) {
+        showError(content, clear, showDialog, content, null, ConsoleDialog.ERROR);
+    }
+
+    @UnSafe("该方法在多线程的情况下并不安全. 因为他在底层可能会弹出对话框. 而该操作会凝固线程, 导致EDT阻塞." +
+            "所以在多线程的情况下, 尽可能不要使用该方法. 在本项目中, 设计多线程情况多是触发Event")
+    public void showError(String content, boolean clear, boolean showDialog, String message, String dialogTitle, ConsoleDialog consoleDialog) {
+        showConsole(() -> {
+            consoleView.print("> " + DateFormatUtils.format(new Date(), "yyyy/MM/dd' 'HH:mm:ss") + "\n", ConsoleViewContentType.LOG_ERROR_OUTPUT);
+            consoleView.print(content, ConsoleViewContentType.LOG_ERROR_OUTPUT);
+            consoleView.print("\n", ConsoleViewContentType.LOG_ERROR_OUTPUT);
+        },  clear, showDialog, message, dialogTitle, consoleDialog);
     }
 
     private void showConsole(Runnable runnable, boolean clear, boolean showDialog, String message, String dialogTitle, ConsoleDialog consoleDialog) {
@@ -168,11 +189,92 @@ public final class ConsoleUtils implements Disposable {
         }
     }
 
+    /**
+     * 阻塞队列, 存储用户输入的信息, 并等待消费者消费
+     */
+    private final BlockingQueue<String> userInputDebugCmdQueue = new LinkedBlockingQueue<>();
+
+    /**
+     * 读取用户输入的指令
+     * @param cmd debug cmd
+     */
+    public void userCmdInput(String cmd) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            checkConsoleView();
+            assert consoleView != null;
+
+            boolean offer = userInputDebugCmdQueue.offer(cmd);
+            // 指令写入失败, 这尼玛什么鬼
+            if (! offer) {
+                LogUtils.error("userInputDebugCmdQueue offer error");
+                consoleView.print("指令写入失败!", ConsoleViewContentType.LOG_ERROR_OUTPUT);
+                return;
+            }
+        });
+    }
+
+    /**
+     * 消费指令
+     * @return cmd
+     */
+    public String consumeCmd() {
+        try {
+            return userInputDebugCmdQueue.take();
+        } catch (InterruptedException e) {
+            return "";
+        }
+    }
+
+    /**
+     * 检测consoleView是否为null
+     */
+    public void checkConsoleView() {
+        if (consoleView == null) {
+            try {
+                this.consoleView = LCConsoleWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CONSOLE_VIEW);
+            } catch (Exception e) {
+                LogUtils.error("consoleView load error", e);
+                return;
+            }
+        }
+    }
+
+    public void simpleShowConsole(String message) {
+        simpleShowConsole(message, ConsoleViewContentType.NORMAL_OUTPUT);
+    }
+
+    public void simpleShowConsole(String message, ConsoleViewContentType consoleViewContentType) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            checkConsoleView();
+            assert consoleView != null;
+            // 弹出
+            // 获取并显示 ToolWindow（确保控制台窗口可见）
+            ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
+            ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.ID);
+            if (toolWindow != null && !toolWindow.isVisible()) {
+                toolWindow.show();  // 显示控制台窗口
+            }
+            consoleView.getComponent().setVisible(true);
+
+            consoleView.print(message, consoleViewContentType);
+        });
+    }
+
     @Override
     public void dispose() {
         if (consoleView != null) {
             consoleView.clear();
             consoleView.dispose();
         }
+    }
+
+    public void clearConsole() {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            checkConsoleView();
+            // 清空
+            if (consoleView != null) {
+                consoleView.clear();
+            }
+        });
     }
 }

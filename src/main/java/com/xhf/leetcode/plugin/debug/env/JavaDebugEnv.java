@@ -1,13 +1,28 @@
 package com.xhf.leetcode.plugin.debug.env;
 
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.TextBrowseFolderListener;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.xhf.leetcode.plugin.bus.DebugEndEvent;
+import com.xhf.leetcode.plugin.bus.DebugStartEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.analysis.AnalysisResult;
 import com.xhf.leetcode.plugin.debug.analysis.JavaCodeAnalyzer;
 import com.xhf.leetcode.plugin.debug.analysis.JavaTestcaseConvertor;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.DebugError;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import org.apache.pdfbox.io.IOUtils;
+
+import javax.swing.*;
+
+import static javax.swing.JOptionPane.CANCEL_OPTION;
 
 /**
  * 启动Java环境的debug
@@ -60,7 +75,7 @@ public class JavaDebugEnv implements DebugEnv {
      * 构建主类 + cv当前打开的文件
      */
     @Override
-    public boolean prepare() {
+    public boolean prepare() throws DebugError {
         return buildToolPrepare() && createSolutionFile() && createMainFile() && buildFile();
     }
 
@@ -68,23 +83,70 @@ public class JavaDebugEnv implements DebugEnv {
      * 获取编译工具路径
      * @return
      */
-    private boolean buildToolPrepare() {
-        java = System.getenv("JAVA_HOME") + "/bin/java";
-        javac = System.getenv("JAVA_HOME") + "/bin/javac";
-        return FileUtils.fileExists(java) && FileUtils.fileExists(javac);
+    private boolean buildToolPrepare() throws DebugError{
+        boolean flag = StoreService.getInstance(project).contains("JAVA_HOME");
+        String javaPath;
+        // 获取JavaPath
+        if (! flag) {
+            // 创建一个选择目录的dialog
+            TextFieldWithBrowseButton myFileBrowserBtn = new TextFieldWithBrowseButton();
+            myFileBrowserBtn.addBrowseFolderListener(
+                    new TextBrowseFolderListener(
+                            FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
+                    ) {
+                    });
+            int i = JOptionPane.showOptionDialog(
+                    null,
+                    myFileBrowserBtn,
+                    "选择Java目录",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    new Object[]{"确定", "取消"},
+                    "确定"
+            );
+            if (i == CANCEL_OPTION) {
+                return false;
+            }
+            javaPath = myFileBrowserBtn.getText();
+        } else {
+            javaPath = StoreService.getInstance(project).getCache("JAVA_HOME", String.class);
+        }
+
+        java = new FileUtils.PathBuilder(javaPath).append("bin").append("java.exe").build();
+        javac = new FileUtils.PathBuilder(javaPath).append("bin").append("javac.exe").build();
+        if (!FileUtils.fileExists(java)) {
+            throw new DebugError("Java路径错误 = " + java);
+        }
+        if (!FileUtils.fileExists(javac)) {
+            throw new DebugError("Javac路径错误 = " + javac);
+        }
+        // 存储正确的javaPath
+        StoreService.getInstance(project).addCache("JAVA_HOME", javaPath);
+        return true;
     }
 
-    private boolean buildFile() {
+    private boolean buildFile() throws DebugError{
         // 通过java编译mainJavaPath下的Java类
         try {
             // 获取系统javac路径
+            String cdCmd = "cd " + this.filePath;
             String cmd = javac + " -g " + mainJavaPath;
-            Runtime.getRuntime().exec(cmd);
+
+            String combinedCmd = " cmd /c " + cdCmd + " & " + cmd;
+
+            LogUtils.simpleDebug("编译cmd = " + combinedCmd);
+            Process exec = Runtime.getRuntime().exec(combinedCmd);
+            DebugUtils.printProcess(exec, false);
+
+            int i = exec.exitValue();
+            if (i != 0) {
+                throw new DebugError("编译文件异常");
+            }
             mainClassPath = mainJavaPath.replace("Main.java", "Main.class");
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            throw new DebugError(e.getMessage(), e);
         }
     }
 
@@ -114,26 +176,37 @@ public class JavaDebugEnv implements DebugEnv {
         // 获取路径
         String solutionPath = new FileUtils.PathBuilder(filePath).append("Solution.java").build();
         this.solutionJavaPath = solutionPath;
-        // 获取内容
-        String solutionContent = "import java.util.*;\r\n" + ViewUtils.getContentOfCurrentOpenVFile(project);
+        // 获取内容(import语句不能加换行符, 否则打印行号对不上, 除非减去offset. 不过Java这块就不这么做了, 毕竟只要有分号, 一行可以解决很多包引入内容)
+        String solutionContent = "import java.util.*;" + ViewUtils.getContentOfCurrentOpenVFile(project);
         // 写文件
         StoreService.getInstance(project).writeFile(solutionPath, solutionContent);
         return true;
     }
 
+    private boolean isDebug = false;
+
     @Override
     public boolean isDebug() {
-        return false;
+        return isDebug;
     }
 
     @Override
     public void stopDebug() {
-
+        isDebug = false;
+        DebugUtils.simpleDebug("debug service stop", project);
+        LCEventBus.getInstance().post(new DebugEndEvent());
     }
 
     @Override
     public void startDebug() {
+        isDebug = true;
+        // 清空consoleView
+        ConsoleUtils.getInstance(project).clearConsole();
+        DebugUtils.simpleDebug("debug service starting...", project);
+        // debug
+        LogUtils.simpleDebug(Thread.currentThread().toString());
 
+        LCEventBus.getInstance().post(new DebugStartEvent());
     }
 
     @Override
