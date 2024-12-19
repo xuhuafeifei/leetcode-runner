@@ -131,7 +131,7 @@ public class JavaDebugEnv implements DebugEnv {
         try {
             // 获取系统javac路径
             String cdCmd = "cd " + this.filePath;
-            String cmd = javac + " -g " + mainJavaPath;
+            String cmd = javac + " -g -encoding UTF-8 " + mainJavaPath;
 
             String combinedCmd = " cmd /c " + cdCmd + " & " + cmd;
 
@@ -176,11 +176,20 @@ public class JavaDebugEnv implements DebugEnv {
         // 获取路径
         String solutionPath = new FileUtils.PathBuilder(filePath).append("Solution.java").build();
         this.solutionJavaPath = solutionPath;
-        // 获取内容(import语句不能加换行符, 否则打印行号对不上, 除非减去offset. 不过Java这块就不这么做了, 毕竟只要有分号, 一行可以解决很多包引入内容)
-        String solutionContent = "import java.util.*;" + ViewUtils.getContentOfCurrentOpenVFile(project);
+        String solutionContent = getSolutionContent();
         // 写文件
         StoreService.getInstance(project).writeFile(solutionPath, solutionContent);
         return true;
+    }
+
+    public String getSolutionContent() {
+        String content = ViewUtils.getContentOfCurrentOpenVFile(project);
+        if (content == null) {
+            throw new DebugError("当前打开文件为空");
+        }
+        // 替换含有package的那一行
+        // 获取内容(import语句不能加换行符, 否则打印行号对不上, 除非减去offset. 不过Java这块就不这么做了, 毕竟只要有分号, 一行可以解决很多包引入内容)
+        return content.replaceFirst("^package .*;", "import java.util.*;");
     }
 
     private boolean isDebug = false;

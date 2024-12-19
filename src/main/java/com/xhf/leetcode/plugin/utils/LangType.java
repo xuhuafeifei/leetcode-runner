@@ -7,22 +7,24 @@ import org.apache.commons.lang.StringUtils;
  * @email 2508020102@qq.com
  */
 public enum LangType {
-    JAVA("java", ".java"),
-    PYTHON("python", ".py"),
-    CPP("c++", ".cpp"),
-    JAVASCRIPT("javascript", ".js"),
-    C("c", ".c"),
-    PYTHON3("python3", ".py"),
-    GO("go", ".go"),
+    JAVA("java", ".java", "//"),
+    PYTHON("python", ".py", "#"),
+    CPP("c++", ".cpp", "//"),
+    JAVASCRIPT("javascript", ".js", "//"),
+    C("c", ".c", "//"),
+    PYTHON3("python3", ".py", "#"),
+    GO("go", ".go", "//"),
     ;
 
-    private LangType(String langType, String suffix) {
+    private LangType(String langType, String suffix, String commentSymbol) {
         this.langType = langType;
         this.suffix = suffix;
+        this.commentSymbol = commentSymbol;
     }
 
     private String langType;
     private String suffix;
+    private String commentSymbol;
 
     public static String getAllLangType() {
         LangType[] values = LangType.values();
@@ -79,5 +81,14 @@ public enum LangType {
 
     public String getSuffix() {
         return suffix;
+    }
+
+    public static String getCommentSymbol(String langType) {
+        for (LangType lt : LangType.values()) {
+            if (lt.langType.equals(langType)) {
+                return lt.commentSymbol;
+            }
+        }
+        return null;
     }
 }

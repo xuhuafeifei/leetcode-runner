@@ -228,8 +228,15 @@ public class CodeService {
         /*
             一切提交代码类型按照setting中的设置确定
          */
-        runCode.setLang(AppSettings.getInstance().getLangType());
-        runCode.setTypeCode(codeContent);
+        String langType = AppSettings.getInstance().getLangType();
+        runCode.setLang(langType);
+        // 处理codeContent, 截取代码片段
+        String coreCode = Question.getCoreCodeSnippets(codeContent, langType);
+        /*
+            这里额外做一层保障, 如果用户随意删改lineStart和endStart, 那么最终得到的coreCode可能会出现问题
+            如果截取为空, 则不做任何截取操作
+         */
+        runCode.setTypeCode(StringUtils.isBlank(coreCode) ? codeContent : coreCode);
         runCode.setTitleSlug(lc.getTitleSlug());
         runCode.setDataInput(lc.getExampleTestcases());
         return runCode;

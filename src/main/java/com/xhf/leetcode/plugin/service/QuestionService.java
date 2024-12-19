@@ -175,7 +175,7 @@ public class QuestionService {
         for (JsonElement item : questionJsonObj.getAsJsonArray("codeSnippets")) {
             JsonObject obj = item.getAsJsonObject();
             if (GsonUtils.fromJson(obj.get("lang"), String.class).equalsIgnoreCase(langType)) {
-                codeSnippets = obj.get("code").getAsString();
+                codeSnippets = Question.handleCodeSnippets(obj.get("code").getAsString(), langType);
                 break;
             }
         }

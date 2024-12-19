@@ -13,6 +13,8 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
+import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import jnr.constants.Constant;
@@ -72,7 +74,7 @@ public class CodeEditor extends CopyToolBarEditor {
                     return;
                 }
                 ConsoleUtils instance = ConsoleUtils.getInstance(project);
-                boolean flag = ViewUtils.writeContentToCurrentVFile(project, content);
+                boolean flag = ViewUtils.writeContentToCurrentVFile(project, Question.handleCodeSnippets(content, AppSettings.getInstance().getLangType()));
                 if (flag) {
                     instance.showInfo("Copy To Editor Success", false, true);
                 }else {

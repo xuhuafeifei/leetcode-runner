@@ -39,6 +39,53 @@ public class Question {
     private String codeSnippets;
     private String exampleTestcases;
 
+    public static final String lineStart = "lc-start-line";
+    public static final String lineEnd = "lc-end-line";
+    /**
+     * 处理代码片段, 形如下方所示. 此外, 注释会随着语言的变化而变化
+     * // lc-start-line
+     * // do not .....
+     * ...code
+     * // lc-end-line
+     * @param code 代码片段
+     * @return 处理后的代码片段
+     */
+    public static String handleCodeSnippets(String code, String langType) {
+        String commentSymbol = LangType.getCommentSymbol(langType);
+        return
+                commentSymbol + "do not modify or remove anything between start-line and end-line" + "\n" +
+                commentSymbol + lineStart + "\n" +
+                code + "\n" +
+                commentSymbol + lineStart + "\n";
+    }
+
+    /**
+     * 核心代码截取
+     *
+     * @param codeSnippets
+     * @param langType
+     * @return
+     */
+    public static String getCoreCodeSnippets(String codeSnippets, String langType) {
+        StringBuilder sb = new StringBuilder();
+        String[] lines = codeSnippets.split("\n");
+        boolean inCoreCode = false;  // 标记是否在核心代码片段范围内
+
+        for (String line : lines) {
+            if (line.contains(lineStart)) {
+                inCoreCode = true;  // 找到lineStart，开始截取核心代码
+                continue;  // 跳过lineStart行
+            }
+            if (line.contains(lineEnd)) {
+                break;  // 找到lineEnd，结束截取
+            }
+            if (inCoreCode) {
+                sb.append(line).append("\n");  // 在核心代码范围内，追加到StringBuilder
+            }
+        }
+        return sb.toString().trim();  // 返回去掉多余空行的核心代码
+    }
+
     public List<TopicTag> getTopicTags() {
         return topicTags;
     }
