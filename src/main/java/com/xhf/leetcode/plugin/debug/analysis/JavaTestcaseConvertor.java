@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.debug.analysis;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.analysis.convert.VariableConvertor;
 import com.xhf.leetcode.plugin.debug.analysis.convert.ConverterFactory;
+import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -39,11 +40,11 @@ public class JavaTestcaseConvertor {
      * 自动获取当前打文件处理的question的测试样例, 并转换为对应的调用代码
      * @return
      */
-    public String autoConvert() {
+    public String autoConvert() throws DebugError {
         // 获取测试案例
         LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByCurrentVFile(project);
-        String tests = lc.getExampleTestcases();
-        return convert(tests);
+        String tests = lc.getDebugTestcase().trim();
+        return convert(tests.split("\n"));
     }
 
     /**
@@ -52,6 +53,7 @@ public class JavaTestcaseConvertor {
      * @param testcases
      * @return
      */
+    @Deprecated // 不支持多轮处理, 要不然debug看不清输入了
     public String convert(String testcases) {
         testcases = testcases.trim();
         String[] split = testcases.split("\r?\n");
@@ -82,9 +84,14 @@ public class JavaTestcaseConvertor {
      * @param testCases
      * @return
      */
-    public String convert(String[] testCases) {
-        StringBuilder sb = new StringBuilder();
+    public String convert(String[] testCases) throws DebugError {
         int len = testCases.length;
+        // 判断测试输入和参数个数是否匹配
+        if (len != result.getParameterTypes().length) {
+            throw new DebugError("测试样例数量与" + result.getMethodName() + "入参数量不匹配, 请检查!\r\n入参数量 = "
+                    + len + " " + result.getMethodName() + "测试样例个数 = " + result.getParameterTypes().length);
+        }
+        StringBuilder sb = new StringBuilder();
         // 参数类型
         String[] pT = result.getParameterTypes();
 

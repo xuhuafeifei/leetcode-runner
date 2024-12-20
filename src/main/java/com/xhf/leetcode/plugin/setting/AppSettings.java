@@ -4,6 +4,8 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.xhf.leetcode.plugin.debug.output.OutputType;
+import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +24,7 @@ public final class AppSettings
   public static final String EMPTY_FILE_PATH = "";
   public static final String EMPTY_LANGUAGE_TYPE = "";
 
-  static class State {
+    static class State {
 
     public String filePath = EMPTY_FILE_PATH;
 
@@ -42,6 +44,12 @@ public final class AppSettings
     public boolean isEmptyCoreFilePath() {
       return coreFilePath.equals(EMPTY_FILE_PATH);
     }
+
+    /*--------debug 相关配置----------*/
+    // debug指令读取来源
+    public String readTypeName;
+    // debug信息输出到什么地方
+    public String outputTypeName;
   }
 
   /**
@@ -74,6 +82,36 @@ public final class AppSettings
 
   public String getLangType() {
     return myState.langType;
+  }
+
+  public boolean isUIReader() {
+    return ReadType.UI_IN.equals(ReadType.getByName(AppSettings.getInstance().getReadTypeName()));
+  }
+
+  public boolean isUIOutput() {
+    return OutputType.UI_OUT.equals(OutputType.getByName(AppSettings.getInstance().getOutputTypeName()));
+  }
+
+  public boolean isCommandReader() {
+    return ReadType.COMMAND_IN.equals(ReadType.getByName(AppSettings.getInstance().getReadTypeName()));
+  }
+  public boolean isConsoleOutput() {
+    return OutputType.CONSOLE_OUT.equals(OutputType.getByName(AppSettings.getInstance().getOutputTypeName()));
+  }
+  /**
+   * 获取debug读取数据来源
+   * @return
+   */
+  public String getReadTypeName() {
+    return myState.readTypeName;
+  }
+
+  /**
+   * 获取debug输出到什么地方
+   * @return
+   */
+  public String getOutputTypeName() {
+    return myState.outputTypeName;
   }
 
   /**

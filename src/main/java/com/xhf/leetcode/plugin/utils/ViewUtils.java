@@ -117,6 +117,20 @@ public class ViewUtils {
         return null;
     }
 
+    /**
+     * 打开当前显示的file editor
+     * @param project
+     * @return
+     */
+    public static FileEditor getCurrentOpenEditor(Project project) {
+        FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+        FileEditor[] selectedEditors = fileEditorManager.getSelectedEditors();
+        if (selectedEditors.length > 0) {
+            return selectedEditors[0];
+        }
+        return null;
+    }
+
     public static String getUnifyFilePathByVFile(VirtualFile file) {
         String key = file.getPath(); // file separator is /
         key = FileUtils.unifyPath(key);

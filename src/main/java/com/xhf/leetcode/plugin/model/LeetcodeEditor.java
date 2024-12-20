@@ -10,6 +10,7 @@ public class LeetcodeEditor {
     private String questionId;
     private String lang;
     private String exampleTestcases;
+    private String debugTestcase;
     private String frontendQuestionId;
     private String translatedTitle;
 
@@ -124,6 +125,14 @@ public class LeetcodeEditor {
 
     public String getSolutionSlug() {
         return solutionSlug;
+    }
+
+    public String getDebugTestcase() {
+        return debugTestcase;
+    }
+
+    public void setDebugTestcase(String debugTestcase) {
+        this.debugTestcase = debugTestcase;
     }
 
     @Override

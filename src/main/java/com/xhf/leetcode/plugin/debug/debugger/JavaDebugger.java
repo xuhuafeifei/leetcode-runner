@@ -1,7 +1,9 @@
 package com.xhf.leetcode.plugin.debug.debugger;
 
-import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.xdebugger.XSourcePosition;
+import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.sun.jdi.*;
 import com.sun.jdi.connect.AttachingConnector;
 import com.sun.jdi.connect.Connector;
@@ -11,31 +13,29 @@ import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
+import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
-import com.xhf.leetcode.plugin.debug.execute.Context;
-import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
-import com.xhf.leetcode.plugin.debug.execute.JavaInstFactory;
+import com.xhf.leetcode.plugin.debug.execute.*;
 import com.xhf.leetcode.plugin.debug.output.Output;
-import com.xhf.leetcode.plugin.debug.output.StdOutput;
-import com.xhf.leetcode.plugin.debug.params.InstParserImpl;
 import com.xhf.leetcode.plugin.debug.params.Instrument;
 import com.xhf.leetcode.plugin.debug.params.Operation;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
-import com.xhf.leetcode.plugin.debug.reader.StdInReader;
+import com.xhf.leetcode.plugin.debug.reader.InstSource;
+import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.apache.commons.io.IOUtils;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author feigebuge
@@ -66,8 +66,6 @@ public class JavaDebugger implements Debugger {
 
     @Override
     public void start() {
-//        env = new JavaDebugEnv();
-        // 为了测试方便, 暂时不调用Prepare
         env = new JavaDebugEnv(project);
         try {
             if (!env.prepare()) {
@@ -83,7 +81,7 @@ public class JavaDebugger implements Debugger {
         this.output = config.getOutput();
         this.reader = config.getReader();
         this.breakpointRequests = new ArrayList<>();
-        // 需要开启新线程, 否则会阻塞idea渲染UI的主线程
+        // 需要开启新线程, 否则指令读取操作会阻塞idea渲染UI的主线程
         new Thread(this::startDebug).start();
     }
 
@@ -193,42 +191,47 @@ public class JavaDebugger implements Debugger {
      * 核心运行方法, 负责读取指令, 并执行
      */
     public void doRun() {
-        String res;
+        while (AbstractDebugEnv.isDebug()) {
+            Instrument inst = reader.readInst();
 
-        while (true) {
-            res = reader.readInst();
-            DebugUtils.simpleDebug("command = " + res, project, ConsoleViewContentType.USER_INPUT);
-            if (res == null || res.equals("bk") || res.equals("exit")) {
-                return;
-            }
-            // 解析指令, 并执行
-            Instrument parse = new InstParserImpl().parse(res);
-            if (parse == null) {
-                DebugUtils.simpleDebug("指令解析失败", project);
+            if (! inst.isSuccess()) {
+                ReadType readType = inst.getReadType();
+                switch (readType) {
+                    case COMMAND_IN:
+                    case STD_IN:
+                        DebugUtils.simpleDebug("命令错误", project);
+                        break;
+                    case UI_IN:
+                        ConsoleUtils.getInstance(project).showWaring("UI指令错误", false, true);
+                        LogUtils.warn("UI指令错误 inst = " + inst);
+                        break;
+                    default:
+                        ConsoleUtils.getInstance(project).showWaring("readType未知错误: " + readType.getType(), false, true);
+                        LogUtils.warn("readType未知错误: " + readType.getType());
+                        break;
+                }
                 continue;
             }
-            JavaInstFactory instance = JavaInstFactory.getInstance();
-            InstExecutor instExecutor = instance.create(parse);
+
+            InstExecutor instExecutor = JavaInstFactory.getInstance().create(inst);
 
             ExecuteResult r;
             try {
-                r = instExecutor.execute(parse, context);
+                r = instExecutor.execute(inst, context);
             } catch (Exception e) {
                 DebugUtils.simpleDebug("指令执行异常: " + e, project);
                 continue;
             }
-            if (r.isSuccess()) {
-                if (r.isHasResult()) {
-                    output.output(r.getResult());
-                }
-            }else {
-                output.output(r.getMsg());
+            // 设置上下文
+            r.setContent(context);
+            output.output(r);
+            if (! r.isSuccess()) {
                 // 错误结果日志记录
                 LogUtils.simpleDebug(r.getMsg());
             }
 
             // 如果是运行类的指令, 则跳出循环, 运行vm
-            if (parse.getOperation() == Operation.R || parse.getOperation() == Operation.N) {
+            if (inst.getOperation() == Operation.R || inst.getOperation() == Operation.N) {
                 break;
             }
         }
@@ -269,25 +272,70 @@ public class JavaDebugger implements Debugger {
             return;
         }
 
+        if (AppSettings.getInstance().isUIOutput()) {
+            // 输入UI打印指令. UI总是会在遇到断点时打印局部变量. 因此输入P指令
+            InstSource.uiInstInput(Instrument.success(ReadType.UI_IN, Operation.P, ""));
+            // 高亮指令
+            InstSource.uiInstInput(Instrument.success(ReadType.UI_IN, Operation.W, ""));
+        }
+
         doRun();
     }
 
     private void InitBreakPoint(Event event) {
         ClassPrepareEvent classPrepareEvent = (ClassPrepareEvent) event;
         String className = classPrepareEvent.referenceType().name();
+
         if (className.equals("Solution")) {
-            // 获取Main类
-            ClassType mainClass = (ClassType) classPrepareEvent.referenceType();
-            // todo: 这块写"findMedianSortedArrays"死了, 记得改回来: env.getMethodName()
-            String methodName = env.getMethodName();
-            Method mainMethod = mainClass.methodsByName(methodName).get(0);
-            Location location = mainMethod.location();
+            // ui读取模式下, 初始化断点
+            if (AppSettings.getInstance().isUIReader()) {
+                uiBreakpointInit(classPrepareEvent);
+            }else {
+                commandBreakpointInit(classPrepareEvent);
+            }
+        }
+    }
 
-            BreakpointRequest breakpointRequest = erm.createBreakpointRequest(location);
-            breakpointRequest.enable();
-            this.breakpointRequests.add(breakpointRequest);
+    private void commandBreakpointInit(ClassPrepareEvent classPrepareEvent) {
+        // 获取solutionClass
+        ClassType solutionClass = (ClassType) classPrepareEvent.referenceType();
+        // 获取solution类的核心方法
+        String methodName = env.getMethodName();
+        Method mainMethod = solutionClass.methodsByName(methodName).get(0);
+        Location location = mainMethod.location();
 
-            DebugUtils.simpleDebug("break point set at Solution." + mainMethod + " line " + location.lineNumber(), project);
+        context.setLocation(location);
+
+        // 设置断点
+        new JavaBInst().execute(Instrument.success(ReadType.UI_IN, Operation.B, String.valueOf(location.lineNumber())), context);
+
+        DebugUtils.simpleDebug("break point set at Solution." + mainMethod + " line " + location.lineNumber(), project);
+    }
+
+    private void uiBreakpointInit(ClassPrepareEvent classPrepareEvent) {
+        // 获取solutionClass
+        ClassType solutionClass = (ClassType) classPrepareEvent.referenceType();
+        // 获取solution类的核心方法
+        String methodName = env.getMethodName();
+        Method mainMethod = solutionClass.methodsByName(methodName).get(0);
+        // 获取location
+        Location location = mainMethod.location();
+
+        context.setLocation(location);
+
+        List<XBreakpoint<?>> allBreakpoint = DebugUtils.getAllBreakpoint(project);
+        for (XBreakpoint<?> breakpoint : allBreakpoint) {
+            XSourcePosition position = breakpoint.getSourcePosition();
+            if (position == null) {
+                continue;
+            }
+            VirtualFile file = Objects.requireNonNull(position).getFile();
+            // 如果file和当前打开的vile一致, 设置断点信息
+            if (file.equals(ViewUtils.getCurrentOpenVirtualFile(project))) {
+                Instrument instrument = DebugUtils.buildBInst(position);
+                // 设置断点
+                new JavaBInst().execute(instrument, context);
+            }
         }
     }
 

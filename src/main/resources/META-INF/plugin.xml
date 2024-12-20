@@ -75,6 +75,18 @@
             <reference id="leetcode.plugin.Reposition"/>
         </group>
 
+        <group id="leetcode.plugin.consoleToolbar">
+            <action id="leetcode.plugin.console.DebugRunAction" class="com.xhf.leetcode.plugin.actions.DebugRunAction"
+                    text="Resume Program" description="Resume program" icon="AllIcons.Debugger.ThreadRunning">
+            </action>
+            <action id="leetcode.plugin.console.DebugNAction" class="com.xhf.leetcode.plugin.actions.DebugNAction"
+                    text="Step Into" description="Step into" icon="AllIcons.Actions.TraceInto">
+            </action>
+            <action id="leetcode.plugin.console.DebugRAAction" class="com.xhf.leetcode.plugin.actions.DebugRAAction"
+                    text="Resume Program" description="Resume program" icon="AllIcons.Debugger.MuteBreakpoints">
+            </action>
+        </group>
+
         <group id="leetcode.plugin.editor.group">
             <action id="leetcode.plugin.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
                     text="Run Code" description="Run code(editor)" icon="/icons/run.png">
@@ -83,7 +95,7 @@
                     text="Submit Code" description="Submit code(editor)" icon="/icons/submit.png">
             </action>
             <separator/>
-            <action id="leetcode.plugin.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
+            <action id="leetcode.plugin.editor.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
                     text="Test Cases" description="Test cases" icon="/icons/test_cases.svg">
             </action>
             <action id="leetcode.plugin.DefaultContent" class="com.xhf.leetcode.plugin.actions.DefaultContentAction"
@@ -91,7 +103,7 @@
             </action>
             <separator/>
             <reference id="leetcode.plugin.Reposition"/>
-            <action id="leetcode.plugin.Debug" class="com.xhf.leetcode.plugin.actions.DebugAction"
+            <action id="leetcode.plugin.debug.Debug" class="com.xhf.leetcode.plugin.actions.DebugAction"
                     text="Debug Code" description="Debug code" icon="AllIcons.Debugger.AttachToProcess">
             </action>
         </group>

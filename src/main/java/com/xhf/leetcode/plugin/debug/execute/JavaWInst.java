@@ -46,7 +46,10 @@ public class JavaWInst implements InstExecutor{
             throw new RuntimeException(e);
         }
 
-        return ExecuteResult.success(res);
+        ExecuteResult success = ExecuteResult.success(inst.getOperation(), res);
+        success.setAddLine(lineNumber);
+        success.setMethodName(methodName);
+        return success;
     }
 
     // 通过文件路径和行号获取指定位置的源代码行内容

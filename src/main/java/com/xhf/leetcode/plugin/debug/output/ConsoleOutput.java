@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.debug.output;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 
 /**
@@ -9,23 +10,17 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class ConsoleOutput implements Output{
-
-    public final Project project;
+public class ConsoleOutput extends IOOutput{
 
     private final ConsoleUtils console;
 
     public ConsoleOutput(Project project) {
-        this.project = project;
+        super(project);
         console = ConsoleUtils.getInstance(project);
     }
 
     @Override
-    public void output(String output) {
-        // 检测是否末尾是换行
-        if (!output.endsWith("\n")) {
-            output += "\n";
-        }
+    protected void outputTo(String output) {
         console.simpleShowConsole(output);
     }
 }

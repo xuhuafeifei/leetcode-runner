@@ -106,6 +106,7 @@ public class CodeService {
         le.setMarkdownContent(translatedContent);
         le.setTranslatedTitle(question.getTranslatedTitle());
         le.setDifficulty(question.getDifficulty());
+        le.setDebugTestcase(question.getExampleTestcases());
         return le;
     }
 

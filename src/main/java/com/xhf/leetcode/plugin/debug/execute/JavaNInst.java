@@ -10,6 +10,6 @@ import com.xhf.leetcode.plugin.debug.params.Instrument;
 public class JavaNInst implements InstExecutor{
     @Override
     public ExecuteResult execute(Instrument inst, Context context) {
-        return ExecuteResult.success();
+        return ExecuteResult.success(inst.getOperation());
     }
 }

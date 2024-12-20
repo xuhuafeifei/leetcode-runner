@@ -17,9 +17,11 @@ public class JavaRBInst implements InstExecutor {
         for (BreakpointRequest breakpointRequest : breakpointRequests) {
             if (breakpointRequest.location().lineNumber() == lineNumber) {
                 breakpointRequest.disable();
-                return ExecuteResult.success("break point remove at line " + lineNumber);
+                ExecuteResult success = ExecuteResult.success(inst.getOperation(), "break point remove at line " + lineNumber);
+                success.setAddLine(lineNumber);
+                return success;
             }
         }
-        return ExecuteResult.fail("break point at " + lineNumber + " haven't been set!");
+        return ExecuteResult.fail(inst.getOperation(), "break point at " + lineNumber + " haven't been set!");
     }
 }

@@ -16,6 +16,6 @@ public class JavaRInst implements InstExecutor{
         if (stepRequest != null) {
             stepRequest.disable();
         }
-        return ExecuteResult.success();
+        return ExecuteResult.success(inst.getOperation());
     }
 }

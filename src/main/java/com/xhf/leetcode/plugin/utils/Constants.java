@@ -1,8 +1,10 @@
 package com.xhf.leetcode.plugin.utils;
 
 import com.intellij.ui.JBColor;
+import com.intellij.util.ui.JBUI;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 
 public interface Constants {
@@ -32,4 +34,6 @@ public interface Constants {
     String SOLUTION_SLUG = "SOLUTION_SLUG";
     String SUBMISSION_ID = "SUBMISSION_ID";
     String QUESTION_CONTENT = "QUESTION_CONTENT";
+
+    Border BORDER = JBUI.Borders.customLine(JBColor.border(), 1);
 }

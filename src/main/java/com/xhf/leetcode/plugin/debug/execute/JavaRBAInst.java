@@ -13,6 +13,6 @@ public class JavaRBAInst implements InstExecutor{
         for (BreakpointRequest breakpointRequest : context.getBreakpointRequests()) {
             breakpointRequest.disable();
         }
-        return ExecuteResult.success("All breakpoint removed !");
+        return ExecuteResult.success(inst.getOperation(), "All breakpoint removed !");
     }
 }

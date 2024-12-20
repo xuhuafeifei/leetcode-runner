@@ -27,10 +27,10 @@ public class JavaPInst implements InstExecutor{
         try {
             String res = getVariable(thread);
             // 存储输出结果
-            return ExecuteResult.success(res);
+            return ExecuteResult.success(inst.getOperation(), res);
         } catch (IncompatibleThreadStateException | AbsentInformationException e) {
             e.printStackTrace();
-            return ExecuteResult.fail();
+            return ExecuteResult.fail(inst.getOperation());
         }
     }
 

@@ -5,12 +5,15 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LoginPass;
 import com.xhf.leetcode.plugin.utils.SettingPass;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -47,6 +50,27 @@ public abstract class AbstractAction extends AnAction {
                         Messages.getCancelButton(),
                         Messages.getQuestionIcon()
                 );
+                return;
+            }
+        }
+        // debug check
+        DebugCheck debugCheck = this.getClass().getAnnotation(DebugCheck.class);
+        if (debugCheck != null) {
+            if (!AbstractDebugEnv.isDebug()) {
+                ConsoleUtils.getInstance(project).showWaring("no debug happen", false, true);
+                return;
+            }
+            AppSettings appSettings = AppSettings.getInstance();
+            // reader 检测
+            if (StringUtils.isBlank(appSettings.getReadTypeName())) {
+                ConsoleUtils.getInstance(project).showWaring("debug reader没有设置, 请前往设置界面", false, true);
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
+                return;
+            }
+            // output 检测
+            if (StringUtils.isBlank(appSettings.getOutputTypeName())) {
+                ConsoleUtils.getInstance(project).showWaring("debug output没有设置, 请前往设置界面", false, true);
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
                 return;
             }
         }

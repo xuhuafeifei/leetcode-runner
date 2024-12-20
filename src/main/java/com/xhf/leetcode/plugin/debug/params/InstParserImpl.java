@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.debug.params;
 
+import com.xhf.leetcode.plugin.debug.reader.ReadType;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,19 +13,19 @@ import java.util.regex.Pattern;
  */
 public class InstParserImpl implements InstParser{
     @Override
-    public Instrument parse(String inst) {
-        if (inst == null || inst.trim().isEmpty()) {
+    public Instrument parse(String command, ReadType readType) {
+        if (command == null || command.trim().isEmpty()) {
             return null;
         }
 
-        inst = inst.trim();
+        command = command.trim();
 
         // 遍历每个 Operation 枚举值，检查是否匹配
         for (Operation operation : Operation.values()) {
-            if (operation.matches(inst)) {
+            if (operation.matches(command)) {
                 // 提取指令的参数
-                String param = operation.getParameterExtractor().extract(inst);
-                return new Instrument(operation, param);
+                String param = operation.getParameterExtractor().extract(command);
+                return Instrument.success(readType, operation, param);
             }
         }
 

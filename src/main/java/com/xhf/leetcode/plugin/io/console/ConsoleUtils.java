@@ -190,42 +190,6 @@ public final class ConsoleUtils implements Disposable {
     }
 
     /**
-     * 阻塞队列, 存储用户输入的信息, 并等待消费者消费
-     */
-    private final BlockingQueue<String> userInputDebugCmdQueue = new LinkedBlockingQueue<>();
-
-    /**
-     * 读取用户输入的指令
-     * @param cmd debug cmd
-     */
-    public void userCmdInput(String cmd) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            checkConsoleView();
-            assert consoleView != null;
-
-            boolean offer = userInputDebugCmdQueue.offer(cmd);
-            // 指令写入失败, 这尼玛什么鬼
-            if (! offer) {
-                LogUtils.error("userInputDebugCmdQueue offer error");
-                consoleView.print("指令写入失败!", ConsoleViewContentType.LOG_ERROR_OUTPUT);
-                return;
-            }
-        });
-    }
-
-    /**
-     * 消费指令
-     * @return cmd
-     */
-    public String consumeCmd() {
-        try {
-            return userInputDebugCmdQueue.take();
-        } catch (InterruptedException e) {
-            return "";
-        }
-    }
-
-    /**
      * 检测consoleView是否为null
      */
     public void checkConsoleView() {
@@ -257,6 +221,9 @@ public final class ConsoleUtils implements Disposable {
             consoleView.getComponent().setVisible(true);
 
             consoleView.print(message, consoleViewContentType);
+            if (message.endsWith("\n")) {
+                consoleView.print("\n", consoleViewContentType);
+            }
         });
     }
 

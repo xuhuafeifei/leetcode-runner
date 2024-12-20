@@ -11,25 +11,4 @@ public interface DebugEnv {
      * @return 是否准备完毕
      */
     boolean prepare() throws DebugError;
-
-    /**
-     * 是否处于debug状态
-     * @return true:是
-     */
-    boolean isDebug();
-
-    /**
-     * 终止debug
-     */
-    void stopDebug();
-
-    /**
-     * 开始debug
-     */
-    void startDebug();
-
-    /**
-     * 获取bean
-     */
-    Class<?> getBean(Class<?> clazz);
 }

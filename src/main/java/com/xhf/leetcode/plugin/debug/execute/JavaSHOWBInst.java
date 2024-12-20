@@ -5,6 +5,7 @@ import com.sun.jdi.request.BreakpointRequest;
 import com.xhf.leetcode.plugin.debug.params.Instrument;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -18,6 +19,17 @@ public class JavaSHOWBInst implements InstExecutor{
     public ExecuteResult execute(Instrument inst, Context context) {
         List<BreakpointRequest> breakpointRequests = context.getBreakpointRequests();
         StringBuilder sb = new StringBuilder();
+
+        // 先排序
+        context.getBreakpointRequests().sort((a, b) -> {
+            String aName = a.location().declaringType().name();
+            String bName = b.location().declaringType().name();
+            if (aName.equals(bName)) {
+                return a.location().lineNumber() - b.location().lineNumber();
+            } else {
+                return aName.compareTo(bName);
+            }
+        });
 
         for (int i = 0; i < breakpointRequests.size(); i++) {
             BreakpointRequest breakpointRequest = breakpointRequests.get(i);
@@ -38,6 +50,6 @@ public class JavaSHOWBInst implements InstExecutor{
         if (StringUtils.isBlank(res)) {
             res = "No enabled breakpoints";
         }
-        return ExecuteResult.success(res);
+        return ExecuteResult.success(inst.getOperation(), res);
     }
 }

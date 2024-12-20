@@ -43,7 +43,9 @@ final class AppSettingsConfigurable implements Configurable {
     AppSettings.State state =
         Objects.requireNonNull(AppSettings.getInstance().getState());
     return  !mySettingsComponent.getLangType().equals(state.langType) ||
-            !mySettingsComponent.getFilePath().equals(state.filePath)
+            !mySettingsComponent.getFilePath().equals(state.filePath) ||
+            !mySettingsComponent.getReadTypeName().equals(state.readTypeName) ||
+            !mySettingsComponent.getOutputTypeName().equals(state.outputTypeName)
             ;
   }
 
@@ -60,6 +62,9 @@ final class AppSettingsConfigurable implements Configurable {
     if (state.isEmptyCoreFilePath() && FileUtils.isPath(mySettingsComponent.getFilePath())) {
       state.coreFilePath = mySettingsComponent.getFilePath();
     }
+    // debug setting
+    state.readTypeName = mySettingsComponent.getReadTypeName();
+    state.outputTypeName = mySettingsComponent.getOutputTypeName();
   }
 
   /**
@@ -72,6 +77,9 @@ final class AppSettingsConfigurable implements Configurable {
     mySettingsComponent.setLangType(state.langType);
     mySettingsComponent.setFilePath(state.filePath);
     state.coreFilePath = mySettingsComponent.getFilePath();
+    // debug setting
+    mySettingsComponent.setReadTypeName(state.readTypeName);
+    mySettingsComponent.setOutputTypeName(state.outputTypeName);
   }
 
   @Override
