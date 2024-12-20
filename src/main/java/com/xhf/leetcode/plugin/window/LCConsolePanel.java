@@ -167,6 +167,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
     @Subscribe
     public void DebugStartEventListener(DebugStartEvent event) {
         LogUtils.simpleDebug("open command line...");
+        variableList.setNonData();
 
         AppSettings instance = AppSettings.getInstance();
         ApplicationManager.getApplication().invokeLater(() -> {

@@ -50,7 +50,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                         if (isBreakpointInEditor(breakpoint, editor)) {
                             XSourcePosition sp = breakpoint.getSourcePosition();
                             assert sp != null;
-                            DebugUtils.simpleDebug("Breakpoint added in editor: " + sp + "【sp.getLine()从0开始计算】", project);
+                            DebugUtils.simpleDebug("Breakpoint added in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project);
                             InstSource.uiInstInput(DebugUtils.buildBInst(sp));
                         }
                     }
@@ -60,7 +60,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                         if (isBreakpointInEditor(breakpoint, editor)) {
                             XSourcePosition sp = breakpoint.getSourcePosition();
                             assert sp != null;
-                            DebugUtils.simpleDebug("Breakpoint removed in editor: " + sp, project);
+                            DebugUtils.simpleDebug("Breakpoint removed in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project);
                             InstSource.uiInstInput(DebugUtils.buildRBInst(sp));
                         }
                     }
@@ -68,7 +68,9 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     @Override
                     public void breakpointChanged(@NotNull XBreakpoint<?> breakpoint) {
                         if (isBreakpointInEditor(breakpoint, editor)) {
-                            DebugUtils.simpleDebug("Breakpoint changed in editor: " + breakpoint.getSourcePosition(), project);
+                            XSourcePosition sp = breakpoint.getSourcePosition();
+                            assert sp != null;
+                            DebugUtils.simpleDebug("Breakpoint added in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project);
                         }
                     }
                 });

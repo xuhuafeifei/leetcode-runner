@@ -9,28 +9,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 只允许在Solution文件中设置断点
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class JavaBInst implements InstExecutor{
     @Override
     public ExecuteResult execute(Instrument inst, Context context) {
-        Location location = context.getLocation();
+        /*
+          确保获取Solution的Location. 避免出现执行到系统方法, 获取到系统函数的Location.
+          从而导致用户在idea设置断点却找不到的bug
+         */
+        Location solutionLocation = context.getSolutionLocation();
 
-        ReferenceType referenceType = location.declaringType();
-        ClassType classType = (ClassType) referenceType;
+        ReferenceType referenceType = solutionLocation.declaringType();
+        ClassType solutionClassType = (ClassType) referenceType;
         int lineNumber = Integer.parseInt(inst.getParam());
 
         try {
-            return setBreakpointAtLine(classType, lineNumber, context.getErm(), context, inst);
+            return setBreakpointAtLine(solutionClassType, lineNumber, context.getErm(), context, inst);
         } catch (AbsentInformationException e) {
             return ExecuteResult.fail(inst.getOperation(), e.toString());
         }
     }
 
     // 在指定行设置断点
-    private static ExecuteResult setBreakpointAtLine(ClassType currentClass, int lineNumber, EventRequestManager erm, Context context, Instrument inst) throws AbsentInformationException {
-        List<Method> methods = currentClass.methods();
+    private static ExecuteResult setBreakpointAtLine(ClassType solutionClassType, int lineNumber, EventRequestManager erm, Context context, Instrument inst) throws AbsentInformationException {
+        List<Method> methods = solutionClassType.methods();
         // 获取methods的所有location
         List<Location> locations = new ArrayList<>();
         for (Method method : methods) {
@@ -41,7 +47,7 @@ public class JavaBInst implements InstExecutor{
         for (BreakpointRequest breakpointRequest : breakpointRequests) {
             if (breakpointRequest.location().lineNumber() == lineNumber) {
                 breakpointRequest.enable();
-                return ExecuteResult.success(inst.getOperation(), "break point set at line " + lineNumber);
+                return ExecuteResult.success(inst.getOperation(), "break point set at Solution's line " + lineNumber);
             }
         }
 
@@ -53,10 +59,10 @@ public class JavaBInst implements InstExecutor{
                 breakpointRequest.enable();
                 context.addBreakpointRequest(breakpointRequest);
 
-                return ExecuteResult.success(inst.getOperation(), "Breakpoint set at line " + lineNumber);
+                return ExecuteResult.success(inst.getOperation(), "Breakpoint set at Solution's line " + lineNumber);
             }
         }
-        ExecuteResult r = ExecuteResult.fail(inst.getOperation(), "no valid location found");
+        ExecuteResult r = ExecuteResult.fail(inst.getOperation(), "no valid location found in Solution file");
         r.setAddLine(lineNumber);
         return r;
     }

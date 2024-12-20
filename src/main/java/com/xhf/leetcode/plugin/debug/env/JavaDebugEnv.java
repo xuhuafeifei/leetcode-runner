@@ -131,7 +131,7 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         try {
             // 获取系统javac路径
             String cdCmd = "cd " + this.filePath;
-            String cmd = javac + " -g -encoding UTF-8 " + mainJavaPath;
+            String cmd = javac + " -g -encoding UTF-8 -cp " + this.filePath + " " + mainJavaPath;
 
             String combinedCmd = " cmd /c " + cdCmd + " & " + cmd;
 

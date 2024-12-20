@@ -3,6 +3,9 @@ package com.xhf.leetcode.plugin.debug.execute;
 import com.sun.jdi.*;
 import com.sun.jdi.event.BreakpointEvent;
 import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.params.Operation;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import java.util.List;
 
@@ -22,14 +25,32 @@ public class JavaPInst implements InstExecutor{
 
     @Override
     public ExecuteResult execute(Instrument inst, Context context) {
-        BreakpointEvent breakpointEvent = context.getBreakpointEvent();
-        ThreadReference thread = breakpointEvent.thread();
+        ThreadReference thread = context.getThread();
+        Location location = context.getLocation();
+
+        int lineNumber = location.lineNumber();
+        String className = location.declaringType().name();
+        String methodName = location.method().name();
+
+        // 执行到solution以外的代码, 不做任何处理
+        if (! "Solution".equals(className)) {
+            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(), "当前断点执行的是系统函数, 不支持显示局部变量");
+            DebugUtils.fillExecuteResultByLocation(failed, location);
+            return failed;
+        }
+
         try {
             String res = getVariable(thread);
             // 存储输出结果
-            return ExecuteResult.success(inst.getOperation(), res);
-        } catch (IncompatibleThreadStateException | AbsentInformationException e) {
-            e.printStackTrace();
+            ExecuteResult success = ExecuteResult.success(inst.getOperation(), res);
+            DebugUtils.fillExecuteResultByLocation(success, location);
+            return success;
+        } catch (AbsentInformationException e) {
+            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(), "没有局部变量");
+            DebugUtils.fillExecuteResultByLocation(failed, location);
+            return failed;
+        } catch (IncompatibleThreadStateException e) {
+            LogUtils.error(e);
             return ExecuteResult.fail(inst.getOperation());
         }
     }

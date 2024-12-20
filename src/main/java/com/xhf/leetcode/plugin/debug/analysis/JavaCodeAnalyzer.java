@@ -1,10 +1,12 @@
 package com.xhf.leetcode.plugin.debug.analysis;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import java.util.regex.*;
@@ -37,6 +39,7 @@ public class JavaCodeAnalyzer {
     public AnalysisResult autoAnalyze() {
         // 从当前打开的VFile路径名称中解析出当前题目的titleSlug
         String titleSlug = CodeService.parseTitleSlugFromVFile(ViewUtils.getCurrentOpenVirtualFile(project));
+        LogUtils.simpleDebug("titleSlug = " + titleSlug);
         Question question = QuestionService.getInstance().queryQuestionInfo(titleSlug, project);
         return analyze(question.getCodeSnippets());
     }
@@ -50,6 +53,7 @@ public class JavaCodeAnalyzer {
      * @return 分析结果
      */
     public AnalysisResult analyze(String code) {
+        LogUtils.simpleDebug(code);
         // 正则表达式匹配方法签名
         Matcher matcher = pattern.matcher(code);
 
@@ -71,6 +75,6 @@ public class JavaCodeAnalyzer {
             return new AnalysisResult(methodName, parameterTypes.toArray(new String[0]));
         }
 
-        return null; // 如果没有匹配到方法签名，返回 null
+        throw new DebugError("代码片段分析错误! 无法匹配任何有效信息\n code = " + code);
     }
 }

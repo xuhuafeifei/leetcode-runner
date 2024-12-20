@@ -6,6 +6,8 @@ import com.xhf.leetcode.plugin.debug.debugger.JavaDebugConfig;
 import com.xhf.leetcode.plugin.debug.debugger.JavaDebugger;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
+import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
 /**
@@ -15,6 +17,23 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 public class DebugAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
+        LangType langType = LangType.getType(AppSettings.getInstance().getLangType());
+        if (langType == null) {
+            LogUtils.error("异常, LangType == null " + AppSettings.getInstance().getLangType());
+            return;
+        }
+        switch (langType) {
+            case JAVA:
+                doJavaDebug(project);
+                break;
+            case PYTHON3:
+                // 暂不支持
+            default:
+                ConsoleUtils.getInstance(project).showWaring("当前" + langType.getLangType() + "语言类型不支持调试", false, true);
+        }
+    }
+
+    private void doJavaDebug(Project project) {
         JavaDebugConfig config = null;
         try {
             config = new JavaDebugConfig.Builder(project).autoBuild().build();

@@ -28,7 +28,11 @@ public class ExecuteResult {
      * 当前执行的方法名词
      */
     private String methodName;
-    private Context content;
+    /**
+     * 上下文对象
+     */
+    private Context context;
+    private String className;
 
     public boolean isSuccess() {
         return success;
@@ -131,11 +135,19 @@ public class ExecuteResult {
         return methodName;
     }
 
-    public void setContent(Context context) {
-        this.content = context;
+    public void setContext(Context context) {
+        this.context = context;
     }
 
-    public Context getContent() {
-        return content;
+    public Context getContext() {
+        return context;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getClassName() {
+        return className;
     }
 }

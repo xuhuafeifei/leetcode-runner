@@ -1,7 +1,9 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
+import com.intellij.openapi.project.Project;
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Location;
+import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.BreakpointEvent;
 import com.sun.jdi.event.EventSet;
@@ -28,8 +30,17 @@ public class Context {
     private StepEvent stepEvent;
     private VirtualMachine vm;
     private JavaDebugEnv env;
+    /**
+     * 表示当前代码执行的location
+     */
     private Location location;
     private List<BreakpointRequest> breakpointRequests;
+    private ThreadReference thread;
+    private Project project;
+    /**
+     * 专门表示Solution类的location
+     */
+    private Location solutionLocation;
 
     public ClassType getCurrentClass() {
         return currentClass;
@@ -127,5 +138,29 @@ public class Context {
 
     public void addBreakpointRequest(BreakpointRequest breakpointRequest) {
         this.breakpointRequests.add(breakpointRequest);
+    }
+
+    public void setThread(ThreadReference thread) {
+        this.thread = thread;
+    }
+
+    public ThreadReference getThread() {
+		return thread;
+	}
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public Project getProject() {
+        return this.project;
+    }
+
+    public void setSolutionLocation(Location location) {
+        this.solutionLocation = location;
+    }
+
+    public Location getSolutionLocation() {
+        return this.solutionLocation;
     }
 }

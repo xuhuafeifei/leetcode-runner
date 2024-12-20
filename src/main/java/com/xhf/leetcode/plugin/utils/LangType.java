@@ -75,6 +75,16 @@ public enum LangType {
         return false;
     }
 
+    public static LangType getType(String langType) {
+        // 遍历所有的langType进行匹配, 匹配成功返回LangType
+        for (LangType lt : LangType.values()) {
+            if (lt.langType.equalsIgnoreCase(langType)) {
+                return lt;
+            }
+        }
+        return null;
+    }
+
     public String getLangType() {
         return langType;
     }

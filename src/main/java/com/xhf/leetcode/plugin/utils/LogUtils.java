@@ -16,7 +16,6 @@ import java.util.Date;
  */
 public class LogUtils {
     private static final Logger IDEA_LOGGER = Logger.getInstance(LogUtils.class);
-    // private static final Log LOG = LogFactory.getLog(LogUtils.class);
 
     static {
         IDEA_LOGGER.setLevel(LogLevel.INFO);
@@ -74,6 +73,7 @@ public class LogUtils {
         String timestamp = DATE_FORMAT.format(new Date());
         String formatted = String.format("%s [%s] %s", timestamp, level, message);
         System.out.println(formatted);
+        IDEA_LOGGER.debug(formatted);
     }
 
 
@@ -83,6 +83,7 @@ public class LogUtils {
 
     public static void error(Throwable e) {
         IDEA_LOGGER.error(e);
+        e.printStackTrace();
     }
 
     public static void error(String message, Throwable e) {
@@ -90,7 +91,7 @@ public class LogUtils {
     }
 
     public static void warn(String message) {
-//        IDEA_LOGGER.warn(message);
+        IDEA_LOGGER.warn(message);
         consoleLog(message, "WARN");
     }
 }

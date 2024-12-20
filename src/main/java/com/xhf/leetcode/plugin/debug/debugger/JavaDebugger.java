@@ -163,6 +163,7 @@ public class JavaDebugger implements Debugger {
         context.setVm(vm);
         context.setEnv(env);
         context.setBreakpointRequestList(this.breakpointRequests);
+        context.setProject(project);
         // 启动事件循环
         EventQueue eventQueue = vm.eventQueue();
         while (true) {
@@ -174,6 +175,7 @@ public class JavaDebugger implements Debugger {
                 LogUtils.simpleDebug("vm disconnected, done !");
                 return;
             }
+            context.setEventSet(eventSet);
             for (Event event : eventSet) {
                 if (event instanceof ClassPrepareEvent) {
                     InitBreakPoint(event);
@@ -223,7 +225,7 @@ public class JavaDebugger implements Debugger {
                 continue;
             }
             // 设置上下文
-            r.setContent(context);
+            r.setContext(context);
             output.output(r);
             if (! r.isSuccess()) {
                 // 错误结果日志记录
@@ -241,6 +243,7 @@ public class JavaDebugger implements Debugger {
         StepEvent stepEvent = (StepEvent) event;
         context.setStepEvent(stepEvent);
         context.setLocation(stepEvent.location());
+        context.setThread(stepEvent.thread());
         doRun();
     }
 
@@ -258,6 +261,7 @@ public class JavaDebugger implements Debugger {
 
         context.setBreakpointEvent(breakpointEvent);
         context.setLocation(location);
+        context.setThread(breakpointEvent.thread());
 
         // 设置单步请求
         if (stepRequest == null) {
@@ -305,6 +309,7 @@ public class JavaDebugger implements Debugger {
         Location location = mainMethod.location();
 
         context.setLocation(location);
+        context.setSolutionLocation(location);
 
         // 设置断点
         new JavaBInst().execute(Instrument.success(ReadType.UI_IN, Operation.B, String.valueOf(location.lineNumber())), context);
@@ -321,6 +326,8 @@ public class JavaDebugger implements Debugger {
         // 获取location
         Location location = mainMethod.location();
 
+        // 存储solution的location
+        context.setSolutionLocation(location);
         context.setLocation(location);
 
         List<XBreakpoint<?>> allBreakpoint = DebugUtils.getAllBreakpoint(project);
@@ -367,8 +374,8 @@ public class JavaDebugger implements Debugger {
         LogUtils.simpleDebug("get available port : " + this.port);
 
         String cdCmd = "cd " + env.getFilePath();
-        String startCmd = String.format("%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=%d %s",
-                env.getJava(), port, "Main");
+        String startCmd = String.format("%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=%d -cp %s %s",
+                env.getJava(), port, env.getFilePath(), "Main");
 
         String combinedCmd = "cmd /c " + cdCmd + " & " + startCmd;
 

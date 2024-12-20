@@ -10,12 +10,10 @@ import com.xhf.leetcode.plugin.debug.params.Instrument;
 import com.xhf.leetcode.plugin.debug.params.Operation;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
-import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
-import io.grpc.EquivalentAddressGroup;
-import org.checkerframework.checker.units.qual.A;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author feigebuge
@@ -44,7 +42,7 @@ public class UIOutput extends AbstractOutput{
                 doR(r);
                 break;
             case N:
-                doAfter(r);
+                // doAfter(r); N指令执行doAfter并不能高亮显示下一行数据. 因为此时获取的addLine是上一行, 而不是下一行
                 break;
             case P:
                 doP(r);
@@ -58,11 +56,28 @@ public class UIOutput extends AbstractOutput{
             case RB:
                 doRB(r);
                 break;
+            case SHOWB:
+                doSHOWB(r);
+                break;
             case RBA:
                 doRBA(r);
                 break;
             default:
                 DebugUtils.simpleDebug("指令" + op.getName() + "不被UIOutput处理", project);
+        }
+    }
+
+    @Adapt(adaptType = {ReadType.COMMAND_IN})
+    private void doSHOWB(ExecuteResult r) {
+        if (r.isSuccess()) {
+            if (appInstance.isCommandReader()) {
+                // double-check. 按理来说, show b 一定会有输出. 但这里额外做一层保险
+                if (r.isHasResult()) {
+                    String result = r.getResult();
+                    String[] split = result.split("\r|\n");
+                    variables.setListData(split);
+                }
+            }
         }
     }
 
@@ -72,10 +87,22 @@ public class UIOutput extends AbstractOutput{
 
     private void doAfter(ExecuteResult r) {
         // 获取当前执行的行号
-        Context ctx = r.getContent();
-        int lineNumber = new JavaWInst().execute(Instrument.success(
-                ReadType.UI_IN, Operation.W, ""
-        ), ctx).getAddLine();
+        Context ctx = r.getContext();
+        ExecuteResult execute =
+                new JavaWInst().execute(Instrument.success(
+                    ReadType.UI_IN, Operation.W, ""
+                ), ctx);
+        int lineNumber = execute.getAddLine();
+
+        highlightLineWithCheck(lineNumber, execute.getClassName());
+    }
+
+    public void highlightLineWithCheck(int lineNumber, String curClassName) {
+        // 如果当前执行的类不是Solution, 则不进行高亮
+        if (! "Solution".equals(curClassName)) {
+            DebugUtils.removeHighlightLine(project);
+            return;
+        }
         DebugUtils.simpleDebug("当前执行行号: " + lineNumber + " 设置高亮...", project);
         DebugUtils.highlightLine(project, lineNumber);
     }
@@ -89,7 +116,7 @@ public class UIOutput extends AbstractOutput{
     private void doW(ExecuteResult r) {
         if (r.isSuccess()) {
             if (appInstance.isUIReader()) {
-                DebugUtils.highlightLine(project, r.getAddLine());
+                highlightLineWithCheck(r.getAddLine(), r.getClassName());
             } else if (appInstance.isCommandReader() && r.isHasResult()) {
                 String[] split = r.getResult().split("\n|\r");
                 variables.setListData(split);
@@ -165,7 +192,12 @@ public class UIOutput extends AbstractOutput{
             String[] split = result.split("\n|\r");
             variables.setListData(split);
         } else {
+            // 打印局部变量失败, 说明出问题了. 问题可能并不严重, 只是受限于debug功能
             variables.setNonData();
+            String msg = r.getMsg();
+            if (StringUtils.isNotBlank(msg)) {
+                variables.setEmptyText(msg);
+            }
         }
     }
 }

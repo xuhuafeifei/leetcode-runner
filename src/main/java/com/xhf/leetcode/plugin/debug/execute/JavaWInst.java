@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.debug.execute;
 import com.sun.jdi.*;
 import com.sun.jdi.event.StepEvent;
 import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
@@ -30,12 +31,9 @@ public class JavaWInst implements InstExecutor{
     @Override
     public ExecuteResult execute(Instrument inst, Context context) {
         Location location = context.getLocation();
-
-        String className = location.declaringType().name(); // 类名
-        String methodName = location.method().name(); // 方法名
         int lineNumber = location.lineNumber(); // 行号
 
-        String res = className + "." + methodName + ":" + lineNumber;
+        String res = DebugUtils.buildCurrentLineInfoByLocation(location);
 
         try {
             String sourceFile = location.sourceName();  // 获取源文件名
@@ -47,8 +45,8 @@ public class JavaWInst implements InstExecutor{
         }
 
         ExecuteResult success = ExecuteResult.success(inst.getOperation(), res);
-        success.setAddLine(lineNumber);
-        success.setMethodName(methodName);
+        // 填充内容
+        DebugUtils.fillExecuteResultByLocation(success, location);
         return success;
     }
 

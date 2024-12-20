@@ -20,15 +20,15 @@ public class DebugPanel extends JPanel{
     public DebugPanel() {
         JPanel readType = createReadType("read type", ReadType.getNames());
         JPanel outputType = createOutputType("output type", OutputType.getNames());
-        add(readType);
-        add(outputType);
+        add(readType, BorderLayout.WEST);
+        add(outputType, BorderLayout.EAST);
     }
 
     private JPanel createOutputType(String title, String[] options) {
         // 创建一个 Panel
         JBPanel<?> panel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(new TitledBorder(title)); // 给 Panel 设置边框和标题
-        panel.setBackground(Constants.BACKGROUND_COLOR);
+//        panel.setBackground(Constants.BACKGROUND_COLOR);
 
         // 创建 ButtonGroup 用于管理单选按钮
         this.outputType = new ButtonGroup();
@@ -38,10 +38,6 @@ public class DebugPanel extends JPanel{
             JBRadioButton radioButton = new JBRadioButton(option);
             outputType.add(radioButton);
             panel.add(radioButton);
-            // 默认控制台
-            if (option.equals(OutputType.CONSOLE_OUT.getName())) {
-                radioButton.setSelected(true);
-            }
         }
 
         return panel;
@@ -51,7 +47,7 @@ public class DebugPanel extends JPanel{
         // 创建一个 Panel
         JBPanel<?> panel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(new TitledBorder(title)); // 给 Panel 设置边框和标题
-        panel.setBackground(Constants.BACKGROUND_COLOR);
+//        panel.setBackground(Constants.BACKGROUND_COLOR);
 
         // 创建 ButtonGroup 用于管理单选按钮
         this.readTypeGroup = new ButtonGroup();
@@ -61,10 +57,6 @@ public class DebugPanel extends JPanel{
             JBRadioButton radioButton = new JBRadioButton(option);
             readTypeGroup.add(radioButton);
             panel.add(radioButton);
-            // 默认命令行
-            if (option.equals(ReadType.COMMAND_IN.getName())) {
-                radioButton.setSelected(true);
-            }
         }
 
         return panel;

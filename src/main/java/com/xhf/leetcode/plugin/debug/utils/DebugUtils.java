@@ -20,6 +20,8 @@ import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointManager;
+import com.sun.jdi.Location;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.params.Instrument;
 import com.xhf.leetcode.plugin.debug.params.Operation;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
@@ -277,5 +279,23 @@ public class DebugUtils {
             }
             simpleDebug("removeHighlightLine done...", project);
         });
+    }
+
+    /**
+     * 根据Location构建行信息
+     * @param location location
+     * @return
+     */
+    public static String buildCurrentLineInfoByLocation(Location location) {
+        String className = location.declaringType().name(); // 类名
+        String methodName = location.method().name(); // 方法名
+        int lineNumber = location.lineNumber(); // 行号
+        return className + "." + methodName + ":" + lineNumber;
+    }
+
+    public static void fillExecuteResultByLocation(ExecuteResult r, Location location) {
+        r.setAddLine(location.lineNumber());
+        r.setMethodName(location.method().name());
+        r.setClassName(location.declaringType().name());
     }
 }
