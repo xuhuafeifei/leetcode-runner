@@ -294,8 +294,13 @@ public class DebugUtils {
     }
 
     public static void fillExecuteResultByLocation(ExecuteResult r, Location location) {
-        r.setAddLine(location.lineNumber());
-        r.setMethodName(location.method().name());
-        r.setClassName(location.declaringType().name());
+        if (location == null) return;
+        try {
+            r.setAddLine(location.lineNumber());
+            r.setMethodName(location.method().name());
+            r.setClassName(location.declaringType().name());
+        } catch (Exception e) {
+            DebugUtils.simpleDebug("fillExecuteResultByLocation error: " + e.getMessage(), r.getContext().getProject());
+        }
     }
 }

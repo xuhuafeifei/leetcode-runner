@@ -59,7 +59,11 @@ public enum Operation {
      * 查看当前执行位置 w
      * w
      */
-    W(new WParameterExtractor(), "^w$", "W");
+    W(new WParameterExtractor(), "^w$", "W"),
+    /**
+     * 帮助指令
+     */
+    HELP(new HELPParameterExtractor(), "^help$|^h$", "HELP");
 
     // 每个操作对应的提取器
     private final ParameterExtractor parameterExtractor;

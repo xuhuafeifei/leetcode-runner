@@ -16,6 +16,11 @@ import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
 import org.apache.commons.lang.StringUtils;
 
 /**
+ * UIOutput, 负责在UI界面输出信息. 该类主要负责处理通过UI进行debug调试的输出显示
+ * <p>
+ * 但为了更好的拓展项目功能, 很多指令均进行适配. 该方法支持从命令行读取的指令执行的结果输出
+ * 适配的方法均用@Adapt注解标注
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
@@ -62,8 +67,21 @@ public class UIOutput extends AbstractOutput{
             case RBA:
                 doRBA(r);
                 break;
+            case HELP:
+                doHELP(r);
+                break;
             default:
                 DebugUtils.simpleDebug("指令" + op.getName() + "不被UIOutput处理", project);
+        }
+    }
+
+    @Adapt(adaptType = {ReadType.COMMAND_IN})
+    private void doHELP(ExecuteResult r) {
+        if (r.isSuccess()) {
+            if (appInstance.isCommandReader() && r.isHasResult()) {
+                String result = r.getResult();
+                variables.setListData(result.split("\r|\n"));
+            }
         }
     }
 
@@ -200,15 +218,15 @@ public class UIOutput extends AbstractOutput{
             }
         }
     }
-}
 
-/**
- * 适配器, 该注解表明当前方法对不同的Reader做出适配
- */
-@interface Adapt {
     /**
-     * 适配的输入类型
-     * @return
+     * 适配器, 该注解表明当前方法对不同的Reader做出适配
      */
-    ReadType[] adaptType();
+    @interface Adapt {
+        /**
+         * 适配的输入类型
+         * @return
+         */
+        ReadType[] adaptType();
+    }
 }

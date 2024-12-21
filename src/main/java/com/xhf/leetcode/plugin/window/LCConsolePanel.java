@@ -15,6 +15,7 @@ import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.tabs.TabInfo;
 import com.intellij.ui.tabs.impl.JBEditorTabs;
 import com.intellij.util.ui.JBUI;
@@ -25,6 +26,7 @@ import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.render.VariablesCellRender;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.DataKeys;
@@ -69,13 +71,15 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         // 解决console关闭时的内存泄露问题
         Disposer.register(this, consoleView);
 
+        variableList.setCellRenderer(new VariablesCellRender());
+
         // 创建选项卡 (基于 JBEditorTabs)
         tabs = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
         tabs.setBorder(Constants.BORDER);
 
         // 添加 Local Variables 选项卡
-        this.variablesTab = new TabInfo(variableList);
-        variablesTab.setText("Local Variables");
+        this.variablesTab = new TabInfo(new JBScrollPane(variableList));
+        variablesTab.setText("Variables & Expressions");
         variablesTab.setIcon(AllIcons.Debugger.Threads);
         tabs.addTab(variablesTab);
 

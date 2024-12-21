@@ -1,0 +1,35 @@
+package com.xhf.leetcode.plugin.debug.execute;
+
+import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+
+/**
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
+public class JavaHELPInst implements InstExecutor{
+    private static final String HELP_INFO =
+            "帮助文档格式: 命令名词 [命令输入形式] 命令作用\n" +
+                    "\n" +
+                    "N命令 [n | n 数字 | n 数字]  step into单步执行\n" +
+                    "\n" +
+                    "R命令 [r] 运行代码, 直到下一个断点\n" +
+                    "\n" +
+                    "P命令 [p] 打印本地变量\n" +
+                    "\n" +
+                    "B命令 [b 数字] 在指定行打上断点\n" +
+                    "\n" +
+                    "SHOWB命令 [show b | s b | sb] 显示所有断点\n" +
+                    "\n" +
+                    "RB命令 [remove b 数字|r b 数字|rb 数字|remove b数字|r b数字|rb数字] 移除指定行断点\n" +
+                    "\n" +
+                    "RBA命令 [remove all|ra|r a]移除所有断点\n" +
+                    "\n" +
+                    "W命令 [w] 查看当前所在位置";
+    @Override
+    public ExecuteResult execute(Instrument inst, Context context) {
+        ExecuteResult success = ExecuteResult.success(inst.getOperation(), HELP_INFO);
+        DebugUtils.fillExecuteResultByLocation(success, context.getLocation());
+        return success;
+    }
+}

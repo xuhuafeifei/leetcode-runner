@@ -44,6 +44,9 @@ public class JavaInstFactory {
             case RBA:
                 instExecutor = new JavaRBAInst();
                 break;
+            case HELP:
+                instExecutor = new JavaHELPInst();
+                break;
             default:
                 break;
         }

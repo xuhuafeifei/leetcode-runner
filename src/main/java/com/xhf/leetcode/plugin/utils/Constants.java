@@ -36,4 +36,7 @@ public interface Constants {
     String QUESTION_CONTENT = "QUESTION_CONTENT";
 
     Border BORDER = JBUI.Borders.customLine(JBColor.border(), 1);
+    String LOCAL_VARIABLE = "Local variable";
+    String STATIC_VARIABLE = "Static variable";
+    String MEMBER_VARIABLE = "Member variable";
 }
