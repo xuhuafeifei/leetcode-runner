@@ -26,10 +26,11 @@ public class JDIExample {
 
     static Context context = new Context();
     static StepRequest stepRequest;
+    static int b = 27;
     public static void main(String[] args) throws IOException, InterruptedException {
-        Runtime.getRuntime().exec("E:\\jdk8\\bin\\javac -g -encoding utf-8 -cp E:\\java_code\\lc-test\\cache\\debug E:\\java_code\\lc-test\\cache\\debug\\Main.java");
-        Runtime.getRuntime().exec("E:\\java_code\\lc-test\\cache\\debug\\start.cmd");
-        Thread.sleep(1500);
+//        Runtime.getRuntime().exec("E:\\jdk8\\bin\\javac -g -encoding utf-8 -cp E:\\java_code\\lc-test\\cache\\debug E:\\java_code\\lc-test\\cache\\debug\\Main.java");
+//        Runtime.getRuntime().exec("E:\\java_code\\lc-test\\cache\\debug\\start.cmd");
+//        Thread.sleep(1500);
         try {
             // 创建连接
             VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
@@ -80,7 +81,7 @@ public class JDIExample {
 //                            breakpointRequest.enable();
 
 
-                            setBreakpointAtLine(mainClass, 16, erm, "combinationSum");
+                            setBreakpointAtLine(mainClass, b, erm, "combinationSum");
                             System.out.println("Breakpoint set at Main.main");
                         }
                         eventSet.resume();
