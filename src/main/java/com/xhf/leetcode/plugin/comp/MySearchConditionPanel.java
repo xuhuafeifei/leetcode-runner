@@ -6,6 +6,7 @@ import com.xhf.leetcode.plugin.window.filter.QFilter;
 
 import javax.swing.*;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -123,7 +124,8 @@ public abstract class MySearchConditionPanel extends JPanel {
         }
 
         public MapOptionConverter(int size) {
-            map = new HashMap<>(size);
+            // 记录顺序的hashMap
+            map = new LinkedHashMap<>(size);
         }
 
         @Override

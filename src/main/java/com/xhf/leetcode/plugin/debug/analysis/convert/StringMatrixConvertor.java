@@ -6,7 +6,9 @@ public class StringMatrixConvertor implements VariableConvertor {
         // 处理 String[][]
         StringBuilder sb = new StringBuilder();
         sb.append("String[][] ").append(variableName).append(" = {");
-        
+
+        testcase = testcase.replace("\"", "");
+
         // 去除外层的方括号并按行分割
         String[] rows = testcase.replace("[[", "").replace("]]", "").split("],\\s*\\[");
         

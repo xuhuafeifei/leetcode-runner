@@ -157,7 +157,12 @@ public class DebugUtils {
             if (breakpoint.getSourcePosition() != null
                     && file.equals(breakpoint.getSourcePosition().getFile())
                     && lineNumber == breakpoint.getSourcePosition().getLine()) {
-                breakpointManager.removeBreakpoint(breakpoint);
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    ApplicationManager.getApplication().runWriteAction(() -> {
+                        // 删除断点
+                        breakpointManager.removeBreakpoint(breakpoint);
+                    });
+                });
                 break;
             }
         }

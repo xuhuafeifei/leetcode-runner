@@ -8,6 +8,7 @@ public class StringArrayConvertor implements VariableConvertor {
     @Override
     public String convert(String testcase, String variableName) {
         StringBuilder sb = new StringBuilder();
+        testcase = testcase.replace("\"", "");
         // 处理 String[]
         sb.append("String[] ").append(variableName).append(" = new String[]{");
         String[] values = testcase.replace("[", "").replace("]", "").split(",");

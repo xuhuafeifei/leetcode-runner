@@ -188,8 +188,15 @@ public class JavaDebugEnv extends AbstractDebugEnv {
             throw new DebugError("当前打开文件为空");
         }
         // 替换含有package的那一行
-        // 获取内容(import语句不能加换行符, 否则打印行号对不上, 除非减去offset. 不过Java这块就不这么做了, 毕竟只要有分号, 一行可以解决很多包引入内容)
-        return content.replaceFirst("^package .*;", "import java.util.*;");
+        if (content.startsWith("package")) {
+            // 如果有package语句，替换为import java.util.*
+            // import语句不能加换行符, 否则打印行号对不上, 除非减去offset. 不过Java这块就不这么做了, 毕竟只要有分号, 一行可以解决很多包引入内容)
+            content = content.replaceFirst("^package .*;", "import java.util.*;");
+        } else {
+            // 如果没有package语句，直接添加import语句到第一行
+            content = "import java.util.*;" + content;
+        }
+        return content;
     }
 
     public String getFilePath() {

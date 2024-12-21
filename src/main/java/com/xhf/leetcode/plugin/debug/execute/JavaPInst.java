@@ -39,11 +39,7 @@ public class JavaPInst implements InstExecutor{
         }
 
         try {
-            if (location.lineNumber() == 18) {
-                System.out.println("31...");
-            }
-            System.err.println(DebugUtils.buildCurrentLineInfoByLocation(location));
-            String res = getVariable(thread, location);
+            String res = getVariable(thread, location, context);
             // 存储输出结果
             ExecuteResult success = ExecuteResult.success(inst.getOperation(), res);
             DebugUtils.fillExecuteResultByLocation(success, location);
@@ -58,7 +54,7 @@ public class JavaPInst implements InstExecutor{
         }
     }
 
-    private String getVariable(ThreadReference thread, Location location) throws IncompatibleThreadStateException, AbsentInformationException {
+    private String getVariable(ThreadReference thread, Location location, Context context) throws IncompatibleThreadStateException, AbsentInformationException {
         // 获取当前栈帧
         StackFrame frame = thread.frame(0);
         // 获取本地变量
@@ -69,7 +65,7 @@ public class JavaPInst implements InstExecutor{
             LocalVariable localVar = localVariables.get(i);
             Value varValue = frame.getValue(localVar);
             // 强转获取value
-            sb.append(localVar.name()).append(" = ").append(inspector.inspectValue(varValue));
+            sb.append(localVar.name()).append(" = ").append(handleValue(varValue, context));
             if (i != localVariables.size() - 1) {
                 sb.append("\n");
             }
@@ -85,7 +81,7 @@ public class JavaPInst implements InstExecutor{
             // 处理静态变量
             if (field.isStatic()) {
                 Value value = referenceType.getValue(field);  // 获取静态字段的值
-                statics.add(field.name() + " = " + inspector.inspectValue(value));
+                statics.add(field.name() + " = " + handleValue(value, context));
             }
             // 处理成员变量
             else {
@@ -93,7 +89,7 @@ public class JavaPInst implements InstExecutor{
                 if (objectRef != null) {
                     // 获取实例字段的值
                     Value value = objectRef.getValue(field);
-                    members.add(field.name() + " = " + inspector.inspectValue(value));
+                    members.add(field.name() + " = " + handleValue(value, context));
                 }
             }
         }
@@ -116,6 +112,16 @@ public class JavaPInst implements InstExecutor{
             }
         }
         return sb.toString();
+    }
+
+    private String handleValue(Value value, Context ctx) {
+        try {
+            return this.inspector.inspectValue(value);
+        } catch (Exception e) {
+            DebugUtils.simpleDebug(e.getMessage(), ctx.getProject());
+            LogUtils.error(e);
+            return "变量类型不支持显示";
+        }
     }
 
 }

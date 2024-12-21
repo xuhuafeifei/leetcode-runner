@@ -7,6 +7,7 @@ package com.xhf.leetcode.plugin.debug.analysis.convert;
 public class StringConvertor implements VariableConvertor {
     @Override
     public String convert(String testcase, String variableName) {
+        testcase = testcase.replace("\"", "");
         return "String " + variableName + " = \"" + testcase + "\";\r\n";
     }
 }

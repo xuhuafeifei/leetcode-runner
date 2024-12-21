@@ -134,6 +134,9 @@ public class JavaTestcaseConvertor {
      */
     private String createVariable(String testcase, String paramType) {
         VariableConvertor cc = cf.createVariableConvertor(paramType);
+        if (cc == null) {
+            throw new DebugError("不支持的方法入参类型: " + paramType);
+        }
         String res = cc.convert(testcase, vName());
         return res;
     }
