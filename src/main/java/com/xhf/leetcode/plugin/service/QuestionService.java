@@ -123,15 +123,6 @@ public class QuestionService {
      * @param question question
      */
     public void fillQuestion(Question question, Project project) {
-        /* check if the question needs to fill content */
-        if (StringUtils.isNotBlank(question.getTranslatedTitle())
-                && StringUtils.isNotBlank(question.getTranslatedContent())
-                && StringUtils.isNotBlank(question.getCodeSnippets())
-                && StringUtils.isNotBlank(question.getQuestionId())
-                && StringUtils.isNotBlank(question.getExampleTestcases())
-        ) {
-            return;
-        }
         if (StringUtils.isBlank(question.getTitleSlug())) {
             throw new RuntimeException("title slug is null ! " + GsonUtils.toJsonStr(question));
         }

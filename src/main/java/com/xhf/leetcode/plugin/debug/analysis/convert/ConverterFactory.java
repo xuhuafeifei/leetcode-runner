@@ -20,15 +20,22 @@ public class ConverterFactory {
     }
 
     static {
-        string2ConvertorMap.put("int", new IntConvertor());
-        string2ConvertorMap.put("int[]", new IntArrayConvertor());
-        string2ConvertorMap.put("int[][]", new IntMatrixConvertor());
-        string2ConvertorMap.put("String", new StringConvertor());
-        string2ConvertorMap.put("String[]", new StringArrayConvertor());
-        string2ConvertorMap.put("String[][]", new StringMatrixConvertor());
+        for (ParamType value : ParamType.values()) {
+            string2ConvertorMap.put(value.getType(), value.getConvertor());
+        }
     }
 
-    public VariableConvertor createVariableConvertor(String paramType) {
-        return string2ConvertorMap.get(paramType);
+    /**
+     * 通过分析器得到的参数类型, 获取对应的converter
+     * @param type type是分析器分析得到的参数类型, 不代表项目对于某一类型的标识
+     * @return convertor
+     */
+    public VariableConvertor createVariableConvertor(String type) {
+        // 通过ParamType获取类型的唯一标识
+        ParamType byType = ParamType.getByType(type);
+        if (byType == null) {
+            return null;
+        }
+        return string2ConvertorMap.getOrDefault(byType.getType(), null);
     }
 }
