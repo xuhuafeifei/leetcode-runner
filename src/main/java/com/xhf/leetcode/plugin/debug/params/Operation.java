@@ -63,7 +63,7 @@ public enum Operation {
     /**
      * step指令, 支持step over 和step out. 不支持缩写
      */
-    STEP(new STEPParameterExtractor(), "^step\\s+[over|out]$", "STEP"),
+    STEP(new STEPParameterExtractor(), "^step\\s+(over|out)$", "STEP"),
     /**
      * 帮助指令
      */

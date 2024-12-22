@@ -47,8 +47,6 @@ public class JavaDebugger implements Debugger {
     private JavaDebugEnv env;
     private EventRequestManager erm;
     private VirtualMachine vm;
-
-    private StepRequest stepRequest;
     private Context context;
     private Output output;
     private InstReader reader;
@@ -244,8 +242,6 @@ public class JavaDebugger implements Debugger {
     }
 
     private void handleStepEvent(Event event) {
-        StepEvent stepEvent = (StepEvent) event;
-        context.setStepEvent(stepEvent);
         setContextBasicInfo((LocatableEvent) event);
         doRun();
     }
@@ -275,17 +271,7 @@ public class JavaDebugger implements Debugger {
         setContextBasicInfo(breakpointEvent);
 
         // 设置单步请求
-        if (stepRequest == null) {
-            stepRequest = erm.createStepRequest(breakpointEvent.thread(), StepRequest.STEP_LINE, StepRequest.STEP_INTO);
-            context.setStepRequest(stepRequest);
-        }
-        try {
-            stepRequest.enable();
-        } catch (Exception e) {
-            // 未知错误, 就很干. 我都不知道为啥出错, fuck
-            LogUtils.simpleDebug(e.toString());
-            return;
-        }
+        context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_INTO);
 
         if (AppSettings.getInstance().isUIOutput()) {
             // 输入UI打印指令. UI总是会在遇到断点时打印局部变量. 因此输入P指令

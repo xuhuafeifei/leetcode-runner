@@ -25,9 +25,7 @@ public class Context {
     private String output;
     private EventRequestManager erm;
     private EventSet eventSet;
-    private StepRequest stepRequest;
     private ClassType currentClass;
-    private StepEvent stepEvent;
     private VirtualMachine vm;
     private JavaDebugEnv env;
     /**
@@ -41,7 +39,10 @@ public class Context {
      * 专门表示Solution类的location
      */
     private Location solutionLocation;
-//    private StepRequestManager stepRequestManager;
+    /**
+     * 单步请求管理器
+     */
+    private final StepRequestManager stepRequestManager = new StepRequestManager();
 
     public ClassType getCurrentClass() {
         return currentClass;
@@ -89,21 +90,13 @@ public class Context {
 		this.eventSet = eventSet;
 	}
 
-    public StepRequest getStepRequest() {
-		return stepRequest;
-	}
-
-    public void setStepRequest(StepRequest stepRequest) {
-		this.stepRequest = stepRequest;
-	}
-
-    public void setStepEvent(StepEvent stepEvent) {
-        this.stepEvent = stepEvent;
+    public void setStepRequest(int size, int depth) {
+        stepRequestManager.setStepRequest(size, depth);
     }
 
-    public StepEvent getStepEvent() {
-		return stepEvent;
-	}
+    public void removeStepRequest() {
+        stepRequestManager.disable();
+    }
 
     public void setVm(VirtualMachine vm) {
         this.vm = vm;
@@ -163,5 +156,21 @@ public class Context {
 
     public Location getSolutionLocation() {
         return this.solutionLocation;
+    }
+
+    private class StepRequestManager {
+        private StepRequest stepRequest;
+        void setStepRequest(int size, int depth) {
+            if (stepRequest != null) {
+                this.stepRequest.disable();
+            }
+            this.stepRequest = erm.createStepRequest(thread, size, depth);
+            this.stepRequest.enable();
+        }
+        void disable() {
+            if (stepRequest != null) {
+                stepRequest.disable();
+            }
+        }
     }
 }

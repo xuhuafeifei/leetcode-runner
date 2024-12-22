@@ -72,6 +72,7 @@ public class UIOutput extends AbstractOutput{
                 break;
             case STEP:
                 doSTEP(r);
+                break;
             default:
                 DebugUtils.simpleDebug("指令" + op.getName() + "不被UIOutput处理", project);
         }
@@ -135,12 +136,11 @@ public class UIOutput extends AbstractOutput{
     @Adapt(adaptType = {ReadType.COMMAND_IN})
     private void doW(ExecuteResult r) {
         if (r.isSuccess()) {
-            if (appInstance.isUIReader()) {
-                DebugUtils.highlightLineWithCheck(r.getAddLine(), r.getClassName(), project);
-            } else if (appInstance.isCommandReader() && r.isHasResult()) {
+            if (appInstance.isCommandReader() && r.isHasResult()) {
                 String[] split = r.getResult().split("\n|\r");
                 variables.setListData(split);
             }
+            DebugUtils.highlightLineWithCheck(r.getAddLine(), r.getClassName(), project);
         }
     }
 

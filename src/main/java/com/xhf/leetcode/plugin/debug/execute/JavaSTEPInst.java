@@ -25,25 +25,21 @@ public class JavaSTEPInst implements InstExecutor {
             String info = DebugUtils.buildCurrentLineInfoByLocation(location);
             DebugUtils.simpleDebug("N 指令执行时, 处于 " + info, context.getProject());
         }
-        // 停止上一轮的单步请求
-        StepRequest stepRequest = context.getStepRequest();
-        if (stepRequest != null) {
-            stepRequest.disable();
-        }
         // 设置单步请求
         switch (inst.getParam()) {
             case "over":
-                stepRequest = context.getErm().createStepRequest(context.getThread(), StepRequest.STEP_LINE, StepRequest.STEP_OVER);
+                context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_OVER);
                 break;
             case "out":
-                stepRequest = context.getErm().createStepRequest(context.getThread(), StepRequest.STEP_LINE, StepRequest.STEP_OUT);
+                context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_OUT);
                 break;
             default:
-                return ExecuteResult.fail(inst.getOperation(), "未知的STEP指令参数: " + inst.getParam());
+                ExecuteResult fail = ExecuteResult.fail(inst.getOperation(), "未知的STEP指令参数: " + inst.getParam());
+                DebugUtils.fillExecuteResultByLocation(fail, context.getLocation());
+                return fail;
         }
-        stepRequest.addCountFilter(1);
-        stepRequest.enable();
-        context.setStepRequest(stepRequest);
-        return ExecuteResult.success(inst.getOperation());
+        ExecuteResult success = ExecuteResult.success(inst.getOperation());
+        DebugUtils.fillExecuteResultByLocation(success, context.getLocation());
+        return success;
     }
 }

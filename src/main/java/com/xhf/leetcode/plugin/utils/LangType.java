@@ -68,8 +68,9 @@ public enum LangType {
 
     public static boolean equals(String langType, String settingLangType) {
         boolean flag = langType.equalsIgnoreCase(settingLangType);
+        if (flag) return true;
         // python特判
-        if (! flag && langType.contains("python") && settingLangType.contains("python")) {
+        if (langType.contains("python") && settingLangType.contains("python")) {
             return true;
         }
         return false;

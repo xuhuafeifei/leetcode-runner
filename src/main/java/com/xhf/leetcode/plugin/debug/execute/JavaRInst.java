@@ -12,10 +12,7 @@ public class JavaRInst implements InstExecutor{
 
     @Override
     public ExecuteResult execute(Instrument inst, Context context) {
-        StepRequest stepRequest = context.getStepRequest();
-        if (stepRequest != null) {
-            stepRequest.disable();
-        }
+        context.removeStepRequest();
         return ExecuteResult.success(inst.getOperation());
     }
 }

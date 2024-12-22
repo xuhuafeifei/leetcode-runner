@@ -59,7 +59,7 @@ public class Question {
                 commentSymbol + "do not modify or remove anything between start-line and end-line" + "\n" +
                 commentSymbol + lineStart + "\n" +
                 code + "\n" +
-                commentSymbol + lineStart + "\n";
+                commentSymbol + lineEnd + "\n";
     }
 
     /**
