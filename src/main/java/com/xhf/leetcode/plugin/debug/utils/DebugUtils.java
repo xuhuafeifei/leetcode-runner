@@ -235,6 +235,16 @@ public class DebugUtils {
     // 用于存储已添加的高亮
     private static final Map<Integer, RangeHighlighter> highlighterMap = new HashMap<>();
 
+    public static void highlightLineWithCheck(int lineNumber, String curClassName, Project project) {
+        // 如果当前执行的类不是Solution, 则不进行高亮
+        if (! "Solution".equals(curClassName)) {
+            DebugUtils.removeHighlightLine(project);
+            return;
+        }
+        DebugUtils.simpleDebug("当前执行行号: " + lineNumber + " 设置高亮...", project);
+        DebugUtils.highlightLine(project, lineNumber);
+    }
+
     public static void highlightLine(Project project, int lineNumber) {
         lineNumber = lineNumber - 1;
         FileEditor fileEditor = ViewUtils.getCurrentOpenEditor(project);

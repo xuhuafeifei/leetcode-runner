@@ -112,17 +112,7 @@ public class UIOutput extends AbstractOutput{
                 ), ctx);
         int lineNumber = execute.getAddLine();
 
-        highlightLineWithCheck(lineNumber, execute.getClassName());
-    }
-
-    public void highlightLineWithCheck(int lineNumber, String curClassName) {
-        // 如果当前执行的类不是Solution, 则不进行高亮
-        if (! "Solution".equals(curClassName)) {
-            DebugUtils.removeHighlightLine(project);
-            return;
-        }
-        DebugUtils.simpleDebug("当前执行行号: " + lineNumber + " 设置高亮...", project);
-        DebugUtils.highlightLine(project, lineNumber);
+        DebugUtils.highlightLineWithCheck(lineNumber, execute.getClassName(), project);
     }
 
     /**
@@ -134,7 +124,7 @@ public class UIOutput extends AbstractOutput{
     private void doW(ExecuteResult r) {
         if (r.isSuccess()) {
             if (appInstance.isUIReader()) {
-                highlightLineWithCheck(r.getAddLine(), r.getClassName());
+                DebugUtils.highlightLineWithCheck(r.getAddLine(), r.getClassName(), project);
             } else if (appInstance.isCommandReader() && r.isHasResult()) {
                 String[] split = r.getResult().split("\n|\r");
                 variables.setListData(split);
