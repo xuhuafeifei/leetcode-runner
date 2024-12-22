@@ -137,11 +137,11 @@ public class JavaDebugEnv extends AbstractDebugEnv {
 
             LogUtils.simpleDebug("编译cmd = " + combinedCmd);
             Process exec = Runtime.getRuntime().exec(combinedCmd);
-            DebugUtils.printProcess(exec, false);
+            DebugUtils.printProcess(exec, false, project);
 
             int i = exec.exitValue();
             if (i != 0) {
-                throw new DebugError("编译文件异常");
+                throw new DebugError("编译文件异常, 详细信息可查看Console");
             }
             mainClassPath = mainJavaPath.replace("Main.java", "Main.class");
             return true;

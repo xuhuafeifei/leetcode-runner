@@ -111,13 +111,19 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
         // 添加codeEditor
         centerPanel.addToCenter(createCodePanel(submissionDetail));
         // 如果提交结果不是Accepted，则显示错误信息
-        if (! submissionDetail.getStatusDisplay().equals("Accepted")) {
+        boolean flag = submissionDetail.getStatusDisplay().equals("Accepted");
+        if (! flag) {
             centerPanel.addToTop(createErrorInfoPanel(submissionDetail));
         }
 
         BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(centerPanel);
         secondComponent.addToTop(createToolbarWrapper(centerPanel));
-        jbSplitter.setSecondComponent(secondComponent);
+        // 如果有错误提交信息, 添加滚轮
+        if (! flag) {
+            jbSplitter.setSecondComponent(new JBScrollPane(secondComponent));
+        }else {
+            jbSplitter.setSecondComponent(secondComponent);
+        }
     }
 
     /**

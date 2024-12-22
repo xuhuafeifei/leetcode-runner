@@ -74,7 +74,8 @@ public class CodeEditor extends CopyToolBarEditor {
                     return;
                 }
                 ConsoleUtils instance = ConsoleUtils.getInstance(project);
-                boolean flag = ViewUtils.writeContentToCurrentVFile(project, Question.handleCodeSnippets(content, AppSettings.getInstance().getLangType()));
+                String curContent = ViewUtils.getContentOfCurrentOpenVFile(project);
+                boolean flag = ViewUtils.writeContentToCurrentVFile(project, Question.replaceCodeSnippets(curContent, content));
                 if (flag) {
                     instance.showInfo("Copy To Editor Success", false, true);
                 }else {

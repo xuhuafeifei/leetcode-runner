@@ -1,6 +1,9 @@
 package com.xhf.leetcode.plugin.model;
 
 import com.xhf.leetcode.plugin.utils.LangType;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -81,6 +84,47 @@ public class Question {
             }
             if (inCoreCode) {
                 sb.append(line).append("\n");  // 在核心代码范围内，追加到StringBuilder
+            }
+        }
+        return sb.toString().trim();  // 返回去掉多余空行的核心代码
+    }
+
+    /**
+     * 将curContent内部的核心代码替换为content
+     * 核心代码指的是在lineStart和lineEnd之间的代码
+     *
+     * @param curContent 当前代码
+     * @param content 需要替换的内容
+     * @return 替换后的内容
+     */
+    public static String replaceCodeSnippets(@Nullable  String curContent, @NotNull String content) {
+        // 如果当前内容为空, 或者不包含start 或 end, 直接返回被替换的内容
+        if (StringUtils.isBlank(curContent) || !curContent.contains(lineStart) || !curContent.contains(lineEnd)) {
+            return content;
+        }
+        StringBuilder sb = new StringBuilder();
+        String[] lines = curContent.split("\n");
+        boolean inCoreCode = false;  // 标记是否在核心代码片段范围内
+
+        for (String line : lines) {
+            if (line.contains(lineStart)) {
+                // 找到lineStart，开始截取核心代码
+                inCoreCode = true;
+                sb.append(line).append("\n");
+                // 添加需要更换的内容
+                sb.append(content);
+                if (!content.endsWith("\n|\r")) {
+                    sb.append("\n");
+                }
+                continue;
+            }
+            if (line.contains(lineEnd)) {
+                sb.append(line).append("\n");
+                continue;
+            }
+            // 只有不在核心代码区域内, 才会添加
+            if (! inCoreCode) {
+                sb.append(line).append("\n");
             }
         }
         return sb.toString().trim();  // 返回去掉多余空行的核心代码

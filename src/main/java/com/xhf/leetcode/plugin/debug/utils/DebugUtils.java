@@ -51,18 +51,20 @@ public class DebugUtils {
      * @param process
      * @param asyn 是否异步
      */
-    public static void printProcess(Process process, boolean asyn) {
+    public static void printProcess(Process process, boolean asyn, Project project) {
         if (asyn) {
             new Thread(() -> {
                 try {
-                    LogUtils.simpleDebug("cmd result = " + IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8));
+                    LogUtils.simpleDebug("cmd result = " + getOutputMessage(process));
                 } catch (IOException e) {
                     LogUtils.error(e);
                 }
             }).start();
             new Thread(() -> {
                 try {
-                    LogUtils.simpleDebug("cmd error result = " + IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8));
+                    String errorMessage = getErrorMessage(process);
+                    LogUtils.simpleDebug("cmd error result = " + errorMessage);
+                    ConsoleUtils.getInstance(project).showError(errorMessage, true);
                 } catch (IOException e) {
                     LogUtils.error(e);
                 }
@@ -70,7 +72,9 @@ public class DebugUtils {
         } else {
             try {
                 LogUtils.simpleDebug("result = " + getOutputMessage(process));
-                LogUtils.simpleDebug("error result = " + getErrorMessage(process));
+                String errorMessage = getErrorMessage(process);
+                LogUtils.simpleDebug("error result = " + errorMessage);
+                ConsoleUtils.getInstance(project).showError(errorMessage, false);
             } catch (IOException e) {
                 LogUtils.error(e);
             }

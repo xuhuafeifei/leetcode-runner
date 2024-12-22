@@ -391,6 +391,6 @@ public class JavaDebugger implements Debugger {
     }
 
     private void getRunInfo(Process exec) throws InterruptedException {
-        DebugUtils.printProcess(exec, true);
+        DebugUtils.printProcess(exec, true, project);
     }
 }
