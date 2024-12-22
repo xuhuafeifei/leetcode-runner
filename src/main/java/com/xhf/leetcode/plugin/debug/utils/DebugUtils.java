@@ -339,6 +339,10 @@ public class DebugUtils {
         String className = location.declaringType().name(); // 类名
         String methodName = location.method().name(); // 方法名
         int lineNumber = location.lineNumber(); // 行号
+        return buildCurrentLineInfo(className, methodName, lineNumber);
+    }
+
+    public static String buildCurrentLineInfo(String className, String methodName, int lineNumber) {
         return className + "." + methodName + ":" + lineNumber;
     }
 
@@ -351,5 +355,9 @@ public class DebugUtils {
         } catch (Exception e) {
             DebugUtils.simpleDebug("fillExecuteResultByLocation error: " + e.getMessage(), r.getContext().getProject());
         }
+    }
+
+    public static String buildCurrentLineInfoByLocation(ExecuteResult r) {
+        return buildCurrentLineInfo(r.getClassName(), r.getMethodName(), r.getAddLine());
     }
 }

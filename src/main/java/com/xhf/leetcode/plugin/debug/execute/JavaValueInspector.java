@@ -102,6 +102,8 @@ public class JavaValueInspector {
             res = getLinkedList(objRef, depth);
         } else if (isSingletonList(objRef)) {
             res = getSingletonList(objRef, depth);
+        } else if (isArrayDeque(objRef)) {
+            res = getArrayDeque(objRef, depth);
         } else {
             StringBuilder sb = new StringBuilder();
             if (objRef == null || objRef.referenceType() == null) {
@@ -146,6 +148,28 @@ public class JavaValueInspector {
     private boolean isArrayDeque(Value value) {
         // 判断是否是 java.util.ArrayDeque
         return value instanceof ObjectReference && "java.util.ArrayDeque".equals(value.type().name());
+    }
+
+    private String getArrayDeque(ObjectReference objRef, int depth) {
+        ReferenceType referenceType = objRef.referenceType();
+        Value elements = objRef.getValue(referenceType.fieldByName("elements"));
+        Value head = objRef.getValue(referenceType.fieldByName("head"));
+        Value tail = objRef.getValue(referenceType.fieldByName("tail"));
+        if (elements != null && head != null && tail != null) {
+            StringBuilder sb = new StringBuilder("[");
+            // 迭代循环
+            ArrayReference arrayReference = (ArrayReference) elements;
+            int length = arrayReference.length();
+            for (int i = ((IntegerValue) head).value(); i != ((IntegerValue) tail).value(); i = (i + 1) % length) {
+                sb.append(this.inspectValue(arrayReference.getValue(i), depth + 1)).append(",");
+            }
+            // 如果最后一个是, 删除
+            if (sb.charAt(sb.length() - 1) == ',') {
+                sb.deleteCharAt(sb.length() - 1);
+            }
+            return sb.append(']').toString();
+        }
+        return null;
     }
 
     /**

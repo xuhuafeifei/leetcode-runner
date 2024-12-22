@@ -215,6 +215,7 @@ public class UIOutput extends AbstractOutput{
             // 打印局部变量失败, 说明出问题了. 问题可能并不严重, 只是受限于debug功能
             variables.setNonData();
             String msg = r.getMsg();
+            msg = msg + " : " + DebugUtils.buildCurrentLineInfoByLocation(r);
             if (StringUtils.isNotBlank(msg)) {
                 variables.setEmptyText(msg);
             }

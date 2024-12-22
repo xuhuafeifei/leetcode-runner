@@ -19,6 +19,7 @@ import com.xhf.leetcode.plugin.debug.params.Instrument;
 import com.xhf.leetcode.plugin.debug.params.Operation;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.reader.StdInReader;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 
 import java.util.*;
 
@@ -26,7 +27,8 @@ public class JDIExample {
 
     static Context context = new Context();
     static StepRequest stepRequest;
-    static int b = 27;
+    static int b = 23;
+    static String methodName = "wordBreak";
     public static void main(String[] args) throws IOException, InterruptedException {
 //        Runtime.getRuntime().exec("E:\\jdk8\\bin\\javac -g -encoding utf-8 -cp E:\\java_code\\lc-test\\cache\\debug E:\\java_code\\lc-test\\cache\\debug\\Main.java");
 //        Runtime.getRuntime().exec("E:\\java_code\\lc-test\\cache\\debug\\start.cmd");
@@ -74,14 +76,14 @@ public class JDIExample {
                         if (className.equals("Solution")) {
                             // 获取Main类
                             ClassType mainClass = (ClassType) classPrepareEvent.referenceType();
-                            Method mainMethod = mainClass.methodsByName("combinationSum").get(0);
+//                            Method mainMethod = mainClass.methodsByName("combinationSum").get(0);
 //                            Location location = mainMethod.location();
 //
 //                            BreakpointRequest breakpointRequest = erm.createBreakpointRequest(location);
 //                            breakpointRequest.enable();
 
 
-                            setBreakpointAtLine(mainClass, b, erm, "combinationSum");
+                            setBreakpointAtLine(mainClass, b, erm, methodName);
                             System.out.println("Breakpoint set at Main.main");
                         }
                         eventSet.resume();
@@ -93,11 +95,13 @@ public class JDIExample {
                         context.setBreakpointEvent(breakpointEvent);
 
                         // 设置单步请求
-                        if (stepRequest == null) {
-                            stepRequest = erm.createStepRequest(breakpointEvent.thread(), StepRequest.STEP_LINE, StepRequest.STEP_INTO);
-                            context.setStepRequest(stepRequest);
-                        }
-                        stepRequest.enable();
+//                        if (stepRequest == null) {
+//                            stepRequest = erm.createStepRequest(breakpointEvent.thread(), StepRequest.STEP_LINE, StepRequest.STEP_INTO);
+//                            context.setStepRequest(stepRequest);
+//                        }
+//                        stepRequest.enable();
+                        context.setThread(breakpointEvent.thread());
+                        context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_OVER);
 
                         eventSet.resume();
                     }

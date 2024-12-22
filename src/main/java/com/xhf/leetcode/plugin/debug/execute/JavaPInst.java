@@ -40,6 +40,7 @@ public class JavaPInst implements InstExecutor{
 
         try {
             String res = getVariable(thread, location, context);
+
             // 存储输出结果
             ExecuteResult success = ExecuteResult.success(inst.getOperation(), res);
             DebugUtils.fillExecuteResultByLocation(success, location);

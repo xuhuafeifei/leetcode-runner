@@ -12,6 +12,7 @@ import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
+import com.xhf.leetcode.plugin.exception.DebugError;
 
 import java.util.List;
 
@@ -163,6 +164,9 @@ public class Context {
         void setStepRequest(int size, int depth) {
             if (stepRequest != null) {
                 this.stepRequest.disable();
+            }
+            if (erm == null || thread == null) {
+                throw new DebugError("Context setStepRequest使用错误. 请在使用context对StepRequest进行统一管理前, 先设置erm和thread对象 !");
             }
             this.stepRequest = erm.createStepRequest(thread, size, depth);
             this.stepRequest.enable();

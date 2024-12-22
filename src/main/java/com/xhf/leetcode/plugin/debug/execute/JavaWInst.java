@@ -22,10 +22,7 @@ import java.util.List;
  */
 public class JavaWInst implements InstExecutor{
 
-    private final JavaValueInspector inspector;
-
     public JavaWInst() {
-        inspector = JavaValueInspector.getInstance();
     }
 
     @Override

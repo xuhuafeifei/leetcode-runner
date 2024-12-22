@@ -190,7 +190,13 @@ public class JavaDebugger implements Debugger {
     /**
      * 核心运行方法, 负责读取指令, 并执行
      */
-    public void doRun() {
+    public void doRun(Event event) {
+        // event类型检测
+        if (! (event instanceof LocatableEvent)) {
+            throw new DebugError("event类型错误, 不是LocatableEvent");
+        }
+        setContextBasicInfo((LocatableEvent) event);
+
         while (AbstractDebugEnv.isDebug()) {
             Instrument inst = reader.readInst();
 
@@ -246,8 +252,7 @@ public class JavaDebugger implements Debugger {
     }
 
     private void handleStepEvent(Event event) {
-        setContextBasicInfo((LocatableEvent) event);
-        doRun();
+        doRun(event);
     }
 
     /**
@@ -272,9 +277,9 @@ public class JavaDebugger implements Debugger {
         DebugUtils.simpleDebug("Hit breakpoint at: " + res, project);
 
         context.setBreakpointEvent(breakpointEvent);
-        setContextBasicInfo(breakpointEvent);
 
         // 设置单步请求
+        setContextBasicInfo((LocatableEvent) event); // 这是初始化方法, 不能删除...
         context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_INTO);
 
         if (AppSettings.getInstance().isUIOutput()) {
@@ -284,7 +289,7 @@ public class JavaDebugger implements Debugger {
             InstSource.uiInstInput(Instrument.success(ReadType.UI_IN, Operation.W, ""));
         }
 
-        doRun();
+        doRun(event);
     }
 
     private void InitBreakPoint(Event event) {
