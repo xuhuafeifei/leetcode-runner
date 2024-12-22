@@ -115,13 +115,43 @@ public class DebugUtils {
         simpleDebug(message, project, ConsoleViewContentType.NORMAL_OUTPUT);
     }
 
-    public static void simpleDebug(String message, Project project, ConsoleViewContentType type) {
+    /**
+     * 同时写入log和consoleView
+     *
+     * @param message message
+     * @param project project
+     * @param isShow 是否弹出console
+     */
+    public static void simpleDebug(String message, Project project, boolean isShow) {
+        simpleDebug(message, project, ConsoleViewContentType.NORMAL_OUTPUT, isShow);
+    }
+
+    /**
+     * 同时写入log和consoleView
+     *
+     * @param message message
+     * @param project project
+     * @param type 控制台打印信息颜色
+     * @param isShow 是否弹出console
+     */
+    public static void simpleDebug(String message, Project project, ConsoleViewContentType type, boolean isShow) {
         // 强制换行
         if (message.charAt(message.length() - 1) != '\n') {
             message += "\n";
         }
         LogUtils.simpleDebug(message);
-        ConsoleUtils.getInstance(project).simpleShowConsole(message, type);
+        ConsoleUtils.getInstance(project).simpleShowConsole(message, type, isShow);
+    }
+
+    /**
+     * 默认弹出console
+     *
+     * @param message message
+     * @param project project
+     * @param type 控制台打印信息的颜色
+     */
+    public static void simpleDebug(String message, Project project, ConsoleViewContentType type) {
+        simpleDebug(message, project, type, true);
     }
 
     /**

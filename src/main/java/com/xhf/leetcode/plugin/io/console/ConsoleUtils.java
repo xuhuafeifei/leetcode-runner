@@ -207,16 +207,24 @@ public final class ConsoleUtils implements Disposable {
         simpleShowConsole(message, ConsoleViewContentType.NORMAL_OUTPUT);
     }
 
-    public void simpleShowConsole(String message, ConsoleViewContentType consoleViewContentType) {
+    /**
+     * 简单打印日志
+     * @param message 信息
+     * @param consoleViewContentType 颜色
+     * @param isShow 是否弹出console
+     */
+    public void simpleShowConsole(String message, ConsoleViewContentType consoleViewContentType, boolean isShow) {
         ApplicationManager.getApplication().invokeLater(() -> {
             checkConsoleView();
             assert consoleView != null;
             // 弹出
-            // 获取并显示 ToolWindow（确保控制台窗口可见）
-            ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-            ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.ID);
-            if (toolWindow != null && !toolWindow.isVisible()) {
-                toolWindow.show();  // 显示控制台窗口
+            if (isShow) {
+                // 获取并显示 ToolWindow（确保控制台窗口可见）
+                ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
+                ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.ID);
+                if (toolWindow != null && !toolWindow.isVisible()) {
+                    toolWindow.show();  // 显示控制台窗口
+                }
             }
             consoleView.getComponent().setVisible(true);
 
@@ -225,6 +233,10 @@ public final class ConsoleUtils implements Disposable {
                 consoleView.print("\n", consoleViewContentType);
             }
         });
+    }
+
+    public void simpleShowConsole(String message, ConsoleViewContentType consoleViewContentType) {
+        simpleShowConsole(message, consoleViewContentType, true);
     }
 
     @Override

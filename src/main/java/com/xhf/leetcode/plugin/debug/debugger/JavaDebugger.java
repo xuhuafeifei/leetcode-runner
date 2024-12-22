@@ -194,6 +194,10 @@ public class JavaDebugger implements Debugger {
         while (AbstractDebugEnv.isDebug()) {
             Instrument inst = reader.readInst();
 
+            // 如果是null, 表示读取InstSource的UI消费阻塞队列被打断, 此时返回null
+            if (inst == null) {
+                continue;
+            }
             if (! inst.isSuccess()) {
                 ReadType readType = inst.getReadType();
                 switch (readType) {

@@ -16,6 +16,7 @@ import com.xhf.leetcode.plugin.debug.params.Operation;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +51,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                         if (isBreakpointInEditor(breakpoint, editor)) {
                             XSourcePosition sp = breakpoint.getSourcePosition();
                             assert sp != null;
-                            DebugUtils.simpleDebug("Breakpoint added in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project);
+                            DebugUtils.simpleDebug("Breakpoint added in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project, false);
                             InstSource.uiInstInput(DebugUtils.buildBInst(sp));
                         }
                     }
@@ -60,7 +61,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                         if (isBreakpointInEditor(breakpoint, editor)) {
                             XSourcePosition sp = breakpoint.getSourcePosition();
                             assert sp != null;
-                            DebugUtils.simpleDebug("Breakpoint removed in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project);
+                            DebugUtils.simpleDebug("Breakpoint removed in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project, false);
                             InstSource.uiInstInput(DebugUtils.buildRBInst(sp));
                         }
                     }
@@ -70,7 +71,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                         if (isBreakpointInEditor(breakpoint, editor)) {
                             XSourcePosition sp = breakpoint.getSourcePosition();
                             assert sp != null;
-                            DebugUtils.simpleDebug("Breakpoint added in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project);
+                            DebugUtils.simpleDebug("Breakpoint added in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project, false);
                         }
                     }
                 });
