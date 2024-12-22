@@ -47,6 +47,8 @@ public class JavaInstFactory {
             case HELP:
                 instExecutor = new JavaHELPInst();
                 break;
+            case STEP:
+                instExecutor = new JavaSTEPInst();
             default:
                 break;
         }

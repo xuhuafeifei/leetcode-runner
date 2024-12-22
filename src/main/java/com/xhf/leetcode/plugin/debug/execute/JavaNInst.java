@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.debug.execute;
 
 import com.sun.jdi.Location;
 import com.sun.jdi.event.EventSet;
+import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.params.Instrument;
 import com.xhf.leetcode.plugin.debug.params.Operation;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
@@ -43,6 +44,15 @@ public class JavaNInst implements InstExecutor{
             String info = DebugUtils.buildCurrentLineInfoByLocation(location);
             DebugUtils.simpleDebug("N 指令执行时, 处于 " + info, context.getProject());
         }
+        // 停止上一轮的单步请求
+        StepRequest stepRequest = context.getStepRequest();
+        if (stepRequest != null) {
+            stepRequest.disable();
+        }
+        // 设置单步请求
+        stepRequest = context.getErm().createStepRequest(context.getThread(), StepRequest.STEP_LINE, StepRequest.STEP_INTO);
+        stepRequest.enable();
+        context.setStepRequest(stepRequest);
         return ExecuteResult.success(inst.getOperation());
     }
 }

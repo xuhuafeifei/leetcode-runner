@@ -25,7 +25,10 @@ public class JavaHELPInst implements InstExecutor{
                     "\n" +
                     "RBA命令 [remove all|ra|r a]移除所有断点\n" +
                     "\n" +
-                    "W命令 [w] 查看当前所在位置";
+                    "W命令 [w] 查看当前所在位置\n" +
+                    "\n" +
+                    "STEP命令 [step out | step over] 功能和idea的debug对应按钮功能一致\n"
+            ;
     @Override
     public ExecuteResult execute(Instrument inst, Context context) {
         ExecuteResult success = ExecuteResult.success(inst.getOperation(), HELP_INFO);

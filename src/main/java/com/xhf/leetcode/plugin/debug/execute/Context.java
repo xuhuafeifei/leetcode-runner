@@ -41,6 +41,7 @@ public class Context {
      * 专门表示Solution类的location
      */
     private Location solutionLocation;
+//    private StepRequestManager stepRequestManager;
 
     public ClassType getCurrentClass() {
         return currentClass;

@@ -222,6 +222,7 @@ public class JavaDebugger implements Debugger {
                 r = instExecutor.execute(inst, context);
             } catch (Exception e) {
                 DebugUtils.simpleDebug("指令执行异常: " + e, project);
+                LogUtils.error(e);
                 continue;
             }
             // 设置上下文
@@ -233,7 +234,10 @@ public class JavaDebugger implements Debugger {
             }
 
             // 如果是运行类的指令, 则跳出循环, 运行vm
-            if (inst.getOperation() == Operation.R || inst.getOperation() == Operation.N) {
+            if (inst.getOperation() == Operation.R ||
+                    inst.getOperation() == Operation.N ||
+                    inst.getOperation() == Operation.STEP
+            ) {
                 break;
             }
         }
@@ -242,9 +246,17 @@ public class JavaDebugger implements Debugger {
     private void handleStepEvent(Event event) {
         StepEvent stepEvent = (StepEvent) event;
         context.setStepEvent(stepEvent);
-        context.setLocation(stepEvent.location());
-        context.setThread(stepEvent.thread());
+        setContextBasicInfo((LocatableEvent) event);
         doRun();
+    }
+
+    /**
+     * 设置基础信息, 比如location和thread
+     * @param event
+     */
+    private void setContextBasicInfo(LocatableEvent event) {
+        context.setLocation(event.location());
+        context.setThread(event.thread());
     }
 
     private void handleBreakpoint(Event event) {
@@ -260,8 +272,7 @@ public class JavaDebugger implements Debugger {
         DebugUtils.simpleDebug("Hit breakpoint at: " + res, project);
 
         context.setBreakpointEvent(breakpointEvent);
-        context.setLocation(location);
-        context.setThread(breakpointEvent.thread());
+        setContextBasicInfo(breakpointEvent);
 
         // 设置单步请求
         if (stepRequest == null) {

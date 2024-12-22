@@ -70,8 +70,20 @@ public class UIOutput extends AbstractOutput{
             case HELP:
                 doHELP(r);
                 break;
+            case STEP:
+                doSTEP(r);
             default:
                 DebugUtils.simpleDebug("指令" + op.getName() + "不被UIOutput处理", project);
+        }
+    }
+
+    @Adapt(adaptType = {ReadType.COMMAND_IN})
+    private void doSTEP(ExecuteResult r) {
+        if (r.isSuccess()) {
+            if (appInstance.isCommandReader() && r.isHasResult()) {
+                String result = r.getResult();
+                variables.setListData(result.split("\r|\n"));
+            }
         }
     }
 

@@ -79,11 +79,18 @@
             <action id="leetcode.plugin.console.DebugRunAction" class="com.xhf.leetcode.plugin.actions.DebugRunAction"
                     text="Resume Program" description="Resume program" icon="AllIcons.Debugger.ThreadRunning">
             </action>
+            <action id="leetcode.plugin.console.DebugSTEP_OVERAction" class="com.xhf.leetcode.plugin.actions.DebugSTEP_OVERAction"
+                    text="Step Over" description="Step over" icon="AllIcons.Actions.TraceOver">
+            </action>
             <action id="leetcode.plugin.console.DebugNAction" class="com.xhf.leetcode.plugin.actions.DebugNAction"
                     text="Step Into" description="Step into" icon="AllIcons.Actions.TraceInto">
             </action>
+            <action id="leetcode.plugin.console.DebugSTEP_OUTAction" class="com.xhf.leetcode.plugin.actions.DebugSTEP_OUTAction"
+                    text="Step Out" description="Step out" icon="AllIcons.Actions.StepOut">
+            </action>
+            <separator/>
             <action id="leetcode.plugin.console.DebugRAAction" class="com.xhf.leetcode.plugin.actions.DebugRAAction"
-                    text="Resume Program" description="Resume program" icon="AllIcons.Debugger.MuteBreakpoints">
+                    text="Mute Breakpoints" description="Mute breakpoints" icon="AllIcons.Debugger.MuteBreakpoints">
             </action>
         </group>
 
