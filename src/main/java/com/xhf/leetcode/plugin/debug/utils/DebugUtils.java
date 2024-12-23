@@ -5,6 +5,9 @@ import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.LogicalPosition;
+import com.intellij.openapi.editor.ScrollType;
+import com.intellij.openapi.editor.ScrollingModel;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
@@ -307,6 +310,10 @@ public class DebugUtils {
             );
             // 缓存该高亮
             highlighterMap.put(finalLineNumber, highlighter);
+
+            // 滚动到指定行
+            ScrollingModel scrollingModel = editor.getScrollingModel();
+            scrollingModel.scrollTo(new LogicalPosition(finalLineNumber, 0), ScrollType.CENTER);
         });
     }
 
