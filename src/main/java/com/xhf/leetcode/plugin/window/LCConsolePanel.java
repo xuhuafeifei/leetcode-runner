@@ -133,8 +133,15 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         DefaultActionGroup ag = (DefaultActionGroup) ActionManager.getInstance().getAction("leetcode.plugin.consoleToolbar");
         ActionToolbar toolbar = ActionManager.getInstance()
                 .createActionToolbar("LCConsoleToolbar", ag, true);
+
+        // 设置工具栏的排列方式为竖向排列
+        toolbar.setOrientation(SwingConstants.VERTICAL);  // 设置竖直排列
+
+        // 设置目标组件
         toolbar.setTargetComponent(jbSplitter);
-        add(toolbar.getComponent(), BorderLayout.NORTH);
+
+        // 添加到父容器
+        add(toolbar.getComponent(), BorderLayout.WEST);
 
         add(jbSplitter, BorderLayout.CENTER);
     }
