@@ -6,8 +6,8 @@ import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.execute.Context;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.JavaWInst;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.debug.params.Operation;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
@@ -78,7 +78,6 @@ public class UIOutput extends AbstractOutput{
         }
     }
 
-    @Adapt(adaptType = {ReadType.COMMAND_IN})
     private void doSTEP(ExecuteResult r) {
         if (r.isSuccess()) {
             if (appInstance.isCommandReader() && r.isHasResult()) {
@@ -120,7 +119,7 @@ public class UIOutput extends AbstractOutput{
         // 获取当前执行的行号
         Context ctx = r.getContext();
         ExecuteResult execute =
-                new JavaWInst().execute(Instrument.success(
+                new JavaWInst().execute(Instruction.success(
                     ReadType.UI_IN, Operation.W, ""
                 ), ctx);
         int lineNumber = execute.getAddLine();

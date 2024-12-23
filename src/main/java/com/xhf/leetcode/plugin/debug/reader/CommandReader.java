@@ -2,8 +2,8 @@ package com.xhf.leetcode.plugin.debug.reader;
 
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.params.InstParserImpl;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.command.parser.InstParserImpl;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 
 /**
@@ -18,16 +18,16 @@ public abstract class CommandReader extends AbstractInstReader{
     }
 
     @Override
-    public final Instrument readInst() {
+    public final Instruction readInst() {
         String res = readCommand();
         DebugUtils.simpleDebug("command = " + res, project, ConsoleViewContentType.USER_INPUT);
-        if (res == null || res.equals("bk") || res.equals("exit")) {
-            return Instrument.quit(this.readType);
+        if (res == null || res.equals("stop") || res.equals("exit")) {
+            return Instruction.quit(this.readType);
         }
         // 解析指令, 并执行
-        Instrument parse = new InstParserImpl().parse(res, this.readType);
+        Instruction parse = new InstParserImpl().parse(res, this.readType);
         if (parse == null) {
-            return Instrument.error(this.readType);
+            return Instruction.error(this.readType);
         }
         return parse;
     }

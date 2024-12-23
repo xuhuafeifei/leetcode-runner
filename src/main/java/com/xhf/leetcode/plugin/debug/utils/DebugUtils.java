@@ -5,7 +5,6 @@ import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
@@ -22,20 +21,18 @@ import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointManager;
 import com.sun.jdi.Location;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.debug.params.Operation;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.apache.commons.io.IOUtils;
 
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -254,12 +251,12 @@ public class DebugUtils {
 
     // 将idea创建的断点转换为项目可以识别的指令
     // 很蠢, sp.getLine()从0开始计算的
-    public static Instrument buildBInst(XSourcePosition sp) {
-        return Instrument.success(ReadType.UI_IN, Operation.B, String.valueOf(sp.getLine() + 1));
+    public static Instruction buildBInst(XSourcePosition sp) {
+        return Instruction.success(ReadType.UI_IN, Operation.B, String.valueOf(sp.getLine() + 1));
     }
 
-    public static Instrument buildRBInst(XSourcePosition sp) {
-        return Instrument.success(ReadType.UI_IN, Operation.RB, String.valueOf(sp.getLine() + 1));
+    public static Instruction buildRBInst(XSourcePosition sp) {
+        return Instruction.success(ReadType.UI_IN, Operation.RB, String.valueOf(sp.getLine() + 1));
     }
 
     // 用于存储已添加的高亮
@@ -322,7 +319,7 @@ public class DebugUtils {
 
         // 获取 MarkupModel
         MarkupModel markupModel = editor.getMarkupModel();
-        ApplicationManager.getApplication().invokeAndWait(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             for (RangeHighlighter highlighter : highlighterMap.values()) {
                 markupModel.removeHighlighter(highlighter);
             }

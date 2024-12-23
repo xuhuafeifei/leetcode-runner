@@ -1,7 +1,8 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
 import com.sun.jdi.*;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 执行P操作. 操作具体信息详见{@link com.xhf.leetcode.plugin.debug.params.Operation}
+ * 执行P操作. 操作具体信息详见{@link Operation}
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -25,7 +26,7 @@ public class JavaPInst implements InstExecutor{
     }
 
     @Override
-    public ExecuteResult execute(Instrument inst, Context context) {
+    public ExecuteResult execute(Instruction inst, Context context) {
         ThreadReference thread = context.getThread();
         Location location = context.getLocation();
 

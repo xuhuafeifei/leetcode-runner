@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.debug.output;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 
 /**

@@ -7,16 +7,11 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileEditor.TextEditorWithPreview;
 import com.intellij.openapi.project.Project;
-import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointListener;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.debug.params.Operation;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
-import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
-import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

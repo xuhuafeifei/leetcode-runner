@@ -1,6 +1,4 @@
-package com.xhf.leetcode.plugin.debug.params.parameter;
-
-import com.xhf.leetcode.plugin.debug.params.parameter.ParameterExtractor;
+package com.xhf.leetcode.plugin.debug.command.parameter;
 
 public class PParameterExtractor implements ParameterExtractor {
     @Override

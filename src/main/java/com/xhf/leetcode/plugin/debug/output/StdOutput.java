@@ -4,6 +4,8 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 
 /**
+ * 这个是项目运行时的标准输入输出
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

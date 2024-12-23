@@ -1,5 +1,6 @@
-package com.xhf.leetcode.plugin.debug.params;
+package com.xhf.leetcode.plugin.debug.command.parser;
 
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 
 /**
@@ -13,5 +14,5 @@ public interface InstParser {
      * @param readType 命令来源
      * @return 解析对象
      */
-    Instrument parse(String command, ReadType readType) throws IllegalArgumentException;
+    Instruction parse(String command, ReadType readType) throws IllegalArgumentException;
 }

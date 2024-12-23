@@ -49,6 +49,13 @@ public enum OutputType {
         }
         return null;
     }
+
+    /**
+     * 通过output子类构造函数创建
+     * @param outputTypeName
+     * @param project
+     * @return
+     */
     public static Output getOutputInstanceByTypeName(@NotNull String outputTypeName, @NotNull Project project) {
         OutputType outputType = getByName(outputTypeName);
         try {

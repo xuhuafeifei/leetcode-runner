@@ -1,10 +1,9 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
 import com.sun.jdi.Location;
-import com.sun.jdi.event.EventSet;
 import com.sun.jdi.request.StepRequest;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.debug.params.Operation;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
@@ -16,7 +15,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
  */
 public class JavaNInst implements InstExecutor{
     @Override
-    public ExecuteResult execute(Instrument inst, Context context) {
+    public ExecuteResult execute(Instruction inst, Context context) {
         /*
          * 如果是UI输出, 则生产打印指令, 并且不执行任何操作
          * 之所以要生成打印指令, 是因为N指令执行无法真正让代码断点运行到下一行. 因此高亮显示的代码
@@ -38,7 +37,7 @@ public class JavaNInst implements InstExecutor{
          * 至此, 实现了在第13行执行N指令, 高亮显示下一行代码, 也就是14行
          */
         if (AppSettings.getInstance().isUIOutput()) {
-            InstSource.uiInstInput(Instrument.success(ReadType.UI_IN, Operation.W, ""));
+            InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, ""));
             // 输出一下当前所在行号, 不然UI显示的时候遇到系统代码, 啥也看不到, 就很操蛋
             Location location = context.getLocation();
             String info = DebugUtils.buildCurrentLineInfoByLocation(location);

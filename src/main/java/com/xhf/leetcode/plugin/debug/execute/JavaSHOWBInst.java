@@ -2,10 +2,9 @@ package com.xhf.leetcode.plugin.debug.execute;
 
 import com.sun.jdi.Location;
 import com.sun.jdi.request.BreakpointRequest;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -16,7 +15,7 @@ import java.util.List;
  */
 public class JavaSHOWBInst implements InstExecutor{
     @Override
-    public ExecuteResult execute(Instrument inst, Context context) {
+    public ExecuteResult execute(Instruction inst, Context context) {
         List<BreakpointRequest> breakpointRequests = context.getBreakpointRequests();
         StringBuilder sb = new StringBuilder();
 

@@ -1,5 +1,6 @@
-package com.xhf.leetcode.plugin.debug.params;
+package com.xhf.leetcode.plugin.debug.instruction;
 
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 
 /**
@@ -8,7 +9,7 @@ import com.xhf.leetcode.plugin.debug.reader.ReadType;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class Instrument {
+public class Instruction {
     /**
      * 标记当前指令是以何种方式读入
      */
@@ -18,35 +19,35 @@ public class Instrument {
     private Operation operation;
     private String param;
 
-    private Instrument(ReadType readType) {
+    private Instruction(ReadType readType) {
         this.readType = readType;
     }
 
-    public Instrument(ReadType readType, Operation operation, String param) {
+    public Instruction(ReadType readType, Operation operation, String param) {
         this.readType = readType;
         this.operation = operation;
         this.param = param;
     }
 
-    public static Instrument success(ReadType readType, Operation operation, String param) {
-        Instrument instrument = new Instrument(readType, operation, param);
-        instrument.exit = false;
-        instrument.success = true;
-        return instrument;
+    public static Instruction success(ReadType readType, Operation operation, String param) {
+        Instruction instruction = new Instruction(readType, operation, param);
+        instruction.exit = false;
+        instruction.success = true;
+        return instruction;
     }
 
-    public static Instrument quit(ReadType readType) {
-        Instrument instrument = new Instrument(readType);
-        instrument.success = true;
-        instrument.exit = true;
-        return instrument;
+    public static Instruction quit(ReadType readType) {
+        Instruction instruction = new Instruction(readType);
+        instruction.success = true;
+        instruction.exit = true;
+        return instruction;
     }
 
-    public static Instrument error(ReadType readType) {
-        Instrument instrument = new Instrument(readType);
-        instrument.success = false;
-        instrument.exit = false;
-        return instrument;
+    public static Instruction error(ReadType readType) {
+        Instruction instruction = new Instruction(readType);
+        instruction.success = false;
+        instruction.exit = false;
+        return instruction;
     }
 
     public Operation getOperation() {
@@ -91,7 +92,7 @@ public class Instrument {
 
     @Override
     public String toString() {
-        return "Instrument{" +
+        return "Instruction{" +
                 "readType=" + readType.getType() +
                 ", exit=" + exit +
                 ", success=" + success +

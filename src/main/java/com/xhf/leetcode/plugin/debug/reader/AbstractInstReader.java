@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.debug.reader;
 
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.params.Operation;
 
 /**
  * 所有的reader必须继承AbstractInstReader

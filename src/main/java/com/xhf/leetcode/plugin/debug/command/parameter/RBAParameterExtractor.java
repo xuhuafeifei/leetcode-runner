@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.debug.params.parameter;
+package com.xhf.leetcode.plugin.debug.command.parameter;
 
 /**
  * remove all无需解析出参数

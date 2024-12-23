@@ -6,6 +6,7 @@ import com.sun.jdi.Location;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.BreakpointEvent;
+import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.request.BreakpointRequest;
@@ -14,6 +15,7 @@ import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
 import com.xhf.leetcode.plugin.exception.DebugError;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -44,6 +46,7 @@ public class Context {
      * 单步请求管理器
      */
     private final StepRequestManager stepRequestManager = new StepRequestManager();
+    private Iterator<Event> itr;
 
     public ClassType getCurrentClass() {
         return currentClass;
@@ -157,6 +160,20 @@ public class Context {
 
     public Location getSolutionLocation() {
         return this.solutionLocation;
+    }
+
+    public void setItrEvent(Iterator<Event> itr) {
+        this.itr = itr;
+    }
+
+    public Iterator<Event> getItrEvent() {
+        return this.itr;
+    }
+
+    public void consumeAllEvent() {
+        while (this.itr != null && this.itr.hasNext()) {
+            itr.next();
+        }
     }
 
     private class StepRequestManager {

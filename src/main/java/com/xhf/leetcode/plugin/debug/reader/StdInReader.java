@@ -1,10 +1,6 @@
 package com.xhf.leetcode.plugin.debug.reader;
 
-import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.params.InstParserImpl;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 
 import java.util.Scanner;
 

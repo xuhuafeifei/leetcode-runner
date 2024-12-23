@@ -13,7 +13,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaDebugConfig {
+public class JavaDebugConfig implements DebugConfig{
     private InstReader reader;
     private Output output;
 

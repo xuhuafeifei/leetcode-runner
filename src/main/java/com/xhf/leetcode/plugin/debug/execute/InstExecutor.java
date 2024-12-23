@@ -1,6 +1,6 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 /**
  * 指令执行器
@@ -12,5 +12,5 @@ public interface InstExecutor {
      * @param context 指令执行时候的上下文
      * @return 是否执行成功
      */
-    ExecuteResult execute(Instrument inst, Context context);
+    ExecuteResult execute(Instruction inst, Context context);
 }

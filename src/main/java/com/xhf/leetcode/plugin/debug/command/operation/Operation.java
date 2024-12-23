@@ -1,7 +1,10 @@
-package com.xhf.leetcode.plugin.debug.params;
+package com.xhf.leetcode.plugin.debug.command.operation;
 
-import com.xhf.leetcode.plugin.debug.params.parameter.*;
+import com.xhf.leetcode.plugin.debug.command.parameter.*;
 
+/**
+ * 操作类型. 由用户命令行输入的内容决定
+ */
 public enum Operation {
     /**
      * 单步运行, 默认为 1
@@ -65,6 +68,11 @@ public enum Operation {
      */
     STEP(new STEPParameterExtractor(), "^step\\s+(over|out)$", "STEP"),
     /**
+     * 空指令, 不匹配任何命令行输入的指令
+     */
+    // NULL(null, "^$", "NULL"), // 暂时不搞什么NULL指令, 增加系统复杂度
+
+    /**
      * 帮助指令
      */
     HELP(new HELPParameterExtractor(), "^help$|^h$", "HELP");
@@ -89,9 +97,9 @@ public enum Operation {
     }
 
     // 判断指令是否匹配当前操作
-    public boolean matches(String inst) {
+    public boolean matches(String command) {
         String regex = getRegex();
-        return inst != null && inst.matches(regex);
+        return command != null && command.matches(regex);
     }
 
     // 获取操作的正则表达式

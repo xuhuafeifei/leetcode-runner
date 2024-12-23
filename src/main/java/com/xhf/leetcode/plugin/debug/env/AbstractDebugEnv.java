@@ -73,6 +73,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
     public void stopDebug() {
         isDebug = false;
         InstSource.clear();
+        DebugUtils.removeHighlightLine(project);
         DebugUtils.simpleDebug("debug service stop", project);
         LCEventBus.getInstance().post(new DebugEndEvent());
     }

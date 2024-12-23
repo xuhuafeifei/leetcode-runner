@@ -1,7 +1,7 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
 import com.sun.jdi.request.BreakpointRequest;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 /**
  * @author feigebuge
@@ -9,7 +9,7 @@ import com.xhf.leetcode.plugin.debug.params.Instrument;
  */
 public class JavaRBAInst implements InstExecutor{
     @Override
-    public ExecuteResult execute(Instrument inst, Context context) {
+    public ExecuteResult execute(Instruction inst, Context context) {
         for (BreakpointRequest breakpointRequest : context.getBreakpointRequests()) {
             breakpointRequest.disable();
         }

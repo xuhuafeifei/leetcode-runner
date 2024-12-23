@@ -7,43 +7,67 @@ import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequestManager;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
-import com.sun.jdi.*;
-import com.sun.jdi.connect.*;
-import com.sun.jdi.event.*;
-import com.sun.jdi.request.StepRequest;
-import com.xhf.leetcode.plugin.debug.execute.*;
-import com.xhf.leetcode.plugin.debug.params.InstParserImpl;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.debug.params.Operation;
-import com.xhf.leetcode.plugin.debug.reader.ReadType;
-import com.xhf.leetcode.plugin.debug.reader.StdInReader;
-import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 
-import java.util.*;
+import com.sun.jdi.request.StepRequest;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
+import com.xhf.leetcode.plugin.debug.execute.*;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.reader.ReadType;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 
 public class JDIExample {
 
     static Context context = new Context();
     static StepRequest stepRequest;
-    static int b = 23;
-    static String methodName = "wordBreak";
+    static int b = 16;
+    static String methodName = "getKth";
+
+    private static void captureStream(InputStream stream, String streamName) {
+        new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("[" + streamName + "] " + line);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+
     public static void main(String[] args) throws IOException, InterruptedException {
 //        Runtime.getRuntime().exec("E:\\jdk8\\bin\\javac -g -encoding utf-8 -cp E:\\java_code\\lc-test\\cache\\debug E:\\java_code\\lc-test\\cache\\debug\\Main.java");
 //        Runtime.getRuntime().exec("E:\\java_code\\lc-test\\cache\\debug\\start.cmd");
 //        Thread.sleep(1500);
         try {
-            // 创建连接
-            VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
-            AttachingConnector connector = getConnector(vmm);
+//            // 创建连接
+//            VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
+//            AttachingConnector connector = getConnector(vmm);
+//
+//            // 配置调试连接信息
+//            Map<String, Connector.Argument> arguments = connector.defaultArguments();
+//            arguments.get("port").setValue("5005");
+//
+//            // 连接到目标 JVM
+//            VirtualMachine vm = connector.attach(arguments);
 
-            // 配置调试连接信息
+            // 获取 LaunchingConnector
+            LaunchingConnector connector = Bootstrap.virtualMachineManager().defaultConnector();
+
+            // 配置启动参数
             Map<String, Connector.Argument> arguments = connector.defaultArguments();
-            arguments.get("port").setValue("5005");
+            arguments.get("main").setValue("Main"); // 替换为你的目标类全路径
+            arguments.get("options").setValue("-classpath E:\\java_code\\lc-test\\cache\\debug"); // 指定类路径
 
-            // 连接到目标 JVM
-            VirtualMachine vm = connector.attach(arguments);
+            // 启动目标 JVM
+            VirtualMachine vm = connector.launch(arguments);
+
 
             // 获取当前类的调试信息
             EventRequestManager erm = vm.eventRequestManager();
@@ -56,6 +80,10 @@ public class JDIExample {
             EventQueue eventQueue = vm.eventQueue();
 
             context.setErm(erm);
+
+            // 捕获目标虚拟机的输出
+            captureStream(vm.process().getInputStream(), "OUTPUT");
+            captureStream(vm.process().getErrorStream(), "ERROR");
 
             while (true) {
                 EventSet eventSet = eventQueue.remove();
@@ -70,19 +98,11 @@ public class JDIExample {
 
                             // 设置断点
                             // 在指定行设置断点
-//                            setBreakpointAtLine(mainClass, 10, erm, "main");
                             System.out.println("Breakpoint set at Main.main");
                         }
                         if (className.equals("Solution")) {
                             // 获取Main类
                             ClassType mainClass = (ClassType) classPrepareEvent.referenceType();
-//                            Method mainMethod = mainClass.methodsByName("combinationSum").get(0);
-//                            Location location = mainMethod.location();
-//
-//                            BreakpointRequest breakpointRequest = erm.createBreakpointRequest(location);
-//                            breakpointRequest.enable();
-
-
                             setBreakpointAtLine(mainClass, b, erm, methodName);
                             System.out.println("Breakpoint set at Main.main");
                         }
@@ -94,12 +114,6 @@ public class JDIExample {
 
                         context.setBreakpointEvent(breakpointEvent);
 
-                        // 设置单步请求
-//                        if (stepRequest == null) {
-//                            stepRequest = erm.createStepRequest(breakpointEvent.thread(), StepRequest.STEP_LINE, StepRequest.STEP_INTO);
-//                            context.setStepRequest(stepRequest);
-//                        }
-//                        stepRequest.enable();
                         context.setThread(breakpointEvent.thread());
                         context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_OVER);
 
@@ -109,30 +123,11 @@ public class JDIExample {
                         StepEvent stepEvent = (StepEvent) event;
                         context.setLocation(stepEvent.location());
                         context.setThread(stepEvent.thread());
-                        ExecuteResult execute = new JavaPInst().execute(Instrument.success(ReadType.COMMAND_IN, Operation.R, ""), context);
+                        ExecuteResult execute = new JavaPInst().execute(Instruction.success(ReadType.COMMAND_IN, Operation.R, ""), context);
+                        System.err.println(DebugUtils.buildCurrentLineInfoByLocation(execute));
                         if (execute.isSuccess()) {
                             System.out.println(execute.getResult());
                         }
-//                        StdInReader reader = new StdInReader();
-//                        String res;
-//                        context.setStepEvent(stepEvent);
-//                        while (true) {
-//                            res = reader.readInst();
-//                            Instrument parse = new InstParserImpl().parse(res);
-//                            JavaInstFactory instance = JavaInstFactory.getInstance();
-//                            InstExecutor instExecutor = instance.create(parse);
-//
-//                            context.setEventSet(eventSet);
-//
-//                            ExecuteResult r = instExecutor.execute(parse, context);
-//                            if (r.isHasResult()) {
-//                                System.out.println(r.getResult());
-//                            }
-//
-//                            if (parse.getOperation() == Operation.R || parse.getOperation() == Operation.N) {
-//                                break;
-//                            }
-//                        }
                         eventSet.resume();
                     }
                     else {
@@ -143,9 +138,6 @@ public class JDIExample {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    public static void doRead() {
-
     }
 
     // 在指定行设置断点
@@ -179,51 +171,5 @@ public class JDIExample {
             }
         }
         throw new RuntimeException("No suitable connector found.");
-    }
-
-    // 打印当前线程的调用栈
-    private static void printStackTrace(ThreadReference thread) {
-        try {
-            // 获取当前线程的堆栈帧
-            List<StackFrame> frames = thread.frames();
-            System.out.println("Stack trace:");
-            for (StackFrame frame : frames) {
-                // 打印每一帧的方法名称和类名
-                System.out.println("  at " + frame.location().declaringType().name() + "." + frame.location().method().name() +
-                        " (" + frame.location().sourceName() + ":" + frame.location().lineNumber() + ")");
-            }
-
-            // 获取当前线程的堆栈帧
-            StackFrame frame = thread.frame(0);  // 获取栈中的第一个帧（即当前执行的函数）
-            Location location = frame.location();  // 获取当前执行的位置
-
-            // 获取方法名和类名
-            String className = location.declaringType().name();
-            String methodName = location.method().name();
-            System.out.println("Currently executing in: " + className + "." + methodName);
-
-            // 获取局部变量
-            List<LocalVariable> localVariables = frame.visibleVariables();  // 获取所有可见的局部变量
-            for (LocalVariable localVar : localVariables) {
-                // 获取每个局部变量的值
-                Value varValue = frame.getValue(localVar);
-
-                ((ArrayReference) varValue).getValues();
-                System.out.println("Variable: " + localVar.name() + " = " + varValue);
-            }
-
-            // 获取字段值（例如，如果当前堆栈帧与对象相关）
-            if (location.declaringType() instanceof ClassType) {
-                ClassType classType = (ClassType) location.declaringType();
-                List<Field> fields = classType.fields();
-                for (Field field : fields) {
-                    System.out.println(field.typeName());
-//                    Value fieldValue = thread.frame(0).getValue(field);
-//                    System.out.println("Field: " + field.name() + " = " + fieldValue);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

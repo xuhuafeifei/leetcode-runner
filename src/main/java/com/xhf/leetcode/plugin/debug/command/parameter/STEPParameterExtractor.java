@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.debug.params.parameter;
+package com.xhf.leetcode.plugin.debug.command.parameter;
 
 /**
  * 提取STEP参数, over或者out

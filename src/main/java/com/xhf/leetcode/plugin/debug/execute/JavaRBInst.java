@@ -1,7 +1,7 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
 import com.sun.jdi.request.BreakpointRequest;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class JavaRBInst implements InstExecutor {
     @Override
-    public ExecuteResult execute(Instrument inst, Context context) {
+    public ExecuteResult execute(Instruction inst, Context context) {
         int lineNumber = Integer.parseInt(inst.getParam());
         List<BreakpointRequest> breakpointRequests = context.getBreakpointRequests();
         for (BreakpointRequest breakpointRequest : breakpointRequests) {

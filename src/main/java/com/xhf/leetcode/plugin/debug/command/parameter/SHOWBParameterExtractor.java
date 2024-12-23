@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.debug.params.parameter;
+package com.xhf.leetcode.plugin.debug.command.parameter;
 
 /**
  * SHOWB操作, 支持读取show b, s b, sb. 没必要解析出参数

@@ -76,6 +76,9 @@
         </group>
 
         <group id="leetcode.plugin.consoleToolbar">
+            <action id="leetcode.plugin.console.DebugStopAction" class="com.xhf.leetcode.plugin.actions.DebugStopAction"
+                    text="Stop" description="Stop" icon="AllIcons.Actions.Suspend">
+            </action>
             <action id="leetcode.plugin.console.DebugRunAction" class="com.xhf.leetcode.plugin.actions.DebugRunAction"
                     text="Resume Program" description="Resume program" icon="AllIcons.Debugger.ThreadRunning">
             </action>

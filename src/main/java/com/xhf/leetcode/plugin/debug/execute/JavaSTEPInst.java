@@ -2,8 +2,8 @@ package com.xhf.leetcode.plugin.debug.execute;
 
 import com.sun.jdi.Location;
 import com.sun.jdi.request.StepRequest;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.debug.params.Operation;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
@@ -17,10 +17,10 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
  */
 public class JavaSTEPInst implements InstExecutor {
     @Override
-    public ExecuteResult execute(Instrument inst, Context context) {
+    public ExecuteResult execute(Instruction inst, Context context) {
         // 这里设置原因和N Inst一致
         if (AppSettings.getInstance().isUIOutput()) {
-            InstSource.uiInstInput(Instrument.success(ReadType.UI_IN, Operation.W, ""));
+            InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, ""));
             Location location = context.getLocation();
             String info = DebugUtils.buildCurrentLineInfoByLocation(location);
             DebugUtils.simpleDebug("N 指令执行时, 处于 " + info, context.getProject());

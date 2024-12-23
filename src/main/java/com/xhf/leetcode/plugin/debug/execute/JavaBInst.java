@@ -3,7 +3,7 @@ package com.xhf.leetcode.plugin.debug.execute;
 import com.sun.jdi.*;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class JavaBInst implements InstExecutor{
     @Override
-    public ExecuteResult execute(Instrument inst, Context context) {
+    public ExecuteResult execute(Instruction inst, Context context) {
         /*
           确保获取Solution的Location. 避免出现执行到系统方法, 获取到系统函数的Location.
           从而导致用户在idea设置断点却找不到的bug
@@ -35,7 +35,7 @@ public class JavaBInst implements InstExecutor{
     }
 
     // 在指定行设置断点
-    private static ExecuteResult setBreakpointAtLine(ClassType solutionClassType, int lineNumber, EventRequestManager erm, Context context, Instrument inst) throws AbsentInformationException {
+    private static ExecuteResult setBreakpointAtLine(ClassType solutionClassType, int lineNumber, EventRequestManager erm, Context context, Instruction inst) throws AbsentInformationException {
         List<Method> methods = solutionClassType.methods();
         // 获取methods的所有location
         List<Location> locations = new ArrayList<>();

@@ -1,10 +1,6 @@
 package com.xhf.leetcode.plugin.debug.reader;
 
-import com.intellij.execution.ui.ConsoleViewContentType;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import java.util.HashSet;
@@ -56,15 +52,15 @@ public class InstSource {
     /**
      * 阻塞队列, 存储用户通过UI界面输入的指令信息, 并等待消费者消费
      */
-    private static final BlockingQueue<Instrument> uiBQ =  new LinkedBlockingQueue<>();
+    private static final BlockingQueue<Instruction> uiBQ =  new LinkedBlockingQueue<>();
 
     /**
      * 存储指令
-     * @param instrument
+     * @param instruction
      * @return
      */
-    public static boolean uiInstInput(Instrument instrument) {
-        return uiBQ.offer(instrument);
+    public static boolean uiInstInput(Instruction instruction) {
+        return uiBQ.offer(instruction);
     }
 
     /**
@@ -72,7 +68,7 @@ public class InstSource {
      * 不能给方法上锁, 因为take()方法是阻塞的
      * @return
      */
-    public static Instrument consumeInst() {
+    public static Instruction consumeInst() {
         try {
             synchronized (consumerThreadSet) {
                 consumerThreadSet.add(Thread.currentThread());

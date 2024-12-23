@@ -1,7 +1,7 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.debug.params.Operation;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 
 /**
  * @author feigebuge
@@ -16,7 +16,7 @@ public class JavaInstFactory {
         return instance;
     }
 
-    public InstExecutor create(Instrument inst) {
+    public InstExecutor create(Instruction inst) {
         Operation operation = inst.getOperation();
         InstExecutor instExecutor = null;
         switch (operation) {

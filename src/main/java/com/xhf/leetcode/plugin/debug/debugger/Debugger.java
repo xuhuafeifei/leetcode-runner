@@ -8,4 +8,9 @@ public interface Debugger {
      * 启动debugger
      */
     void start();
+
+    /**
+     * 终止debugger
+     */
+    void stop();
 }

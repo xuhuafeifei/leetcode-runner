@@ -58,6 +58,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
     private final MyList<String> variableList = new MyList<>();
     private final TabInfo consoleTab;
     private final TabInfo variablesTab;
+    private final StdPanel stdPanel;
 
     public LCConsolePanel(ToolWindow toolWindow, Project project) {
         super(Boolean.FALSE, Boolean.TRUE);
@@ -78,7 +79,12 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         tabs.setBorder(Constants.BORDER);
 
         // 添加 Local Variables 选项卡
-        this.variablesTab = new TabInfo(new JBScrollPane(variableList));
+        stdPanel = new StdPanel();
+        JBSplitter varAndExpSplitter = new JBSplitter();
+        varAndExpSplitter.setFirstComponent(new JBScrollPane(variableList));
+        varAndExpSplitter.setSecondComponent(stdPanel);
+
+        this.variablesTab = new TabInfo(varAndExpSplitter);
         variablesTab.setText("Variables & Expressions");
         variablesTab.setIcon(AllIcons.Debugger.Threads);
         tabs.addTab(variablesTab);
@@ -158,6 +164,8 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
             return consoleView;
         } else if (DataKeys.LEETCODE_DEBUG_VARIABLE_LIST.is(dataId)) {
             return variableList;
+        } else if (DataKeys.LEETCODE_DEBUG_STDPANEL.is(dataId)) {
+            return stdPanel;
         }
         return super.getData(dataId);
     }
@@ -184,6 +192,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
             if (instance.isConsoleOutput()) {
                 tabs.select(consoleTab, true);
             }
+            stdPanel.clear();
         });
     }
 

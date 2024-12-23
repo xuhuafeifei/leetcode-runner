@@ -1,6 +1,6 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 
 /**
@@ -30,7 +30,7 @@ public class JavaHELPInst implements InstExecutor{
                     "STEP命令 [step out | step over] 功能和idea的debug对应按钮功能一致\n"
             ;
     @Override
-    public ExecuteResult execute(Instrument inst, Context context) {
+    public ExecuteResult execute(Instruction inst, Context context) {
         ExecuteResult success = ExecuteResult.success(inst.getOperation(), HELP_INFO);
         DebugUtils.fillExecuteResultByLocation(success, context.getLocation());
         return success;

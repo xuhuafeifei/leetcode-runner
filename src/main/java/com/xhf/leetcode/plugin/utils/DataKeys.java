@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.DataKey;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.window.LCPanel;
+import com.xhf.leetcode.plugin.window.StdPanel;
 
 /**
  * @author feigebuge
@@ -17,5 +18,7 @@ public class DataKeys {
 
     public static final DataKey<MyList<Question>> LEETCODE_QUESTION_LIST = DataKey.create("LEETCODE_QUESTION_LIST");
 
-    public static final DataKey<MyList<String>> LEETCODE_DEBUG_VARIABLE_LIST = DataKey.create("LEETCODE_DEBUG_VARIABLE_LIST ");
+    public static final DataKey<MyList<String>> LEETCODE_DEBUG_VARIABLE_LIST = DataKey.create("LEETCODE_DEBUG_VARIABLE_LIST");
+
+    public static final DataKey<StdPanel> LEETCODE_DEBUG_STDPANEL = DataKey.create("LEETCODE_DEBUG_STDPANEL");
 }

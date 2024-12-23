@@ -1,7 +1,7 @@
 package com.xhf.leetcode.plugin.debug.reader;
 
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 /**
  * 从UI读取输入
@@ -15,7 +15,7 @@ public class UIReader extends AbstractInstReader{
     }
 
     @Override
-    public Instrument readInst() {
+    public Instruction readInst() {
         return InstSource.consumeInst();
     }
 }

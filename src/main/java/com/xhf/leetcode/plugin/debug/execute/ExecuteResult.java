@@ -1,6 +1,6 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
-import com.xhf.leetcode.plugin.debug.params.Operation;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 
 /**
  * 执行结果
@@ -9,6 +9,10 @@ import com.xhf.leetcode.plugin.debug.params.Operation;
  */
 public class ExecuteResult {
     private Operation operation;
+    /**
+     * 为了配合Operation.NULL的引入, 增加moreInfo字段. 用于表示额外信息
+     */
+    private String moreInfo;
     private boolean success;
     private boolean hasResult;
     /**
@@ -149,5 +153,13 @@ public class ExecuteResult {
 
     public String getClassName() {
         return className;
+    }
+
+    public void setMoreInfo(String moreInfo) {
+        this.moreInfo = moreInfo;
+    }
+
+    public String getMoreInfo() {
+        return moreInfo;
     }
 }

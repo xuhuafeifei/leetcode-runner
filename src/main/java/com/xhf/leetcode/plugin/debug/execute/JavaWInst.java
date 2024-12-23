@@ -1,8 +1,8 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
 import com.sun.jdi.*;
-import com.sun.jdi.event.StepEvent;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -12,10 +12,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 /**
- * 执行W操作. 操作具体信息详见{@link com.xhf.leetcode.plugin.debug.params.Operation}
+ * 执行W操作. 操作具体信息详见{@link Operation}
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -26,7 +25,7 @@ public class JavaWInst implements InstExecutor{
     }
 
     @Override
-    public ExecuteResult execute(Instrument inst, Context context) {
+    public ExecuteResult execute(Instruction inst, Context context) {
         Location location = context.getLocation();
         int lineNumber = location.lineNumber(); // 行号
 

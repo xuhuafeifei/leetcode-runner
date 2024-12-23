@@ -1,10 +1,14 @@
 package com.xhf.leetcode.plugin.actions;
 
+import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.DebugManager;
+import com.xhf.leetcode.plugin.debug.debugger.Debugger;
 import com.xhf.leetcode.plugin.debug.debugger.JavaDebugConfig;
 import com.xhf.leetcode.plugin.debug.debugger.JavaDebugger;
 import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.setting.AppSettings;
@@ -41,15 +45,11 @@ public class DebugAction extends AbstractAction {
     }
 
     private void doJavaDebug(Project project) {
-        JavaDebugConfig config = null;
+        Debugger debugger = DebugManager.getInstance(project).getDebugger(JavaDebugger.class);
         try {
-            config = new JavaDebugConfig.Builder(project).autoBuild().build();
-        } catch (Exception ex) {
-            ConsoleUtils.getInstance(project).showError(ex.toString(), true, true, ex.toString(), "Java环境配置创建异常!", ConsoleDialog.ERROR);
-            LogUtils.error(ex);
-            return;
+            debugger.start();
+        } catch (Exception e) {
+            DebugUtils.simpleDebug("Debug Failed! " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
         }
-        JavaDebugger javaDebugger = new JavaDebugger(project, config);
-        javaDebugger.start();
     }
 }

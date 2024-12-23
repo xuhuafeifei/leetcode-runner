@@ -5,9 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.sun.jdi.*;
-import com.sun.jdi.connect.AttachingConnector;
-import com.sun.jdi.connect.Connector;
-import com.sun.jdi.connect.IllegalConnectorArgumentsException;
+import com.sun.jdi.connect.*;
 import com.sun.jdi.event.*;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.ClassPrepareRequest;
@@ -16,9 +14,10 @@ import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.*;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.Output;
-import com.xhf.leetcode.plugin.debug.params.Instrument;
-import com.xhf.leetcode.plugin.debug.params.Operation;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
+import com.xhf.leetcode.plugin.debug.output.OutputHelper;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
@@ -30,12 +29,12 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author feigebuge
@@ -55,11 +54,16 @@ public class JavaDebugger implements Debugger {
      * 服务启动端口
      */
     private int port;
+    /**
+     * 用于输出debug过程中, 代码的std out/ std error
+     */
+    private OutputHelper outputHelper;
 
 
     public JavaDebugger(Project project, JavaDebugConfig config) {
         this.project = project;
         this.config = config;
+        this.outputHelper = new OutputHelper(project);
     }
 
     @Override
@@ -83,11 +87,17 @@ public class JavaDebugger implements Debugger {
         new Thread(this::startDebug).start();
     }
 
+    @Override
+    public void stop() {
+        env.stopDebug();
+        vm.dispose();
+    }
+
     private void startDebug() {
         env.startDebug();
         try {
-            startVMService();
-            connectVM();
+            debugLocally();
+            // debugRemotely(); // 废弃远程debug方式
         } catch (DebugError ex) {
             ConsoleUtils.getInstance(project).showWaring(ex.toString(), false, true, ex.toString(), "debug异常", ConsoleDialog.ERROR);
             LogUtils.error(ex);
@@ -98,9 +108,86 @@ public class JavaDebugger implements Debugger {
         env.stopDebug();
     }
 
+
+    /**
+     * 本地断点启动
+     */
+    private void debugLocally() {
+        // 获取 LaunchingConnector
+        LaunchingConnector connector = Bootstrap.virtualMachineManager().defaultConnector();
+
+        // 配置启动参数
+        Map<String, Connector.Argument> arguments = connector.defaultArguments();
+        arguments.get("main").setValue("Main"); // 替换为你的目标类全路径
+        arguments.get("options").setValue("-classpath " + env.getFilePath()); // 指定类路径
+
+        // 启动目标 JVM
+        VirtualMachine vm;
+        try {
+            vm = connector.launch(arguments);
+        } catch (IOException | IllegalConnectorArgumentsException | VMStartException e) {
+            throw new DebugError("vm启动失败!", e);
+        }
+
+        // 捕获目标虚拟机的输出
+        captureStream(vm.process().getInputStream(), OutputHelper.STD_OUT);
+        captureStream(vm.process().getErrorStream(), OutputHelper.STD_ERROR);
+
+        // 获取当前类的调试信息
+        startProcessEvent(vm);
+    }
+
+    private void captureStream(InputStream stream, String streamName) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "GBK"))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        ExecuteResult success = ExecuteResult.success(null, line + "\n");
+                        success.setMoreInfo(streamName);
+                        outputHelper.output(success);
+                    }
+                } catch (Exception e) {
+                    LogUtils.error(e);
+                }
+            }
+        }).start();
+
+    }
+
+    /**
+     * 开始处理event
+     * @param vm
+     */
+    private void startProcessEvent(VirtualMachine vm) {
+        EventRequestManager erm = vm.eventRequestManager();
+
+        this.vm = vm;
+        this.erm = erm;
+
+        // 设置类加载事件监听
+        ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
+        classPrepareRequest.enable();
+
+        try {
+            processEvent();
+        } catch (InterruptedException e) {
+            throw new DebugError("事件处理失败", e);
+        }
+    }
+
+    // 采用本地debug方式, 废弃远程连接
+    @Deprecated
+    private void debugRemotely() {
+        startVMService();
+        connectVM();
+    }
+
     /**
      * 连接VM, 开始debug
      */
+    @Deprecated // 取消远程连接的debug方式
     private void connectVM() {
         // 创建连接
         VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
@@ -135,25 +222,11 @@ public class JavaDebugger implements Debugger {
             throw new DebugError("vm 连接失败");
         }
 
-        // 获取当前类的调试信息
-        EventRequestManager erm = vm.eventRequestManager();
-
-        this.vm = vm;
-        this.erm = erm;
-
-        // 设置类加载事件监听
-        ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
-        classPrepareRequest.enable();
-
-        try {
-            processEvent();
-        } catch (InterruptedException e) {
-            throw new DebugError("事件处理失败", e);
-        }
+        startProcessEvent(vm);
     }
 
     /**
-     * 核心方法, 读取Instrument, 执行debug流程
+     * 核心方法, 读取instruction, 执行debug流程
      */
     private void processEvent() throws InterruptedException {
         this.context = new Context();
@@ -164,7 +237,7 @@ public class JavaDebugger implements Debugger {
         context.setProject(project);
         // 启动事件循环
         EventQueue eventQueue = vm.eventQueue();
-        while (true) {
+        while (AbstractDebugEnv.isDebug()) {
             EventSet eventSet;
             // vm断开连接, 结束断点
             try {
@@ -173,8 +246,15 @@ public class JavaDebugger implements Debugger {
                 LogUtils.simpleDebug("vm disconnected, done !");
                 return;
             }
+            Iterator<Event> itr = eventSet.iterator();
             context.setEventSet(eventSet);
-            for (Event event : eventSet) {
+            context.setItrEvent(itr);
+
+            while (itr.hasNext()) {
+                Event event = itr.next();
+                if (! AbstractDebugEnv.isDebug()) {
+                    return;
+                }
                 if (event instanceof ClassPrepareEvent) {
                     InitBreakPoint(event);
                 } else if (event instanceof BreakpointEvent) {
@@ -198,11 +278,16 @@ public class JavaDebugger implements Debugger {
         setContextBasicInfo((LocatableEvent) event);
 
         while (AbstractDebugEnv.isDebug()) {
-            Instrument inst = reader.readInst();
+            Instruction inst = reader.readInst();
 
             // 如果是null, 表示读取InstSource的UI消费阻塞队列被打断, 此时返回null
             if (inst == null) {
                 continue;
+            }
+            // 如果指令是exit, 直接终止运行
+            if (inst.isExit()) {
+                this.stop();
+                return;
             }
             if (! inst.isSuccess()) {
                 ReadType readType = inst.getReadType();
@@ -246,6 +331,8 @@ public class JavaDebugger implements Debugger {
                     inst.getOperation() == Operation.N ||
                     inst.getOperation() == Operation.STEP
             ) {
+                // 消费所有事件
+                context.consumeAllEvent();
                 break;
             }
         }
@@ -284,9 +371,9 @@ public class JavaDebugger implements Debugger {
 
         if (AppSettings.getInstance().isUIOutput()) {
             // 输入UI打印指令. UI总是会在遇到断点时打印局部变量. 因此输入P指令
-            InstSource.uiInstInput(Instrument.success(ReadType.UI_IN, Operation.P, ""));
+            InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, ""));
             // 高亮指令
-            InstSource.uiInstInput(Instrument.success(ReadType.UI_IN, Operation.W, ""));
+            InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, ""));
         }
 
         doRun(event);
@@ -318,7 +405,7 @@ public class JavaDebugger implements Debugger {
         context.setSolutionLocation(location);
 
         // 设置断点
-        new JavaBInst().execute(Instrument.success(ReadType.UI_IN, Operation.B, String.valueOf(location.lineNumber())), context);
+        new JavaBInst().execute(Instruction.success(ReadType.UI_IN, Operation.B, String.valueOf(location.lineNumber())), context);
 
         DebugUtils.simpleDebug("break point set at Solution." + mainMethod + " line " + location.lineNumber(), project);
     }
@@ -345,9 +432,9 @@ public class JavaDebugger implements Debugger {
             VirtualFile file = Objects.requireNonNull(position).getFile();
             // 如果file和当前打开的vile一致, 设置断点信息
             if (file.equals(ViewUtils.getCurrentOpenVirtualFile(project))) {
-                Instrument instrument = DebugUtils.buildBInst(position);
+                Instruction instruction = DebugUtils.buildBInst(position);
                 // 设置断点
-                new JavaBInst().execute(instrument, context);
+                new JavaBInst().execute(instruction, context);
             }
         }
     }
@@ -374,6 +461,9 @@ public class JavaDebugger implements Debugger {
             throw new DebugError("Failed to find an available port", e);
         }
     }
+
+    // 取消用远程debug的方式
+    @Deprecated
     private void startVMService() {
         // 测试
         this.port = findAvailablePort();
