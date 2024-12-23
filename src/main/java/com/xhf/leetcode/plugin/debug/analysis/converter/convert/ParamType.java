@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.debug.analysis.convert;
+package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 
 /**
  * 参数类型

@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.debug.analysis.convert;
+package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 
 /**
  * 将测试案例转换为变量, 并以对应语言的方式输出字符串

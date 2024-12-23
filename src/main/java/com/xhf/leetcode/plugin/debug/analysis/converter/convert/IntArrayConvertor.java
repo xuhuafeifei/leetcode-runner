@@ -1,12 +1,17 @@
-package com.xhf.leetcode.plugin.debug.analysis.convert;
+package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class IntArrayConvertor implements VariableConvertor{
+public class IntArrayConvertor extends AbstractVariableConvertor {
     @Override
-    public String convert(String testcase, String variableName) {
+    protected String doPython(String testcase, String variableName) {
+        return TAB + variableName + " = " + testcase;
+    }
+
+    @Override
+    protected String doJava(String testcase, String variableName) {
         // 处理 int[]
         StringBuilder sb = new StringBuilder();
         sb.append("int[] ").append(variableName).append(" = new int[]{");

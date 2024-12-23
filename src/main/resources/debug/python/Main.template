@@ -1,0 +1,91 @@
+import pdb
+import queue
+import sys
+import json
+import threading
+from io import StringIO
+
+from Solution import *  # 假设你的 Solution.py 文件存在
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# 创建一个阻塞队列
+input_queue = queue.Queue()
+
+# 存储pdb输出
+sio = StringIO()
+
+
+# 自定义一个类，模拟 stdin 的读取
+class QueueStdin:
+    @staticmethod
+    def readline():
+        # 阻塞等待队列中的数据，返回类似 readline 的行为
+        line = input_queue.get()
+        return line + '\n'  # 模拟 readline 返回的每行数据的结尾包含 '\n'
+
+
+# 定义请求处理类
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        # 获取请求的长度
+        content_length = int(self.headers['Content-Length'])
+        # 读取请求体内容
+        post_data = self.rfile.read(content_length)
+
+        # 假设接收到的是 JSON 格式的数据
+        try:
+            data = json.loads(post_data)
+            command = data.get("command")
+            input_queue.put(command)  # 将指令放入队列
+
+            # 这里可以根据接收到的指令进行处理
+            response = {"status": "success", "message": sio.getvalue()}
+
+        except json.JSONDecodeError:
+            response = {"status": "error", "message": "Invalid JSON data"}
+
+        # 设置响应头
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+
+        # 返回响应内容
+        self.wfile.write(json.dumps(response).encode())
+
+
+def run_server(port):
+    server_address = ('', port)
+    httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
+    httpd.serve_forever()
+
+
+# 定义一个函数，用于让 pdb 从队列读取输入
+def pdb_input_loop():
+    sys.stdin = QueueStdin()  # 重定向 stdin 到队列
+    sys.stdout = sio
+
+    # 这里我们让 pdb 执行命令
+    pdb.set_trace()  # 启动调试器
+    # 初始执行
+    solution = Solution()
+    # 注意缩进
+{{callCode}}
+
+def main():
+    # 启动服务器线程
+    port = {{port}}
+    server_thread = threading.Thread(target=run_server, args=(port,))
+    server_thread.daemon = True
+    server_thread.start()
+
+    # 启动输入循环线程
+    input_thread = threading.Thread(target=pdb_input_loop)
+    input_thread.daemon = True
+    input_thread.start()
+
+    # 让主线程等待，保持程序运行
+    input_thread.join()
+
+
+if __name__ == "__main__":
+    main()

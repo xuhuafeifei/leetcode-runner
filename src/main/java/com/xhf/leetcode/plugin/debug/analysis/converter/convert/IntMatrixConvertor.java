@@ -1,8 +1,8 @@
-package com.xhf.leetcode.plugin.debug.analysis.convert;
+package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 
-public class IntMatrixConvertor implements VariableConvertor {
+public class IntMatrixConvertor extends AbstractVariableConvertor {
     @Override
-    public String convert(String testcase, String variableName) {
+    protected String doJava(String testcase, String variableName) {
         // 处理 int[][]
         StringBuilder sb = new StringBuilder();
         sb.append("int[][] ").append(variableName).append(" = {");
@@ -28,5 +28,10 @@ public class IntMatrixConvertor implements VariableConvertor {
         
         sb.append("};\r\n");
         return sb.toString();
+    }
+
+    @Override
+    protected String doPython(String testcase, String variableName) {
+        return TAB + variableName + " = " + testcase;
     }
 }

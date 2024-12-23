@@ -449,24 +449,11 @@ public class JavaDebugger implements Debugger {
         throw new RuntimeException("No suitable connector found.");
     }
 
-    /**
-     * 获取可用端口
-     * @return port
-     */
-    public static int findAvailablePort() {
-        // socket使用完后立刻关闭
-        try (ServerSocket socket = new ServerSocket(0)) {
-            return socket.getLocalPort();
-        } catch (IOException e) {
-            throw new DebugError("Failed to find an available port", e);
-        }
-    }
-
     // 取消用远程debug的方式
     @Deprecated
     private void startVMService() {
         // 测试
-        this.port = findAvailablePort();
+        this.port = DebugUtils.findAvailablePort();
         LogUtils.simpleDebug("get available port : " + this.port);
 
         String cdCmd = "cd " + env.getFilePath();

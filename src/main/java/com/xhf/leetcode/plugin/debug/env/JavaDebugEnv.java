@@ -4,25 +4,15 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
-import com.intellij.ui.components.JBScrollPane;
-import com.xhf.leetcode.plugin.bus.DebugEndEvent;
-import com.xhf.leetcode.plugin.bus.DebugStartEvent;
-import com.xhf.leetcode.plugin.bus.LCEventBus;
-import com.xhf.leetcode.plugin.debug.analysis.AnalysisResult;
-import com.xhf.leetcode.plugin.debug.analysis.JavaCodeAnalyzer;
-import com.xhf.leetcode.plugin.debug.analysis.JavaTestcaseConvertor;
-import com.xhf.leetcode.plugin.debug.reader.ReadType;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
+import com.xhf.leetcode.plugin.debug.analysis.converter.JavaTestcaseConvertor;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
-import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
-import com.xhf.leetcode.plugin.model.LeetcodeEditor;
-import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.pdfbox.io.IOUtils;
 
 import javax.swing.*;
 
@@ -35,10 +25,6 @@ import static javax.swing.JOptionPane.NO_OPTION;
  * @email 2508020102@qq.com
  */
 public class JavaDebugEnv extends AbstractDebugEnv {
-    /**
-     * 核心存储路径. 所有debug相关文件都存储在filePath指定目录下
-     */
-    private String filePath = "E:\\java_code\\lc-test\\cache\\debug";
     /**
      * Java编写的Main类路径
      */
@@ -63,7 +49,6 @@ public class JavaDebugEnv extends AbstractDebugEnv {
 
     public JavaDebugEnv(Project project) {
         super(project);
-        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug").build();
     }
 
     @Deprecated // only for test
@@ -83,7 +68,8 @@ public class JavaDebugEnv extends AbstractDebugEnv {
      * 获取编译工具路径
      * @return
      */
-    private boolean buildToolPrepare() throws DebugError{
+    @Override
+    protected boolean buildToolPrepare() throws DebugError{
         boolean flag = StoreService.getInstance(project).contains("JAVA_HOME");
 
         TextFieldWithBrowseButton myFileBrowserBtn = new TextFieldWithBrowseButton();
@@ -150,7 +136,8 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         }
     }
 
-    private boolean createMainFile() throws DebugError {
+    @Override
+    protected boolean createMainFile() throws DebugError {
         String mainPath = new FileUtils.PathBuilder(filePath).append("Main.java").build();
         this.mainJavaPath = mainPath;
         // 读取Main.template
@@ -172,7 +159,8 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         return convertor.autoConvert();
     }
 
-    private boolean createSolutionFile() {
+    @Override
+    protected boolean createSolutionFile() {
         // 获取路径
         String solutionPath = new FileUtils.PathBuilder(filePath).append("Solution.java").build();
         this.solutionJavaPath = solutionPath;
@@ -182,7 +170,7 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         return true;
     }
 
-    public String getSolutionContent() {
+    private String getSolutionContent() {
         String content = ViewUtils.getContentOfCurrentOpenVFile(project);
         if (content == null) {
             throw new DebugError("当前打开文件为空");

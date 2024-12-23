@@ -1,8 +1,8 @@
 package debug;
 
-import com.xhf.leetcode.plugin.debug.analysis.AnalysisResult;
-import com.xhf.leetcode.plugin.debug.analysis.JavaCodeAnalyzer;
-import com.xhf.leetcode.plugin.debug.analysis.JavaTestcaseConvertor;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
+import com.xhf.leetcode.plugin.debug.analysis.converter.JavaTestcaseConvertor;
 import org.junit.Test;
 
 /**

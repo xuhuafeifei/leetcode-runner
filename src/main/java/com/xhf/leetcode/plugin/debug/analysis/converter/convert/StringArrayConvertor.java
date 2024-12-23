@@ -1,12 +1,12 @@
-package com.xhf.leetcode.plugin.debug.analysis.convert;
+package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class StringArrayConvertor implements VariableConvertor {
+public class StringArrayConvertor extends AbstractVariableConvertor {
     @Override
-    public String convert(String testcase, String variableName) {
+    protected String doJava(String testcase, String variableName) {
         StringBuilder sb = new StringBuilder();
         testcase = testcase.replace("\"", "");
         // 处理 String[]
@@ -20,5 +20,10 @@ public class StringArrayConvertor implements VariableConvertor {
         }
         sb.append("};\r\n");
         return sb.toString();
+    }
+
+    @Override
+    protected String doPython(String testcase, String variableName) {
+        return TAB + variableName + " = " + testcase;
     }
 }

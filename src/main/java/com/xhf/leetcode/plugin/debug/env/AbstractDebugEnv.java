@@ -9,7 +9,10 @@ import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.file.StoreService;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
@@ -23,6 +26,11 @@ import static javax.swing.JOptionPane.NO_OPTION;
  * @email 2508020102@qq.com
  */
 public abstract class AbstractDebugEnv implements DebugEnv {
+    /**
+     * 核心存储路径. 所有debug相关文件都存储在filePath指定目录下
+     */
+    protected String filePath = "E:\\java_code\\lc-test\\cache\\debug";
+
     protected final Project project;
     /**
      * Solution核心方法名
@@ -33,6 +41,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
 
     public AbstractDebugEnv(Project project) {
         this.project = project;
+        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug").build();
     }
 
     @Override
@@ -89,4 +98,10 @@ public abstract class AbstractDebugEnv implements DebugEnv {
 
         LCEventBus.getInstance().post(new DebugStartEvent());
     }
+
+    protected abstract boolean buildToolPrepare() throws DebugError;
+
+    protected abstract boolean createMainFile() throws DebugError;
+
+    protected abstract boolean createSolutionFile() throws DebugError;
 }

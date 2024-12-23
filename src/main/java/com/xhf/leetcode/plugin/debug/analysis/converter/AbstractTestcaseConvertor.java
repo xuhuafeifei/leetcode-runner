@@ -1,35 +1,26 @@
-package com.xhf.leetcode.plugin.debug.analysis;
+package com.xhf.leetcode.plugin.debug.analysis.converter;
 
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.analysis.convert.VariableConvertor;
-import com.xhf.leetcode.plugin.debug.analysis.convert.ConverterFactory;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
+import com.xhf.leetcode.plugin.debug.analysis.converter.convert.ConverterFactory;
+import com.xhf.leetcode.plugin.debug.analysis.converter.convert.VariableConvertor;
 import com.xhf.leetcode.plugin.exception.DebugError;
-import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.bouncycastle.crypto.agreement.jpake.JPAKERound1Payload;
 
 /**
- * 测试案例转换器. 通过AnalysisResult, 将测试案例转换为Java代码
- *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaTestcaseConvertor {
+public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
     private final String instanceName;
     private final AnalysisResult result;
     private final ConverterFactory cf;
     private int count = 0;
-    private final String variableName = "a";
-    
+
     private final Project project;
-    
-    @Deprecated // for test
-    public JavaTestcaseConvertor(String instanceName, AnalysisResult result) {
-        this(instanceName, result, null);
-    }
-    
-    public JavaTestcaseConvertor(String instanceName, AnalysisResult result, Project project) {
+
+    public AbstractTestcaseConvertor(String instanceName, AnalysisResult result, Project project) {
         this.instanceName = instanceName;
         this.result = result;
         this.cf = ConverterFactory.getInstance();
@@ -40,11 +31,13 @@ public class JavaTestcaseConvertor {
      * 自动获取当前打文件处理的question的测试样例, 并转换为对应的调用代码
      * @return
      */
+    @Override
     public String autoConvert() throws DebugError {
         // 获取测试案例
         LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByCurrentVFile(project);
         String tests = lc.getDebugTestcase().trim();
         return convert(tests.split("\n"));
+
     }
 
     /**
@@ -53,7 +46,8 @@ public class JavaTestcaseConvertor {
      * @param testcases
      * @return
      */
-    @Deprecated // 不支持多轮处理, 要不然debug看不清输入了
+    @Deprecated
+    @Override
     public String convert(String testcases) {
         testcases = testcases.trim();
         String[] split = testcases.split("\r?\n");
@@ -72,9 +66,10 @@ public class JavaTestcaseConvertor {
             String[] sub = new String[paramSize];
             System.arraycopy(split, i * paramSize, sub, 0, paramSize);
             String res = convert(sub);
-            sb.append(res); 
+            sb.append(res);
         }
         return sb.toString();
+
     }
 
     /**
@@ -84,6 +79,7 @@ public class JavaTestcaseConvertor {
      * @param testCases
      * @return
      */
+    @Override
     public String convert(String[] testCases) throws DebugError {
         int len = testCases.length;
         // 判断测试输入和参数个数是否匹配
@@ -122,6 +118,7 @@ public class JavaTestcaseConvertor {
      * @return
      */
     private String vName() {
+        String variableName = "a";
         return variableName + count;
     }
 

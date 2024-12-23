@@ -27,6 +27,7 @@ import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
+import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -36,6 +37,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -363,5 +365,18 @@ public class DebugUtils {
 
     public static String buildCurrentLineInfoByLocation(ExecuteResult r) {
         return buildCurrentLineInfo(r.getClassName(), r.getMethodName(), r.getAddLine());
+    }
+
+    /**
+     * 获取可用端口
+     * @return port
+     */
+    public static int findAvailablePort() {
+        // socket使用完后立刻关闭
+        try (ServerSocket socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            throw new DebugError("Failed to find an available port", e);
+        }
     }
 }

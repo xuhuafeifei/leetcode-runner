@@ -1,14 +1,13 @@
-package com.xhf.leetcode.plugin.debug.analysis.convert;
-
-import java.util.Arrays;
+package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 
 /**
+ * {@link ParamType#LIST_STRING}
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class ListStringConvertor implements VariableConvertor {
+public class ListStringConvertor extends AbstractVariableConvertor {
     @Override
-    public String convert(String testcase, String variableName) {
+    protected String doJava(String testcase, String variableName) {
         // 去除引号并替换方括号为大括号
         String modifiedTestcase = testcase
                 .replace("[", "{")
@@ -21,5 +20,10 @@ public class ListStringConvertor implements VariableConvertor {
                 " = new ArrayList<>(Arrays.asList(new String[]" +
                 modifiedTestcase +
                 "));\n";
+    }
+
+    @Override
+    protected String doPython(String testcase, String variableName) {
+        throw new UnsupportedOperationException("Python does not support List<String>");
     }
 }

@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.debug.analysis;
+package com.xhf.leetcode.plugin.debug.analysis.analyzer;
 
 public class AnalysisResult {
     private String methodName;
