@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.sun.jdi.*;
 

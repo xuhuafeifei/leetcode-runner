@@ -1,15 +1,18 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.sun.jdi.request.BreakpointRequest;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaRBAInst implements InstExecutor{
+public class JavaRBAInst extends AbstractJavaInstExecutor {
     @Override
-    public ExecuteResult execute(Instruction inst, Context context) {
+    public ExecuteResult doExecute(Instruction inst, Context context) {
         for (BreakpointRequest breakpointRequest : context.getBreakpointRequests()) {
             breakpointRequest.disable();
         }

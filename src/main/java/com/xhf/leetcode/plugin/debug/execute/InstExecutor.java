@@ -12,5 +12,5 @@ public interface InstExecutor {
      * @param context 指令执行时候的上下文
      * @return 是否执行成功
      */
-    ExecuteResult execute(Instruction inst, Context context);
+    ExecuteResult execute(Instruction inst, ExecuteContext context);
 }

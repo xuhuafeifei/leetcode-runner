@@ -1,6 +1,9 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.sun.jdi.request.BreakpointRequest;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 import java.util.List;
@@ -9,9 +12,9 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaRBInst implements InstExecutor {
+public class JavaRBInst extends AbstractJavaInstExecutor {
     @Override
-    public ExecuteResult execute(Instruction inst, Context context) {
+    public ExecuteResult doExecute(Instruction inst, Context context) {
         int lineNumber = Integer.parseInt(inst.getParam());
         List<BreakpointRequest> breakpointRequests = context.getBreakpointRequests();
         for (BreakpointRequest breakpointRequest : breakpointRequests) {

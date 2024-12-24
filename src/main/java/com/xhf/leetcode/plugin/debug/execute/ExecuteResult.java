@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
 
 /**
  * 执行结果
@@ -11,6 +12,8 @@ public class ExecuteResult {
     private Operation operation;
     /**
      * 为了配合Operation.NULL的引入, 增加moreInfo字段. 用于表示额外信息
+     * ---------------------
+     * 现在不配合Operation.NULL, moreInfo服务于捕获debug代码的std out / std error
      */
     private String moreInfo;
     private boolean success;
@@ -35,7 +38,7 @@ public class ExecuteResult {
     /**
      * 上下文对象
      */
-    private Context context;
+    private ExecuteContext context;
     private String className;
 
     public boolean isSuccess() {
@@ -139,11 +142,11 @@ public class ExecuteResult {
         return methodName;
     }
 
-    public void setContext(Context context) {
+    public void setContext(ExecuteContext context) {
         this.context = context;
     }
 
-    public Context getContext() {
+    public ExecuteContext getContext() {
         return context;
     }
 

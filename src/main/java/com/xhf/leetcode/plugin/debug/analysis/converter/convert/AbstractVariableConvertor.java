@@ -12,7 +12,6 @@ import java.util.Objects;
  */
 public abstract class AbstractVariableConvertor implements VariableConvertor{
     protected final AppSettings appSettings = AppSettings.getInstance();
-    protected final String TAB = "  ";
 
     @Override
     public final String convert(String testcase, String variableName) {
@@ -20,7 +19,7 @@ public abstract class AbstractVariableConvertor implements VariableConvertor{
         switch(Objects.requireNonNull(langType)) {
             case JAVA:
                 return doJava(testcase, variableName);
-            case PYTHON:
+            case PYTHON3:
                 return doPython(testcase, variableName);
             default:
                 throw new DebugError("目前不支持 " + langType.getLangType() + " 语言的debug");

@@ -1,6 +1,9 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.sun.jdi.*;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
@@ -19,13 +22,13 @@ import java.nio.file.Paths;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaWInst implements InstExecutor{
+public class JavaWInst extends AbstractJavaInstExecutor {
 
     public JavaWInst() {
     }
 
     @Override
-    public ExecuteResult execute(Instruction inst, Context context) {
+    public ExecuteResult doExecute(Instruction inst, Context context) {
         Location location = context.getLocation();
         int lineNumber = location.lineNumber(); // 行号
 

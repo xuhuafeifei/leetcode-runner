@@ -78,7 +78,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         tabs = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
         tabs.setBorder(Constants.BORDER);
 
-        // 添加 Local Variables 选项卡
+        // 添加 Variables 选项卡
         stdPanel = new StdPanel();
         JBSplitter varAndExpSplitter = new JBSplitter();
         varAndExpSplitter.setFirstComponent(new JBScrollPane(variableList));

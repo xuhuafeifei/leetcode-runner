@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.model;
 
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
+import com.xhf.leetcode.plugin.utils.GsonUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -123,6 +124,13 @@ public class HttpRequest {
             HttpRequest httpRequest = new HttpRequest(this.url, this.contentType);
             httpRequest.Header = this.Header;
             httpRequest.body = this.body;
+            return httpRequest;
+        }
+
+        public HttpRequest buildByJsonBody() {
+            HttpRequest httpRequest = new HttpRequest(this.url, this.contentType);
+            httpRequest.Header = this.Header;
+            httpRequest.body = GsonUtils.toJsonStr(this.jsonBody);
             return httpRequest;
         }
 

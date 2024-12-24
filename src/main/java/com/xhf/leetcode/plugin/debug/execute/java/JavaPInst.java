@@ -1,6 +1,7 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.sun.jdi.*;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
@@ -16,7 +17,7 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaPInst implements InstExecutor{
+public class JavaPInst extends AbstractJavaInstExecutor {
 
     private final JavaValueInspector inspector;
     private StackFrame frame;
@@ -26,7 +27,7 @@ public class JavaPInst implements InstExecutor{
     }
 
     @Override
-    public ExecuteResult execute(Instruction inst, Context context) {
+    public ExecuteResult doExecute(Instruction inst, Context context) {
         ThreadReference thread = context.getThread();
         Location location = context.getLocation();
 

@@ -1,8 +1,11 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.sun.jdi.*;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 import java.util.ArrayList;
@@ -14,9 +17,9 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaBInst implements InstExecutor{
+public class JavaBInst extends AbstractJavaInstExecutor {
     @Override
-    public ExecuteResult execute(Instruction inst, Context context) {
+    protected ExecuteResult doExecute(Instruction inst, Context context) {
         /*
           确保获取Solution的Location. 避免出现执行到系统方法, 获取到系统函数的Location.
           从而导致用户在idea设置断点却找不到的bug

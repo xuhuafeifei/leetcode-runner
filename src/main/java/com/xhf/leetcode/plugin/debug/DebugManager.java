@@ -1,9 +1,7 @@
 package com.xhf.leetcode.plugin.debug;
 
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.debugger.Debugger;
-import com.xhf.leetcode.plugin.debug.debugger.JavaDebugConfig;
-import com.xhf.leetcode.plugin.debug.debugger.JavaDebugger;
+import com.xhf.leetcode.plugin.debug.debugger.*;
 import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
@@ -39,14 +37,36 @@ public class DebugManager {
     // 容器
     private final Map<Class<? extends Debugger>, Debugger> debuggers = new HashMap<>();
 
-    // 返回debug启动器
-    public Debugger getDebugger(Class<? extends Debugger> clazz) {
+    /*
+     * 创建并存储全新的debugger
+     */
+    public Debugger createDebugger(Class<? extends Debugger> clazz) {
         if (clazz == JavaDebugger.class) {
             JavaDebugger javaDebugger = buildJavaDebugger();
             debuggers.put(clazz, javaDebugger);
             return javaDebugger;
+        } else if (clazz == PythonDebugger.class) {
+            PythonDebugger pythonDebugger = buildPythonDebugger();
+            debuggers.put(clazz, pythonDebugger);
+            return pythonDebugger;
         }
         return null;
+    }
+
+    public <T extends Debugger> T getDebugger(Class<T> clazz) {
+        return clazz.cast(debuggers.get(clazz));
+    }
+
+
+    private PythonDebugger buildPythonDebugger() {
+        PythonDebugConfig config = null;
+        try {
+            config = new PythonDebugConfig.Builder(project).autoBuild().build();
+        } catch (Exception ex) {
+            LogUtils.error(ex);
+            throw new DebugError("Java环境配置创建异常!" + ex.toString(), ex);
+        }
+        return new PythonDebugger(project, config);
     }
 
     private JavaDebugger buildJavaDebugger() {

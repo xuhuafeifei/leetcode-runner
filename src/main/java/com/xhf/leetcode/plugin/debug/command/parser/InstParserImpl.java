@@ -28,7 +28,7 @@ public class InstParserImpl implements InstParser{
             }
         }
 
-        // 如果没有匹配成功，则抛出异常
+        // 如果没有匹配成功，则返回null
         return null;
     }
 }

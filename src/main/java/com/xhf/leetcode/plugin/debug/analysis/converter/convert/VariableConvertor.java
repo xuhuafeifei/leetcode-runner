@@ -6,5 +6,8 @@ package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
  * 为了避免类爆炸, VariableConvertor不区分语言. 这意味着每一个convertor都可以处理被允许debug的语言
  */
 public interface VariableConvertor {
+
+    String TAB = "    ";
+
     String convert(String testcase, String variableName);
 }

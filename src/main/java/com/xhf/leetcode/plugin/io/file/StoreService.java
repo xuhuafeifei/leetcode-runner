@@ -8,10 +8,12 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -236,6 +238,17 @@ public final class StoreService implements Disposable {
         try {
             FileUtils.createAndWriteFile(filePath, content);
         } catch (IOException e) {
+            LogUtils.error(e);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean copyFile(URL resource, String targetPath) {
+        try {
+            FileUtils.copyFile(resource, targetPath);
+        } catch (IOException e) {
+            LogUtils.error(e);
             return false;
         }
         return true;

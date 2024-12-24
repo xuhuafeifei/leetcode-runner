@@ -16,6 +16,8 @@ import java.util.*;
 import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.*;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
+import com.xhf.leetcode.plugin.debug.execute.java.JavaPInst;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;

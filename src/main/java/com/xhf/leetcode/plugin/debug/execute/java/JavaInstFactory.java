@@ -1,5 +1,7 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
+import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.InstructionFactory;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 
@@ -7,7 +9,7 @@ import com.xhf.leetcode.plugin.debug.command.operation.Operation;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaInstFactory {
+public class JavaInstFactory implements InstructionFactory {
     // 单例
     private static final JavaInstFactory instance = new JavaInstFactory();
     private JavaInstFactory() {
@@ -16,6 +18,7 @@ public class JavaInstFactory {
         return instance;
     }
 
+    @Override
     public InstExecutor create(Instruction inst) {
         Operation operation = inst.getOperation();
         InstExecutor instExecutor = null;

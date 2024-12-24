@@ -41,6 +41,10 @@ public class PythonDebugEnv extends AbstractDebugEnv {
      * solution.py路径
      */
     private String solutionPyPath;
+    /**
+     * python服务启动端口
+     */
+    private int pyPort;
 
     public PythonDebugEnv(Project project) {
         super(project);
@@ -48,7 +52,31 @@ public class PythonDebugEnv extends AbstractDebugEnv {
 
     @Override
     public boolean prepare() throws DebugError {
-        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile();
+        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyPyFile();
+    }
+
+    /**
+     * copy python需要的代码
+     * @return
+     */
+    private boolean copyPyFile() {
+        // copy
+
+        return
+                copyFile("/debug/python/inst_source.py") &&
+                copyFile("/debug/python/log_out_helper.py") &&
+                copyFile("/debug/python/debug_core.py") &&
+                copyFile("/debug/python/execute_result.py") &&
+                copyFile("/debug/python/server.py");
+    }
+
+    private boolean copyFile(String resourcePath) {
+        String[] split = resourcePath.split("/");
+        String fileName = split[split.length - 1];
+        return StoreService.getInstance(project).
+                copyFile(getClass().getResource(resourcePath),
+                        new FileUtils.PathBuilder(filePath).append(fileName).build()
+                );
     }
 
     @Override
@@ -97,8 +125,9 @@ public class PythonDebugEnv extends AbstractDebugEnv {
         // 读取Main.template
         String mainContent = FileUtils.readContentFromFile(getClass().getResource("/debug/python/Main.template"));
         // 获取callCode
+        this.pyPort = DebugUtils.findAvailablePort();
         mainContent = mainContent.replace("{{callCode}}", getCallCode())
-                .replace("{{port}}", String.valueOf(DebugUtils.findAvailablePort()))
+                .replace("{{port}}", String.valueOf(this.pyPort))
         ;
         // 存储文件
         StoreService.getInstance(project).writeFile(mainPath, mainContent);
@@ -118,7 +147,7 @@ public class PythonDebugEnv extends AbstractDebugEnv {
     @Override
     protected boolean createSolutionFile() throws DebugError {
         // 获取路径
-        String solutionPath = new FileUtils.PathBuilder(filePath).append("Solution.java").build();
+        String solutionPath = new FileUtils.PathBuilder(filePath).append("Solution.py").build();
         this.solutionPyPath = solutionPath;
         String solutionContent = getSolutionContent();
         // 写文件
@@ -167,5 +196,9 @@ public class PythonDebugEnv extends AbstractDebugEnv {
 
     public String getSolutionPyPath() {
         return solutionPyPath;
+    }
+
+    public int getPyPort() {
+        return pyPort;
     }
 }

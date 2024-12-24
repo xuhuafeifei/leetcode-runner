@@ -1,7 +1,10 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.sun.jdi.Location;
 import com.sun.jdi.request.StepRequest;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
@@ -13,9 +16,9 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaNInst implements InstExecutor{
+public class JavaNInst extends AbstractJavaInstExecutor {
     @Override
-    public ExecuteResult execute(Instruction inst, Context context) {
+    public ExecuteResult doExecute(Instruction inst, Context context) {
         /*
          * 如果是UI输出, 则生产打印指令, 并且不执行任何操作
          * 之所以要生成打印指令, 是因为N指令执行无法真正让代码断点运行到下一行. 因此高亮显示的代码

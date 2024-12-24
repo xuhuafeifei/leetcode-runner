@@ -1,5 +1,8 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 
@@ -7,7 +10,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaHELPInst implements InstExecutor{
+public class JavaHELPInst extends AbstractJavaInstExecutor {
     private static final String HELP_INFO =
             "帮助文档格式: 命令名词 [命令输入形式] 命令作用\n" +
                     "\n" +
@@ -30,7 +33,7 @@ public class JavaHELPInst implements InstExecutor{
                     "STEP命令 [step out | step over] 功能和idea的debug对应按钮功能一致\n"
             ;
     @Override
-    public ExecuteResult execute(Instruction inst, Context context) {
+    public ExecuteResult doExecute(Instruction inst, Context context) {
         ExecuteResult success = ExecuteResult.success(inst.getOperation(), HELP_INFO);
         DebugUtils.fillExecuteResultByLocation(success, context.getLocation());
         return success;

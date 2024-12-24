@@ -3,9 +3,10 @@ package com.xhf.leetcode.plugin.debug.output;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.comp.MyList;
-import com.xhf.leetcode.plugin.debug.execute.Context;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.execute.JavaWInst;
+import com.xhf.leetcode.plugin.debug.execute.java.JavaWInst;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
@@ -117,7 +118,7 @@ public class UIOutput extends AbstractOutput{
 
     private void doAfter(ExecuteResult r) {
         // 获取当前执行的行号
-        Context ctx = r.getContext();
+        ExecuteContext ctx = r.getContext();
         ExecuteResult execute =
                 new JavaWInst().execute(Instruction.success(
                     ReadType.UI_IN, Operation.W, ""

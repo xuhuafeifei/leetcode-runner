@@ -1,7 +1,8 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.sun.jdi.Location;
 import com.sun.jdi.request.StepRequest;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
@@ -15,9 +16,9 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaSTEPInst implements InstExecutor {
+public class JavaSTEPInst extends AbstractJavaInstExecutor {
     @Override
-    public ExecuteResult execute(Instruction inst, Context context) {
+    public ExecuteResult doExecute(Instruction inst, Context context) {
         // 这里设置原因和N Inst一致
         if (AppSettings.getInstance().isUIOutput()) {
             InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, ""));

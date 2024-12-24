@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.debug.execute;
+package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.intellij.openapi.project.Project;
 import com.sun.jdi.ClassType;
@@ -13,6 +13,7 @@ import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.exception.DebugError;
 
 import java.util.Iterator;
@@ -23,7 +24,7 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class Context {
+public class Context implements ExecuteContext {
     private BreakpointEvent breakpointEvent;
     private String output;
     private EventRequestManager erm;

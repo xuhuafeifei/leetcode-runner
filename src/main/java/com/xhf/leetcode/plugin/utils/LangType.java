@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
  */
 public enum LangType {
     JAVA("java", ".java", "//"),
-    PYTHON("python", ".py", "#"),
+//    PYTHON("python", ".py", "#"),
     CPP("c++", ".cpp", "//"),
     JAVASCRIPT("javascript", ".js", "//"),
     C("c", ".c", "//"),

@@ -212,6 +212,18 @@ public class FileUtils {
         file.deleteOnExit();
     }
 
+    public static void copyFile(URL resource, String targetPath) throws IOException {
+        // 将resource 复制到solutionPyPath
+        try (InputStream inputStream = resource.openStream();
+            OutputStream outputStream = new FileOutputStream(targetPath)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+        }
+    }
+
     /**
      * build a file path and make sure the path is unified
      */

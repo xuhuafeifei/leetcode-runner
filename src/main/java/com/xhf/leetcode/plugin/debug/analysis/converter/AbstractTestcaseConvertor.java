@@ -13,12 +13,13 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
  * @email 2508020102@qq.com
  */
 public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
-    private final String instanceName;
-    private final AnalysisResult result;
+    protected final String instanceName;
+    protected final AnalysisResult result;
     private final ConverterFactory cf;
     private int count = 0;
 
     private final Project project;
+    protected String[] varNames;
 
     public AbstractTestcaseConvertor(String instanceName, AnalysisResult result, Project project) {
         this.instanceName = instanceName;
@@ -87,37 +88,30 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
             throw new DebugError("测试样例数量与" + result.getMethodName() + "入参数量不匹配, 请检查!\r\n入参数量 = "
                     + len + " " + result.getMethodName() + "测试样例个数 = " + result.getParameterTypes().length);
         }
-        StringBuilder sb = new StringBuilder();
         // 参数类型
-        String[] pT = result.getParameterTypes();
-
-        String[] varNames = new String[len];
+        this.varNames = new String[len];
+        StringBuilder sb = new StringBuilder();
         // 添加变量创建
         for (int i = 0; i < len; i++) {
-            sb.append(createVariable(testCases[i], pT[i]));
+            sb.append(createVariable(testCases[i], result.getParameterTypes()[i]));
             // 存储变量名
             varNames[i] = vName();
-            count += 1;
+            updateVName();
         }
-        // 添加方法调用
-        sb.append(instanceName).append(".").append(result.getMethodName()).append("(");
-        for (int i = 0; i < varNames.length; i++) {
-            String varName = varNames[i];
-            sb.append(varName);
-            if (i != varNames.length - 1) {
-                sb.append(",");
-            } else {
-                sb.append(");").append("\r\n");
-            }
-        }
-        return sb.toString();
+        return doConvert(testCases, sb);
     }
+
+    private void updateVName() {
+        count += 1;
+    }
+
+    protected abstract String doConvert(String[] testCases, StringBuilder sb);
 
     /**
      * 获取变量名
      * @return
      */
-    private String vName() {
+    protected String vName() {
         String variableName = "a";
         return variableName + count;
     }
@@ -129,7 +123,7 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
      * @param paramType
      * @return
      */
-    private String createVariable(String testcase, String paramType) {
+    protected String createVariable(String testcase, String paramType) {
         VariableConvertor cc = cf.createVariableConvertor(paramType);
         if (cc == null) {
             throw new DebugError("不支持的方法入参类型: " + paramType);

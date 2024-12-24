@@ -12,8 +12,12 @@ import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
+import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.*;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
+import com.xhf.leetcode.plugin.debug.execute.java.JavaBInst;
+import com.xhf.leetcode.plugin.debug.execute.java.JavaInstFactory;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
@@ -33,15 +37,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
 import java.util.*;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaDebugger implements Debugger {
-    private final Project project;
+public class JavaDebugger extends AbstractDebugger {
     private final JavaDebugConfig config;
     private JavaDebugEnv env;
     private EventRequestManager erm;
@@ -57,11 +59,12 @@ public class JavaDebugger implements Debugger {
     /**
      * 用于输出debug过程中, 代码的std out/ std error
      */
-    private OutputHelper outputHelper;
+    private final OutputHelper outputHelper;
 
 
     public JavaDebugger(Project project, JavaDebugConfig config) {
-        this.project = project;
+        super(project, new Context(), config, JavaInstFactory.getInstance());
+        this.context = (Context) super.basicContext;
         this.config = config;
         this.outputHelper = new OutputHelper(project);
     }
@@ -91,6 +94,11 @@ public class JavaDebugger implements Debugger {
     public void stop() {
         env.stopDebug();
         vm.dispose();
+    }
+
+    @Override
+    public DebugEnv getEnv() {
+        return this.env;
     }
 
     private void startDebug() {
@@ -229,7 +237,6 @@ public class JavaDebugger implements Debugger {
      * 核心方法, 读取instruction, 执行debug流程
      */
     private void processEvent() throws InterruptedException {
-        this.context = new Context();
         context.setErm(erm);
         context.setVm(vm);
         context.setEnv(env);
@@ -278,54 +285,16 @@ public class JavaDebugger implements Debugger {
         setContextBasicInfo((LocatableEvent) event);
 
         while (AbstractDebugEnv.isDebug()) {
-            Instruction inst = reader.readInst();
-
-            // 如果是null, 表示读取InstSource的UI消费阻塞队列被打断, 此时返回null
-            if (inst == null) {
-                continue;
-            }
-            // 如果指令是exit, 直接终止运行
-            if (inst.isExit()) {
-                this.stop();
-                return;
-            }
-            if (! inst.isSuccess()) {
-                ReadType readType = inst.getReadType();
-                switch (readType) {
-                    case COMMAND_IN:
-                    case STD_IN:
-                        DebugUtils.simpleDebug("命令错误", project);
-                        break;
-                    case UI_IN:
-                        ConsoleUtils.getInstance(project).showWaring("UI指令错误", false, true);
-                        LogUtils.warn("UI指令错误 inst = " + inst);
-                        break;
-                    default:
-                        ConsoleUtils.getInstance(project).showWaring("readType未知错误: " + readType.getType(), false, true);
-                        LogUtils.warn("readType未知错误: " + readType.getType());
-                        break;
+            ProcessResult pR = processDebugCommand();
+            if (! pR.isSuccess) {
+                if (pR.isContinue) {
+                    continue;
                 }
-                continue;
+                if (pR.isReturn) {
+                    return;
+                }
             }
-
-            InstExecutor instExecutor = JavaInstFactory.getInstance().create(inst);
-
-            ExecuteResult r;
-            try {
-                r = instExecutor.execute(inst, context);
-            } catch (Exception e) {
-                DebugUtils.simpleDebug("指令执行异常: " + e, project);
-                LogUtils.error(e);
-                continue;
-            }
-            // 设置上下文
-            r.setContext(context);
-            output.output(r);
-            if (! r.isSuccess()) {
-                // 错误结果日志记录
-                LogUtils.simpleDebug(r.getMsg());
-            }
-
+            Instruction inst = pR.inst;
             // 如果是运行类的指令, 则跳出循环, 运行vm
             if (inst.getOperation() == Operation.R ||
                     inst.getOperation() == Operation.N ||
@@ -337,6 +306,7 @@ public class JavaDebugger implements Debugger {
             }
         }
     }
+
 
     private void handleStepEvent(Event event) {
         doRun(event);

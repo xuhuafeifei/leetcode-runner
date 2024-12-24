@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.io.http.utils;
 
 import com.xhf.leetcode.plugin.model.HttpRequest;
 import com.xhf.leetcode.plugin.model.HttpResponse;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.CookieStore;
@@ -129,7 +130,9 @@ public class HttpClient {
             }
         } catch (IOException e) {
             // todo: 修改为弹窗提示
-            throw new RuntimeException("POST request failed: " + e.getMessage(), e);
+            // throw new RuntimeException("POST request failed: " + e.getMessage(), e);
+            LogUtils.error(e);
+            return null;
         }
 
         return httpResponse;
