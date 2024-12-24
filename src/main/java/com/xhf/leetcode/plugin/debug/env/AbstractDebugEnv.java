@@ -18,8 +18,7 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
 
-import static javax.swing.JOptionPane.CANCEL_OPTION;
-import static javax.swing.JOptionPane.NO_OPTION;
+import static javax.swing.JOptionPane.*;
 
 /**
  * @author feigebuge
@@ -64,7 +63,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
                 new Object[]{"确定", "取消"},
                 "确定"
         );
-        if (i == CANCEL_OPTION || i == NO_OPTION) {
+        if (i != OK_OPTION) {
             return false;
         }
 
@@ -93,8 +92,6 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         // 清空consoleView
         ConsoleUtils.getInstance(project).clearConsole();
         DebugUtils.simpleDebug("debug service starting...", project);
-        // debug
-        LogUtils.simpleDebug(Thread.currentThread().toString());
 
         LCEventBus.getInstance().post(new DebugStartEvent());
     }

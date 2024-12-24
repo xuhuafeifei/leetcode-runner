@@ -34,6 +34,9 @@ import java.util.List;
 @LCSubscriber(events = {LoginEvent.class, ClearCacheEvent.class, CodeSubmitEvent.class, QLoadStartEvent.class, QLoadEndEvent.class})
 public class SearchPanel extends SimpleToolWindowPanel {
     private final JPanel searchBar;
+    /**
+     * 搜索框, 其中存储用户输入的搜索条件
+     */
     private final JTextField searchField;
     private final QuestionEngine engine;
     private final Project project;
@@ -41,6 +44,9 @@ public class SearchPanel extends SimpleToolWindowPanel {
     // 锁定标志位, lock == true, 当前搜索面板的状态处于锁定状态, 不提供搜索服务
     // lock == false, 解锁
     private boolean lock;
+    /**
+     * 所有的搜索条件Panel都存储在Array中
+     */
     private final List<MySearchConditionPanel> conditionPanelArray;
     // 筛选条件组件放置的面板容器
     private JPanel conditionGroup;
@@ -385,6 +391,8 @@ public class SearchPanel extends SimpleToolWindowPanel {
     public void rePositionEventListeners(RePositionEvent event) {
         String titleSlug = event.getTitleSlug();
         String fid = event.getFrontendQuestionId();
+        // 这里需要清除searchPanel设置的搜索条件, 不然查询到的数据是缺失的
+        this.clear();
         ListModel<Question> model = questionList.getModel();
         int size = model.getSize();
         // 遍历, 匹配fid
@@ -407,5 +415,12 @@ public class SearchPanel extends SimpleToolWindowPanel {
             }
         }
         JOptionPane.showMessageDialog(null, "current file can not reposition");
+    }
+
+    private void clear() {
+        for (MySearchConditionPanel panel : this.conditionPanelArray) {
+            panel.clear();
+        }
+        this.searchField.setText("");
     }
 }

@@ -63,7 +63,7 @@ public abstract class MySearchConditionPanel extends JPanel {
             myFilter.removeAllItems();
 
             // 判断当前选择的项是否与之前的选择项相同
-            if (selectedItem != null && selectedItem.equals(previousSelection)) {
+            if (selectedItem == null || selectedItem.equals(previousSelection)) {
                 // 如果选择的是之前的项，清空选择
                 conditionComb.setSelectedIndex(-1);
                 // 清除记录的选中项
@@ -99,6 +99,13 @@ public abstract class MySearchConditionPanel extends JPanel {
 
     public String getDefaultText() {
         return defaultText;
+    }
+
+    /**
+     * 清除搜索条件
+     */
+    public void clear() {
+        conditionComb.setSelectedIndex(-1);
     }
 
     /**

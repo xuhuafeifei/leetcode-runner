@@ -62,9 +62,16 @@ public class PythonDebugger extends AbstractDebugger {
     }
 
     private void startDebug() {
-        startPythonService();
+        env.startDebug();
+        try {
+//            startPythonService();
+        } catch (DebugError e) {
+            DebugUtils.simpleDebug("Debug Failed! " + e, project, true);
+            return;
+        }
         initCtx();
         executePythonDebugRemotely();
+        env.stopDebug();
     }
 
     private void initCtx() {
@@ -99,6 +106,7 @@ public class PythonDebugger extends AbstractDebugger {
 
         try {
             Process exec = Runtime.getRuntime().exec(cmd);
+            DebugUtils.printProcess(exec, false, project);
         } catch (Exception e) {
             throw new DebugError(e.toString(), e);
         }

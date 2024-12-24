@@ -16,8 +16,7 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
 
-import static javax.swing.JOptionPane.CANCEL_OPTION;
-import static javax.swing.JOptionPane.NO_OPTION;
+import static javax.swing.JOptionPane.*;
 
 /**
  * 启动Java环境的debug
@@ -94,7 +93,7 @@ public class JavaDebugEnv extends AbstractDebugEnv {
                 new Object[]{"确定", "取消"},
                 "确定"
         );
-        if (i == CANCEL_OPTION || i == NO_OPTION) {
+        if (i != OK_OPTION) {
                 return false;
         }
         javaPath = myFileBrowserBtn.getText();
