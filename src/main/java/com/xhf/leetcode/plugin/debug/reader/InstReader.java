@@ -10,5 +10,5 @@ public interface InstReader {
      * 读取并解析为指令
      * @return inst
      */
-    Instruction readInst();
+    Instruction readInst() throws InterruptedException;
 }

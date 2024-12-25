@@ -11,6 +11,7 @@ import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
+import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
@@ -92,8 +93,14 @@ public class JavaDebugger extends AbstractDebugger {
 
     @Override
     public void stop() {
+        // 已经停止了, 无需再次停止
+        if (!DebugManager.getInstance(project).isDebug()) {
+            return;
+        }
+        DebugUtils.simpleDebug("JavaDebugger即将停止!", project);
         env.stopDebug();
         vm.dispose();
+        DebugUtils.simpleDebug("JavaDebugger停止!", project);
     }
 
     @Override
@@ -113,7 +120,7 @@ public class JavaDebugger extends AbstractDebugger {
             ConsoleUtils.getInstance(project).showWaring(e.toString(), false, true, e.toString(), "未知异常", ConsoleDialog.ERROR);
             LogUtils.error(e);
         }
-        this.stop();
+        DebugManager.getInstance(project).stopDebugger();
     }
 
 
@@ -244,7 +251,7 @@ public class JavaDebugger extends AbstractDebugger {
         context.setProject(project);
         // 启动事件循环
         EventQueue eventQueue = vm.eventQueue();
-        while (AbstractDebugEnv.isDebug()) {
+        while (DebugManager.getInstance(project).isDebug()) {
             EventSet eventSet;
             // vm断开连接, 结束断点
             try {
@@ -259,7 +266,7 @@ public class JavaDebugger extends AbstractDebugger {
 
             while (itr.hasNext()) {
                 Event event = itr.next();
-                if (! AbstractDebugEnv.isDebug()) {
+                if (! DebugManager.getInstance(project).isDebug()) {
                     return;
                 }
                 if (event instanceof ClassPrepareEvent) {
@@ -284,7 +291,7 @@ public class JavaDebugger extends AbstractDebugger {
         }
         setContextBasicInfo((LocatableEvent) event);
 
-        while (AbstractDebugEnv.isDebug()) {
+        while (DebugManager.getInstance(project).isDebug()) {
             ProcessResult pR = processDebugCommand();
             if (pR.isContinue) {
                 continue;

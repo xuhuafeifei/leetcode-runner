@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
@@ -56,7 +57,7 @@ public abstract class AbstractAction extends AnAction {
         // debug check
         DebugCheck debugCheck = this.getClass().getAnnotation(DebugCheck.class);
         if (debugCheck != null) {
-            if (!AbstractDebugEnv.isDebug()) {
+            if (!DebugManager.getInstance(project).isDebug()) {
                 ConsoleUtils.getInstance(project).showWaring("no debug happen", false, true);
                 return;
             }

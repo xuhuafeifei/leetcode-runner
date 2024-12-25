@@ -14,6 +14,7 @@ public interface Debugger {
 
     /**
      * 终止debugger
+     * 尽量通过调用DebugManager.stop()停止debugger
      */
     void stop();
 

@@ -8,6 +8,7 @@ import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
 
@@ -21,7 +22,7 @@ import com.xhf.leetcode.plugin.utils.DebugCheck;
 public class DebugStopAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
-        DebugManager.getInstance(project).getAnyDebugger().stop();
-        ConsoleUtils.getInstance(project).showInfo("结束debug!", false, true);
+        DebugManager.getInstance(project).stopDebugger();
+        ConsoleUtils.getInstance(project).simpleShowConsole("结束debug!\n");
     }
 }

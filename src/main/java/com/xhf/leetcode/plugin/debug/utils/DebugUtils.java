@@ -33,6 +33,7 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.awt.*;
 import java.io.BufferedReader;
@@ -59,7 +60,8 @@ public class DebugUtils {
         if (asyn) {
             new Thread(() -> {
                 try {
-                    LogUtils.simpleDebug("cmd result = " + getOutputMessage(process));
+                    String outputMessage = getOutputMessage(process);
+                    LogUtils.simpleDebug("cmd result = " + outputMessage);
                 } catch (IOException e) {
                     LogUtils.error(e);
                 }
@@ -67,6 +69,9 @@ public class DebugUtils {
             new Thread(() -> {
                 try {
                     String errorMessage = getErrorMessage(process);
+                    if (StringUtils.isBlank(errorMessage)) {
+                        return;
+                    }
                     LogUtils.simpleDebug("cmd error result = " + errorMessage);
                     ConsoleUtils.getInstance(project).showError(errorMessage, false);
                 } catch (IOException e) {
@@ -334,7 +339,7 @@ public class DebugUtils {
             for (RangeHighlighter highlighter : highlighterMap.values()) {
                 markupModel.removeHighlighter(highlighter);
             }
-            simpleDebug("removeHighlightLine done...", project);
+            simpleDebug("移除文件高亮代码...", project);
         });
     }
 

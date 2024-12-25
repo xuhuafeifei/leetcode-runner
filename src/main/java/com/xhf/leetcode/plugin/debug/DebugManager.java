@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.debug;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.bus.DebugEndEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.debugger.*;
 import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.exception.DebugError;
@@ -21,7 +23,9 @@ public class DebugManager {
 
     private DebugManager(Project project) {
         this.project = project;
+        LCEventBus.getInstance().register(this);
     }
+
     // 单例
     public static DebugManager getInstance(Project project) {
         if (instance == null) {
@@ -37,6 +41,8 @@ public class DebugManager {
     // 容器
     private final Map<Class<? extends Debugger>, Debugger> debuggers = new HashMap<>();
 
+    private Debugger currentDebugger;
+
     /*
      * 创建并存储全新的debugger
      */
@@ -44,17 +50,28 @@ public class DebugManager {
         if (clazz == JavaDebugger.class) {
             JavaDebugger javaDebugger = buildJavaDebugger();
             debuggers.put(clazz, javaDebugger);
-            return javaDebugger;
+            currentDebugger = javaDebugger;
         } else if (clazz == PythonDebugger.class) {
             PythonDebugger pythonDebugger = buildPythonDebugger();
             debuggers.put(clazz, pythonDebugger);
-            return pythonDebugger;
+            currentDebugger = pythonDebugger;
         }
-        return null;
+        return currentDebugger;
     }
 
     public <T extends Debugger> T getDebugger(Class<T> clazz) {
         return clazz.cast(debuggers.get(clazz));
+    }
+
+    public Debugger getCurrentDebugger() {
+        return currentDebugger;
+    }
+
+    public void stopDebugger() {
+        if (currentDebugger != null) {
+            currentDebugger.stop();
+            currentDebugger = null;
+        }
     }
 
 
@@ -82,5 +99,11 @@ public class DebugManager {
 
     public Debugger getAnyDebugger() {
         return debuggers.values().iterator().next();
+    }
+
+    public boolean isDebug() {
+        if (currentDebugger == null) return false;
+        if (currentDebugger.getEnv() == null) return false;
+        return currentDebugger.getEnv().isDebug();
     }
 }

@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
@@ -21,7 +22,7 @@ public class DebugRAAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
         // 如果是处于debug状态, 写入指令
-        if (AbstractDebugEnv.isDebug()) {
+        if (DebugManager.getInstance(project).isDebug()) {
             // 写指令到阻塞队列中
             boolean flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.RBA, ""));
             if (! flag) {

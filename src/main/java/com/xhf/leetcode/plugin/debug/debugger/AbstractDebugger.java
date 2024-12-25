@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.debug.debugger;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
@@ -59,7 +60,13 @@ public abstract class AbstractDebugger implements Debugger{
      * @return
      */
     protected ProcessResult processDebugCommand() {
-        Instruction inst = reader.readInst();
+        Instruction inst = null;
+        try {
+            inst = reader.readInst();
+        } catch (InterruptedException e) {
+            // 此时读取到的是无效指令, 因为是阻塞队列消费被打断而返回的null数据, 因此需要continue, 继续读取数据
+            return new ProcessResult(true, true, false, null, null);
+        }
 
         // 如果是null, 表示读取InstSource的UI消费阻塞队列被打断, 此时返回null
         if (inst == null) {
@@ -67,7 +74,7 @@ public abstract class AbstractDebugger implements Debugger{
         }
         // 如果指令是exit, 直接终止运行
         if (inst.isExit()) {
-            this.stop();
+            DebugManager.getInstance(project).stopDebugger();
             return new ProcessResult(true, false, true, inst, null);
         }
         if (! inst.isSuccess()) {
@@ -100,7 +107,7 @@ public abstract class AbstractDebugger implements Debugger{
         return new ProcessResult(true, false, false, inst, r);
     }
 
-    protected class ProcessResult {
+    protected static class ProcessResult {
         boolean isSuccess;
         boolean isContinue;
         boolean isReturn;

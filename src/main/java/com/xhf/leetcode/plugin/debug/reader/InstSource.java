@@ -45,7 +45,7 @@ public class InstSource {
             return commandBQ.take();
         } catch (InterruptedException e) {
             LogUtils.debug("消费被打断, 终止消费...");
-            return "";
+            return null;
         }
     }
 

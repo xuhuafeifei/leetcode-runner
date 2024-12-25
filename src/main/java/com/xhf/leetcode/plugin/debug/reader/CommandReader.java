@@ -19,10 +19,11 @@ public abstract class CommandReader extends AbstractInstReader{
     }
 
     @Override
-    public final Instruction readInst() {
+    public final Instruction readInst() throws InterruptedException {
         String res = readCommand();
-        if (StringUtils.isBlank(res)) {
-            res = readCommand();
+        // 阻塞队列被打断时, 返回null
+        if (res == null) {
+            throw new InterruptedException("阻塞队列消费被打断");
         }
         DebugUtils.simpleDebug("command = " + res, project, ConsoleViewContentType.USER_INPUT);
         if (res == null || res.equals("stop") || res.equals("exit")) {

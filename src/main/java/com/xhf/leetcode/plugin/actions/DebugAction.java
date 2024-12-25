@@ -25,7 +25,7 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 public class DebugAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
-        if (AbstractDebugEnv.isDebug()) {
+        if (DebugManager.getInstance(project).isDebug()) {
             ConsoleUtils.getInstance(project).showInfo("当前处于调试状态, 请先退出调试状态", false, true);
             return;
         }

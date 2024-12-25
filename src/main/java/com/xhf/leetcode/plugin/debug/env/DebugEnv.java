@@ -11,4 +11,8 @@ public interface DebugEnv {
      * @return 是否准备完毕
      */
     boolean prepare() throws DebugError;
+
+    boolean isDebug();
+
+    void stopDebug();
 }

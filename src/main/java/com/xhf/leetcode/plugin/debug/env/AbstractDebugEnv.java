@@ -9,11 +9,9 @@ import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
-import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
@@ -74,15 +72,17 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         return true;
     }
 
-    public static boolean isDebug() {
+    @Override
+    public boolean isDebug() {
         return isDebug;
     }
 
+    @Override
     public void stopDebug() {
-        isDebug = false;
+        isDebug = false; // 先置为false, 否则后续判断debug状态可能会出现问题. 在结束时可能会出现并发问题. DebugStopAction一个Thread, BQ消费一个Thread
         InstSource.clear();
         DebugUtils.removeHighlightLine(project);
-        DebugUtils.simpleDebug("debug service stop", project);
+        DebugUtils.simpleDebug("debug env stop!", project);
         LCEventBus.getInstance().post(new DebugEndEvent());
     }
 
@@ -91,7 +91,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         InstSource.clear();
         // 清空consoleView
         ConsoleUtils.getInstance(project).clearConsole();
-        DebugUtils.simpleDebug("debug service starting...", project);
+        DebugUtils.simpleDebug("debug env start", project);
 
         LCEventBus.getInstance().post(new DebugStartEvent());
     }
