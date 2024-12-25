@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.debug.execute;
 
+import com.google.gson.annotations.SerializedName;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
 
@@ -15,30 +16,38 @@ public class ExecuteResult {
      * ---------------------
      * 现在不配合Operation.NULL, moreInfo服务于捕获debug代码的std out / std error
      */
+    @SerializedName("more_info")
     private String moreInfo;
+    @SerializedName("success")
     private boolean success;
+    @SerializedName("has_result")
     private boolean hasResult;
     /**
      * 输出结果
      */
+    @SerializedName("result")
     private String result;
     /**
      * 错误信息
      */
+    @SerializedName("msg")
     private String msg;
     /**
      * 添加的断点行数, 专门服务于UIOutput
      * UIOutput将会取消显示该断点, 因为该断点非法
      */
+    @SerializedName("add_line")
     private int addLine;
     /**
      * 当前执行的方法名词
      */
+    @SerializedName("method_name")
     private String methodName;
     /**
      * 上下文对象
      */
     private ExecuteContext context;
+    @SerializedName("class_name")
     private String className;
 
     public boolean isSuccess() {
@@ -63,6 +72,7 @@ public class ExecuteResult {
 
     public void setResult(String result) {
         this.result = result;
+        this.hasResult = true;
     }
 
     public static ExecuteResult success(Operation operation, String result) {

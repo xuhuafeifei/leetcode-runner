@@ -1,15 +1,13 @@
 package com.xhf.leetcode.plugin.debug.debugger;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
-import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
-import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
-import com.xhf.leetcode.plugin.debug.execute.java.JavaInstFactory;
 import com.xhf.leetcode.plugin.debug.execute.python.PyClient;
 import com.xhf.leetcode.plugin.debug.execute.python.PyContext;
 import com.xhf.leetcode.plugin.debug.execute.python.PythonInstFactory;
+import com.xhf.leetcode.plugin.debug.execute.python.PythonRBAInst;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.ConsoleOutput;
 import com.xhf.leetcode.plugin.debug.output.Output;
@@ -18,6 +16,7 @@ import com.xhf.leetcode.plugin.debug.reader.InstReader;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import java.io.IOException;
@@ -29,18 +28,24 @@ import java.net.Socket;
  */
 public class PythonDebugger extends AbstractDebugger {
 
+    private final PythonDebugConfig config;
     private PythonDebugEnv env;
 
     private InstReader reader;
 
     private Output output;
     private PyContext context;
+    /**
+     * 启动python服务的Process
+     */
+    private Process exec;
 
     public PythonDebugger(Project project, PythonDebugConfig config) {
         super(project, new PyContext(), config, PythonInstFactory.getInstance());
-        reader = new CommandLineReader(project);
-        output = new ConsoleOutput(project);
+        reader = config.getReader();
+        output = config.getOutput();
         context = (PyContext) super.basicContext;
+        this.config = config;
     }
 
     @Override
@@ -64,14 +69,14 @@ public class PythonDebugger extends AbstractDebugger {
     private void startDebug() {
         env.startDebug();
         try {
-//            startPythonService();
+            startPythonService();
+            initCtx();
+            executePythonDebugRemotely();
         } catch (DebugError e) {
-            DebugUtils.simpleDebug("Debug Failed! " + e, project, true);
-            return;
+            LogUtils.error(e);
+            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
         }
-        initCtx();
-        executePythonDebugRemotely();
-        env.stopDebug();
+        this.stop();
     }
 
     private void initCtx() {
@@ -86,13 +91,19 @@ public class PythonDebugger extends AbstractDebugger {
     private void executePythonDebugRemotely() {
         while (true) {
             ProcessResult pR = processDebugCommand();
-            if (! pR.isSuccess) {
-                if (pR.isContinue) {
-                    continue;
-                }
-                if (pR.isReturn) {
-                    return;
-                }
+            if (pR.isContinue) {
+                continue;
+            } else if (pR.isReturn) {
+                return;
+            }
+            if (!pR.isSuccess) {
+                LogUtils.simpleDebug("未知异常! debug 指令执行错误!");
+                ConsoleUtils.getInstance(project).showError("未知异常! debug 指令执行错误!", false, true);
+                continue;
+            }
+            if (Constants.PY_SERVER_DISCONNECT.equals(pR.r.getMoreInfo())) {
+                DebugUtils.simpleDebug("python服务断开连接, debug结束!", project);
+                break;
             }
         }
     }
@@ -103,27 +114,27 @@ public class PythonDebugger extends AbstractDebugger {
     private void startPythonService() {
         String python = env.getPython();
         String cmd = String.format("\"%s\" \"%s\"", python, env.getMainPyPath());
+        LogUtils.simpleDebug("启动python服务: " + cmd);
 
         try {
-            Process exec = Runtime.getRuntime().exec(cmd);
-            DebugUtils.printProcess(exec, false, project);
+            this.exec = Runtime.getRuntime().exec(cmd);
+            DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
             throw new DebugError(e.toString(), e);
         }
 
-        // 三次检测连接
-        for (int i = 0; i < 3; i++) {
+        // 五次检测连接
+        for (int i = 0; i < 5; i++) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException ignored) {
             }
             if (isPortAvailable("localhost", env.getPyPort())) {
-                DebugUtils.simpleDebug("python服务启动成功", project, false);
-                env.startDebug();
+                DebugUtils.simpleDebug("python服务连接成功", project, false);
                 return;
             }
         }
-        throw new DebugError("python服务启动失败!");
+        throw new DebugError("python服务连接失败!");
     }
 
     /**
@@ -146,8 +157,25 @@ public class PythonDebugger extends AbstractDebugger {
     @Override
     public void stop() {
         env.stopDebug();
-        // 发送终止请求
-//        dafjl
+        // 发送终止请求(所谓的终止python, 就是提前让python跑完所有内容, 自动结束)
+        new PythonRBAInst().execute(Instruction.success(config.getReadType(), Operation.RBA, ""), this.context);
+        new PythonRBAInst().execute(Instruction.success(config.getReadType(), Operation.R, ""), this.context);
+        // 3次循环, 检测python服务是否已经关闭
+        for (int i = 0; i < 3; i++) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
+            if (!isPortAvailable("localhost", env.getPyPort())) {
+                DebugUtils.simpleDebug("python服务关闭成功", project);
+                return;
+            }
+        }
+        exec.destroy();
+        if (exec.isAlive()) {
+            exec.destroyForcibly();
+        }
+        DebugUtils.simpleDebug("python服务强制关闭!", project, false);
     }
 
     @Override

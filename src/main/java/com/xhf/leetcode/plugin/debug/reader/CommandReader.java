@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.command.parser.InstParserImpl;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 命令读取器, 读取命令并解析为指令
@@ -20,6 +21,9 @@ public abstract class CommandReader extends AbstractInstReader{
     @Override
     public final Instruction readInst() {
         String res = readCommand();
+        if (StringUtils.isBlank(res)) {
+            res = readCommand();
+        }
         DebugUtils.simpleDebug("command = " + res, project, ConsoleViewContentType.USER_INPUT);
         if (res == null || res.equals("stop") || res.equals("exit")) {
             return Instruction.quit(this.readType);

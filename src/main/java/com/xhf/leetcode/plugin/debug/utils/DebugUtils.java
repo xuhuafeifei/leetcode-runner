@@ -68,7 +68,7 @@ public class DebugUtils {
                 try {
                     String errorMessage = getErrorMessage(process);
                     LogUtils.simpleDebug("cmd error result = " + errorMessage);
-                    ConsoleUtils.getInstance(project).showError(errorMessage, true);
+                    ConsoleUtils.getInstance(project).showError(errorMessage, false);
                 } catch (IOException e) {
                     LogUtils.error(e);
                 }
@@ -363,6 +363,12 @@ public class DebugUtils {
         } catch (Exception e) {
             DebugUtils.simpleDebug("fillExecuteResultByLocation error: " + e.getMessage(), r.getContext().getProject());
         }
+    }
+
+    public static void fillExecuteResultByLocation(ExecuteResult r, String className, String methodName, int lineNumber) {
+        r.setAddLine(lineNumber);
+        r.setMethodName(methodName);
+        r.setClassName(className);
     }
 
     public static String buildCurrentLineInfoByLocation(ExecuteResult r) {

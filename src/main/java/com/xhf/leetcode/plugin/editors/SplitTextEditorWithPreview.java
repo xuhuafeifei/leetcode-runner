@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.editors;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileEditor.TextEditorWithPreview;
@@ -80,7 +81,8 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
         // 检查断点是否属于当前 Editor
         String breakpointFilePath = breakpoint.getSourcePosition().getFile().getPath();
         // 获取 Editor 的文件路径
-        String editorFilePath = editor.getDocument().toString();
+        // String editorFilePath = editor.getDocument().toString();
+        String editorFilePath = ((EditorImpl) editor).getVirtualFile().getPath();
         return editorFilePath.contains(breakpointFilePath);
     }
     public String getFileContent() {

@@ -1,7 +1,7 @@
 import sys
 import threading
 
-from debug_core import trace_calls
+from debug_core import Debugger
 
 from Solution import Solution
 from server import WebServer
@@ -16,10 +16,10 @@ def main():
     thread.start()
 
     solution = Solution()
+    trace_calls = Debugger('totalNQueens').trace_calls
     sys.settrace(trace_calls)
     result = solution.totalNQueens(4)
     sys.settrace(None)  # 停止跟踪
-    print(f"Result: {result}")
 
 
 if __name__ == '__main__':

@@ -8,8 +8,5 @@ import com.xhf.leetcode.plugin.debug.instruction.Instruction;
  * @email 2508020102@qq.com
  */
 public class PythonRInst extends AbstractPythonInstExecutor {
-    @Override
-    protected ExecuteResult doExecute(Instruction inst, PyContext context) {
-        return null;
-    }
+
 }

@@ -63,12 +63,12 @@ public abstract class AbstractDebugger implements Debugger{
 
         // 如果是null, 表示读取InstSource的UI消费阻塞队列被打断, 此时返回null
         if (inst == null) {
-            return new ProcessResult(false, true, false, null, null);
+            return new ProcessResult(true, true, false, null, null);
         }
         // 如果指令是exit, 直接终止运行
         if (inst.isExit()) {
             this.stop();
-            return new ProcessResult(false, false, true, inst, null);
+            return new ProcessResult(true, false, true, inst, null);
         }
         if (! inst.isSuccess()) {
             doFailed(inst);
@@ -86,6 +86,10 @@ public abstract class AbstractDebugger implements Debugger{
             return new ProcessResult(false, true, false, inst, null);
         }
 
+        // 执行结果为null
+        if (r == null) {
+            return new ProcessResult(false, false, false, inst, null);
+        }
         // 设置上下文
         r.setContext(this.basicContext);
         this.output.output(r);

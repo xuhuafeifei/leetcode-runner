@@ -13,13 +13,4 @@ import com.xhf.leetcode.plugin.model.HttpResponse;
  */
 public class PythonNInst extends AbstractPythonInstExecutor {
 
-    /*
-        curl -X POST http://localhost:{pyPort}/process -d "{\"operation\": \"R\", \"param\": \"\"}" -H "Content-Type: application/json"
-     */
-    @Override
-    protected ExecuteResult doExecute(Instruction inst, PyContext pCtx) {
-        PyClient pyClient = pCtx.getPyClient();
-        PyClient.PyResponse pyResponse = pyClient.executeN(inst);
-        return null;
-    }
 }

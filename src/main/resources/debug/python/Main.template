@@ -1,7 +1,7 @@
 import sys
 import threading
 
-from debug_core import trace_calls
+from debug_core import Debugger
 
 from Solution import Solution
 from server import WebServer
@@ -10,12 +10,13 @@ from server import WebServer
 def main():
     # 启动服务, 开启新的线程
     # 创建线程
-    webServer = WebServer({{port}})
-    thread = threading.Thread(target=webServer.run)
+    webServer = WebServer(port={{port}})
+    thread = threading.Thread(target=webServer.run, daemon=True)
     # 启动线程
     thread.start()
 
     solution = Solution()
+    trace_calls = Debugger({{methodName}}).trace_calls
     sys.settrace(trace_calls)
 {{callCode}}
     sys.settrace(None)  # 停止跟踪

@@ -7,6 +7,7 @@ import com.xhf.leetcode.plugin.debug.debugger.Debugger;
 import com.xhf.leetcode.plugin.debug.debugger.PythonDebugger;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
@@ -14,6 +15,8 @@ import com.xhf.leetcode.plugin.model.HttpRequest;
 import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import org.junit.Test;
+
+import java.util.Map;
 
 /**
  * python client, 负责于启动debug的python服务交互
@@ -36,7 +39,7 @@ public class PyClient {
 
     public static class PyResponse {
         String status;
-        String data;
+        ExecuteResult data;
         String message;
 
         public String getStatus() {
@@ -47,12 +50,12 @@ public class PyClient {
             this.status = status;
         }
 
-        public String getData() {
+        public ExecuteResult getData() {
             return data;
         }
 
-        public void setData(String data) {
-            this.data = data;
+        public void setData(ExecuteResult r) {
+            this.data = r;
         }
 
         public String getMessage() {
@@ -62,16 +65,25 @@ public class PyClient {
         public void setMessage(String message) {
             this.message = message;
         }
+
+        @Override
+        public String toString() {
+            return "PyResponse{" +
+                    "status='" + status + '\'' +
+                    ", data=" + data +
+                    ", message='" + message + '\'' +
+                    '}';
+        }
     }
 
-    // 执行N指令
-    public PyResponse executeN(Instruction inst) {
+    public PyResponse postRequest(Instruction inst) {
         HttpClient instance = HttpClient.getInstance();
         HttpResponse httpResponse = instance.executePost(new HttpRequest.RequestBuilder("http://localhost:" + pyPort + "/process")
                 .addJsonBody("operation", inst.getOperation().getName())
                 .addJsonBody("param", inst.getParam())
                 .buildByJsonBody()
         );
+        if (httpResponse == null) return null;
         return GsonUtils.fromJson(httpResponse.getBody(), PyResponse.class);
     }
 }

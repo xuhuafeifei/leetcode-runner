@@ -1,10 +1,21 @@
 import json
-
 from aiohttp import web
-
 from inst_source import inst_source
 from log_out_helper import LogOutHelper
 
+class Response:
+    def __init__(self, status, data, message):
+        self.status = status
+        self.data = data  # `data` 是 ExecuteResult 类型
+        self.message = message
+
+    def to_dict(self):
+        """将 Response 对象转换为字典"""
+        return {
+            'status': self.status,
+            'data': self.data.to_dict() if self.data else None,  # 确保 `data` 是字典
+            'message': self.message
+        }
 
 class WebServer:
     def __init__(self, host='localhost', port=5005):
@@ -22,20 +33,23 @@ class WebServer:
         post_data = await request.json()
 
         try:
-            # command = post_data.get("command")
             LogOutHelper.log_out("web服务器接受请求数据: " + str(post_data))
             inst_source.store_input(post_data)
 
             # 等待输出队列中有数据
             output = inst_source.consume_output()
 
-            response = {"status": "success", "data": output.to_json(), "message": None}
+            LogOutHelper.log_out(output)
+
+            # 创建 Response 对象
+            response = Response(status="success", data=output, message=None)
 
         except json.JSONDecodeError:
-            response = {"status": "error", "data": None, "message": "Invalid JSON data"}
+            # 创建错误的 Response 对象
+            response = Response(status="error", data=None, message="Invalid JSON data")
 
-        # 返回响应内容
-        return web.json_response(response)
+        # 返回响应内容，将 Response 转换为字典
+        return web.json_response(response.to_dict())
 
     def run(self):
         """启动 Web 服务器"""

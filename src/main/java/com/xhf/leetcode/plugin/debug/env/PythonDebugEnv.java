@@ -128,6 +128,7 @@ public class PythonDebugEnv extends AbstractDebugEnv {
         this.pyPort = DebugUtils.findAvailablePort();
         mainContent = mainContent.replace("{{callCode}}", getCallCode())
                 .replace("{{port}}", String.valueOf(this.pyPort))
+                .replace("{{methodName}}", "\"" + this.methodName + "\"");
         ;
         // 存储文件
         StoreService.getInstance(project).writeFile(mainPath, mainContent);

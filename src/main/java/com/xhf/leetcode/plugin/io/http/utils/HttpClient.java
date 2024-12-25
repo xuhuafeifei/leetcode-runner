@@ -10,6 +10,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -131,7 +132,7 @@ public class HttpClient {
         } catch (IOException e) {
             // todo: 修改为弹窗提示
             // throw new RuntimeException("POST request failed: " + e.getMessage(), e);
-            LogUtils.error(e);
+            LogUtils.info(e.toString());
             return null;
         }
 

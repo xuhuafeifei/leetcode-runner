@@ -44,9 +44,11 @@ public abstract class AbstractDebugConfig implements DebugConfig {
         protected final Project project;
         protected InstReader reader;
         protected Output output;
+        protected AppSettings appSettings;
 
         public Builder(Project project) {
             this.project = project;
+            this.appSettings = AppSettings.getInstance();
         }
 
         public Builder<T> setReader(InstReader reader) {
@@ -59,7 +61,6 @@ public abstract class AbstractDebugConfig implements DebugConfig {
         }
 
         public Builder<T> autoBuild() {
-            AppSettings appSettings = AppSettings.getInstance();
 
             return
                     setReader(

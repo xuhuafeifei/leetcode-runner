@@ -24,6 +24,6 @@ public class StringArrayConvertor extends AbstractVariableConvertor {
 
     @Override
     protected String doPython(String testcase, String variableName) {
-        return TAB + variableName + " = " + testcase;
+        return TAB + variableName + " = " + testcase + "\r\n";
     }
 }

@@ -6,7 +6,7 @@ package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 public class StringMatrixConvertor extends AbstractVariableConvertor {
     @Override
     protected String doPython(String testcase, String variableName) {
-        return TAB + variableName + " = " + testcase;
+        return TAB + variableName + " = " + testcase + "\r\n";
     }
 
     @Override

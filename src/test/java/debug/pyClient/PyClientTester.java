@@ -33,4 +33,21 @@ public class PyClientTester {
         }
         System.out.println(GsonUtils.fromJson(httpResponse.getBody(), PyClient.PyResponse.class));
     }
+
+    @Test
+    public void test() {
+        HttpClient instance = HttpClient.getInstance();
+        Instruction inst = Instruction.success(ReadType.UI_IN, Operation.R, "1");
+        int pyPort = 5005;
+        HttpResponse httpResponse = instance.executePost(new HttpRequest.RequestBuilder("http://localhost:" + pyPort + "/process")
+                .addJsonBody("operation", inst.getOperation().getName())
+                .addJsonBody("param", inst.getParam())
+                .buildByJsonBody()
+        );
+        if (httpResponse == null) return ;
+        String body = httpResponse.getBody();
+        System.out.println(body);
+        PyClient.PyResponse x = GsonUtils.fromJson(body, PyClient.PyResponse.class);
+        System.out.println(x);
+    }
 }

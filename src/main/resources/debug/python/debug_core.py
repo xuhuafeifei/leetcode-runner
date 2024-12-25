@@ -9,9 +9,10 @@ from log_out_helper import LogOutHelper
 
 
 class Debugger:
-    def __init__(self):
+    def __init__(self, core_method_name):
         self.breakpoint_list = set()
         self.pp = pprint.PrettyPrinter(indent=4)
+        self.core_method_name = core_method_name
 
     def trace_calls(self, frame, event, arg):
         if event == 'call':
@@ -20,9 +21,12 @@ class Debugger:
             line = frame.f_lineno
             print(f'Calling function: {function_name}')
             print(f'line: {line}')
+            if function_name != self.core_method_name:
+                return self.trace_calls
             self.breakpoint_list.add(line)
-            print("init breapoint_list with line = ", line)
-        if event == 'line':
+            self.breakpoint_list.add(line + 1)
+            print("init breapoint_list with line = ", line, " and line + 1", line + 1)
+        elif event == 'line':
             LogOutHelper.log_out("line event....")
             line = frame.f_lineno
             # 遇到断点, 阻塞打断程序
@@ -160,9 +164,9 @@ class Debugger:
             return json.dumps({"operation": params[0], "param": params[1]})
         return json.dumps({"operation": input, "param": None})
 
-# 创建一个Debugger实例并使用trace_calls方法
-debugger = Debugger()
-
-# 使用trace_calls方法作为trace的钩子
-def trace_calls(frame, event, arg):
-    return debugger.trace_calls(frame, event, arg)
+# # 创建一个Debugger实例并使用trace_calls方法
+# debugger = Debugger()
+#
+# # 使用trace_calls方法作为trace的钩子
+# def trace_calls(frame, event, arg):
+#     return debugger.trace_calls(frame, event, arg)

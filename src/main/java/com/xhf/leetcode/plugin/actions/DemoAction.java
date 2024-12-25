@@ -85,22 +85,22 @@ public class DemoAction extends AbstractAction {
         }
         new Thread(() -> {
             LogUtils.info("准备播放音频");
-            // 打开音频输入流
             try (AudioInputStream audioStream = AudioSystem.getAudioInputStream(url)) {
-                // 获取音频格式
                 AudioFormat format = audioStream.getFormat();
-                // 获取数据行信息
                 DataLine.Info info = new DataLine.Info(Clip.class, format);
-                // 打开数据行
                 Clip clip = (Clip) AudioSystem.getLine(info);
                 clip.open(audioStream);
-                // 开始播放
+
+                // 设置音量为最大
+                FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                gainControl.setValue(0);  // 设置音量为最大
+
                 clip.start();
-                // 等待音频播放完成
-                while (!clip.isRunning())
+
+                // 等待播放完成
+                while (clip.isRunning()) {
                     Thread.sleep(10);
-                while (clip.isRunning())
-                    Thread.sleep(10);
+                }
             } catch (UnsupportedAudioFileException | IOException | LineUnavailableException |
                      InterruptedException ex) {
                 LogUtils.error("播放音频失败: ", ex);

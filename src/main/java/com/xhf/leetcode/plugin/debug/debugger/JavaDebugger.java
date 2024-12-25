@@ -113,7 +113,7 @@ public class JavaDebugger extends AbstractDebugger {
             ConsoleUtils.getInstance(project).showWaring(e.toString(), false, true, e.toString(), "未知异常", ConsoleDialog.ERROR);
             LogUtils.error(e);
         }
-        env.stopDebug();
+        this.stop();
     }
 
 
@@ -286,13 +286,13 @@ public class JavaDebugger extends AbstractDebugger {
 
         while (AbstractDebugEnv.isDebug()) {
             ProcessResult pR = processDebugCommand();
-            if (! pR.isSuccess) {
-                if (pR.isContinue) {
-                    continue;
-                }
-                if (pR.isReturn) {
-                    return;
-                }
+            if (pR.isContinue) {
+                continue;
+            } else if (pR.isReturn) {
+                return;
+            }
+            if (!pR.isSuccess) {
+                throw new DebugError("未知异常! debug 指令执行错误!");
             }
             Instruction inst = pR.inst;
             // 如果是运行类的指令, 则跳出循环, 运行vm
