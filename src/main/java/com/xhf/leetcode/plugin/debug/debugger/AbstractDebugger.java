@@ -34,6 +34,8 @@ public abstract class AbstractDebugger implements Debugger{
         this.reader = config.getReader();
         this.output = config.getOutput();
         this.instFactory = instFactory;
+        // 清空consoleView
+        ConsoleUtils.getInstance(project).clearConsole();
     }
 
     @Override
@@ -83,6 +85,10 @@ public abstract class AbstractDebugger implements Debugger{
         }
 
         InstExecutor instExecutor = instFactory.create(inst);
+        if (instExecutor == null) {
+            DebugUtils.simpleDebug("指令执行异常: " + inst + ". 指令对应的执行器InstExecutor创建为null, 请检查!", project);
+            return new ProcessResult(false, true, false, inst, null);
+        }
 
         ExecuteResult r;
         try {

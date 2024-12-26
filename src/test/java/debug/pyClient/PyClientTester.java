@@ -50,4 +50,10 @@ public class PyClientTester {
         PyClient.PyResponse x = GsonUtils.fromJson(body, PyClient.PyResponse.class);
         System.out.println(x);
     }
+
+    @Test
+    public void testr2() {
+        for (int i = 0; i < 10; ++i) System.out.println(i);
+
+    }
 }

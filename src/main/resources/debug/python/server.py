@@ -29,10 +29,12 @@ class WebServer:
 
     async def handle_post(self, request):
         """处理 POST 请求"""
-        # 获取请求体内容
-        post_data = await request.json()
 
         try:
+            # 获取请求体内容
+            LogOutHelper.log_out("web准备接受数据")
+            post_data = await request.json()
+
             LogOutHelper.log_out("web服务器接受请求数据: " + str(post_data))
             inst_source.store_input(post_data)
 
@@ -47,6 +49,9 @@ class WebServer:
         except json.JSONDecodeError:
             # 创建错误的 Response 对象
             response = Response(status="error", data=None, message="Invalid JSON data")
+        except Exception as e:
+            # 创建异常的 Response 对象
+            response = Response(status="error", data=None, message=str(e))
 
         # 返回响应内容，将 Response 转换为字典
         return web.json_response(response.to_dict())

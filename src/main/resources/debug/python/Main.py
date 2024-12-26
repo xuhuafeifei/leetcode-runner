@@ -18,7 +18,7 @@ def main():
     solution = Solution()
     trace_calls = Debugger('totalNQueens').trace_calls
     sys.settrace(trace_calls)
-    result = solution.totalNQueens(4)
+    result = solution.totalNQueens(2)
     sys.settrace(None)  # 停止跟踪
 
 

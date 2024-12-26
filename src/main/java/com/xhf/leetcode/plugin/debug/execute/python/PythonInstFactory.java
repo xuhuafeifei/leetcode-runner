@@ -51,7 +51,7 @@ public class PythonInstFactory implements InstructionFactory {
                 instExecutor = new PythonHELPInst();
                 break;
             case STEP:
-//                instExecutor = new PythonSTEPInst();
+                instExecutor = new PythonSTEPInst();
             default:
                 break;
         }

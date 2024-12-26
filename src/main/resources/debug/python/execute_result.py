@@ -19,8 +19,9 @@ class ExecuteResult:
     @classmethod
     def fill_with_frame(cls, r: 'ExecuteResult', frame):
         """根据帧信息填充执行结果"""
+        r.class_name = frame.f_locals.get('self', None).__class__.__name__
         r.add_line = frame.f_lineno
-        r.class_name = frame.f_code.co_name
+        r.method_name = frame.f_code.co_name
 
     @classmethod
     def success(cls, operation, result=None):

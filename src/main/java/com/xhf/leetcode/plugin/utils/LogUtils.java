@@ -17,10 +17,6 @@ import java.util.Date;
 public class LogUtils {
     private static final Logger IDEA_LOGGER = Logger.getInstance(LogUtils.class);
 
-    static {
-        IDEA_LOGGER.setLevel(LogLevel.INFO);
-    }
-
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private static final StringBuilder sb = new StringBuilder();

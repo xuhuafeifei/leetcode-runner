@@ -13,6 +13,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
@@ -126,10 +127,15 @@ public class PythonDebugEnv extends AbstractDebugEnv {
         String mainContent = FileUtils.readContentFromFile(getClass().getResource("/debug/python/Main.template"));
         // 获取callCode
         this.pyPort = DebugUtils.findAvailablePort();
-        mainContent = mainContent.replace("{{callCode}}", getCallCode())
+        String callCode = getCallCode();
+        mainContent = mainContent.replace("{{callCode}}", callCode)
                 .replace("{{port}}", String.valueOf(this.pyPort))
                 .replace("{{methodName}}", "\"" + this.methodName + "\"");
         ;
+        // debug
+        DebugUtils.simpleDebug("python服务端口确定: " + pyPort, project);
+        DebugUtils.simpleDebug("核心调用代码: \n" + callCode, project);
+        DebugUtils.simpleDebug("methodName: " + methodName, project);
         // 存储文件
         StoreService.getInstance(project).writeFile(mainPath, mainContent);
         return true;

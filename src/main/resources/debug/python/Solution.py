@@ -25,18 +25,23 @@ class Solution:
         return True
 
     def totalNQueens(self, n: int) -> int:
-        print(n)
+        for i in range(100):
+            print(i)
+            print(i)
+        board = [['.'] * n for _ in range(n)]
+        def dfs(i):
+            if i == n:
+                self.ans += 1
+                return
+            for j in range(n):
+                if self.isValid(board, i, j, n):
+                    board[i][j] = 'Q'
+                    dfs(i + 1)
+                    board[i][j] = '.' 
+        dfs(0)
         return self.ans
-        # board = [['.'] * n for _ in range(n)]
-        # def dfs(i):
-        #     if i == n:
-        #         self.ans += 1
-        #         return
-        #     for j in range(n):
-        #         if self.isValid(board, i, j, n):
-        #             board[i][j] = 'Q'
-        #             dfs(i + 1)
-        #             board[i][j] = '.'
-        # dfs(0)
-        # return self.ans
 #lc-end-line
+
+if __name__ == '__main__':
+    s = Solution()
+    s.totalNQueens(1)

@@ -89,8 +89,6 @@ public abstract class AbstractDebugEnv implements DebugEnv {
     public void startDebug() {
         isDebug = true;
         InstSource.clear();
-        // 清空consoleView
-        ConsoleUtils.getInstance(project).clearConsole();
         DebugUtils.simpleDebug("debug env start", project);
 
         LCEventBus.getInstance().post(new DebugStartEvent());
