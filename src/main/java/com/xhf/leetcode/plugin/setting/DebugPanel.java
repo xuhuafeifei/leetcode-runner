@@ -30,6 +30,7 @@ public class DebugPanel extends JPanel{
         panel.setBorder(new TitledBorder(title)); // 给 Panel 设置边框和标题
 //        panel.setBackground(Constants.BACKGROUND_COLOR);
 
+
         // 创建 ButtonGroup 用于管理单选按钮
         this.outputType = new ButtonGroup();
 
