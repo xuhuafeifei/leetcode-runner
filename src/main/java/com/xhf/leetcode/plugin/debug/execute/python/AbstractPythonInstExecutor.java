@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.debug.execute.python;
 
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
@@ -49,10 +50,7 @@ public abstract class AbstractPythonInstExecutor implements InstExecutor {
         PyClient pyClient = pCtx.getPyClient();
         PyClient.PyResponse pyResponse = pyClient.postRequest(inst);
         if (pyResponse == null) {
-            ExecuteResult success = ExecuteResult.success(inst.getOperation());
-            success.setMoreInfo(PY_SERVER_DISCONNECT);
-            success.setHasResult(false);
-            return success;
+            return disConnectedResult(inst.getOperation());
         }
         ExecuteResult data = pyResponse.getData();
         // data.setHasResult(true);
@@ -103,5 +101,12 @@ public abstract class AbstractPythonInstExecutor implements InstExecutor {
         int lineNumber = Integer.parseInt(inst.getParam());
         lineNumber += pCtx.getEnv().getOffset();
         inst.setParam(String.valueOf(lineNumber));
+    }
+
+    protected ExecuteResult disConnectedResult(Operation op) {
+        ExecuteResult success = ExecuteResult.success(op);
+        success.setMoreInfo(PY_SERVER_DISCONNECT);
+        success.setHasResult(false);
+        return success;
     }
 }

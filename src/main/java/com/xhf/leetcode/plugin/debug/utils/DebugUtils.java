@@ -62,7 +62,7 @@ public class DebugUtils {
                 try {
                     String outputMessage = getOutputMessage(process);
                     LogUtils.simpleDebug("cmd result = " + outputMessage);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LogUtils.error(e);
                 }
             }).start();
@@ -74,7 +74,7 @@ public class DebugUtils {
                     }
                     LogUtils.simpleDebug("cmd error result = " + errorMessage);
                     ConsoleUtils.getInstance(project).showError(errorMessage, false);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LogUtils.error(e);
                 }
             }).start();
@@ -84,7 +84,7 @@ public class DebugUtils {
                 String errorMessage = getErrorMessage(process);
                 LogUtils.simpleDebug("error result = " + errorMessage);
                 ConsoleUtils.getInstance(project).showError(errorMessage, false);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LogUtils.error(e);
             }
         }

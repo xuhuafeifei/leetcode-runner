@@ -9,13 +9,19 @@ from log_out_helper import LogOutHelper
 
 
 class Debugger:
-    def __init__(self, core_method_name):
+    def __init__(self, core_method_name, read_type):
         self.breakpoint_list = set()
         self.pp = pprint.PrettyPrinter(indent=4)
         self.core_method_name = core_method_name
         self.call_stack = []
-        self.pre_option = None
+        # pre_option记录的是上一轮运行操作(R, N, STEP...)
+        self.pre_option = 'R'
         self.pre_param = None
+        '''
+        这里的read_type和ReadType.java一致. 有关readType详细信息
+        可以参考com.xhf.leetcode.plugin.debug.reader.ReadType
+        '''
+        self.read_type = read_type
         '''
         快照栈的长度, 服务于step over and step out指令
         需要说明的是, 该变量记录的是指令执行时的调用栈的状态
@@ -61,7 +67,7 @@ class Debugger:
                 self.call_stack.append(frame.f_code.co_name)
                 SELF = frame.f_locals.get('self', None)
                 class_name = ""
-                if (SELF == None):
+                if SELF is None:
                     class_name = "None"
                 else:
                     class_name = SELF.__class__.__name__
@@ -72,18 +78,54 @@ class Debugger:
                 if function_name != self.core_method_name:
                     return self.trace_calls
 
-                # 如果当前函数是原地调用, 也就是函数调用和函数执行是同一行, 则不记录断点
+                '''
+                更新: 这段检查其实没必要, 因为event = call的断点逻辑是: 只会在core_method方法打上断点
+                
+                如果当前函数是原地调用, 也就是函数调用和函数执行是同一行, 则不记录断点
+                比如某个出生列表推导式, 他就是原地调用. 对于这种调用类型, 不能在调用函数line的下一行
+                打断点. 否则对使用者来说会莫名其妙多了个断点
+                '''
                 LogOutHelper.log_out("检测当前函数是不是原地调用 = " + str(line) + " pre_breakpoint = " + str(self.pre_breakpoint))
                 if line == self.pre_breakpoint:
                     return self.trace_calls
-                # self.breakpoint_list.add(line)
-                res = "init breakpoint_list with line + 1 = " + str(line + 1)
-                LogOutHelper.log_out(res)
-                self.breakpoint_list.add(line + 1)
+
+                LogOutHelper.log_out("检测PythonDebugger的ReadType: " + self.read_type)
+                if self.read_type != "ui_in":
+                    res = "检测到plugin非UI指令读取, 自动初始化断点. init breakpoint_list with line + 1 = " + str(line + 1)
+                    LogOutHelper.log_out(res)
+                    self.breakpoint_list.add(line + 1)
+                else:
+                    LogOutHelper.log_out("检测到plugin为UI指令读取, 等待初始化断点....")
+                    while True:
+                        # 读取指令
+                        LogOutHelper.log_out("准备init断点信息....")
+                        instruction = inst_source.consume_input()
+                        LogOutHelper.log_out("接受断点信息: " + str(instruction))
+                        # 读取instruction的operation
+                        operation = instruction["operation"]
+                        '''
+                        这里和PythonDebugger协商好, 当执行到 PYTHON_INIT_BREAK_DONE指令, 表示
+                        断点初始化结束
+                        另外, 执行断点初始化操作时, 只允许PythonDebugger发送B指令(断点指令)
+                        '''
+                        if operation == "PYTHON_INIT_BREAKPOINT_DONE":
+                            inst_source.store_output(ExecuteResult.success(operation, "结束断点init"))
+                            break
+                        if operation != "B":
+                            LogOutHelper.log_out("检测到PythonDebugger发送的指令不是B指令, 不进行断点初始化, 退出....")
+                            inst_source.store_output(ExecuteResult.success(operation, "检测到plugin发送的指令不是B指令, 不进行断点初始化, "
+                                                                                      "退出...."))
+                            return self.trace_calls
+                        self.do_b(instruction, frame)
+
             elif event == 'line':
                 line = frame.f_lineno
-                # 如果上一个指令是R, 则继续执行, 直到遇到断点
-                if self.pre_option == 'R' and line not in self.breakpoint_list:
+                '''
+                如果是R操作, 执行代码, 直到遇到断点. 如果是STEP, N, 则不需要运行到断点
+                '''
+                if self.pre_option == "STEP" or self.pre_option == 'N':
+                    pass
+                if line not in self.breakpoint_list and self.pre_option == 'R':
                     '''
                     这里需要跟新pre_line为line. 因为此处python执行过line行代码, 再下一轮处理过程中line将会变为pre_line
                     因此这里需要进行记录
@@ -113,9 +155,11 @@ class Debugger:
                         # 递归, 需要阻塞执行
                         # pass
 
-
                 # 遇到断点, 阻塞打断程序
-                LogOutHelper.log_out("Hit breakpoint at line = " + str(line))
+                if self.pre_option == 'R':
+                    LogOutHelper.log_out("Hit breakpoint at line = " + str(line))
+                elif self.pre_option == 'STEP' or self.pre_option == 'N':
+                    LogOutHelper.log_out(self.pre_option + " at line = " + str(line))
                 # 遇到断点, 记录栈
                 self.capture_stack()
                 # 遇到断点, 记录line为pre_line. 当while循环退出后, line则会成为pre_line. 因此此处做出记录
@@ -157,7 +201,7 @@ class Debugger:
                         return self.do_step(instruction, frame)
                     else:
                         LogOutHelper.log_out("指令错误!")
-                        inst_source.store_output(ExecuteResult.success_no_result("指令错误"))
+                        inst_source.store_output(ExecuteResult.success(operation, "指令错误"))
             elif event == 'return':
                 LogOutHelper.log_out("return event...")
                 function_name = frame.f_code.co_name

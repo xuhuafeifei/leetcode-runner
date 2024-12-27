@@ -220,6 +220,20 @@ public class CodeService {
         return parseLangType(filePath);
     }
 
+    /**
+     * 通过当前打开的vFile 反解析langType
+     * @param project project
+     * @return langType
+     */
+    public static String parseLangTypeFromCVFile(Project project) {
+        VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
+        if (cFile == null) {
+            JOptionPane.showMessageDialog(null, "No file is chosen");
+            return null;
+        }
+        return parseLangTypeFromVFile(cFile);
+    }
+
     private static RunCode buildRunCode(LeetcodeEditor lc, String codeContent) {
         // build run code
         RunCode runCode = new RunCode();

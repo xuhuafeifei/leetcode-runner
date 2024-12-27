@@ -16,7 +16,7 @@ def main():
     thread.start()
 
     solution = Solution()
-    trace_calls = Debugger('totalNQueens').trace_calls
+    trace_calls = Debugger('totalNQueens', 'ui_in').trace_calls
     sys.settrace(trace_calls)
     result = solution.totalNQueens(2)
     sys.settrace(None)  # 停止跟踪

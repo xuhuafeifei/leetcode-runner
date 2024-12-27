@@ -63,4 +63,10 @@ public interface Constants {
             "\n" +
             "STEP命令 [step out | step over] 功能和idea的debug对应按钮功能一致\n"
             ;
+
+
+    /**
+     * PythonDebugger用于在UI读取指令状态下, 通知python server终止断点初始化的operation
+     */
+    String OPT_PYTHON_INIT_BREAKPOINT_DONE = "PYTHON_INIT_BREAKPOINT_DONE";
 }

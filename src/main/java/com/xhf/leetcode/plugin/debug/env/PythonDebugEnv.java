@@ -5,15 +5,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
-import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.PythonCodeAnalyzer;
-import com.xhf.leetcode.plugin.debug.analysis.converter.JavaTestcaseConvertor;
 import com.xhf.leetcode.plugin.debug.analysis.converter.PythonTestcaseConvertor;
+import com.xhf.leetcode.plugin.debug.debugger.PythonDebugConfig;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
-import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
@@ -26,6 +25,10 @@ import static javax.swing.JOptionPane.NO_OPTION;
  * @email 2508020102@qq.com
  */
 public class PythonDebugEnv extends AbstractDebugEnv {
+    /**
+     * python debugger的启动配置
+     */
+    private final PythonDebugConfig config;
     /**
      * python执行器路径
      */
@@ -47,8 +50,9 @@ public class PythonDebugEnv extends AbstractDebugEnv {
      */
     private int pyPort;
 
-    public PythonDebugEnv(Project project) {
+    public PythonDebugEnv(Project project, PythonDebugConfig config) {
         super(project);
+        this.config = config;
     }
 
     @Override
@@ -130,7 +134,8 @@ public class PythonDebugEnv extends AbstractDebugEnv {
         String callCode = getCallCode();
         mainContent = mainContent.replace("{{callCode}}", callCode)
                 .replace("{{port}}", String.valueOf(this.pyPort))
-                .replace("{{methodName}}", "\"" + this.methodName + "\"");
+                .replace("{{methodName}}", "\"" + this.methodName + "\"")
+                .replace("{{read_type}}", "\"" + config.getReadType().getType() + "\"")
         ;
         // debug
         DebugUtils.simpleDebug("python服务端口确定: " + pyPort, project);

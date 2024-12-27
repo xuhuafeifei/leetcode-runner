@@ -5,16 +5,16 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.debug.debugger.Debugger;
-import com.xhf.leetcode.plugin.debug.debugger.JavaDebugConfig;
 import com.xhf.leetcode.plugin.debug.debugger.JavaDebugger;
 import com.xhf.leetcode.plugin.debug.debugger.PythonDebugger;
-import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
-import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
+import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+
+import javax.swing.*;
 
 /**
  * 启动debug调试功能
@@ -36,17 +36,20 @@ public class DebugAction extends AbstractAction {
         }
         switch (langType) {
             case JAVA:
-                doJavaDebug(project);
+                doJavaDebug(project, langType);
                 break;
             case PYTHON3:
-                doPythonDebug(project);
+                doPythonDebug(project, langType);
                 break;
             default:
                 ConsoleUtils.getInstance(project).showWaring("当前" + langType.getLangType() + "语言类型不支持调试", false, true);
         }
     }
 
-    private void doPythonDebug(Project project) {
+    private void doPythonDebug(Project project, LangType langType) {
+        if (! doCheck(project, langType)) {
+            return;
+        }
         Debugger debugger = DebugManager.getInstance(project).createDebugger(PythonDebugger.class);
         try {
             debugger.start();
@@ -55,12 +58,29 @@ public class DebugAction extends AbstractAction {
         }
     }
 
-    private void doJavaDebug(Project project) {
+    private void doJavaDebug(Project project, LangType langType) {
+        if (!doCheck(project, langType)) {
+            return;
+        }
         Debugger debugger = DebugManager.getInstance(project).createDebugger(JavaDebugger.class);
         try {
             debugger.start();
         } catch (Exception e) {
             DebugUtils.simpleDebug("Debug Failed! " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
         }
+    }
+
+    private boolean doCheck(Project project, LangType langType) {
+        // 通过文件名获取语言类型
+        String langFromFile = CodeService.parseLangTypeFromCVFile(project);
+        if (LangType.getType(langFromFile) != langType) {
+            LogUtils.warn("异常, LangType != langFromFile " + langType + " != " + langFromFile);
+            JOptionPane.showMessageDialog(null, "当前文件代表语言类型与设置的语言类型类型不一致, 请重新选择代码文件\n"
+                    + "当前文件语言类型 = " + langFromFile + "\n"
+                    + "设置语言类型 = " + langType.getLangType()
+            );
+            return false;
+        }
+        return true;
     }
 }

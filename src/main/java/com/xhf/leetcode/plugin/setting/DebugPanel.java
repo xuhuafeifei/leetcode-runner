@@ -70,7 +70,7 @@ public class DebugPanel extends JPanel{
                 return button.getText();
             }
         }
-        return null;
+        return "";
     }
 
     public String getOutputTypeName() {
@@ -80,7 +80,7 @@ public class DebugPanel extends JPanel{
                 return button.getText();
             }
         }
-        return null;
+        return "";
     }
 
     public void setOutputTypeName(String outputTypeName) {

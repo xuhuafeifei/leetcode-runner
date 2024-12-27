@@ -140,6 +140,7 @@ public class UIOutput extends AbstractOutput{
                 String[] split = r.getResult().split("\n|\r");
                 variables.setListData(split);
             }
+            // 用这个方法, 他更加通用, 且适配不同语言的debug
             DebugUtils.highlightLineWithCheck(r.getAddLine(), r.getClassName(), project);
         }
     }

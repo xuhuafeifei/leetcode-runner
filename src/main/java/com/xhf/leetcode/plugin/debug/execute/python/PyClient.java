@@ -77,10 +77,17 @@ public class PyClient {
     }
 
     public PyResponse postRequest(Instruction inst) {
+        return postRequest(
+                inst.getOperation().getName(),
+                inst.getParam() == null ? "" : inst.getParam()
+                );
+    }
+
+    public PyResponse postRequest(String operation, String param) {
         HttpClient instance = HttpClient.getInstance();
         HttpResponse httpResponse = instance.executePost(new HttpRequest.RequestBuilder("http://localhost:" + pyPort + "/process")
-                .addJsonBody("operation", inst.getOperation().getName())
-                .addJsonBody("param", inst.getParam() == null ? "" : inst.getParam()) // gson默认不会序列化为null字段
+                .addJsonBody("operation", operation)
+                .addJsonBody("param", param) // gson默认不会序列化为null字段
                 .buildByJsonBody()
         );
         if (httpResponse == null) return null;

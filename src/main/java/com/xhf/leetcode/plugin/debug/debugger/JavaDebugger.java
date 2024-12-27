@@ -56,6 +56,7 @@ public class JavaDebugger extends AbstractDebugger {
     /**
      * 服务启动端口
      */
+    @Deprecated // 不适用远程debug方式
     private int port;
     /**
      * 用于输出debug过程中, 代码的std out/ std error
@@ -400,6 +401,7 @@ public class JavaDebugger extends AbstractDebugger {
         context.setSolutionLocation(location);
         context.setLocation(location);
 
+        // 获取所有断点
         List<XBreakpoint<?>> allBreakpoint = DebugUtils.getAllBreakpoint(project);
         for (XBreakpoint<?> breakpoint : allBreakpoint) {
             XSourcePosition position = breakpoint.getSourcePosition();
