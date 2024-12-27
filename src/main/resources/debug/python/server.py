@@ -1,7 +1,6 @@
 import json
+import traceback
 from aiohttp import web
-from inst_source import inst_source
-from log_out_helper import LogOutHelper
 
 class Response:
     def __init__(self, status, data, message):
@@ -18,10 +17,12 @@ class Response:
         }
 
 class WebServer:
-    def __init__(self, host='localhost', port=5005):
+    def __init__(self, log, inst_source, host='localhost', port=5005):
         self.host = host
         self.port = port
         self.app = web.Application()
+        self.log = log
+        self.inst_source = inst_source
 
     def add_routes(self):
         """添加路由"""
@@ -32,24 +33,26 @@ class WebServer:
 
         try:
             # 获取请求体内容
-            LogOutHelper.log_out("web准备接受数据")
+            self.log.log_out("web准备接受数据")
             post_data = await request.json()
 
-            LogOutHelper.log_out("web服务器接受请求数据: " + str(post_data))
-            inst_source.store_input(post_data)
+            self.log.log_out("web服务器接受请求数据: " + str(post_data))
+            self.inst_source.store_input(post_data)
 
             # 等待输出队列中有数据
-            output = inst_source.consume_output()
+            output = self.inst_source.consume_output()
 
-            LogOutHelper.log_out(output)
+            self.log.log_out(output)
 
             # 创建 Response 对象
             response = Response(status="success", data=output, message=None)
 
         except json.JSONDecodeError:
+            traceback.print_exc()
             # 创建错误的 Response 对象
             response = Response(status="error", data=None, message="Invalid JSON data")
         except Exception as e:
+            traceback.print_exc()
             # 创建异常的 Response 对象
             response = Response(status="error", data=None, message=str(e))
 

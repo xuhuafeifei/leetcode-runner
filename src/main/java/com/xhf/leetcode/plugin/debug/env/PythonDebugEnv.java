@@ -13,12 +13,14 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
 
-import static javax.swing.JOptionPane.CANCEL_OPTION;
-import static javax.swing.JOptionPane.NO_OPTION;
+import java.io.IOException;
+
+import static javax.swing.JOptionPane.*;
 
 /**
  * @author feigebuge
@@ -49,6 +51,9 @@ public class PythonDebugEnv extends AbstractDebugEnv {
      * python服务启动端口
      */
     private int pyPort;
+    private String logDir;
+    private String stdOutDir;
+    private String stdErrDir;
 
     public PythonDebugEnv(Project project, PythonDebugConfig config) {
         super(project);
@@ -110,7 +115,7 @@ public class PythonDebugEnv extends AbstractDebugEnv {
                 new Object[]{"确定", "取消"},
                 "确定"
         );
-        if (i == CANCEL_OPTION || i == NO_OPTION) {
+        if (i != OK_OPTION) {
             return false;
         }
         python = myFileBrowserBtn.getText();
@@ -132,10 +137,31 @@ public class PythonDebugEnv extends AbstractDebugEnv {
         // 获取callCode
         this.pyPort = DebugUtils.findAvailablePort();
         String callCode = getCallCode();
+        this.logDir = new FileUtils.PathBuilder(filePath).append("pylog").append("run.log").buildUnUnify();
+        this.stdOutDir = new FileUtils.PathBuilder(filePath).append("pylog").append("std_out.log").buildUnUnify();
+        this.stdErrDir = new FileUtils.PathBuilder(filePath).append("pylog").append("std_err.log").buildUnUnify();
+
+        LogUtils.simpleDebug("logDir = " + this.logDir);
+        LogUtils.simpleDebug("stdOutDir = " + this.stdOutDir);
+        LogUtils.simpleDebug("stdErrDir = " + this.stdErrDir);
+
+        // 清空文件
+        try {
+            FileUtils.createAndWriteFile(this.logDir, "");
+            FileUtils.createAndWriteFile(this.stdOutDir, "");
+            FileUtils.createAndWriteFile(this.stdErrDir, "");
+        } catch (IOException e) {
+            LogUtils.error(e);
+            throw new DebugError("python日志文件创建错误!" + e.toString());
+        }
+
         mainContent = mainContent.replace("{{callCode}}", callCode)
                 .replace("{{port}}", String.valueOf(this.pyPort))
                 .replace("{{methodName}}", "\"" + this.methodName + "\"")
                 .replace("{{read_type}}", "\"" + config.getReadType().getType() + "\"")
+                .replace("{{log_dir}}", "\"" + this.logDir + "\"")
+                .replace("{{std_out_dir}}", "\"" + this.stdOutDir + "\"")
+                .replace("{{std_err_dir}}", "\"" + this.stdErrDir + "\"")
         ;
         // debug
         DebugUtils.simpleDebug("python服务端口确定: " + pyPort, project);
@@ -212,5 +238,17 @@ public class PythonDebugEnv extends AbstractDebugEnv {
 
     public int getPyPort() {
         return pyPort;
+    }
+
+    public String getLogDir() {
+        return logDir;
+    }
+
+    public String getStdOutDir() {
+        return stdOutDir;
+    }
+
+    public String getStdErrDir() {
+        return stdErrDir;
     }
 }

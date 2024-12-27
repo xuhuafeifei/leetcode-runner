@@ -248,5 +248,10 @@ public class FileUtils {
             String path = sb.toString();
             return FileUtils.unifyPath(path);
         }
+
+        public String buildUnUnify() {
+            String path = sb.toString();
+            return FileUtils.unUnifyPath(path);
+        }
     }
 }

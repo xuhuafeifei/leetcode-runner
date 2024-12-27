@@ -12,19 +12,24 @@ import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.python.*;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.Output;
+import com.xhf.leetcode.plugin.debug.output.OutputHelper;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import com.xhf.leetcode.plugin.window.StdPanel;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -74,6 +79,7 @@ public class PythonDebugger extends AbstractDebugger {
      * 启动python服务的Process
      */
     private Process exec;
+    private OutputHelper outputHelper;
 
     public PythonDebugger(Project project, PythonDebugConfig config) {
         super(project, new PyContext(), config, PythonInstFactory.getInstance());
@@ -81,6 +87,7 @@ public class PythonDebugger extends AbstractDebugger {
         output = config.getOutput();
         context = (PyContext) super.basicContext;
         this.config = config;
+        this.outputHelper = new OutputHelper(project);
     }
 
     @Override
@@ -126,9 +133,101 @@ public class PythonDebugger extends AbstractDebugger {
      * 远程执行python debug功能
      */
     private void executePythonDebugRemotely() {
+        // 监听stdout/stderr
+        captureStd(OutputHelper.STD_OUT, 0, env.getStdOutDir());
+        captureStd(OutputHelper.STD_ERROR, 1, env.getStdErrDir());
         // 初始化断点
         initBreakpoint();
         doRun();
+    }
+
+    /**
+     * 存储两个工作线程, 分别捕获std out/ std error
+     */
+    Thread[] threads = new Thread[2];
+    long[] preSize = new long[2];
+
+    /**
+     * 监控stdout/stderr
+     * @param name
+     */
+    private void captureStd(String name, int idx, String path) {
+        // 存储文件之前的大小
+        preSize[idx] = 0;
+        // 创建线程
+        threads[idx] = new Thread(new Runnable() {
+            private void doStdOutRead() {
+                // 监测文件变化
+                File file = new File(path);
+                long length = file.length();
+                // LogUtils.simpleDebug(Thread.currentThread().getName() + ": 检测" + path + " 大小变化情况, preSize = " + preSize[idx] + ", currentSize = " + length);
+                if (length > preSize[idx]) {
+                    // 写入panel
+                    String content = FileUtils.readContentFromFile(file);
+                    String[] lines = content.split("\n");
+                    if (lines.length >= 3) {
+                        // 跳过1, 2和最后一行
+                        content = String.join("\n", Arrays.copyOfRange(lines, 2, lines.length));
+                        ExecuteResult success = ExecuteResult.success(null, content);
+                        success.setMoreInfo(name);
+                        outputHelper.output(success, false);
+                    }
+                    preSize[idx] = length;
+                }
+            }
+
+            private void doStdErrRead() {
+                // 监测文件变化
+                File file = new File(path);
+                long length = file.length();
+                // LogUtils.simpleDebug(Thread.currentThread().getName() + ": 检测" + path + " 大小变化情况, preSize = " + preSize[idx] + ", currentSize = " + length);
+                if (length > preSize[idx]) {
+                    // 写入panel
+                    String content = FileUtils.readContentFromFile(file);
+                    ExecuteResult success = ExecuteResult.success(null, content);
+                    success.setMoreInfo(name);
+                    outputHelper.output(success, false);
+                    preSize[idx] = length;
+                }
+            }
+
+
+            private void doRead() {
+                switch (name) {
+                    case OutputHelper.STD_OUT:
+                        doStdOutRead();
+                        break;
+                    case OutputHelper.STD_ERROR:
+                        doStdErrRead();
+                        break;
+                }
+            }
+
+            @Override
+            public void run() {
+                // 第一阶段：检查中断标志
+                while (!Thread.currentThread().isInterrupted()) {
+                    doRead();
+                    // 检查中断状态并决定是否继续执行
+                    if (Thread.interrupted()) {
+                        LogUtils.info("Thread interrupted at stage 1 (before sleep).");
+                        return;  // 阶段一：在此响应中断
+                    }
+
+                    try {
+                        Thread.sleep(400);
+                    } catch (InterruptedException e) {
+                        // 第二阶段：捕获 InterruptedException 响应中断
+                        LogUtils.simpleDebug("Thread interrupted during sleep (stage 2).");
+                        // 在捕获到 InterruptedException 后，可以直接退出循环
+                        Thread.currentThread().interrupt(); // 保持中断状态
+                        doRead();
+                        break;
+                    }
+                }
+            }
+        }, name);
+        threads[idx].start();
     }
 
     private void doRun() {
@@ -273,6 +372,10 @@ public class PythonDebugger extends AbstractDebugger {
         }
         DebugUtils.simpleDebug("PythonDebugger即将停止!", project);
         env.stopDebug();
+        // 打断监控线程
+        for (Thread thread : threads) {
+            thread.interrupt();
+        }
         // 如果没有启动, 直接返回
         if (!isPortAvailable("localhost", env.getPyPort())) {
             DebugUtils.simpleDebug("python服务关闭成功, PythonDebugger停止", project);

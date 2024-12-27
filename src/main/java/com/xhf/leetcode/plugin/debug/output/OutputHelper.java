@@ -32,18 +32,31 @@ public class OutputHelper {
         this.stdPanel = LCConsoleWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_DEBUG_STDPANEL);
     }
     public void output(ExecuteResult r) {
+        output(r, true);
+    }
+
+
+    public void output(ExecuteResult r, boolean append) {
         AppSettings setting = AppSettings.getInstance();
         switch (r.getMoreInfo()) {
             case STD_OUT:
                 if (setting.isUIOutput()) {
-                    stdPanel.appendStdoutContent(r.getResult());
+                    if (append) {
+                        stdPanel.appendStdoutContent(r.getResult());
+                    } else {
+                        stdPanel.setStdoutContent(r.getResult());
+                    }
                 } else if (setting.isConsoleOutput()) {
                     ConsoleUtils.getInstance(project).simpleShowConsole(r.getResult(),  ConsoleViewContentType.LOG_WARNING_OUTPUT, true);
                 }
                 break;
             case STD_ERROR:
                 if (setting.isUIOutput()) {
-                    stdPanel.appendStderrContent(r.getResult());
+                    if (append) {
+                        stdPanel.appendStderrContent(r.getResult());
+                    } else {
+                        stdPanel.setStderrContent(r.getResult());
+                    }
                 } else if (setting.isConsoleOutput()) {
                     ConsoleUtils.getInstance(project).simpleShowConsole(r.getResult(),  ConsoleViewContentType.ERROR_OUTPUT, true);
                 }
