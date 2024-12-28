@@ -38,8 +38,8 @@ def main():
     with open(std_err_dir, 'w') as f:
         pass
 
-    sys.stdout = MyOutput(std_out_dir)
-    sys.stderr = MyOutput(std_err_dir)
+    # sys.stdout = MyOutput(std_out_dir)
+    # sys.stderr = MyOutput(std_err_dir)
 
     log_out_helper = LogOutHelper(log_dir)
     inst_source = InstSource(log_out_helper)

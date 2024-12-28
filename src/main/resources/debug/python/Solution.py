@@ -25,9 +25,6 @@ class Solution:
         return True
 
     def totalNQueens(self, n: int) -> int:
-        for i in range(100):
-            print(i)
-            print(i)
         board = [['.'] * n for _ in range(n)]
         def dfs(i):
             if i == n:

@@ -230,6 +230,32 @@ class Debugger:
             self.inst_source.store_output(ExecuteResult.fail("指令执行出错" + str(e)))
 
     def do_p(self, inst, frame):
+        param = inst["param"]
+
+        if param:
+            res = ""
+            r = ExecuteResult.success("P", "")
+            try:
+                solution_env_local = frame.f_locals
+                solution_env_global = {}
+                class_obj = frame.f_globals.get('Solution')  # 从全局变量中获取 Solution 类
+                if class_obj:
+                    for key, value in class_obj.__dict__.items():
+                        # 排除内建属性
+                        if not key.startswith('__'):
+                            solution_env_global[str(key)] = value
+
+                res = eval(param, solution_env_global, solution_env_local)
+                r.result = res
+            except Exception as e:
+                # todo: 记得删除了
+                traceback.print_exc()
+                r.more_info = traceback.format_exc()
+            # 打印到日志
+            self.log.log_out(res, "doP----------")
+            # 存储输出
+            self.inst_source.store_output(r)
+            return
         # 打印局部变量
         res = "Local Variables:\n"
         # 遍历frame.f_locals, 同时将他存储到字符串中
@@ -263,7 +289,6 @@ class Debugger:
 
         # 打印到日志
         self.log.log_out(res, "doP----------")
-
         # 存储输出
         self.inst_source.store_output(r)
 
