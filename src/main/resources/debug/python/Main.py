@@ -18,7 +18,7 @@ class MyOutput():
         self.file_path = file_path
 
     def write(self, data):
-        with open(self.file_path, 'a') as f:
+        with open(self.file_path, 'a', encoding='utf-8') as f:
             f.write(data)
 
     def flush(self):

@@ -239,9 +239,34 @@ class Debugger:
         r = ExecuteResult.success("P", res)
         ExecuteResult.fill_with_frame(r, frame)
 
+
+        # 打印静态变量（类变量）
+        class_obj = frame.f_globals.get('Solution')  # 从全局变量中获取 Solution 类
+        if class_obj:
+            res += "Static variable:\n"
+            for key, value in class_obj.__dict__.items():
+                # 排除内建属性
+                if not key.startswith('__') and not callable(value):
+                    res += f"{key}: {value}\n"
+
+        # 打印成员变量（实例变量）
+        res += "Member variable:\n"
+        SELF = frame.f_locals.get('self', None)
+        if SELF is not None:
+            instance_vars = vars(SELF)  # 获取实例的属性
+            for key, value in instance_vars.items():
+                res += f"{key}: {value}\n"
+
+        # 返回执行结果
+        r = ExecuteResult.success("P", res)
+        ExecuteResult.fill_with_frame(r, frame)
+
+        # 打印到日志
         self.log.log_out(res, "doP----------")
 
+        # 存储输出
         self.inst_source.store_output(r)
+
 
     def do_n(self, inst, frame):
         self.log.log_out(None, "doN-------")
