@@ -12,7 +12,6 @@ import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.DebugManager;
-import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.*;
@@ -100,7 +99,10 @@ public class JavaDebugger extends AbstractDebugger {
         }
         DebugUtils.simpleDebug("JavaDebugger即将停止!", project);
         env.stopDebug();
-        vm.dispose();
+        try {
+            vm.dispose();
+        } catch (VMDisconnectedException ignored) {
+        }
         DebugUtils.simpleDebug("JavaDebugger停止!", project);
     }
 
@@ -135,7 +137,10 @@ public class JavaDebugger extends AbstractDebugger {
         // 配置启动参数
         Map<String, Connector.Argument> arguments = connector.defaultArguments();
         arguments.get("main").setValue("Main"); // 替换为你的目标类全路径
-        arguments.get("options").setValue("-classpath " + env.getFilePath()); // 指定类路径
+        arguments.get("options").setValue("-classpath " + env.getFilePath() + " -Dencoding=utf-8"); // 指定类路径
+        // fix: 编译jdk和运行jdk不一致问题
+        arguments.get("home").setValue(env.getJAVA_HOME());
+        arguments.get("vmexec").setValue("java.exe");
 
         // 启动目标 JVM
         VirtualMachine vm;

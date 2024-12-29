@@ -26,8 +26,8 @@ public class JDIExample {
 
     static Context context = new Context();
     static StepRequest stepRequest;
-    static int b = 16;
-    static String methodName = "getKth";
+    static int b = 15;
+    static String methodName = "test";
 
     private static void captureStream(InputStream stream, String streamName) {
         new Thread(() -> {
@@ -44,7 +44,7 @@ public class JDIExample {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-//        Runtime.getRuntime().exec("E:\\jdk8\\bin\\javac -g -encoding utf-8 -cp E:\\java_code\\lc-test\\cache\\debug E:\\java_code\\lc-test\\cache\\debug\\Main.java");
+//        Runtime.getRuntime().exec("E:\\jdk8\\bin\\javac -g -encoding utf-8 -cp E:\\java_code\\lc-test\\cache\\debug E:\\java_code\\lc-test\\cache\\debug\\search.Main.java");
 //        Runtime.getRuntime().exec("E:\\java_code\\lc-test\\cache\\debug\\start.cmd");
 //        Thread.sleep(1500);
         try {
@@ -65,7 +65,7 @@ public class JDIExample {
             // 配置启动参数
             Map<String, Connector.Argument> arguments = connector.defaultArguments();
             arguments.get("main").setValue("Main"); // 替换为你的目标类全路径
-            arguments.get("options").setValue("-classpath E:\\java_code\\lc-test\\cache\\debug"); // 指定类路径
+            arguments.get("options").setValue("-classpath E:\\java_code\\leetcode-runner\\out\\test\\classes  -Dfile.encoding=UTF-8"); // 指定类路径
 
             // 启动目标 JVM
             VirtualMachine vm = connector.launch(arguments);
@@ -84,8 +84,8 @@ public class JDIExample {
             context.setErm(erm);
 
             // 捕获目标虚拟机的输出
-            captureStream(vm.process().getInputStream(), "OUTPUT");
-            captureStream(vm.process().getErrorStream(), "ERROR");
+//            captureStream(vm.process().getInputStream(), "OUTPUT");
+//            captureStream(vm.process().getErrorStream(), "ERROR");
 
             while (true) {
                 EventSet eventSet = eventQueue.remove();
@@ -98,16 +98,25 @@ public class JDIExample {
                             ClassType mainClass = (ClassType) classPrepareEvent.referenceType();
                             Method mainMethod = mainClass.methodsByName("main").get(0);
 
+                            List<Location> locations = mainMethod.allLineLocations();
+                            for (Location location : locations) {
+                                if (location.lineNumber() == 15) {
+                                    BreakpointRequest breakpointRequest = erm.createBreakpointRequest(location);
+                                    breakpointRequest.enable();
+                                }
+                            }
+
                             // 设置断点
+//                             setBreakpointAtLine(mainClass, b, erm, methodName);
                             // 在指定行设置断点
-                            System.out.println("Breakpoint set at Main.main");
+                            System.out.println("Breakpoint set at search.Main.main");
                         }
-                        if (className.equals("Solution")) {
-                            // 获取Main类
-                            ClassType mainClass = (ClassType) classPrepareEvent.referenceType();
-                            setBreakpointAtLine(mainClass, b, erm, methodName);
-                            System.out.println("Breakpoint set at Main.main");
-                        }
+//                        if (className.equals("Solution")) {
+//                            // 获取Main类
+//                            ClassType mainClass = (ClassType) classPrepareEvent.referenceType();
+//                            setBreakpointAtLine(mainClass, b, erm, methodName);
+//                            System.out.println("Breakpoint set at search.Main.main");
+//                        }
                         eventSet.resume();
                     }
                     else if (event instanceof BreakpointEvent) {

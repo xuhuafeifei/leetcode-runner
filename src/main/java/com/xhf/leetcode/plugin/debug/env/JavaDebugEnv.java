@@ -37,6 +37,10 @@ public class JavaDebugEnv extends AbstractDebugEnv {
      */
     private String mainClassPath = "E:\\java_code\\lc-test\\cache\\debug\\Main.class";
     /**
+     * JAVA_HOME
+     */
+    private String JAVA_HOME = "E:\\jdk8";
+    /**
      * java执行路径
      */
     private String java = "E:\\jdk8\\bin\\java.exe";
@@ -96,10 +100,10 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         if (i != OK_OPTION) {
                 return false;
         }
-        javaPath = myFileBrowserBtn.getText();
+        JAVA_HOME = myFileBrowserBtn.getText();
 
-        java = new FileUtils.PathBuilder(javaPath).append("bin").append("java.exe").build();
-        javac = new FileUtils.PathBuilder(javaPath).append("bin").append("javac.exe").build();
+        java = new FileUtils.PathBuilder(JAVA_HOME).append("bin").append("java.exe").build();
+        javac = new FileUtils.PathBuilder(JAVA_HOME).append("bin").append("javac.exe").build();
         if (!FileUtils.fileExists(java)) {
             throw new DebugError("Java路径错误 = " + java);
         }
@@ -107,7 +111,7 @@ public class JavaDebugEnv extends AbstractDebugEnv {
             throw new DebugError("Javac路径错误 = " + javac);
         }
         // 存储正确的javaPath
-        StoreService.getInstance(project).addCache("JAVA_HOME", javaPath);
+        StoreService.getInstance(project).addCache("JAVA_HOME", JAVA_HOME);
         return true;
     }
 
@@ -212,5 +216,9 @@ public class JavaDebugEnv extends AbstractDebugEnv {
 
     public String getMethodName() {
         return methodName;
+    }
+
+    public String getJAVA_HOME() {
+        return JAVA_HOME;
     }
 }
