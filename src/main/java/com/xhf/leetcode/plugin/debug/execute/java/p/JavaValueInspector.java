@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.debug.execute.java.p;
 
 import com.sun.jdi.*;
+import com.xhf.leetcode.plugin.debug.analysis.converter.convert.ListNode;
+import com.xhf.leetcode.plugin.debug.analysis.converter.convert.TreeNode;
 import com.xhf.leetcode.plugin.utils.MapUtils;
 
 import java.util.*;
@@ -107,34 +109,161 @@ public class JavaValueInspector {
             res = handleArrayDeque(objRef, depth);
         } else if (objRef instanceof ThreadGroupReference) {
             res = "objRef 是 ThreadGroupReference, 不支持处理!";
+        } else if (isTreeNode(objRef)) {
+            res = handleTreeNode(objRef, depth);
+        } else if (isListNode(objRef)) {
+            res = handleListNode(objRef, depth);
         } else {
-            StringBuilder sb = new StringBuilder();
-            if (objRef == null || objRef.referenceType() == null) {
-                return "";
-            }
-            List<String> results = new ArrayList<>();
-            for (Field field : objRef.referenceType().allFields()) {
-                if (!field.isStatic()) {
-                    Value value = objRef.getValue(field);
-                    // 过滤某些变量
-                    if (isSkipWord(field.name())) {
-                        continue;
-                    }
-                    results.add(field.name() + " : " + this.inspectValue(value, depth + 1));  // 深度+1
-                }
-            }
-            if (!results.isEmpty()) {
-                sb.append("\n").append(getTabsByDepth(depth));  // 外层缩进
-                sb.append("{\n");
-                for (String s : results) {
-                    sb.append(getTabsByDepth(depth + 1)).append(s);  // 字段缩进
-                    sb.append("\n");
-                }
-                sb.append(getTabsByDepth(depth)).append("}");  // 结束的 } 也要缩进
-            }
-            res = sb.toString();
+            res = handleComplexObject(objRef, depth);
         }
         return res;
+    }
+
+    private String handleListNode(ObjectReference objRef, int depth) {
+        if (! isMyListNode(objRef)) {
+            return handleComplexObject(objRef, depth);
+        }
+        ReferenceType referenceType = objRef.referenceType();
+        Value val = objRef.getValue(referenceType.fieldByName("val"));
+        Value next = objRef.getValue(referenceType.fieldByName("next"));
+
+        StringBuilder sb = new StringBuilder("[");
+        while (next != null) {
+            val = objRef.getValue(referenceType.fieldByName("val"));
+            next = objRef.getValue(referenceType.fieldByName("next"));
+            objRef = (ObjectReference) next;
+            sb.append(getIntNodeVal(val)).append(",");
+        }
+        if (sb.charAt(sb.length() - 1) == ',') {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private boolean isListNode(Value value) {
+        // 判断是否是 java.util.ArrayDeque
+        return value instanceof ObjectReference && value.type().name().contains("ListNode");
+    }
+
+    /**
+     * 判断是否是我提供的ListNode
+     * @param objRef
+     * @return
+     */
+    private boolean isMyListNode(ObjectReference objRef) {
+        // 检查并获取变量
+        ReferenceType referenceType = objRef.referenceType();
+        Value val = objRef.getValue(referenceType.fieldByName("val"));
+        Value next = objRef.getValue(referenceType.fieldByName("next"));
+        if (val == null || next == null) {
+            return false;
+        }
+        if (! (val instanceof IntegerValue) ) {
+            return false;
+        }
+        // 判断类型
+        return next.type().name().equals(referenceType.name());
+    }
+
+    /**
+     * 处理复杂对象的打印
+     * @param objRef
+     * @param depth
+     * @return
+     */
+    private String handleComplexObject(ObjectReference objRef, int depth) {
+        StringBuilder sb = new StringBuilder();
+        if (objRef == null || objRef.referenceType() == null) {
+            return "";
+        }
+        List<String> results = new ArrayList<>();
+        for (Field field : objRef.referenceType().allFields()) {
+            if (!field.isStatic()) {
+                Value value = objRef.getValue(field);
+                // 过滤某些变量
+                if (isSkipWord(field.name())) {
+                    continue;
+                }
+                results.add(field.name() + " : " + this.inspectValue(value, depth + 1));  // 深度+1
+            }
+        }
+        if (!results.isEmpty()) {
+            sb.append("\n").append(getTabsByDepth(depth));  // 外层缩进
+            sb.append("{\n");
+            for (String s : results) {
+                sb.append(getTabsByDepth(depth + 1)).append(s);  // 字段缩进
+                sb.append("\n");
+            }
+            sb.append(getTabsByDepth(depth)).append("}");  // 结束的 右大括号 也要缩进
+        }
+        return sb.toString();
+    }
+
+    private String handleTreeNode(ObjectReference objRef, int depth) {
+        // 检查是否和我项目提供的TreeNode一致, 否则不进行打印
+        if (! isMyTreeNode(objRef)) {
+            // 采用默认的复杂对象打印器
+            return handleComplexObject(objRef, depth);
+        }
+        // 创建头节点
+        TreeNode cp = dfs(objRef);
+        return new TreeNodePrinter(cp).visitAndReturn().toString();
+    }
+
+    /**
+     * 返回头节点
+     * @return
+     */
+    private TreeNode dfs(ObjectReference objRef) {
+        if (objRef == null) {
+            return null;
+        }
+        ReferenceType referenceType = objRef.referenceType();
+        Value val = objRef.getValue(referenceType.fieldByName("val"));
+        Value left = objRef.getValue(referenceType.fieldByName("left"));
+        Value right = objRef.getValue(referenceType.fieldByName("right"));
+
+        TreeNode head = new TreeNode(getIntNodeVal(val));
+
+        head.left = dfs((ObjectReference) left);
+        head.right = dfs((ObjectReference) right);
+
+        return head;
+    }
+
+    private int getIntNodeVal(Value val) {
+        return ((IntegerValue)val).intValue();
+    }
+
+    /**
+     * 判断是否是我提供的TreeNode
+     *
+     * @param objRef
+     * @return
+     */
+    private boolean isMyTreeNode(ObjectReference objRef) {
+        // 检查并获取变量
+        ReferenceType referenceType = objRef.referenceType();
+        Value val = objRef.getValue(referenceType.fieldByName("val"));
+        Value left = objRef.getValue(referenceType.fieldByName("left"));
+        Value right = objRef.getValue(referenceType.fieldByName("right"));
+        if (val == null || left == null || right == null) {
+            return false;
+        }
+        if (! (val instanceof IntegerValue) ) {
+            return false;
+        }
+        // 判断类型
+        if (!left.type().name().equals(referenceType.name())) {
+            return false;
+        }
+        return right.type().name().equals(referenceType.name());
+    }
+
+    private boolean isTreeNode(Value value) {
+        // 判断是否是 java.util.ArrayDeque
+        return value instanceof ObjectReference && value.type().name().contains("TreeNode");
     }
 
     // 在打印复杂对象时, 有些字段不需要打印

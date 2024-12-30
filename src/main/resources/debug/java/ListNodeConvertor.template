@@ -1,0 +1,23 @@
+String {{testcaseVName}} = "{{testcase}}";
+{{testcaseVName}} = {{testcaseVName}}.trim();
+
+ListNode {{variableName}} = null;
+if (! "[]".equals({{testcaseVName}})) {
+    // 把collect变为数组
+    Integer[] split =
+            Arrays.stream(
+                            {{testcaseVName}}.replace("[", "")
+                                    .replace("]", "")
+                                    .split(","))
+                    .map(Integer::parseInt)
+                    .toArray(Integer[]::new);
+    int i = 0;
+    {{variableName}} = new ListNode(split[i]);
+    ListNode cp = {{variableName}};
+    i += 1;
+    // 迭代
+    for (; i < split.length; ++i) {
+        cp.next = new ListNode(split[i]);
+        cp = cp.next;
+    }
+}

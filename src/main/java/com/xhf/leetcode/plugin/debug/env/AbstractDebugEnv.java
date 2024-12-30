@@ -8,7 +8,7 @@ import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
-import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.setting.AppSettings;
@@ -39,7 +39,14 @@ public abstract class AbstractDebugEnv implements DebugEnv {
     public AbstractDebugEnv(Project project) {
         this.project = project;
         this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug").build();
+        initFilePath();
     }
+
+    /**
+     * 允许子类覆盖filePath路径
+     */
+    protected abstract void initFilePath();
+
 
     @Override
     public abstract boolean prepare() throws DebugError;
@@ -92,6 +99,20 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         DebugUtils.simpleDebug("debug env start", project);
 
         LCEventBus.getInstance().post(new DebugStartEvent());
+    }
+
+    // 拷贝py文件. 可以选择不实现, 毕竟有可能没有copy的需求
+    protected boolean copyFile() {
+        return true;
+    }
+
+    protected boolean copyFileHelper(String resourcePath) {
+        String[] split = resourcePath.split("/");
+        String fileName = split[split.length - 1];
+        return StoreService.getInstance(project).
+                copyFile(getClass().getResource(resourcePath),
+                        new FileUtils.PathBuilder(filePath).append(fileName).build()
+                );
     }
 
     protected abstract boolean buildToolPrepare() throws DebugError;

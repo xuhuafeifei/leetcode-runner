@@ -44,6 +44,15 @@ public class Question {
 
     public static final String lineStart = "lc-start-line";
     public static final String lineEnd = "lc-end-line";
+
+    /**
+     * 目前只在class上方增加两行注释(下方offset暂不考虑)
+     * @return
+     */
+    public static int getLineUpperOffset() {
+        return 2;
+    }
+
     /**
      * 处理代码片段, 形如下方所示. 此外, 注释会随着语言的变化而变化
      * // lc-start-line

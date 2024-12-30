@@ -13,7 +13,7 @@ import com.xhf.leetcode.plugin.utils.DebugCheck;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-@DebugCheck
+@DebugCheck(DebugCheck.CheckType.STATUS)
 public class DebugRunAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {

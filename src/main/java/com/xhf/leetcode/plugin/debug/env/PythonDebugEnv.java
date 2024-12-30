@@ -61,32 +61,28 @@ public class PythonDebugEnv extends AbstractDebugEnv {
     }
 
     @Override
+    protected void initFilePath() {
+        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug").append("python").build();
+    }
+
+    @Override
     public boolean prepare() throws DebugError {
-        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyPyFile();
+        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyFile();
     }
 
     /**
      * copy python需要的代码
      * @return
      */
-    private boolean copyPyFile() {
+    @Override
+    protected boolean copyFile() {
         // copy
-
         return
-                copyFile("/debug/python/inst_source.py") &&
-                copyFile("/debug/python/log_out_helper.py") &&
-                copyFile("/debug/python/debug_core.py") &&
-                copyFile("/debug/python/execute_result.py") &&
-                copyFile("/debug/python/server.py");
-    }
-
-    private boolean copyFile(String resourcePath) {
-        String[] split = resourcePath.split("/");
-        String fileName = split[split.length - 1];
-        return StoreService.getInstance(project).
-                copyFile(getClass().getResource(resourcePath),
-                        new FileUtils.PathBuilder(filePath).append(fileName).build()
-                );
+                copyFileHelper("/debug/python/inst_source.py") &&
+                copyFileHelper("/debug/python/log_out_helper.py") &&
+                copyFileHelper("/debug/python/debug_core.py") &&
+                copyFileHelper("/debug/python/execute_result.py") &&
+                copyFileHelper("/debug/python/server.py");
     }
 
     @Override

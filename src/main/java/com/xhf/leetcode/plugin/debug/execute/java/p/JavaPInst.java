@@ -43,7 +43,6 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
         try {
             String res = getVariable(thread, location, context);
-
             // 存储输出结果
             ExecuteResult success = ExecuteResult.success(inst.getOperation(), res);
             DebugUtils.fillExecuteResultByLocation(success, location);
@@ -65,8 +64,17 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         StackFrame frame = thread.frame(0);
         // 获取本地变量
         List<LocalVariable> localVariables = frame.visibleVariables();
-        Map<LocalVariable, Value> values = frame.getValues(localVariables);
         StringBuilder sb = new StringBuilder(Constants.LOCAL_VARIABLE + ":\n");
+        // 遍历
+        for (int i = 0; i < localVariables.size(); i++) {
+            LocalVariable localVar = localVariables.get(i);
+            Value varValue = frame.getValue(localVar);
+            // 强转获取value
+            sb.append(localVar.name()).append(" = ").append(inspector.inspectValue(varValue));
+            if (i != localVariables.size() - 1) {
+                sb.append("\n");
+            }
+        }
 
         // 获取静态变量
         ReferenceType referenceType = location.declaringType();

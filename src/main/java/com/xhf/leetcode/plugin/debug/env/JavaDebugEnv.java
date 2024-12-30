@@ -11,6 +11,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
@@ -54,6 +55,11 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         super(project);
     }
 
+    @Override
+    protected void initFilePath() {
+        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug").append("java").build();
+    }
+
     @Deprecated // only for test
     public JavaDebugEnv() {
         super(null);
@@ -64,7 +70,14 @@ public class JavaDebugEnv extends AbstractDebugEnv {
      */
     @Override
     public boolean prepare() throws DebugError {
-        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && buildFile();
+        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyFile() && buildFile();
+    }
+
+    @Override
+    protected boolean copyFile() {
+        return
+                copyFileHelper("/debug/java/ListNode.java") &&
+                copyFileHelper("/debug/java/TreeNode.java");
     }
 
     /**
@@ -120,7 +133,7 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         try {
             // 获取系统javac路径
             String cdCmd = "cd " + this.filePath;
-            String cmd = javac + " -g -encoding UTF-8 -cp " + this.filePath + " " + mainJavaPath;
+            String cmd = javac + " -g -encoding UTF-8 -cp " + this.filePath + " " + mainJavaPath + "  -Xdiags:verbose";
 
             String combinedCmd = " cmd /c " + cdCmd + " & " + cmd;
 

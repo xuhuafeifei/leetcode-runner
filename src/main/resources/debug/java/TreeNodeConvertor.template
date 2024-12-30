@@ -1,0 +1,39 @@
+String {{testcaseVName}} = "{{testcase}}";
+{{testcaseVName}} = {{testcaseVName}}.trim();
+
+TreeNode {{variableName}} = null;
+if (! "[]".equals({{testcaseVName}})) {
+    // 把collect变为数组
+    Integer[] split =
+            Arrays.stream(
+                            {{testcaseVName}}.replace("[", "")
+                                    .replace("]", "")
+                                    .split(","))
+                    .map(e -> "null".equals(e) ? null : (int) Integer.parseInt(e))
+                    .toArray(Integer[]::new);
+    int i = 0;
+    {{variableName}} = new TreeNode(split[i]);
+    i++;
+    Queue<TreeNode> q = new LinkedList<>();
+    q.add({{variableName}});
+
+    while (! q.isEmpty()) {
+        TreeNode node = q.poll();
+        // 添加它的左节点
+        if (i < split.length) {
+            if (split[i] != null) {
+                node.left = new TreeNode(split[i]);
+                q.add(node.left);
+            }
+            i+=1;
+        }
+        // 添加右节点
+        if (i < split.length) {
+            if (split[i] != null) {
+                node.right = new TreeNode(split[i]);
+                q.add(node.right);
+            }
+            i+=1;
+        }
+    }
+}

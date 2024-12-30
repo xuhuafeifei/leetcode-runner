@@ -31,7 +31,7 @@ public abstract class AbstractAction extends AnAction {
         if (settingPass == null) {
             AppSettings appSettings = AppSettings.getInstance();
             if (!appSettings.initOrNot()) {
-                ConsoleUtils.getInstance(project).showWaring("please init plugin setting", false, false, "Please init Setting", null, ConsoleDialog.WARNING);
+                Messages.showInfoMessage("请先前往设置界面设置插件...", "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
                 return;
             }
@@ -57,22 +57,27 @@ public abstract class AbstractAction extends AnAction {
         // debug check
         DebugCheck debugCheck = this.getClass().getAnnotation(DebugCheck.class);
         if (debugCheck != null) {
-            if (!DebugManager.getInstance(project).isDebug()) {
-                ConsoleUtils.getInstance(project).showWaring("no debug happen", false, true);
-                return;
-            }
+            // 必须检测设置
             AppSettings appSettings = AppSettings.getInstance();
             // reader 检测
             if (StringUtils.isBlank(appSettings.getReadTypeName())) {
-                ConsoleUtils.getInstance(project).showWaring("debug reader没有设置, 请前往设置界面", false, true);
+                Messages.showInfoMessage("debug reader没有设置, 请前往设置界面", "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
                 return;
             }
             // output 检测
             if (StringUtils.isBlank(appSettings.getOutputTypeName())) {
-                ConsoleUtils.getInstance(project).showWaring("debug output没有设置, 请前往设置界面", false, true);
+                Messages.showInfoMessage("debug output没有设置, 请前往设置界面", "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
                 return;
+            }
+            // 状态检测
+            DebugCheck.CheckType value = debugCheck.value();
+            if (value == DebugCheck.CheckType.STATUS) {
+                if (!DebugManager.getInstance(project).isDebug()) {
+                    ConsoleUtils.getInstance(project).showWaring("no debug happen", false, true);
+                    return;
+                }
             }
         }
         doActionPerformed(project, e);

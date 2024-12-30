@@ -36,6 +36,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static javax.swing.JOptionPane.CLOSED_OPTION;
 
@@ -329,9 +331,9 @@ public class CodeService {
                 AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr);
                 boolean correctAnswer = scrb.isCorrectAnswer();
                 if (correctAnswer) {
-                    ConsoleUtils.getInstance(project).showInfo(scrb.build(), true, true, "Congratulations!", "Submit Code Result", ConsoleDialog.INFO);
+                    ConsoleUtils.getInstance(project).showInfo("运行成功", true, true, "Congratulations!", "Submit Code Result", ConsoleDialog.INFO);
                 } else {
-                    ConsoleUtils.getInstance(project).showInfo(scrb.build(), true, true, "Oh No! Not Accept!", "Submit Code Result", ConsoleDialog.ERROR);
+                    ConsoleUtils.getInstance(project).showError("运行失败", true, true, "Oh No! Not Accept!", "Submit Code Result", ConsoleDialog.ERROR);
                 }
 
                 ConsoleUtils.getInstance(project).showInfo(scrb.build());
@@ -457,6 +459,7 @@ public class CodeService {
         protected final StringBuilder sb = new StringBuilder();
         protected final String splitter = "--------------";
         private final String codeTypeSplitter = "===============";
+        private final Pattern pattern = Pattern.compile("Line (\\d+):");
 
         public AbstractResultBuilder (T cr) {
             this.cr = cr;
@@ -527,6 +530,33 @@ public class CodeService {
                         throw new RuntimeException("unknown leetcode error...");
                     }
                 }
+            }
+        }
+
+        /**
+         * 处理错误行信息: 比如
+         * ❌ Compile Error...
+         * Line 36: error: not a statement
+         *         a
+         *         ^
+         * 我要提取 Line 36, 然后对36进行行号校正. 因为存在注释偏移
+         *
+         * @param error
+         * @return
+         */
+        private String handleErrorInfo(String error) {
+            // 正则表达式提取行号
+            Matcher matcher = pattern.matcher(error);
+
+            if (matcher.find()) {
+                // 提取行号
+                String lineNumberStr = matcher.group(1);
+                int lineNumber = Integer.parseInt(lineNumberStr);
+                // 对行号进行操作
+                int newLineNumber = lineNumber + Question.getLineUpperOffset();  // 示例：将行号加10
+                return error.replaceFirst("Line " + lineNumberStr + ":", "Line " + newLineNumber + ":");
+            } else {
+                return error;
             }
         }
 
