@@ -1,15 +1,16 @@
-package com.xhf.leetcode.plugin.debug.execute.java;
+package com.xhf.leetcode.plugin.debug.execute.java.p;
 
 import com.sun.jdi.*;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 执行P操作. 操作具体信息详见{@link Operation}
@@ -54,25 +55,19 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         } catch (IncompatibleThreadStateException e) {
             LogUtils.error(e);
             return ExecuteResult.fail(inst.getOperation());
+        } catch (ClassNotLoadedException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private String getVariable(ThreadReference thread, Location location, Context context) throws IncompatibleThreadStateException, AbsentInformationException {
+    private String getVariable(ThreadReference thread, Location location, Context context) throws IncompatibleThreadStateException, AbsentInformationException, ClassNotLoadedException {
         // 获取当前栈帧
         StackFrame frame = thread.frame(0);
         // 获取本地变量
         List<LocalVariable> localVariables = frame.visibleVariables();
+        Map<LocalVariable, Value> values = frame.getValues(localVariables);
         StringBuilder sb = new StringBuilder(Constants.LOCAL_VARIABLE + ":\n");
-        // 遍历
-        for (int i = 0; i < localVariables.size(); i++) {
-            LocalVariable localVar = localVariables.get(i);
-            Value varValue = frame.getValue(localVar);
-            // 强转获取value
-            sb.append(localVar.name()).append(" = ").append(handleValue(varValue, context));
-            if (i != localVariables.size() - 1) {
-                sb.append("\n");
-            }
-        }
+
         // 获取静态变量
         ReferenceType referenceType = location.declaringType();
         List<Field> fields = referenceType.fields();
@@ -117,7 +112,14 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         return sb.toString();
     }
 
+
     private String handleValue(Value value, Context ctx) {
+        if (value != null) {
+            if (value.toString().contains("java.lang.ThreadGroup")) {
+                System.out.println("abab");
+            }
+            System.out.println(value);
+        }
         try {
             return this.inspector.inspectValue(value);
         } catch (Exception e) {

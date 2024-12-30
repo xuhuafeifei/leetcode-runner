@@ -99,8 +99,19 @@ public class Context implements ExecuteContext {
         stepRequestManager.setStepRequest(size, depth);
     }
 
+    /**
+     * 这个名字不好, 取错了, 但考虑该方法已经大面积使用, 就保留了
+     */
     public void removeStepRequest() {
         stepRequestManager.disable();
+    }
+
+    public void disableStepRequest() {
+        stepRequestManager.disable();
+    }
+
+    public void enableStepRequest() {
+        stepRequestManager.enable();
     }
 
     public void setVm(VirtualMachine vm) {
@@ -192,6 +203,12 @@ public class Context implements ExecuteContext {
         void disable() {
             if (stepRequest != null) {
                 stepRequest.disable();
+            }
+        }
+
+        public void enable() {
+            if (stepRequest != null) {
+                stepRequest.enable();
             }
         }
     }

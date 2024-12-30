@@ -11,6 +11,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
@@ -22,6 +23,7 @@ import javax.swing.*;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
+@DebugCheck
 public class DebugAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {

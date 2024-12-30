@@ -1,6 +1,7 @@
-package com.xhf.leetcode.plugin.debug.execute.java;
+package com.xhf.leetcode.plugin.debug.execute.java.p;
 
 import com.sun.jdi.*;
+import com.xhf.leetcode.plugin.utils.MapUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -82,7 +83,7 @@ public class JavaValueInspector {
             } else if (value instanceof PrimitiveValue) {
                 res = "[" + ((ArrayReference) objRef).getValues().stream().map(e -> handlePrimitiveValue((PrimitiveValue) e)).collect(Collectors.joining(", ")) + "]";
             } else if (isWrapperType(value)) {
-                res = "[" + ((ArrayReference) objRef).getValues().stream().map(e -> getWrapperValue((ObjectReference) e)).collect(Collectors.joining(", ")) + "]";
+                res = "[" + ((ArrayReference) objRef).getValues().stream().map(e -> handleWrapper((ObjectReference) e)).collect(Collectors.joining(", ")) + "]";
             } else {
                 res = "[" + ((ArrayReference) objRef).getValues().stream().map(e -> handleObjectReference((ObjectReference) e, depth + 1)).collect(Collectors.joining(", ")) + "]";
             }
@@ -93,17 +94,19 @@ public class JavaValueInspector {
         } else if (objRef instanceof ClassLoaderReference) {
             res = "ClassLoader...";
         } else if (isWrapperType(objRef)) {
-            res = getWrapperValue(objRef);
+            res = handleWrapper(objRef);
         } else if (isArrayList(objRef)) {
-            res = getArrayList(objRef, depth);
+            res = handleArrayList(objRef, depth);
         } else if (isArraysArrayList(objRef)) {
-            res = getArraysArrayList(objRef, depth);
+            res = handleArraysArrayList(objRef, depth);
         } else if (isLinkedList(objRef)) {
-            res = getLinkedList(objRef, depth);
+            res = handleLinkedList(objRef, depth);
         } else if (isSingletonList(objRef)) {
-            res = getSingletonList(objRef, depth);
+            res = handleSingletonList(objRef, depth);
         } else if (isArrayDeque(objRef)) {
-            res = getArrayDeque(objRef, depth);
+            res = handleArrayDeque(objRef, depth);
+        } else if (objRef instanceof ThreadGroupReference) {
+            res = "objRef 是 ThreadGroupReference, 不支持处理!";
         } else {
             StringBuilder sb = new StringBuilder();
             if (objRef == null || objRef.referenceType() == null) {
@@ -150,7 +153,7 @@ public class JavaValueInspector {
         return value instanceof ObjectReference && "java.util.ArrayDeque".equals(value.type().name());
     }
 
-    private String getArrayDeque(ObjectReference objRef, int depth) {
+    private String handleArrayDeque(ObjectReference objRef, int depth) {
         ReferenceType referenceType = objRef.referenceType();
         Value elements = objRef.getValue(referenceType.fieldByName("elements"));
         Value head = objRef.getValue(referenceType.fieldByName("head"));
@@ -175,7 +178,7 @@ public class JavaValueInspector {
     /**
      * 获取 Collections.singletonList 的值
      */
-    private String getSingletonList(ObjectReference objRef, int depth) {
+    private String handleSingletonList(ObjectReference objRef, int depth) {
         Value value = objRef.getValue(objRef.referenceType().fieldByName("element"));
         if (value != null) {
             return "[" + this.inspectValue(value, depth + 1) + "]";
@@ -198,7 +201,7 @@ public class JavaValueInspector {
         return value instanceof ObjectReference && "java.util.LinkedList$Node".equals(value.type().name());
     }
 
-    public String getLinkedList(ObjectReference objRef, int depth) {
+    public String handleLinkedList(ObjectReference objRef, int depth) {
         Field first = objRef.referenceType().fieldByName("first");
         if (first != null) {
             Value value = objRef.getValue(first);
@@ -239,7 +242,7 @@ public class JavaValueInspector {
      * 获取Arrays.ArrayList
      * @return 以String的形式表示Arrays.ArrayList
      */
-    private String getArraysArrayList(ObjectReference objRef, int depth) {
+    private String handleArraysArrayList(ObjectReference objRef, int depth) {
         Field a = objRef.referenceType().fieldByName("a");
         if (a != null) {
             Value value = objRef.getValue(a);
@@ -263,7 +266,7 @@ public class JavaValueInspector {
      * 获取ArrayList
      * @return 以String的形式表示ArrayList
      */
-    private String getArrayList(ObjectReference objRef, int depth) {
+    private String handleArrayList(ObjectReference objRef, int depth) {
         Field elementData = objRef.referenceType().fieldByName("elementData");
         Field size = objRef.referenceType().fieldByName("size");
 
@@ -294,10 +297,55 @@ public class JavaValueInspector {
     }
 
     // 包装类集合
-    private static final Set<String> WRAPPER_CLASSES = new HashSet<>(Arrays.asList(
-            "java.lang.Integer", "java.lang.Double", "java.lang.Character", "java.lang.Long",
-            "java.lang.Float", "java.lang.Boolean", "java.lang.Byte", "java.lang.Short"
-    ));
+    public final Map<String, String> WRAPPER_TO_PRIMITIVES = MapUtils.getMapFromList(
+            Arrays.asList(
+                    "java.lang.Integer", "java.lang.Double", "java.lang.Character", "java.lang.Long",
+                    "java.lang.Float", "java.lang.Boolean", "java.lang.Byte", "java.lang.Short"
+            ),
+            Arrays.asList(
+                    "int", "double", "char", "long",
+                    "float", "boolean", "byte", "short"
+            )
+    );
+
+    public final Map<String, String> PRIMITIVES_TO_WRAPPER = MapUtils.getMapFromList(
+            Arrays.asList(
+                    "int", "double", "char", "long",
+                    "float", "boolean", "byte", "short"
+            ),
+            Arrays.asList(
+                    "java.lang.Integer", "java.lang.Double", "java.lang.Character", "java.lang.Long",
+                    "java.lang.Float", "java.lang.Boolean", "java.lang.Byte", "java.lang.Short"
+            )
+    );
+
+    public String getPrimitiveTypeByWrapperTypeName(String wrapperTypeName) {
+        return WRAPPER_TO_PRIMITIVES.get(wrapperTypeName);
+    }
+
+    public String getWrapperTypeByPrimitiveTypeName(String primitiveTypeName) {
+        return PRIMITIVES_TO_WRAPPER.get(primitiveTypeName);
+    }
+
+
+    /**
+     * 判断是不是primitiveType
+     * @param value
+     * @return
+     */
+    public boolean isPrimitiveType(Value value) {
+        return value instanceof PrimitiveValue;
+    }
+
+
+    public boolean isPrimitiveType(String typeName) {
+        return PRIMITIVES_TO_WRAPPER.containsKey(typeName);
+    }
+
+
+    public boolean isWrapperType(String typeName) {
+        return WRAPPER_TO_PRIMITIVES.containsKey(typeName);
+    }
 
     // 判断对象是否为包装类型
     public boolean isWrapperType(Value value) {
@@ -307,12 +355,12 @@ public class JavaValueInspector {
             ReferenceType refType = objRef.referenceType();
             String className = refType.name();
             // 判断该类是否是包装类型
-            return WRAPPER_CLASSES.contains(className);
+            return WRAPPER_TO_PRIMITIVES.containsKey(className);
         }
         return false;  // 如果是基本类型值，则认为它不是包装类型
     }
 
-    private String getWrapperValue(ObjectReference objRef) {
+    private String handleWrapper(ObjectReference objRef) {
         // 获取包装类型类的 'value' 字段
         Field valueField = objRef.referenceType().fieldByName("value");
         if (valueField != null) {
@@ -323,4 +371,20 @@ public class JavaValueInspector {
         }
         return "";
     }
+
+    /**
+     * 获取包装类型类的 'value' 字段. 该字段是PrimitiveValue
+     * @param objRef
+     * @return
+     */
+    public Value getWrapperValue(ObjectReference objRef) {
+        // 获取包装类型类的 'value' 字段
+        Field valueField = objRef.referenceType().fieldByName("value");
+        if (valueField != null) {
+            // 获取字段值
+            return objRef.getValue(valueField);
+        }
+        return null;
+    }
+
 }

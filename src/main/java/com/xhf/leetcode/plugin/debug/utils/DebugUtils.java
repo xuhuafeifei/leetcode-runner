@@ -22,7 +22,9 @@ import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointManager;
+import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Location;
+import com.sun.jdi.Value;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
@@ -391,5 +393,18 @@ public class DebugUtils {
         } catch (IOException e) {
             throw new DebugError("Failed to find an available port", e);
         }
+    }
+
+    public static Map<String, Value> convert(Map<LocalVariable, Value> values) {
+        Map<String, Value> res = new HashMap<>();
+        for (Map.Entry<LocalVariable, Value> entry : values.entrySet()) {
+            res.put(entry.getKey().name(), entry.getValue());
+        }
+        return res;
+    }
+
+    public static String removeQuotes(String str) {
+        // 除去的是字符串两端的双引号
+        return str.replaceAll("^\"|\"$", "");
     }
 }

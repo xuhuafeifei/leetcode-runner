@@ -17,7 +17,8 @@ import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.*;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
-import com.xhf.leetcode.plugin.debug.execute.java.JavaPInst;
+import com.xhf.leetcode.plugin.debug.execute.java.p.JavaPInst;
+import com.xhf.leetcode.plugin.debug.execute.java.p.doExp;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
@@ -26,7 +27,7 @@ public class JDIExample {
 
     static Context context = new Context();
     static StepRequest stepRequest;
-    static int b = 15;
+    static int b = 12;
     static String methodName = "test";
 
     private static void captureStream(InputStream stream, String streamName) {
@@ -70,7 +71,6 @@ public class JDIExample {
             // 启动目标 JVM
             VirtualMachine vm = connector.launch(arguments);
 
-
             // 获取当前类的调试信息
             EventRequestManager erm = vm.eventRequestManager();
 
@@ -82,6 +82,7 @@ public class JDIExample {
             EventQueue eventQueue = vm.eventQueue();
 
             context.setErm(erm);
+            context.setVm(vm);
 
             // 捕获目标虚拟机的输出
 //            captureStream(vm.process().getInputStream(), "OUTPUT");
@@ -100,45 +101,36 @@ public class JDIExample {
 
                             List<Location> locations = mainMethod.allLineLocations();
                             for (Location location : locations) {
-                                if (location.lineNumber() == 15) {
+                                if (location.lineNumber() == b) {
                                     BreakpointRequest breakpointRequest = erm.createBreakpointRequest(location);
                                     breakpointRequest.enable();
                                 }
                             }
-
-                            // 设置断点
-//                             setBreakpointAtLine(mainClass, b, erm, methodName);
-                            // 在指定行设置断点
-                            System.out.println("Breakpoint set at search.Main.main");
                         }
-//                        if (className.equals("Solution")) {
-//                            // 获取Main类
-//                            ClassType mainClass = (ClassType) classPrepareEvent.referenceType();
-//                            setBreakpointAtLine(mainClass, b, erm, methodName);
-//                            System.out.println("Breakpoint set at search.Main.main");
-//                        }
                         eventSet.resume();
                     }
                     else if (event instanceof BreakpointEvent) {
                         BreakpointEvent breakpointEvent = (BreakpointEvent) event;
-                        System.out.println("Hit breakpoint at: " + breakpointEvent.location());
-
                         context.setBreakpointEvent(breakpointEvent);
-
                         context.setThread(breakpointEvent.thread());
                         context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_OVER);
-
                         eventSet.resume();
                     }
                     else if (event instanceof StepEvent) {
                         StepEvent stepEvent = (StepEvent) event;
                         context.setLocation(stepEvent.location());
                         context.setThread(stepEvent.thread());
-                        ExecuteResult execute = new JavaPInst().execute(Instruction.success(ReadType.COMMAND_IN, Operation.R, ""), context);
-                        System.err.println(DebugUtils.buildCurrentLineInfoByLocation(execute));
-                        if (execute.isSuccess()) {
-                            System.out.println(execute.getResult());
+                        // ExecuteResult execute = new JavaPInst().execute(Instruction.success(ReadType.COMMAND_IN, Operation.R, ""), context);
+                        doExp doExp = new doExp();
+                        String s = null;
+                        try {
+                            System.err.println(stepEvent.location().lineNumber());
+                            s = doExp.executeExpression("abab", context);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
+                        System.err.println(s);
+                        // System.err.println(DebugUtils.buildCurrentLineInfoByLocation(execute));
                         eventSet.resume();
                     }
                     else {
