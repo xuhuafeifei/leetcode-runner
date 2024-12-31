@@ -28,7 +28,6 @@ class TreeNode:
             ans.append(cur.val)
             q.append(cur.left if cur.left else None)
             q.append(cur.right if cur.right else None)
-        print(ans)
         return str(build(ans))
 
 if __name__ == '__main__':

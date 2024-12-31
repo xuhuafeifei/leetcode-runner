@@ -202,10 +202,10 @@ public class JavaValueInspector {
 
     private String handleTreeNode(ObjectReference objRef, int depth) {
         // 检查是否和我项目提供的TreeNode一致, 否则不进行打印
-        if (! isMyTreeNode(objRef)) {
-            // 采用默认的复杂对象打印器
-            return handleComplexObject(objRef, depth);
-        }
+//        if (! isMyTreeNode(objRef)) {
+//            // 采用默认的复杂对象打印器
+//            return handleComplexObject(objRef, depth);
+//        }
         // 创建头节点
         TreeNode cp = dfs(objRef);
         return new TreeNodePrinter(cp).visitAndReturn().toString();
@@ -242,6 +242,7 @@ public class JavaValueInspector {
      * @param objRef
      * @return
      */
+    @Deprecated // 因为debug内核采用的是我提供的TreeNode. 所以不用判断
     private boolean isMyTreeNode(ObjectReference objRef) {
         // 检查并获取变量
         ReferenceType referenceType = objRef.referenceType();

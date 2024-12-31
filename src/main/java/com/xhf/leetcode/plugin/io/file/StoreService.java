@@ -130,6 +130,11 @@ public final class StoreService implements Disposable {
         }
     }
 
+    /**
+     * 持久化数据并记录日志
+     * @param info 日志信息, 统计缓存更新次数和频率
+     * @param async 是否异步
+     */
     private void persistAndLog(String info, boolean async) {
         frequentLog(info);
         this.persistCache(async);
