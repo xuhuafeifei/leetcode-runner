@@ -35,4 +35,8 @@ public class FileTreePrinter extends TreePrinter {
     public boolean isLeaf(Object obj) {
         return ((File)obj).isFile();
     }
+
+    public static void main(String[] args) {
+        System.out.println(new FileTreePrinter(new File("E:\\java_code\\leetcode-runner\\src\\main\\resources")).visitAndReturn());
+    }
 }

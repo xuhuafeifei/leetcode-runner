@@ -74,7 +74,7 @@ public class DebugAction extends AbstractAction {
 
     private boolean doCheck(Project project, LangType langType) {
         // 通过文件名获取语言类型
-        String langFromFile = CodeService.parseLangTypeFromCVFile(project);
+        String langFromFile = CodeService.getInstance(project).parseLangTypeFromCVFile(project);
         if (LangType.getType(langFromFile) != langType) {
             LogUtils.warn("异常, LangType != langFromFile " + langType + " != " + langFromFile);
             JOptionPane.showMessageDialog(null, "当前文件代表语言类型与设置的语言类型类型不一致, 请重新选择代码文件\n"

@@ -11,6 +11,6 @@ import com.xhf.leetcode.plugin.service.CodeService;
 public class RunCodeAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
-        CodeService.runCode(project);
+        CodeService.getInstance(project).runCode();
     }
 }

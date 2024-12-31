@@ -1,0 +1,19 @@
+{{testcaseVName}} = str("{{testcase}}").strip()
+
+{{variableName}} = None
+if {{testcaseVName}} != "[]":
+    # 把collect变为数组
+    split = [
+        int(e)
+        for e in {{testcaseVName}}.replace("[", "").replace("]", "").split(",")
+    ]
+
+    i = 0
+    {{variableName}} = ListNode(split[i])
+    cp = {{variableName}}
+    i += 1
+
+    # 迭代
+    for i in range(i, len(split)):
+        cp.next = ListNode(split[i])
+        cp = cp.next

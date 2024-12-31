@@ -29,4 +29,13 @@ public abstract class AbstractVariableConvertor implements VariableConvertor{
     protected abstract String doPython(String testcase, String variableName);
 
     protected abstract String doJava(String testcase, String variableName);
+
+
+    protected String addTab(String content) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : content.split("\n")) {
+            sb.append(TAB).append(s).append("\n");
+        }
+        return sb.toString();
+    }
 }

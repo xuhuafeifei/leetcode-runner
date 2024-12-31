@@ -410,7 +410,7 @@ public class SearchPanel extends SimpleToolWindowPanel {
                     questionList.scrollRectToVisible(cellRect);
                 }
                 // 重新打开文件
-                CodeService.reOpenCodeEditor(question, project, event.getFile(), event.getLangType());
+                CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
                 return;
             }
         }

@@ -75,6 +75,7 @@ public class QuestionEngine implements SearchEngine<Question> {
         IndexSearcher isearcher = new IndexSearcher(directory);
 
         QueryParser parser = new QueryParser(Version.LUCENE_29, "titleSlug", analyzer);
+        // query如何设置自己的分词器
         Query query = parser.parse(queryParam);
 
         TopDocs topDocs = isearcher.search(query, 100);

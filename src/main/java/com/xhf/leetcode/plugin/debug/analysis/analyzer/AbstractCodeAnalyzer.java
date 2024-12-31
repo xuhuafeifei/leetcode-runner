@@ -24,7 +24,7 @@ public abstract class AbstractCodeAnalyzer implements CodeAnalyzer{
      */
     public AnalysisResult autoAnalyze() {
         // 从当前打开的VFile路径名称中解析出当前题目的titleSlug
-        String titleSlug = CodeService.parseTitleSlugFromVFile(ViewUtils.getCurrentOpenVirtualFile(project));
+        String titleSlug = CodeService.getInstance(project).parseTitleSlugFromVFile(ViewUtils.getCurrentOpenVirtualFile(project));
         LogUtils.simpleDebug("titleSlug = " + titleSlug);
         Question question = QuestionService.getInstance().queryQuestionInfo(titleSlug, project);
         return analyze(question.getCodeSnippets());

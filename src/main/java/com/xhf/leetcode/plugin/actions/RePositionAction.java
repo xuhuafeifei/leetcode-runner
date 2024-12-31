@@ -11,6 +11,6 @@ import com.xhf.leetcode.plugin.service.CodeService;
 public class RePositionAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
-        CodeService.rePosition(project);
+        CodeService.getInstance(project).rePosition();
     }
 }

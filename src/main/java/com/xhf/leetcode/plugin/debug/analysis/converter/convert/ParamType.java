@@ -28,8 +28,8 @@ public enum ParamType {
     String_ARRAY("String_array", new String[]{"String[]", "List[str]"}, new StringArrayConvertor()),
     String_MATRIX("String_matrix", new String[]{"String[][]", "List[List[str]]"}, new StringMatrixConvertor()),
     LIST_STRING("List_String", new String[]{"List<String>"}, new ListStringConvertor()),
-    TREE_NODE("TreeNode", new String[]{"TreeNode"}, new TreeNodeConvertor()),
-    LIST_NODE("List_Node", new String[]{"ListNode"}, new ListNodeConvertor());
+    TREE_NODE("TreeNode", new String[]{"TreeNode", "Optional[TreeNode]"}, new TreeNodeConvertor()),
+    LIST_NODE("List_Node", new String[]{"ListNode", "Optional[ListNode]"}, new ListNodeConvertor());
 
     /**
      * 不同变量的类型.所有语言的类型都通过type进行标识

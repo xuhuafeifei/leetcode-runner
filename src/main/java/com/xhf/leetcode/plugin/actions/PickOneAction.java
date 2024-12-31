@@ -16,6 +16,6 @@ public class PickOneAction extends AbstractAction {
     void doActionPerformed(Project project, AnActionEvent e) {
         // choose one question randomly
         Question question = QuestionService.getInstance().pickOne(project);
-        CodeService.openCodeEditor(question, project);
+        CodeService.getInstance(project).openCodeEditor(question);
     }
 }

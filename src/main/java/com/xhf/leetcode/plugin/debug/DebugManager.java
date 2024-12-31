@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.debug;
 
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.DebugEndEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
@@ -17,11 +19,12 @@ import java.util.Map;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class DebugManager {
+@Service(Service.Level.PROJECT) // 注册idea, 保证所有debugger强制关闭
+public final class DebugManager implements Disposable {
     private static volatile DebugManager instance;
     private final Project project;
 
-    private DebugManager(Project project) {
+    public DebugManager(Project project) {
         this.project = project;
         LCEventBus.getInstance().register(this);
     }
@@ -44,9 +47,10 @@ public class DebugManager {
     private Debugger currentDebugger;
 
     /*
-     * 创建并存储全新的debugger
+     * 创建并存储全新的debugger. 同时关闭已有debugger
      */
     public Debugger createDebugger(Class<? extends Debugger> clazz) {
+        closeAllDebugger();
         if (clazz == JavaDebugger.class) {
             JavaDebugger javaDebugger = buildJavaDebugger();
             debuggers.put(clazz, javaDebugger);
@@ -57,6 +61,16 @@ public class DebugManager {
             currentDebugger = pythonDebugger;
         }
         return currentDebugger;
+    }
+
+    /**
+     * 关闭所有debugger
+     */
+    private void closeAllDebugger() {
+        for (Debugger debugger : debuggers.values()) {
+            debugger.stop();
+        }
+        currentDebugger = null;
     }
 
     public <T extends Debugger> T getDebugger(Class<T> clazz) {
@@ -105,5 +119,12 @@ public class DebugManager {
         if (currentDebugger == null) return false;
         if (currentDebugger.getEnv() == null) return false;
         return currentDebugger.getEnv().isDebug();
+    }
+
+
+    @Override
+    public void dispose() {
+        // 包装强制关闭所有的debugger
+        closeAllDebugger();
     }
 }

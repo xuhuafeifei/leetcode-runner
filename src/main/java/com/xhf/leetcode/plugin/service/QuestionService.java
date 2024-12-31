@@ -198,7 +198,7 @@ public class QuestionService {
         LeetcodeClient instance = LeetcodeClient.getInstance(project);
         Question todayQuestion = instance.getTodayQuestion(project);
 
-        CodeService.openCodeEditor(todayQuestion, project);
+        CodeService.getInstance(project).openCodeEditor(todayQuestion);
     }
 
     /**

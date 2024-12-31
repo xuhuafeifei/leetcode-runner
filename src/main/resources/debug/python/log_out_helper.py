@@ -7,11 +7,11 @@ class LogOutHelper:
 
         # 配置logging，设置日志级别为DEBUG
         logging.basicConfig(
-            # filename=self.log_dir,
+            filename=self.log_dir,
             level=logging.DEBUG,  # 只需要DEBUG级别
             format='%(asctime)s - %(message)s',  # 简单的时间戳和消息
             filemode='a',  # 以追加模式打开文件
-            # encoding='utf-8'  # 指定编码为 UTF-8
+            encoding='utf-8'  # 指定编码为 UTF-8
         )
 
     def log_out(self, message: str, title: str = None):

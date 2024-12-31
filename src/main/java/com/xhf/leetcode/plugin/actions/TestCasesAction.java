@@ -11,6 +11,6 @@ import com.xhf.leetcode.plugin.service.CodeService;
 public class TestCasesAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
-        CodeService.openTestCasesDialog(project);
+        CodeService.getInstance(project).openTestCasesDialog();
     }
 }

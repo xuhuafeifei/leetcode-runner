@@ -78,11 +78,24 @@ public class PythonDebugEnv extends AbstractDebugEnv {
     protected boolean copyFile() {
         // copy
         return
-                copyFileHelper("/debug/python/inst_source.py") &&
-                copyFileHelper("/debug/python/log_out_helper.py") &&
-                copyFileHelper("/debug/python/debug_core.py") &&
-                copyFileHelper("/debug/python/execute_result.py") &&
-                copyFileHelper("/debug/python/server.py");
+//                copyFileHelper("/debug/python/inst_source.py") &&
+//                copyFileHelper("/debug/python/log_out_helper.py") &&
+//                copyFileHelper("/debug/python/debug_core.py") &&
+//                copyFileHelper("/debug/python/execute_result.py") &&
+//                copyFileHelper("/debug/python/server.py") &&
+//                copyFileHelper("/debug/python/ListNode.py") &&
+//                copyFileHelper("/debug/python/TreeNode.py")
+                // 别在屁股后面加/
+                copyFileExcept("/debug/python",
+                        new String[]{
+                                "ListNodeConvertor.template",
+                                "TreeNodeConvertor.template",
+                                "test.cmd",
+                                "Main.template",
+                                "Main.py",
+                                "Solution.py"
+                        }
+                );
     }
 
     @Override
@@ -210,7 +223,10 @@ public class PythonDebugEnv extends AbstractDebugEnv {
                 "from itertools import permutations, combinations, product, accumulate\n" +
                 "from bisect import bisect_left, bisect_right\n" +
                 "import math\n" +
-                "import sys\n";
+                "import sys\n" +
+                "from ListNode import ListNode\n" +
+                "from TreeNode import TreeNode\n"
+                ;
         // 设置偏移量, 后期debug的时候需要通过offset对齐
         this.offset = commonPackage.split("\n").length;
         return commonPackage + content;

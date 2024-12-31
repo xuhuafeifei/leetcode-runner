@@ -13,6 +13,6 @@ import com.xhf.leetcode.plugin.service.CodeService;
 public class DefaultContentAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {
-        CodeService.getDefaultContent(project);
+        CodeService.getInstance(project).getDefaultContent();
     }
 }

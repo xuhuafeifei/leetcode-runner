@@ -15,11 +15,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * support cache ability and disk persistence
+ * 如果发现durableCache发生变化, 立刻将数据异步写入磁盘(因为目前项目存储容量不大, 触发频率不算太高, 因此通过及时持久化来保存数据)
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -103,6 +107,12 @@ public final class StoreService implements Disposable {
         addCache(key, GsonUtils.toJsonStr(o), true, -1, null);
     }
 
+    /**
+     * 计数器
+     */
+    private int cnt = 0;
+    private long last_time = 0;
+
     public void addCache(String key, String o, boolean isDurable, int expire, TimeUnit timeUnit) {
         StoreContent c = new StoreContent();
         c.setContentJson(o);
@@ -114,10 +124,45 @@ public final class StoreService implements Disposable {
 
         if (isDurable) {
             durableCache.put(key, c);
+            persistAndLog("新增缓存数据!", true);
         } else {
             cache.put(key, c);
         }
     }
+
+    private void persistAndLog(String info, boolean async) {
+        frequentLog(info);
+        this.persistCache(async);
+    }
+
+    private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            5, // 核心线程数
+            5, // 最大线程数
+            1, // 线程存活时间
+            TimeUnit.MINUTES,
+            new LinkedBlockingQueue<>(), // 无界阻塞队列
+            new ThreadPoolExecutor.CallerRunsPolicy() // 拒绝策略：CallerRunsPolicy
+    );
+
+
+    private void frequentLog(final String info) {
+        executor.execute(() -> {
+            lock.lock();
+            try {
+                long now = System.currentTimeMillis();
+                if (cnt == 0) {
+                    LogUtils.simpleDebug(info + " 第" + cnt + "次刷新");
+                } else {
+                    LogUtils.simpleDebug(info + " 第" + cnt + "次刷新, 与上次时间差为 = " + (now - last_time) + "ms");
+                }
+                cnt += 1;
+                last_time = now;
+            } finally {
+                lock.unlock();
+            }
+        });
+    }
+
 
     public boolean contains(String key) {
         return StringUtils.isNotBlank(getCacheJson(key));
@@ -134,18 +179,25 @@ public final class StoreService implements Disposable {
         }
         StoreContent content = cache.getIfPresent(key);
         if (content != null) {
-            return getIfNotExpireTime(content);
+            return handleStoreContent(key, getIfNotExpireTime(content));
         }
         content = durableCache.getIfPresent(key);
         if (content != null) {
-            String res = getIfNotExpireTime(content);
-            if (res == null) {
-                // delete expired content
-                durableCache.invalidate(key);
-            }
-            return res;
+            return handleStoreContent(key, getIfNotExpireTime(content));
         }
         return null;
+    }
+
+    private String handleStoreContent(String key, String ifNotExpireTime) {
+        if (ifNotExpireTime == null) {
+            removeCache(key);
+        }
+        return ifNotExpireTime;
+    }
+
+    private void removeCache(String key) {
+        durableCache.invalidate(key);
+        persistAndLog("删除缓存数据!", true);
     }
 
     /**
@@ -187,6 +239,18 @@ public final class StoreService implements Disposable {
     /*------------------------------disk---------------------------------*/
     private ReentrantLock lock = new ReentrantLock();
 
+
+    /**
+     * persist cache to file
+     * @param async true:异步, false:同步
+     */
+    private void persistCache(boolean async) {
+        if (async) {
+            executor.execute(this::persistCache);
+        } else {
+            this.persistCache();
+        }
+    }
 
     private void persistCache() {
         this.scanFileCache();

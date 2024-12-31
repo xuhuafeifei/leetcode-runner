@@ -1,0 +1,30 @@
+{{testcaseVName}} = str("{{testcase}}").strip()
+
+{{variableName}} = None
+if {{testcaseVName}} != "[]":
+    # 把collect变为数组
+    split = [
+        None if e == "null" else int(e)
+        for e in {{testcaseVName}}.replace("[", "").replace("]", "").split(",")
+    ]
+
+    i = 0
+    {{variableName}} = TreeNode(split[i])
+    i += 1
+
+    q = [{{variableName}}]
+
+    while q:
+        node = q.pop(0)
+        # 添加它的左节点
+        if i < len(split):
+            if split[i] is not None and split[i] != "null":
+                node.left = TreeNode(split[i])
+                q.append(node.left)
+            i += 1
+        # 添加右节点
+        if i < len(split):
+            if split[i] is not None and split[i] != "null":
+                node.right = TreeNode(split[i])
+                q.append(node.right)
+            i += 1

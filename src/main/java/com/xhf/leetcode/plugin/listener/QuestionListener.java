@@ -29,6 +29,6 @@ public class QuestionListener extends AbstractMouseAdapter {
         Point point = e.getPoint();
         int idx = questionList.locationToIndex(point);
         Question question = questionList.getModel().getElementAt(idx);
-        CodeService.openCodeEditor(question, project);
+        CodeService.getInstance(project).openCodeEditor(question);
     }
 }

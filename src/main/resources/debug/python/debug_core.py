@@ -229,6 +229,13 @@ class Debugger:
             traceback.print_exc()
             self.inst_source.store_output(ExecuteResult.fail("指令执行出错" + str(e)))
 
+    def handle_value(self, value):
+        # 如果value含有__humna_visible__()
+        if hasattr(value, '__human_visible__'):
+            return str(value.__human_visible__())
+        else:
+            return str(value)
+
     def do_p(self, inst, frame):
         param = inst["param"]
 
@@ -257,10 +264,10 @@ class Debugger:
             self.inst_source.store_output(r)
             return
         # 打印局部变量
-        res = "Local Variables:\n"
+        res = "Local variable:\n"
         # 遍历frame.f_locals, 同时将他存储到字符串中
         for key, value in frame.f_locals.items():
-            v = f'{key}: {value}'
+            v = f'{key}: {self.handle_value(value)}'
             res += v + '\n'
         r = ExecuteResult.success("P", res)
         ExecuteResult.fill_with_frame(r, frame)
@@ -273,7 +280,7 @@ class Debugger:
             for key, value in class_obj.__dict__.items():
                 # 排除内建属性
                 if not key.startswith('__') and not callable(value):
-                    res += f"{key}: {value}\n"
+                    res += f"{key}: {self.handle_value(value)}\n"
 
         # 打印成员变量（实例变量）
         res += "Member variable:\n"
@@ -281,7 +288,7 @@ class Debugger:
         if SELF is not None:
             instance_vars = vars(SELF)  # 获取实例的属性
             for key, value in instance_vars.items():
-                res += f"{key}: {value}\n"
+                res += f"{key}: {self.handle_value(value)}\n"
 
         # 返回执行结果
         r = ExecuteResult.success("P", res)

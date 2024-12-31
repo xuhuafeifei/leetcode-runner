@@ -5,6 +5,8 @@ from heapq import heappush, heappop, heapify
 from functools import lru_cache, cache
 from itertools import permutations, combinations, product, accumulate
 from bisect import bisect_left, bisect_right
+from ListNode import ListNode
+from TreeNode import TreeNode
 import math
 import sys
 #do not modify or remove anything between start-line and end-line

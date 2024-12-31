@@ -16,7 +16,11 @@ public class TreeNodeConvertor extends AbstractVariableConvertor {
 
     @Override
     protected String doPython(String testcase, String variableName) {
-        return null;
+        String code = FileUtils.readContentFromFile(getClass().getResource("/debug/python/TreeNodeConvertor.template"));
+        code = code.replace("{{testcase}}", testcase)
+                   .replace("{{variableName}}", variableName)
+                   .replace("{{testcaseVName}}", RandomUtils.nextString(10));
+        return addTab(code);
     }
 
     @Override

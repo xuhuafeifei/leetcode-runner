@@ -20,6 +20,10 @@ class ExecuteResult:
     def fill_with_frame(cls, r: 'ExecuteResult', frame):
         """根据帧信息填充执行结果"""
         r.class_name = frame.f_locals.get('self', None).__class__.__name__
+        if r.class_name is None or type(None) == type(r.class_name) or type(None) == r.class_name:
+            # 判断所在文件
+            if "Solution" in frame.f_code.co_filename:
+                r.class_name = "Solution"
         r.add_line = frame.f_lineno
         r.method_name = frame.f_code.co_name
 

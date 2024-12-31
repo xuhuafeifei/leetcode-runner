@@ -1,8 +1,6 @@
 package com.xhf.leetcode.plugin.service;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -15,6 +13,9 @@ import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.RePositionEvent;
 import com.xhf.leetcode.plugin.comp.TestCaseDialog;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.PythonCodeAnalyzer;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
@@ -24,14 +25,13 @@ import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -48,17 +48,37 @@ import static javax.swing.JOptionPane.CLOSED_OPTION;
 public class CodeService {
     public static String DIR = "temp";
 
+    // 单例
+    private static volatile CodeService instance;
+    private final Project project;
+
+    public CodeService(Project project) {
+        this.project = project;
+    }
+
+    // 单例
+    public static CodeService getInstance(Project project) {
+        if (instance == null) {
+            synchronized (CodeService.class) {
+                if (instance == null) {
+                    instance = new CodeService(project);
+                }
+            }
+        }
+        return instance;
+    }
+
     /**
      * fill question and open code editor with preview content function
      *
      * @param question question
-     * @param project project
      */
-    public static void openCodeEditor(Question question, Project project) {
+    public void openCodeEditor(Question question) {
         QuestionService.getInstance().fillQuestion(question, project);
 
         // create code file
         String codeFilePath = createCodeFile(question);
+        analysisAndCreateFile(question);
         // create content file
         // String markdownFilePath = createContentFile(question);
 
@@ -76,7 +96,56 @@ public class CodeService {
         });
     }
 
-    public static void reOpenCodeEditor(Question question, Project project, VirtualFile file, String langType) {
+    /**
+     * 分析代码, 同时创建文件
+     * 主要服务于包含ListNode, TreeNode的题目
+     * @param question
+     */
+    private void analysisAndCreateFile(Question question) {
+        String codeSnippets = question.getCodeSnippets();
+        if (StringUtils.isBlank(codeSnippets)) {
+            return;
+        }
+        // 分析代码
+        LangType langType = LangType.getType(AppSettings.getInstance().getLangType());
+        if (langType == null) {
+            LogUtils.warn("langType is null !!!");
+            return;
+        }
+        switch (langType) {
+            case JAVA:
+                AnalysisResult a1 = new JavaCodeAnalyzer(project).analyze(codeSnippets);
+                if (contains(a1, "ListNode")) {
+                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/java/ListNode.java")), "ListNode.java");
+                }
+                if (contains(a1, "TreeNode")) {
+                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/java/TreeNode.java")), "TreeNode.java");
+                }
+                return;
+            case PYTHON3:
+                AnalysisResult a2 = new PythonCodeAnalyzer(project).analyze(codeSnippets);
+                if (contains(a2, "ListNode")) {
+                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/python/ListNode.py")), "ListNode.py");
+                }
+                if (contains(a2, "TreeNode")) {
+                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/python/TreeNode.py")), "TreeNode.py");
+                }
+                return;
+            default:
+                LogUtils.warn("当前语言并不支持自动创建ListNode或TreeNode, langType = " + langType.getLangType());
+        }
+    }
+
+    private boolean contains(AnalysisResult ar, String paramTypeName) {
+        for (String parameterType : ar.getParameterTypes()) {
+            if (parameterType.contains(paramTypeName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void reOpenCodeEditor(Question question, VirtualFile file, String langType) {
         QuestionService.getInstance().fillQuestion(question, project);
 
         LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
@@ -96,7 +165,7 @@ public class CodeService {
         });
     }
 
-    private static LeetcodeEditor buildLeetcodeEditor(Question question, String translatedContent, String lang) {
+    private LeetcodeEditor buildLeetcodeEditor(Question question, String translatedContent, String lang) {
         LeetcodeEditor le = new LeetcodeEditor();
         le.setLang(lang);
         le.setQuestionId(question.getQuestionId());
@@ -113,7 +182,7 @@ public class CodeService {
     }
 
     @Deprecated // not used
-    private static String createContentFile(Question question) {
+    private String createContentFile(Question question) {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)
                 .append("content")
@@ -132,7 +201,30 @@ public class CodeService {
         return filePath;
     }
 
-    private static String createCodeFile(Question question) {
+    /**
+     * 根据文件名称 + 文件内容, 创建文件
+     *
+     * @param content
+     * @param fileName
+     * @return
+     */
+    private String createCodeFile(String content, String fileName) {
+        String filePath = AppSettings.getInstance().getFilePath();
+        filePath = new FileUtils.PathBuilder(filePath)
+                // .append("temp")
+                .append(fileName)
+                .build();
+
+        try {
+            FileUtils.createAndWriteFile(filePath, content);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return filePath;
+    }
+
+    private String createCodeFile(Question question) {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)
                 // .append("temp")
@@ -156,7 +248,7 @@ public class CodeService {
      * @param question question
      * @return 获取文件名
      */
-    public static String getCodeFileName(Question question) {
+    public String getCodeFileName(Question question) {
         return question.getFileName() + AppSettings.getInstance().getFileTypeSuffix();
     }
 
@@ -165,7 +257,7 @@ public class CodeService {
      * @param filePath 打开的虚拟文件的路径
      * @return frontedQuestionId
      */
-    public static String parseFidFromFileName(String filePath) {
+    public String parseFidFromFileName(String filePath) {
         Path path = Paths.get(filePath);
         String fileName = path.getFileName().toString();
         return Question.parseFrontendQuestionId(fileName);
@@ -176,7 +268,7 @@ public class CodeService {
      * @param file idea打开的虚拟文件
      * @return frontedQuestionId
      */
-    public static String parseFidFromVFile(VirtualFile file) {
+    public String parseFidFromVFile(VirtualFile file) {
         String filePath = ViewUtils.getUnifyFilePathByVFile(file);
         return parseFidFromFileName(filePath);
     }
@@ -186,7 +278,7 @@ public class CodeService {
      * @param filePath 打开的虚拟文件的路径
      * @return 解析出titleSlug
      */
-    public static String parseTitleSlugFromFileName(String filePath) {
+    public String parseTitleSlugFromFileName(String filePath) {
         Path path = Paths.get(filePath);
         String fileName = path.getFileName().toString();
         return Question.parseTitleSlug(fileName);
@@ -197,7 +289,7 @@ public class CodeService {
      * @param file idea打开的虚拟文件
      * @return 解析titleSlug
      */
-    public static String parseTitleSlugFromVFile(VirtualFile file) {
+    public String parseTitleSlugFromVFile(VirtualFile file) {
         String filePath = ViewUtils.getUnifyFilePathByVFile(file);
         return parseTitleSlugFromFileName(filePath);
     }
@@ -206,7 +298,7 @@ public class CodeService {
      * 通过文件名反解析question的langType
      * @param filePath 打开的虚拟文件的路径
      */
-    private static String parseLangType(String filePath) {
+    private String parseLangType(String filePath) {
         Path path = Paths.get(filePath);
         String fileName = path.getFileName().toString();
         return Question.parseLangType(fileName);
@@ -217,7 +309,7 @@ public class CodeService {
      * @param file idea打开的虚拟文件
      * @return langType
      */
-    public static String parseLangTypeFromVFile(VirtualFile file) {
+    public String parseLangTypeFromVFile(VirtualFile file) {
         String filePath = ViewUtils.getUnifyFilePathByVFile(file);
         return parseLangType(filePath);
     }
@@ -227,7 +319,7 @@ public class CodeService {
      * @param project project
      * @return langType
      */
-    public static String parseLangTypeFromCVFile(Project project) {
+    public String parseLangTypeFromCVFile(Project project) {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
             JOptionPane.showMessageDialog(null, "No file is chosen");
@@ -236,7 +328,7 @@ public class CodeService {
         return parseLangTypeFromVFile(cFile);
     }
 
-    private static RunCode buildRunCode(LeetcodeEditor lc, String codeContent) {
+    private RunCode buildRunCode(LeetcodeEditor lc, String codeContent) {
         // build run code
         RunCode runCode = new RunCode();
         runCode.setFrontendQuestionId(lc.getFrontendQuestionId());
@@ -261,9 +353,8 @@ public class CodeService {
 
     /**
      * run code with a teat case through a leetcode platform
-     * @param project project
      */
-    public static void runCode(Project project) {
+    public void runCode() {
         /* get file editor */
         SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
 
@@ -300,7 +391,7 @@ public class CodeService {
         });
     }
 
-    public static void submitCode(Project project) {
+    public void submitCode() {
         /* get file editor */
         SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
 
@@ -349,9 +440,8 @@ public class CodeService {
 
     /**
      * 重新定位question
-     * @param project project
      */
-    public static void rePosition(Project project) {
+    public void rePosition() {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
             JOptionPane.showMessageDialog(null, "No file is chosen");
@@ -384,9 +474,8 @@ public class CodeService {
      * <p>
      * 该方法会通过当前打开的文件解析出fid和titleSlug, 并且根据这两个值获取默认代码
      *
-     * @param project project
      */
-    public static void getDefaultContent(Project project) {
+    public void getDefaultContent() {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
             JOptionPane.showMessageDialog(null, "No file open");
@@ -454,7 +543,7 @@ public class CodeService {
      *
      * @param <T>
      */
-    private static abstract class AbstractResultBuilder<T extends BaseCodeResult> {
+    private abstract static class AbstractResultBuilder<T extends BaseCodeResult> {
         protected T cr; // code result
         protected final StringBuilder sb = new StringBuilder();
         protected final String splitter = "--------------";
@@ -506,6 +595,7 @@ public class CodeService {
             if (correctAnswer) {
                 // true
                 sb.append("✅ Accept...").append("\n");
+                sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" 💽: ").append(cr.getMemory());
                 sb.append("total test cases: ").append(cr.getTotalTestcases()).append("\n");
                 sb.append("total correct: ").append(cr.getTotalCorrect()).append("\n");
             } else {
@@ -621,7 +711,7 @@ public class CodeService {
      * @param cr RunCode结果, 来自于leetcode platform
      * @return 返回builder, 用于build创建string, 输出到LCConsole
      */
-    private static AbstractResultBuilder<RunCodeResult> createRunCodeResultBuilder(String dataInput, RunCodeResult cr) {
+    private AbstractResultBuilder<RunCodeResult> createRunCodeResultBuilder(String dataInput, RunCodeResult cr) {
         return new AbstractResultBuilder<>(cr) {
             @Override
             protected void createBody() {
@@ -691,7 +781,7 @@ public class CodeService {
      * @param scr SubmitCodeResult, 来自于leetcode platform
      * @return 返回builder, 用于build创建string, 输出到LCConsole
      */
-    private static AbstractResultBuilder<SubmitCodeResult> createSubmitCodeResultBuilder(SubmitCodeResult scr) {
+    private AbstractResultBuilder<SubmitCodeResult> createSubmitCodeResultBuilder(SubmitCodeResult scr) {
         return new AbstractResultBuilder<>(scr) {
             @Override
             protected void createBody() {
@@ -750,9 +840,8 @@ public class CodeService {
 
     /**
      * open test case dialog
-     * @param project project
      */
-    public static void openTestCasesDialog(Project project) {
+    public void openTestCasesDialog() {
         /* get file editor */
         SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
 
