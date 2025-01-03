@@ -34,7 +34,7 @@ public class doExp {
             doPrepare();
 //             return doExecute("solutionTest", "demo", List.of("demoContent"));
 //            return doExecute("solutionTest", "test", List.of());
-            return doExecute("solutionTest", "test", List.of("a","b","c","demo"));
+            return doExecute("d", "demo", List.of("queens", "diag1", "diag2"));
         } catch (IncompatibleThreadStateException | AbsentInformationException | ClassNotLoadedException |
                  InvocationException | InvalidTypeException e) {
             throw new RuntimeException(e);
@@ -90,12 +90,12 @@ public class doExp {
             arguments.add(getValueByVName(paramName, type));
         }
         // 调用method
-        for (ThreadReference thread : vm.allThreads()) {
-            if (thread.isSuspended()) {
-                thread.resume(); // 恢复挂起的线程
-            }
-        }
-        vm.resume();
+//        for (ThreadReference thread : vm.allThreads()) {
+//            if (thread.isSuspended()) {
+//                thread.resume(); // 恢复挂起的线程
+//            }
+//        }
+//        vm.resume();
 
         Value resultV = objRef.invokeMethod(ctx.getThread(), method, arguments, ClassType.INVOKE_SINGLE_THREADED);
         return inspector.inspectValue(resultV);

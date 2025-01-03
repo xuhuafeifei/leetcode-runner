@@ -24,7 +24,7 @@ public class JavaSTEPInst extends AbstractJavaInstExecutor {
             InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, ""));
             Location location = context.getLocation();
             String info = DebugUtils.buildCurrentLineInfoByLocation(location);
-            DebugUtils.simpleDebug("N 指令执行时, 处于 " + info, context.getProject());
+            DebugUtils.simpleDebug(inst.getOperation().getName() + " 指令执行时, 处于 " + info, context.getProject());
         }
         // 设置单步请求
         switch (inst.getParam()) {
@@ -39,6 +39,9 @@ public class JavaSTEPInst extends AbstractJavaInstExecutor {
                 DebugUtils.fillExecuteResultByLocation(fail, context.getLocation());
                 return fail;
         }
+        // target VM 放行
+        context.resume();
+
         ExecuteResult success = ExecuteResult.success(inst.getOperation());
         DebugUtils.fillExecuteResultByLocation(success, context.getLocation());
         return success;

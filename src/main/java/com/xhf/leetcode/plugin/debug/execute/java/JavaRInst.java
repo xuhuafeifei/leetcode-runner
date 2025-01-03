@@ -14,6 +14,7 @@ public class JavaRInst extends AbstractJavaInstExecutor {
     @Override
     public ExecuteResult doExecute(Instruction inst, Context context) {
         context.removeStepRequest();
+        context.getVm().resume();
         return ExecuteResult.success(inst.getOperation());
     }
 }

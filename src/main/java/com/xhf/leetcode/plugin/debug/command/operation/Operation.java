@@ -68,10 +68,9 @@ public enum Operation {
      */
     STEP(new STEPParameterExtractor(), "^step\\s+(over|out)$", "STEP"),
     /**
-     * 空指令, 不匹配任何命令行输入的指令
+     * 空指令, 不匹配任何命令行输入的指令, 系统内部执行使用
      */
-    // NULL(null, "^$", "NULL"), // 暂时不搞什么NULL指令, 增加系统复杂度
-
+    NULL(null, "^$", "NULL"), // 暂时不搞什么NULL指令, 增加系统复杂度
     /**
      * 帮助指令
      */

@@ -1,23 +1,19 @@
 package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.intellij.openapi.project.Project;
-import com.sun.jdi.ClassType;
-import com.sun.jdi.Location;
-import com.sun.jdi.ThreadReference;
-import com.sun.jdi.VirtualMachine;
-import com.sun.jdi.event.BreakpointEvent;
-import com.sun.jdi.event.Event;
-import com.sun.jdi.event.EventSet;
-import com.sun.jdi.event.StepEvent;
+import com.sun.jdi.*;
+import com.sun.jdi.event.*;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 指令执行上下文
@@ -44,10 +40,11 @@ public class Context implements ExecuteContext {
      */
     private Location solutionLocation;
     /**
-     * 单步请求管理器
+     * 单步请求管理器. 统一管理所有的单步请求
      */
     private final StepRequestManager stepRequestManager = new StepRequestManager();
     private Iterator<Event> itr;
+    private volatile boolean waitFor = false;
 
     public ClassType getCurrentClass() {
         return currentClass;
@@ -134,7 +131,7 @@ public class Context implements ExecuteContext {
         this.location = location;
     }
 
-    public Location getLocation() {
+    public synchronized Location getLocation() {
 		return location;
 	}
 
@@ -154,7 +151,7 @@ public class Context implements ExecuteContext {
         this.thread = thread;
     }
 
-    public ThreadReference getThread() {
+    public synchronized ThreadReference getThread() {
 		return thread;
 	}
 
@@ -166,11 +163,27 @@ public class Context implements ExecuteContext {
         return this.project;
     }
 
+    public Location setSolutionLocation(ClassPrepareEvent event) {
+        String className = event.referenceType().name();
+        if (!className.equals("Solution")) {
+            throw new DebugError("Context setSolutionLocation使用错误. 该方法只允许当className为Solution时使用!");
+        }
+        // 获取solutionClass
+        ClassType solutionClass = (ClassType) event.referenceType();
+        // 获取solution类的核心方法
+        String methodName = env.getMethodName();
+        Method mainMethod = solutionClass.methodsByName(methodName).get(0);
+        // 获取location
+        Location location = mainMethod.location();
+        setSolutionLocation(location);
+        return location;
+    }
+
     public void setSolutionLocation(Location location) {
         this.solutionLocation = location;
     }
 
-    public Location getSolutionLocation() {
+    public synchronized Location getSolutionLocation() {
         return this.solutionLocation;
     }
 
@@ -186,6 +199,13 @@ public class Context implements ExecuteContext {
         while (this.itr != null && this.itr.hasNext()) {
             itr.next();
         }
+    }
+
+    public void resume() {
+        if (vm == null) {
+            throw new DebugError("Context resume使用错误. 请在通过Context恢复Target VM运行前, 先设置vm对象 !");
+        }
+        vm.resume();
     }
 
     private class StepRequestManager {
@@ -210,6 +230,66 @@ public class Context implements ExecuteContext {
             if (stepRequest != null) {
                 stepRequest.enable();
             }
+        }
+    }
+
+    /**
+     * 锁
+     */
+    private final Object lock = new Object();
+    /**
+     * 存储调用waitFor的线程
+     */
+    private final Set<Thread> threadSet = new HashSet<>();
+
+    /**
+     * 自选等待JEventHandler通知, 如果waitFor为False或者被打断/唤醒, 则表明JEventHandler完成处理
+     * JavaDebugger可以继续执行
+     */
+    public void waitForJEventHandler(String name) {
+        // 总是先让出cpu
+        Thread.yield();
+        // 无需等待
+        if (! waitFor) {
+            return;
+        }
+        synchronized (lock) {
+            LogUtils.simpleDebug(name + "等待JEventHandler...");
+            threadSet.add(Thread.currentThread());
+            try {
+                // 自旋优化
+                for (int i = 0; i < 8 && waitFor; ++i) {
+                    Thread.sleep(100);
+                }
+                LogUtils.simpleDebug("睡眠...");
+                lock.wait();
+            } catch (InterruptedException e) {
+                LogUtils.simpleDebug("JEventHandler释放锁, " + name + "执行指令...");
+            }
+        }
+    }
+
+    /**
+     * 调用此方法, JavaDebugger将会等待JEventHandler解锁
+     * 该方法服务于JavaDebugger. 其他类不能调用此方法
+     */
+    public void waitFor() {
+        synchronized (lock) {
+            this.waitFor = true;
+        }
+    }
+
+    /**
+     * 调用此方法, 表示JEventHandler已经完成运行, JavaDebugger无需等待
+     * 该方法服务于JEventHandler. 其他类不能调用此方法
+     */
+    public void done() {
+        this.waitFor = false;
+        for (Thread t : threadSet) {
+            t.interrupt();
+        }
+        synchronized (lock) {
+            this.lock.notifyAll();
         }
     }
 }

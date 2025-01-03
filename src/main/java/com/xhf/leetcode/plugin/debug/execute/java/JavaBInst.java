@@ -25,6 +25,9 @@ public class JavaBInst extends AbstractJavaInstExecutor {
           从而导致用户在idea设置断点却找不到的bug
          */
         Location solutionLocation = context.getSolutionLocation();
+        if (solutionLocation == null) {
+            return ExecuteResult.success(inst.getOperation(), "Solution Class未被加载, 无法添加断点");
+        }
 
         ReferenceType referenceType = solutionLocation.declaringType();
         ClassType solutionClassType = (ClassType) referenceType;

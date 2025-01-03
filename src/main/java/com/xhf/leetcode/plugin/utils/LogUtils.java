@@ -46,6 +46,11 @@ public class LogUtils {
         return sb.toString();
     }
 
+
+    private static void consoleLog(String message, String info, int idx) {
+        System.out.print(formatLogMessage(message, info, idx + 1));
+    }
+
     private static void consoleLog(String message, String info) {
         System.out.print(formatLogMessage(message, info, 3));
     }
@@ -88,6 +93,6 @@ public class LogUtils {
 
     public static void warn(String message) {
         IDEA_LOGGER.warn(message);
-        consoleLog(message, "WARN");
+        consoleLog(message, "WARN", 1);
     }
 }

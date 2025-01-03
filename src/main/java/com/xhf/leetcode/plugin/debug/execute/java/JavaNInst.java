@@ -52,6 +52,8 @@ public class JavaNInst extends AbstractJavaInstExecutor {
             DebugUtils.simpleDebug("N 指令执行时, 处于 " + info, context.getProject());
         }
         context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_INTO);
+        // 放行
+        context.resume();
         return ExecuteResult.success(inst.getOperation());
     }
 }

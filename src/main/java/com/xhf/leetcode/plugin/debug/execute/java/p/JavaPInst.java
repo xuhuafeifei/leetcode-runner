@@ -9,6 +9,7 @@ import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 
@@ -29,9 +30,10 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     @Override
     public ExecuteResult doExecute(Instruction inst, Context context) {
-        ThreadReference thread = context.getThread();
-        Location location = context.getLocation();
+        // 等待event handler
+        context.waitForJEventHandler("JavaPInst");
 
+        Location location = context.getLocation();
         String className = location.declaringType().name();
 
         // 执行到solution以外的代码, 不做任何处理
@@ -42,7 +44,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         }
 
         try {
-            String res = getVariable(thread, location, context);
+            String res = checkAndGetValue(inst, context);
             // 存储输出结果
             ExecuteResult success = ExecuteResult.success(inst.getOperation(), res);
             DebugUtils.fillExecuteResultByLocation(success, location);
@@ -51,12 +53,31 @@ public class JavaPInst extends AbstractJavaInstExecutor {
             ExecuteResult failed = ExecuteResult.fail(inst.getOperation(), "没有局部变量");
             DebugUtils.fillExecuteResultByLocation(failed, location);
             return failed;
-        } catch (IncompatibleThreadStateException e) {
+        } catch (Exception e) {
             LogUtils.error(e);
             return ExecuteResult.fail(inst.getOperation());
-        } catch (ClassNotLoadedException e) {
-            throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 检查并获取value. 如果param有值, 则计算表达式. 否则打印当前局部变量
+     * @param inst
+     * @param context
+     * @return
+     * @throws ClassNotLoadedException
+     * @throws IncompatibleThreadStateException
+     * @throws AbsentInformationException
+     */
+    private String checkAndGetValue(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
+        String res = null;
+        String exp = inst.getParam();
+        exp = "1 + 2";
+        if (StringUtils.isNotBlank(exp)) {
+           res =  new doExp().executeExpression(exp, context);
+        } else {
+           res = getVariable(context.getThread(), context.getLocation(), context);
+        }
+        return res;
     }
 
     private String getVariable(ThreadReference thread, Location location, Context context) throws IncompatibleThreadStateException, AbsentInformationException, ClassNotLoadedException {

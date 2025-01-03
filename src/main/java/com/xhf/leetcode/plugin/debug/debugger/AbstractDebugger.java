@@ -74,6 +74,11 @@ public abstract class AbstractDebugger implements Debugger{
         if (inst == null) {
             return new ProcessResult(true, true, false, null, null);
         }
+        // 允许子类在读取instruction后执行一些操作
+        doAfterReadInstruction(inst);
+        // debug
+        LogUtils.simpleDebug(inst.toString());
+
         // 如果指令是exit, 直接终止运行
         if (inst.isExit()) {
             DebugManager.getInstance(project).stopDebugger();
@@ -111,6 +116,14 @@ public abstract class AbstractDebugger implements Debugger{
             LogUtils.simpleDebug(r.getMsg());
         }
         return new ProcessResult(true, false, false, inst, r);
+    }
+
+    /**
+     * 允许子类重写该方法, 执行某些操作
+     * @param inst
+     */
+    protected void doAfterReadInstruction(final Instruction inst) {
+
     }
 
     protected static class ProcessResult {

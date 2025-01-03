@@ -151,7 +151,12 @@ public class DebugUtils {
             message += "\n";
         }
         LogUtils.simpleDebug(message);
-        ConsoleUtils.getInstance(project).simpleShowConsole(message, type, isShow);
+        ConsoleUtils instance = ConsoleUtils.getInstance(project);
+        if (instance == null) {
+            LogUtils.simpleDebug("当前为测试模式, 不启动console output");
+            return;
+        }
+        instance.simpleShowConsole(message, type, isShow);
     }
 
     /**

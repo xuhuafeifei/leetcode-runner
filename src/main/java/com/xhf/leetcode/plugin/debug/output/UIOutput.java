@@ -74,8 +74,18 @@ public class UIOutput extends AbstractOutput{
             case STEP:
                 doSTEP(r);
                 break;
+            case NULL:
+                doNULL(r);
+                break;
             default:
                 DebugUtils.simpleDebug("指令" + op.getName() + "不被UIOutput处理", project);
+        }
+    }
+
+    private void doNULL(ExecuteResult r) {
+        if (r.isSuccess()) {
+            String result = r.getResult();
+            variables.setListData(result.split("\r|\n"));
         }
     }
 

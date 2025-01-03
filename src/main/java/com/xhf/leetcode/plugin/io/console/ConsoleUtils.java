@@ -39,6 +39,10 @@ public final class ConsoleUtils implements Disposable {
     }
 
     public static ConsoleUtils getInstance(Project project) {
+        // 考虑到测试需要, 提供null返回
+        if (project == null) {
+            return null;
+        }
         return project.getService(ConsoleUtils.class);
     }
 

@@ -7,6 +7,7 @@ import com.xhf.leetcode.plugin.bus.DebugEndEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.debugger.*;
 import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
@@ -125,6 +126,7 @@ public final class DebugManager implements Disposable {
     @Override
     public void dispose() {
         // 包装强制关闭所有的debugger
+        LogUtils.simpleDebug("强制关闭所有debugger...");
         closeAllDebugger();
     }
 }
