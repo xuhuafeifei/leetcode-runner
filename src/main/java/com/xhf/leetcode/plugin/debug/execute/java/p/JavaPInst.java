@@ -69,9 +69,8 @@ public class JavaPInst extends AbstractJavaInstExecutor {
      * @throws AbsentInformationException
      */
     private String checkAndGetValue(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
-        String res = null;
+        String res;
         String exp = inst.getParam();
-        exp = "1 + 2";
         if (StringUtils.isNotBlank(exp)) {
            res =  new doExp().executeExpression(exp, context);
         } else {
