@@ -1,10 +1,6 @@
 package com.xhf.leetcode.plugin.utils;
 
-import com.intellij.ide.script.IDE;
-import com.intellij.openapi.diagnostic.LogLevel;
 import com.intellij.openapi.diagnostic.Logger;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -72,7 +68,7 @@ public class LogUtils {
     private static void simpleConsoleLog(String message, String level) {
         // 获取当前时间
         String timestamp = DATE_FORMAT.format(new Date());
-        String formatted = String.format("%s [%s] %s", timestamp, level, message);
+        String formatted = String.format("%s [%s] [%s] %s", timestamp, Thread.currentThread().getName(), level, message);
         System.out.println(formatted);
         IDEA_LOGGER.debug(formatted);
     }

@@ -4,15 +4,8 @@ import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
 import com.sun.jdi.event.*;
 import com.sun.jdi.request.*;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.*;
-
-import com.xhf.leetcode.plugin.debug.debugger.JEventHandler;
-import com.xhf.leetcode.plugin.debug.execute.*;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.execute.java.JavaInstFactory;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
@@ -21,11 +14,17 @@ import com.xhf.leetcode.plugin.debug.reader.StdInReader;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+
 public class JDIExample {
 
     static Context context = new Context();
     static StepRequest stepRequest;
-    static int b = 18;
+    static int b = 8;
     static String methodName = "test";
 
     private static void captureStream(InputStream stream, String streamName) {
@@ -49,8 +48,8 @@ public class JDIExample {
         LaunchingConnector connector = Bootstrap.virtualMachineManager().defaultConnector();
 
         // 配置启动参数
-        String path = "E:\\java_code\\leetcode-runner\\out\\test\\classes";
-//        String path = "E:\\java_code\\lc-test\\cache\\debug\\java";
+//        String path = "E:\\java_code\\leetcode-runner\\out\\test\\classes";
+        String path = "E:\\java_code\\lc-test\\cache\\debug\\java";
         Map<String, Connector.Argument> arguments = connector.defaultArguments();
         arguments.get("main").setValue("Main");
         arguments.get("options").setValue("-classpath " + path + " -Dfile.encoding=UTF-8"); // 指定类路径

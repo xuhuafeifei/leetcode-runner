@@ -2,7 +2,10 @@ package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.intellij.openapi.project.Project;
 import com.sun.jdi.*;
-import com.sun.jdi.event.*;
+import com.sun.jdi.event.BreakpointEvent;
+import com.sun.jdi.event.ClassPrepareEvent;
+import com.sun.jdi.event.Event;
+import com.sun.jdi.event.EventSet;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
@@ -12,8 +15,11 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
-import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * 指令执行上下文
@@ -44,7 +50,11 @@ public class Context implements ExecuteContext {
      */
     private final StepRequestManager stepRequestManager = new StepRequestManager();
     private Iterator<Event> itr;
-    private volatile boolean waitFor = false;
+
+    /**
+     * 项目运行之初, 需要等待
+     */
+    private volatile boolean waitFor = true;
 
     public ClassType getCurrentClass() {
         return currentClass;
@@ -208,6 +218,10 @@ public class Context implements ExecuteContext {
         vm.resume();
     }
 
+    /**
+     * step request管理器, 统一管理step request. 防止
+     * 项目发出多个同一个step request, 导致运行异常
+     */
     private class StepRequestManager {
         private StepRequest stepRequest;
         void setStepRequest(int size, int depth) {
@@ -240,6 +254,7 @@ public class Context implements ExecuteContext {
     /**
      * 存储调用waitFor的线程
      */
+    @Deprecated // 打断线程的方式已被废弃. 存在破话正在阻塞读取数据线程的风险. 详细查看{@link com.xhf.leetcode.plugin.debug.reader.InstSource}
     private final Set<Thread> threadSet = new HashSet<>();
 
     /**
@@ -251,6 +266,7 @@ public class Context implements ExecuteContext {
         Thread.yield();
         // 无需等待
         if (! waitFor) {
+            LogUtils.simpleDebug(name + "无需等待JEventHandler...");
             return;
         }
         synchronized (lock) {
@@ -263,14 +279,16 @@ public class Context implements ExecuteContext {
                 }
                 LogUtils.simpleDebug("睡眠...");
                 lock.wait();
-            } catch (InterruptedException e) {
                 LogUtils.simpleDebug("JEventHandler释放锁, " + name + "执行指令...");
+            } catch (InterruptedException ignored) {
             }
         }
     }
 
     /**
-     * 调用此方法, JavaDebugger将会等待JEventHandler解锁
+     * 调用此方法, JavaDebugger将会等待JEventHandler处理TargetVM
+     * 直到JEventHandler调用{@link #done()}方法, JavaDebugger可以继续执行
+     * <p>
      * 该方法服务于JavaDebugger. 其他类不能调用此方法
      */
     public void waitFor() {
@@ -281,15 +299,65 @@ public class Context implements ExecuteContext {
 
     /**
      * 调用此方法, 表示JEventHandler已经完成运行, JavaDebugger无需等待
+     * <p>
      * 该方法服务于JEventHandler. 其他类不能调用此方法
      */
     public void done() {
         this.waitFor = false;
+        // 不再采用线程打断的方式唤醒
+        // 因为此种打断方式可能会中断读取阻塞队列的线程
+        /*
         for (Thread t : threadSet) {
             t.interrupt();
         }
+         */
         synchronized (lock) {
             this.lock.notifyAll();
         }
+    }
+
+    /**
+     * 存储前台执行invokeMethod的状态
+     */
+    private enum InvokeStatus {
+        NOT_START, // 前台JavaDebugger没有执行invokeMethod, 属于初始状态
+        INVOKE_START, // 前台JavaDebugger开始执行invokeMethod
+        INVOKE_DONE // 前台JavaDebugger执行invokeMethod完成
+    }
+
+    /**
+     * 存储invoke状态. 该字段记录JavaDebugger在处理指令过程中
+     * 是否触发invokeMethod. invokeMethod底层涉及到很多复杂的操作,
+     * 需要额外进行前后台的协调处理(JavaDebugger和JEventHandler之间的协调)
+     */
+    private InvokeStatus invokeStatus = InvokeStatus.NOT_START;
+
+    /**
+     * {@link com.xhf.leetcode.plugin.debug.execute.java.p.doExp}准备进行invokeMethod, JEventHandler执行指令时
+     * 会检测是否进行invokeMethod, 从而做出不同的处理逻辑
+     * <p>
+     * 该方法只服务于doExp
+     */
+    public void invokeMethodStart() {
+        invokeStatus = InvokeStatus.INVOKE_START;
+    }
+
+    /**
+     * {@link com.xhf.leetcode.plugin.debug.execute.java.p.doExp}完成invokeMethod
+     * <p>
+     * 该方法只服务于doExp
+     */
+    public void invokeMethodDone() {
+        invokeStatus = InvokeStatus.INVOKE_DONE;
+        String s = DebugUtils.buildCurrentLineInfoByLocation(location);
+        LogUtils.simpleDebug("invokeMethod done... " + s);
+    }
+
+    /**
+     * 判断是否完成前台是否完成invokeMethod
+     * 该方法只服务于JEventHandler
+     */
+    public boolean isInvokeMethodStart() {
+        return invokeStatus == InvokeStatus.INVOKE_START;
     }
 }

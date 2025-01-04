@@ -46,9 +46,12 @@ public class JEventHandler implements Runnable {
         EventQueue eventQueue = context.getVm().eventQueue();
         while (true) {
             try {
-                // System.err.println("准备阻塞...");
+                // 同理保留: 纪念为排查invokeMethod带来bug做出的杰出贡献
+                // LogUtils.simpleDebug("准备阻塞..."); // 不要删除!!!
                 EventSet set = eventQueue.remove();
-                // System.err.println("获取数据, 不再阻塞....");
+                context.setEventSet(set);
+                // LogUtils.simpleDebug("获取数据, 不再阻塞...."); // 不要删除!!!
+
                 Iterator<Event> it = set.iterator();
                 // copy JDB源码
                 boolean resumeStoppedApp = false;
@@ -78,10 +81,16 @@ public class JEventHandler implements Runnable {
      * @throws AbsentInformationException
      */
     private boolean handleEvent(Event event) throws AbsentInformationException {
-        // debug
-        // DebugUtils.simpleDebug(event.toString(), project);
-        // 设置context基本信息
-        if (event instanceof LocatableEvent) {
+        /*
+         debug: 该日志信息在处理invokeMethod导致的阻塞等诸多bug
+         起到关键性作用, 为了纪念下方代码对@author feigebuge
+         排查bug做出的杰出贡献, 保留注释forever...
+         @date 2025/1/4 17:25
+         */
+        // LogUtils.simpleDebug(event.toString()); // 不要删除!!!
+
+        // 设置context基本信息. 如果前台触发invokeMethod, 则不update location/thread信息
+        if (event instanceof LocatableEvent && ! context.isInvokeMethodStart()) {
             setContextBasicInfo((LocatableEvent) event);
         }
 
@@ -108,11 +117,34 @@ public class JEventHandler implements Runnable {
     }
 
     private boolean handleStepEvent(StepEvent event) {
-        context.setLocation(event.location());
-        context.setThread(event.thread());
+        /*
+         此处需要区分是否因该update location/thread信息. 如果前台正在执行doExp方法, 并且触发invokeMethod
+         那么不能修改context中的location, thread信息.
+         因为invokeMethod会导致stack frame状态变化, 进而变化后的location, thread等数据
+         此时如果执行非运行TargetVM类指令, 如W, P(不进行表达式计算的P指令), 那么会导致得不到预料输出
+         比如:
+         现在代码执行到 line 10:
+         int a = 10
+         此时用户输入P demo.test(). 那么JavaPInst在解析并执行表达式时, 底层会调用
+         invokeMethod. 而该方法会改变TargetVM的状态, 最终导致的stack frame的变化
+         此时在执行W, P指令, 得到的时test()方法内部的数据, 而不是int a = 10;这行
+         代码所在方法的数据.
+         因此需要做处location, thread数据的备份
+         */
+        if (! context.isInvokeMethodStart()) {
+            context.setLocation(event.location());
+            context.setThread(event.thread());
+        }
 
         Thread.yield();  // fetch output
 
+        // 如果doExp开启invokeMethod, 需要resume
+        // 否则invokeMethod方法可能会被阻塞
+        if (context.isInvokeMethodStart()) {
+            LogUtils.simpleDebug("step event检测到doExp触发invokeMethod, resume TargetVM");
+            return false;
+        }
+        LogUtils.simpleDebug("doExp并未触发invokeMethod, stop TargetVM");
         // 后台准备完毕, 前台可以执行指令
         context.done();
         return true;

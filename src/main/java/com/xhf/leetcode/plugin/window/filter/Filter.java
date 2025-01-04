@@ -20,7 +20,7 @@ public interface Filter<T, I> {
     int itemCount();
 
     /**
-     * 返回当前过滤器能够执行过滤行为
+     * 返回当前过滤器是否能够执行过滤行为
      * @return
      */
     boolean usable();

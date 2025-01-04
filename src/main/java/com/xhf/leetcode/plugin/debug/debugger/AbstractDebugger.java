@@ -6,11 +6,8 @@ import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.InstructionFactory;
-import com.xhf.leetcode.plugin.debug.execute.java.JavaInstFactory;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
-import com.xhf.leetcode.plugin.debug.output.AbstractOutput;
 import com.xhf.leetcode.plugin.debug.output.Output;
-import com.xhf.leetcode.plugin.debug.reader.CommandReader;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
@@ -62,7 +59,7 @@ public abstract class AbstractDebugger implements Debugger{
      * @return
      */
     protected ProcessResult processDebugCommand() {
-        Instruction inst = null;
+        Instruction inst;
         try {
             inst = reader.readInst();
         } catch (InterruptedException e) {

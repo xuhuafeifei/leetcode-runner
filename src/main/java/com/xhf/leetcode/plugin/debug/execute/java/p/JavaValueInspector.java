@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.debug.execute.java.p;
 
 import com.sun.jdi.*;
-import com.xhf.leetcode.plugin.debug.analysis.converter.convert.ListNode;
 import com.xhf.leetcode.plugin.debug.analysis.converter.convert.TreeNode;
 import com.xhf.leetcode.plugin.utils.MapUtils;
 
@@ -175,7 +174,7 @@ public class JavaValueInspector {
     private String handleComplexObject(ObjectReference objRef, int depth) {
         StringBuilder sb = new StringBuilder();
         if (objRef == null || objRef.referenceType() == null) {
-            return "";
+            return "null";
         }
         List<String> results = new ArrayList<>();
         for (Field field : objRef.referenceType().allFields()) {
@@ -196,6 +195,9 @@ public class JavaValueInspector {
                 sb.append("\n");
             }
             sb.append(getTabsByDepth(depth)).append("}");  // 结束的 右大括号 也要缩进
+        }else {
+            sb.append(getTabsByDepth(depth));
+            sb.append("{}");
         }
         return sb.toString();
     }

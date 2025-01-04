@@ -15,6 +15,7 @@ import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.cookie.Cookie;
@@ -149,13 +150,17 @@ public class LeetcodeClient {
 
         String resp = httpResponse.getBody();
 
-        // extract field
-        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-        JsonObject dataObject = jsonObject.getAsJsonObject("data");
-        JsonObject userStatusObject = dataObject.getAsJsonObject("userStatus");
-
-        // extract isSignedIn
-        return userStatusObject.get("isSignedIn").getAsBoolean();
+        try {
+            // extract field
+            JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+            JsonObject dataObject = jsonObject.getAsJsonObject("data");
+            JsonObject userStatusObject = dataObject.getAsJsonObject("userStatus");
+            // extract isSignedIn
+            return userStatusObject.get("isSignedIn").getAsBoolean();
+        } catch (Exception e) {
+            LogUtils.error(e);
+            return false;
+        }
     }
 
     @Deprecated // leetcode login api is not suitable

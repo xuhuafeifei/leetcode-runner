@@ -4,12 +4,9 @@ import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
+import com.xhf.leetcode.plugin.comp.MyJTextAreaWithPopupMenu;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 import java.awt.*;
 
 /**
@@ -87,18 +84,33 @@ public class StdPanel extends JPanel {
     }
 
     // 用于显示 stdout 的面板
-    private static class StdOutPanel extends JTextArea {
+    private static class StdOutPanel extends MyJTextAreaWithPopupMenu {
         public StdOutPanel() {
             setEditable(false);
             setLineWrap(true);
             setWrapStyleWord(true);
             setText("Standard Output:\n");
+
+            // 清空内容
+            JMenuItem clearMenuItem = new JMenuItem("Clear");
+            clearMenuItem.addActionListener(e -> {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    ApplicationManager.getApplication().runWriteAction(() -> {
+                        setText("Standard Output:\n");
+                    });
+                });
+            });
+            popupMenu.add(clearMenuItem);
+
+            // 复制内容
+            JMenuItem copyMenuItem = new JMenuItem("Copy");
+            copyMenuItem.addActionListener(e -> copy());
+            popupMenu.add(copyMenuItem);
         }
     }
 
     // 用于显示 stderr 的面板，字体颜色与 IntelliJ 主题同步
-    private static class StdErrPanel extends JTextPane {
-
+    private static class StdErrPanel extends MyJTextAreaWithPopupMenu {
         public StdErrPanel() {
             setEditable(false);
             setText("Standard Error:\n");
@@ -107,17 +119,22 @@ public class StdPanel extends JPanel {
             JBColor errorColor = new JBColor(Color.RED, Color.RED); // 这里设置红色默认
             setForeground(errorColor);
 
-            // 设置样式
-            StyledDocument doc = getStyledDocument();
-            Style style = doc.addStyle("ErrorStyle", null);
-            StyleConstants.setForeground(style, errorColor);
+            // 清空内容
+            JMenuItem clearMenuItem = new JMenuItem("Clear");
+            clearMenuItem.addActionListener(e -> {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    ApplicationManager.getApplication().runWriteAction(() -> {
+                        setText("Standard Error:\n");
+                    });
+                });
+            });
+            popupMenu.add(clearMenuItem);
 
-//            // 添加初始文本为红色
-//            try {
-//                doc.insertString(doc.getLength(), "", style);
-//            } catch (BadLocationException e) {
-//                e.printStackTrace();
-//            }
+            // 复制内容
+            JMenuItem copyMenuItem = new JMenuItem("Copy");
+            copyMenuItem.addActionListener(e -> copy());
+            popupMenu.add(copyMenuItem);
         }
     }
+
 }

@@ -24,7 +24,7 @@ public final class AppSettings
   public static final String EMPTY_FILE_PATH = "";
   public static final String EMPTY_LANGUAGE_TYPE = "";
 
-    static class State {
+  static class State {
 
     public String filePath = EMPTY_FILE_PATH;
 
@@ -50,6 +50,17 @@ public final class AppSettings
     public String readTypeName;
     // debug信息输出到什么地方
     public String outputTypeName;
+
+    @Override
+    public String toString() {
+      return "State{" +
+              "filePath='" + filePath + '\'' +
+              ", langType='" + langType + '\'' +
+              ", coreFilePath='" + coreFilePath + '\'' +
+              ", readTypeName='" + readTypeName + '\'' +
+              ", outputTypeName='" + outputTypeName + '\'' +
+              '}';
+    }
   }
 
   /**
@@ -74,6 +85,12 @@ public final class AppSettings
   public static AppSettings getInstance() {
     return ApplicationManager.getApplication()
             .getService(AppSettings.class);
+  }
+
+  @Override
+  public String toString() {
+    // 将state变为string
+    return myState.toString();
   }
 
   public String getFilePath() {

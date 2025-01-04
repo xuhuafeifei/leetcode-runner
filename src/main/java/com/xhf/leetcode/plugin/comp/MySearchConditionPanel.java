@@ -5,7 +5,6 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.window.filter.QFilter;
 
 import javax.swing.*;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -124,7 +123,7 @@ public abstract class MySearchConditionPanel extends JPanel {
     }
 
     public static class MapOptionConverter implements OptionConvert {
-        private Map<String, String> map = new HashMap<>();
+        private final Map<String, String> map;
 
         public MapOptionConverter() {
             this(20);

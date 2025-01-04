@@ -3,22 +3,21 @@ package com.xhf.leetcode.plugin.window;
 import com.google.common.eventbus.Subscribe;
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.ui.ConsoleView;
-import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.DataProvider;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
-import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.tabs.TabInfo;
 import com.intellij.ui.tabs.impl.JBEditorTabs;
-import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.bus.DebugEndEvent;
 import com.xhf.leetcode.plugin.bus.DebugStartEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
@@ -26,7 +25,6 @@ import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
-import com.xhf.leetcode.plugin.render.VariablesCellRender;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.DataKeys;
@@ -50,15 +48,30 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
     private final ConsoleView consoleView;
     private final JBSplitter jbSplitter;
     private final Project project;
+    /**
+     * 命令行输入框, 用于接收用户输入的命令行数据
+     */
     private final JTextField inputField;
+    /**
+     * 命令行选项卡, 用于呈现Console 和 Variables 选项卡
+     */
     private final JBEditorTabs tabs;
     /**
-     * 存储变量
+     * console选项卡, 显示console信息
      */
-    private final MyList<String> variableList = new MyList<>();
     private final TabInfo consoleTab;
+    /**
+     * variables选项卡, 显示variables信息. 其中包含stdPanel和variablePanel
+     */
     private final TabInfo variablesTab;
+    /**
+     * 标准输出/错误显示面板, 用于呈现debug过程中, 代码的标准输出和标准错误
+     */
     private final StdPanel stdPanel;
+    /**
+     * 在debug过程中, 存储变量的面板, 同时提供表达式计算的输入功能
+     */
+    private final VariablePanel variablePanel;
 
     public LCConsolePanel(ToolWindow toolWindow, Project project) {
         super(Boolean.FALSE, Boolean.TRUE);
@@ -72,7 +85,6 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         // 解决console关闭时的内存泄露问题
         Disposer.register(this, consoleView);
 
-        variableList.setCellRenderer(new VariablesCellRender());
 
         // 创建选项卡 (基于 JBEditorTabs)
         tabs = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
@@ -80,8 +92,9 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
 
         // 添加 Variables 选项卡
         stdPanel = new StdPanel();
+        variablePanel = new VariablePanel();
         JBSplitter varAndExpSplitter = new JBSplitter();
-        varAndExpSplitter.setFirstComponent(new JBScrollPane(variableList));
+        varAndExpSplitter.setFirstComponent(variablePanel);
         varAndExpSplitter.setSecondComponent(stdPanel);
 
         this.variablesTab = new TabInfo(varAndExpSplitter);
@@ -170,7 +183,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         if (DataKeys.LEETCODE_CONSOLE_VIEW.is(dataId)) {
             return consoleView;
         } else if (DataKeys.LEETCODE_DEBUG_VARIABLE_LIST.is(dataId)) {
-            return variableList;
+            return variablePanel.getVariables();
         } else if (DataKeys.LEETCODE_DEBUG_STDPANEL.is(dataId)) {
             return stdPanel;
         }
@@ -186,7 +199,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
     @Subscribe
     public void DebugStartEventListener(DebugStartEvent event) {
         LogUtils.simpleDebug("open command line...");
-        variableList.setNonData();
+        variablePanel.getVariables().setNonData();
 
         AppSettings instance = AppSettings.getInstance();
         ApplicationManager.getApplication().invokeLater(() -> {
@@ -206,6 +219,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
     @Subscribe
     public void DebugEndEventListener(DebugEndEvent event) {
         closeSecond();
+        MyList<String> variableList = variablePanel.getVariables();
         variableList.setNonData();
         variableList.setEmptyText("Debug finish...");
     }

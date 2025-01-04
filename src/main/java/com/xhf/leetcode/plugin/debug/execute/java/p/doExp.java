@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.debug.execute.java.p;
 import com.sun.jdi.*;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -89,15 +90,14 @@ public class doExp {
             String paramName = paramsName.get(i);
             arguments.add(getValueByVName(paramName, type));
         }
-        // 调用method
-//        for (ThreadReference thread : vm.allThreads()) {
-//            if (thread.isSuspended()) {
-//                thread.resume(); // 恢复挂起的线程
-//            }
-//        }
-//        vm.resume();
 
-        Value resultV = objRef.invokeMethod(ctx.getThread(), method, arguments, ClassType.INVOKE_SINGLE_THREADED);
+        LogUtils.simpleDebug("准备执行" + methodName + "方法");
+
+        // invokeMethod开始执行
+        ctx.invokeMethodStart();
+        Value resultV = objRef.invokeMethod(ctx.getThread(), method, arguments, 0);
+        // invokeMethod执行结束
+        ctx.invokeMethodDone();
         return inspector.inspectValue(resultV);
     }
 

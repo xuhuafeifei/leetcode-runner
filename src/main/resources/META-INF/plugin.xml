@@ -61,6 +61,7 @@
                 text="Reload Reposition" icon="/icons/position.svg">
         </action>
 
+
         <group id="leetcode.plugin.lcActionsToolbar">
             <reference id="leetcode.plugin.LoginAction"/>
             <reference id="leetcode.plugin.Reload"/>

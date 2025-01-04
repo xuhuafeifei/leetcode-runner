@@ -2,11 +2,9 @@ package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.sun.jdi.Location;
 import com.sun.jdi.request.StepRequest;
-import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
-import com.xhf.leetcode.plugin.debug.execute.java.Context;
-import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
@@ -46,11 +44,13 @@ public class JavaNInst extends AbstractJavaInstExecutor {
          */
         if (AppSettings.getInstance().isUIOutput()) {
             InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, ""));
-            // 输出一下当前所在行号, 不然UI显示的时候遇到系统代码, 啥也看不到, 就很操蛋
-            Location location = context.getLocation();
-            String info = DebugUtils.buildCurrentLineInfoByLocation(location);
-            DebugUtils.simpleDebug("N 指令执行时, 处于 " + info, context.getProject());
         }
+        // 输出一下当前所在行号, 不然UI显示的时候遇到系统代码, 啥也看不到, 就很操蛋
+        Location location = context.getLocation();
+        // debug
+        String info = DebugUtils.buildCurrentLineInfoByLocation(location);
+        DebugUtils.simpleDebug("N 指令执行时, 处于 " + info, context.getProject());
+
         context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_INTO);
         // 放行
         context.resume();
