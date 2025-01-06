@@ -33,7 +33,7 @@ public class DebugAction extends AbstractAction {
         }
         LangType langType = LangType.getType(AppSettings.getInstance().getLangType());
         if (langType == null) {
-            LogUtils.error("异常, LangType == null " + AppSettings.getInstance().getLangType());
+            LogUtils.error("异常, LangType == null " + AppSettings.getInstance().toString());
             return;
         }
         switch (langType) {

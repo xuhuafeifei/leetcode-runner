@@ -254,7 +254,7 @@ public class Context implements ExecuteContext {
     /**
      * 存储调用waitFor的线程
      */
-    @Deprecated // 打断线程的方式已被废弃. 存在破话正在阻塞读取数据线程的风险. 详细查看{@link com.xhf.leetcode.plugin.debug.reader.InstSource}
+    @Deprecated // 打断线程的方式已被废弃. 打断线程存在破坏正在阻塞读取数据线程的风险. 详细查看{@link com.xhf.leetcode.plugin.debug.reader.InstSource}
     private final Set<Thread> threadSet = new HashSet<>();
 
     /**
@@ -287,7 +287,7 @@ public class Context implements ExecuteContext {
 
     /**
      * 调用此方法, JavaDebugger将会等待JEventHandler处理TargetVM
-     * 直到JEventHandler调用{@link #done()}方法, JavaDebugger可以继续执行
+     * 直到JEventHandler调用{@link #JEventHandlerDone()}方法, JavaDebugger可以继续执行
      * <p>
      * 该方法服务于JavaDebugger. 其他类不能调用此方法
      */
@@ -302,7 +302,7 @@ public class Context implements ExecuteContext {
      * <p>
      * 该方法服务于JEventHandler. 其他类不能调用此方法
      */
-    public void done() {
+    public void JEventHandlerDone() {
         this.waitFor = false;
         // 不再采用线程打断的方式唤醒
         // 因为此种打断方式可能会中断读取阻塞队列的线程

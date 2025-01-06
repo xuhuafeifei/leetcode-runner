@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.debug.execute;
 
 import com.google.gson.annotations.SerializedName;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
-import com.xhf.leetcode.plugin.debug.execute.java.Context;
 
 /**
  * 执行结果
@@ -15,6 +14,8 @@ public class ExecuteResult {
      * 为了配合Operation.NULL的引入, 增加moreInfo字段. 用于表示额外信息
      * ---------------------
      * 现在不配合Operation.NULL, moreInfo服务于捕获debug代码的std out / std error
+     * ---------------------
+     * 该字段目前存在新用途(PyDebugger中使用), 需要保留
      */
     @SerializedName("more_info")
     private String moreInfo;

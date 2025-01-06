@@ -153,6 +153,10 @@ public class doExp {
     private Value getValueByConstant(@NotNull String constant, Type type) throws ClassNotLoadedException, IncompatibleThreadStateException, InvocationException, InvalidTypeException {
         String typeName = type.name();
         VirtualMachine vm = ctx.getVm();
+        // StringReference 特判
+        if (typeName.equals("java.lang.String")) {
+            return vm.mirrorOf(constant);
+        }
         // 检查类型
         boolean isPrimitiveType = this.inspector.isPrimitiveType(typeName);
         boolean isWrapperType = this.inspector.isWrapperType(typeName);
