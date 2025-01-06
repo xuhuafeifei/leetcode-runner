@@ -333,19 +333,19 @@ public class Context implements ExecuteContext {
     private InvokeStatus invokeStatus = InvokeStatus.NOT_START;
 
     /**
-     * {@link com.xhf.leetcode.plugin.debug.execute.java.p.doExp}准备进行invokeMethod, JEventHandler执行指令时
+     * {@link com.xhf.leetcode.plugin.debug.execute.java.p.JavaEvaluatorImpl}准备进行invokeMethod, JEventHandler执行指令时
      * 会检测是否进行invokeMethod, 从而做出不同的处理逻辑
      * <p>
-     * 该方法只服务于doExp
+     * 该方法只服务于JavaEvaluatorImpl
      */
     public void invokeMethodStart() {
         invokeStatus = InvokeStatus.INVOKE_START;
     }
 
     /**
-     * {@link com.xhf.leetcode.plugin.debug.execute.java.p.doExp}完成invokeMethod
+     * {@link com.xhf.leetcode.plugin.debug.execute.java.p.JavaEvaluatorImpl}完成invokeMethod
      * <p>
-     * 该方法只服务于doExp
+     * 该方法只服务于JavaEvaluatorImpl
      */
     public void invokeMethodDone() {
         invokeStatus = InvokeStatus.INVOKE_DONE;

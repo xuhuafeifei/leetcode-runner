@@ -118,7 +118,7 @@ public class JEventHandler implements Runnable {
 
     private boolean handleStepEvent(StepEvent event) {
         /*
-         此处需要区分是否要update location/thread信息. 如果前台正在执行doExp方法, 并且触发invokeMethod
+         此处需要区分是否要update location/thread信息. 如果前台正在执行JavaEvaluatorImpl方法, 并且触发invokeMethod
          那么不能修改context中的location, thread信息.
          因为invokeMethod会导致stack frame状态变化, 进而导致location, thread等数据发生变化
          此时如果执行 '非运行TargetVM' 类指令, 如W, P(不进行表达式计算的P指令), 那么会导致得到预料之外的结果
@@ -137,13 +137,13 @@ public class JEventHandler implements Runnable {
 
         Thread.yield();  // fetch output
 
-        // 如果doExp开启invokeMethod, 需要resume
+        // 如果JavaEvaluatorImpl开启invokeMethod, 需要resume
         // 否则invokeMethod方法可能会被阻塞
         if (context.isInvokeMethodStart()) {
-            LogUtils.simpleDebug("step event检测到doExp触发invokeMethod, resume TargetVM");
+             LogUtils.simpleDebug("step event检测到JavaEvaluatorImpl触发invokeMethod, resume TargetVM");
             return false;
         }
-        LogUtils.simpleDebug("doExp并未触发invokeMethod, stop TargetVM");
+         LogUtils.simpleDebug("JavaEvaluatorImpl并未触发invokeMethod, stop TargetVM");
         // 后台准备完毕, 前台可以执行指令
         context.JEventHandlerDone();
         return true;

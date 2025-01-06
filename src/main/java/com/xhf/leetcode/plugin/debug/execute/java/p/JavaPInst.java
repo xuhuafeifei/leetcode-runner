@@ -55,7 +55,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
             return failed;
         } catch (Exception e) {
             LogUtils.error(e);
-            return ExecuteResult.fail(inst.getOperation());
+            return ExecuteResult.fail(inst.getOperation(), e.getMessage());
         }
     }
 
@@ -72,7 +72,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         String res;
         String exp = inst.getParam();
         if (StringUtils.isNotBlank(exp)) {
-           res =  new doExp().executeExpression(exp, context);
+            res = new JavaEvaluatorImpl().executeExpression(exp, context);
         } else {
            res = getVariable(context.getThread(), context.getLocation(), context);
         }

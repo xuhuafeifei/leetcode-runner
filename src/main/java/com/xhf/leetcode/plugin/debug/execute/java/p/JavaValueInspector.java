@@ -451,10 +451,20 @@ public class JavaValueInspector {
             )
     );
 
+    /**
+     * 通过包装类型返回对应的基本类型
+     * @param wrapperTypeName 包装类型
+     * @return 对应的基本类型
+     */
     public String getPrimitiveTypeByWrapperTypeName(String wrapperTypeName) {
         return WRAPPER_TO_PRIMITIVES.get(wrapperTypeName);
     }
 
+    /**
+     * 通过primitiveType获取对应的包装类型
+     * @param primitiveTypeName 基本类型
+     * @return 对应的包装类型
+     */
     public String getWrapperTypeByPrimitiveTypeName(String primitiveTypeName) {
         return PRIMITIVES_TO_WRAPPER.get(primitiveTypeName);
     }

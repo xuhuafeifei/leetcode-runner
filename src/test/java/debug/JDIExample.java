@@ -109,11 +109,11 @@ public class JDIExample {
                             context.setThread(stepEvent.thread());
                             // ExecuteResult execute = new JavaPInst().execute(Instruction.success(ReadType.COMMAND_IN, Operation.R, ""), context);
                             new Thread(() -> {
-                                doExp doExp = new doExp();
+                                JavaEvaluatorImpl JavaEvaluatorImpl = new JavaEvaluatorImpl();
                                 System.err.println("-----" + stepEvent.location().lineNumber());
                                 String s = null;
                                 try {
-                                    s = doExp.executeExpression("abab", context);
+                                    s = JavaEvaluatorImpl.executeExpression("abab", context);
                                     System.err.println(s);
                                     System.err.println(stepEvent.location().lineNumber());
                                 } catch (Exception e) {
