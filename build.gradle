@@ -47,4 +47,6 @@ dependencies {
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.apache.lucene:lucene-core:3.0.3'
     implementation 'org.jgrapht:jgrapht-core:1.5.1'
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
+    implementation group: 'org.apache.commons', name: 'commons-jexl3', version: '3.2.1'
 }

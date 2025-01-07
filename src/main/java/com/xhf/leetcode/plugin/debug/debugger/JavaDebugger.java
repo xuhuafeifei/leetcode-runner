@@ -1,43 +1,38 @@
 package com.xhf.leetcode.plugin.debug.debugger;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.xdebugger.XSourcePosition;
-import com.intellij.xdebugger.breakpoints.XBreakpoint;
-import com.sun.jdi.*;
+import com.sun.jdi.Bootstrap;
+import com.sun.jdi.VMDisconnectedException;
+import com.sun.jdi.VirtualMachine;
+import com.sun.jdi.VirtualMachineManager;
 import com.sun.jdi.connect.*;
-import com.sun.jdi.event.*;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequestManager;
-import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.DebugManager;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
-import com.xhf.leetcode.plugin.debug.execute.*;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
-import com.xhf.leetcode.plugin.debug.execute.java.JavaBInst;
 import com.xhf.leetcode.plugin.debug.execute.java.JavaInstFactory;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.Output;
-import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.output.OutputHelper;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
-import com.xhf.leetcode.plugin.debug.reader.InstSource;
-import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
-import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author feigebuge
@@ -121,10 +116,10 @@ public class JavaDebugger extends AbstractDebugger {
             debugLocally();
             // debugRemotely(); // 废弃远程debug方式
         } catch (DebugError ex) {
-            ConsoleUtils.getInstance(project).showWaring(ex.toString(), false, true, ex.toString(), "debug异常", ConsoleDialog.ERROR);
+            ConsoleUtils.getInstance(project).showWaring(ex.getMessage(), false, true, ex.getMessage(), "debug异常", ConsoleDialog.ERROR);
             LogUtils.error(ex);
         } catch (Exception e) {
-            ConsoleUtils.getInstance(project).showWaring(e.toString(), false, true, e.toString(), "未知异常", ConsoleDialog.ERROR);
+            ConsoleUtils.getInstance(project).showWaring(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
             LogUtils.error(e);
         }
         DebugManager.getInstance(project).stopDebugger();

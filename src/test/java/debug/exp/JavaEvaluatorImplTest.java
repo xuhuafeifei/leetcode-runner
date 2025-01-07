@@ -20,7 +20,7 @@ public class JavaEvaluatorImplTest {
     @Test
     public void parseToToken_CalculationOperator_ReturnsEvalToken() throws Exception {
         JavaEvaluatorImpl.Token token = tokenFactory.parseToToken("+");
-        assertTrue(token instanceof JavaEvaluatorImpl.EvalToken);
+        assertTrue(token instanceof JavaEvaluatorImpl.OperatorToken);
     }
 
     @Test
@@ -47,8 +47,10 @@ public class JavaEvaluatorImplTest {
         assertTrue(token instanceof JavaEvaluatorImpl.ConstantToken);
     }
 
-    @Test(expected = DebugError.class)
+//    @Test(expected = DebugError.class)
+    @Deprecated
     public void parseToToken_NoMatchingRule_ThrowsDebugError() throws Exception {
+        // 这属于非法表达式, 会在语法检查时抛出异常
         tokenFactory.parseToToken("a[");
     }
 
@@ -108,5 +110,57 @@ public class JavaEvaluatorImplTest {
         assert "a[test.demo]".equals(new JavaEvaluatorImpl.InvokeToken("a[test.demo].invoke()", null).getCallVName());
         assert "a[test.demo][b.a() + 2]".equals(new JavaEvaluatorImpl.InvokeToken("a[test.demo][b.a() + 2].invoke()", null).getCallVName());
         assert "a[test.demo][b.a() + 2]".equals(new JavaEvaluatorImpl.InvokeToken("a[test.demo][b.a() + 2].invoke(a, b.test(), c[1][2])", null).getCallVName());
+    }
+
+    @Test
+    public void test4() throws Exception {
+        assert tokenFactory.parseToToken("1 + 2 + 3", null, 0).getToken().equals("1");
+        assert tokenFactory.parseToToken("1 + 2 + 3", null, 2).getToken().equals("+");
+        assert tokenFactory.parseToToken("1 << 2 + 3", null, 2).getToken().equals("<<");
+        assert tokenFactory.parseToToken("a.test(b, c,d) + arr[2]", null, 15).getToken().equals("+");
+        assert tokenFactory.parseToToken("1 + b.invoke(a,b[1],1+2) + 3", null, 4).getToken().equals("b.invoke(a,b[1],1+2)");
+    }
+
+    @Test
+    public void test5() throws Exception {
+        assert "() + ()".equals(tokenFactory.handleInput("  () + ()  "));
+        assert "() + ()".equals(tokenFactory.handleInput("  ( () + () )  "));
+        assert "() + ()".equals(tokenFactory.handleInput("  (  ( () + () ))  "));
+    }
+
+    @Test
+    public void test6() throws Exception {
+        assert tokenFactory.parseToToken("+", null, 0) instanceof JavaEvaluatorImpl.OperatorToken;
+        assert tokenFactory.parseToToken("+", null, 0).getToken().equals("+");
+
+        assert tokenFactory.parseToToken("+123", null, 0) instanceof JavaEvaluatorImpl.OperatorToken;
+        assert tokenFactory.parseToToken("+123", null, 0).getToken().equals("+");
+
+        assert tokenFactory.parseToToken("+ 1  - 2 + a.invoke(a, b, c)", null, 0) instanceof JavaEvaluatorImpl.OperatorToken;
+        assert tokenFactory.parseToToken("+ 1  - 2 + a.invoke(a, b, c)", null, 0).getToken().equals("+");
+
+        assert tokenFactory.parseToToken("2+123", null, 1) instanceof JavaEvaluatorImpl.OperatorToken;
+        assert tokenFactory.parseToToken("2+123", null, 1).getToken().equals("+");
+
+        assert tokenFactory.parseToToken("a+2-3*a", null, 0) instanceof JavaEvaluatorImpl.VariableToken;
+        assert tokenFactory.parseToToken("a+2-3*a", null, 0).getToken().equals("a");
+
+        assert tokenFactory.parseToToken("1 +a*b-(1+2*c-a)", null, 0) instanceof JavaEvaluatorImpl.ConstantToken;
+        assert tokenFactory.parseToToken("1 +a*b-(1+2*c-a)", null, 0).getToken().equals("1");
+
+        assert tokenFactory.parseToToken("1 +a*b-(1+2*c-a)", null, 4) instanceof JavaEvaluatorImpl.OperatorToken;
+        assert tokenFactory.parseToToken("1 +a*b-(1+2*c-a)", null, 4).getToken().equals("*");
+
+        assert tokenFactory.parseToToken("arr[0][1] +a*b-(1+2*c-a)", null, 0) instanceof JavaEvaluatorImpl.ArrayToken;
+        assert tokenFactory.parseToToken("arr[0][1] +a*b-(1+2*c-a)", null, 0).getToken().equals("arr[0][1]");
+
+        assert tokenFactory.parseToToken("1+arr[0][a.test(a,b,1+3)] +a*b-(1+2*c-a)", null, 2) instanceof JavaEvaluatorImpl.ArrayToken;
+        assert tokenFactory.parseToToken("1+arr[0][a.test(a,b,1+3)]+a*b-(1+2*c-a)", null, 2).getToken().equals("arr[0][a.test(a,b,1+3)]");
+
+        assert tokenFactory.parseToToken("1 + arr[0][1] + b[0]", null, 16) instanceof JavaEvaluatorImpl.ArrayToken;
+        assert tokenFactory.parseToToken("1 + arr[0][1] + b[0]", null, 16).getToken().equals("b[0]");
+
+        assert tokenFactory.parseToToken("1 + b.invoke() + arr[0][1] + b[0]", null, 4) instanceof JavaEvaluatorImpl.InvokeToken;
+        assert tokenFactory.parseToToken("1 + b.invoke() + arr[0][1] + b[0]", null, 4).getToken().equals("b.invoke()");
     }
 }

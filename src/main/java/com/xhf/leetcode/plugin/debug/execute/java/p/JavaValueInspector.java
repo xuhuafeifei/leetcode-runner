@@ -529,4 +529,7 @@ public class JavaValueInspector {
         return null;
     }
 
+    public List<String> getWrapperTypeList() {
+        return new ArrayList<>(WRAPPER_TO_PRIMITIVES.keySet());
+    }
 }

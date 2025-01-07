@@ -5,6 +5,9 @@ import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.apache.commons.jexl3.JexlContext;
+import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.jexl3.internal.Engine;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -97,6 +100,21 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
     }
 
+    /**
+     * 计算工具
+     */
+    public static class ComputeEngin {
+        private static final Engine engine = new Engine();
+
+        public static Object execute(String expression) {
+            return engine.createExpression(expression).evaluate(new MapContext());
+        }
+
+        public static Object execute(String expression, JexlContext jexlContext) {
+            return engine.createExpression(expression).evaluate(jexlContext);
+        }
+    }
+
     public JavaEvaluatorImpl() {
         Env.setInspector(JavaValueInspector.getInstance());
     }
@@ -132,7 +150,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         Value getValue();
     }
 
-    public abstract static class  AbstractToken implements Token {
+    public abstract static class AbstractToken implements Token {
         protected final Context ctx;
         protected final String token;
 
@@ -179,7 +197,7 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @param expression 表达式
          * @return 如果括号和方括号都匹配，返回true，否则返回false
          */
-        private static boolean areParenthesesAndBracketsBalanced(String expression) {
+        protected static boolean areParenthesesAndBracketsBalanced(String expression) {
             Stack<Character> stack = new Stack<>();
 
             for (char ch : expression.toCharArray()) {
@@ -305,12 +323,12 @@ public class JavaEvaluatorImpl implements Evaluator {
          * 比如IntegerValue -> ObjectReferenceImpl
          * @param value
          * @return
-         * @throws ClassNotLoadedException
-         * @throws IncompatibleThreadStateException
-         * @throws InvocationException
-         * @throws InvalidTypeException
+         * @throws ClassNotLoadedException 类未加载
+         * @throws IncompatibleThreadStateException 线程非法
+         * @throws InvocationException 方法invoke时发生异常
+         * @throws InvalidTypeException 方法对应的入参类型不匹配
          */
-        private Value PrimitiveValueToWrapperObjReference(Value value) throws ClassNotLoadedException, IncompatibleThreadStateException, InvocationException, InvalidTypeException {
+        protected Value PrimitiveValueToWrapperObjReference(Value value) throws ClassNotLoadedException, IncompatibleThreadStateException, InvocationException, InvalidTypeException {
             if (value instanceof PrimitiveValue) {
                 PrimitiveValue primitiveValue = (PrimitiveValue) value;
                 // 获取primitiveType
@@ -321,9 +339,23 @@ public class JavaEvaluatorImpl implements Evaluator {
                 ).get(0);
                 Method constructor = wrapperClass.methodsByName("<init>").get(0);
                 // 创建objRef
-                return wrapperClass.newInstance(ctx.getThread(), constructor, Collections.singletonList(primitiveValue), 0);
+                ctx.invokeMethodStart();
+                Value v = wrapperClass.newInstance(ctx.getThread(), constructor, Collections.singletonList(primitiveValue), 0);
+                ctx.invokeMethodDone();
+                return v;
             }
             throw new RuntimeException("该方法只接受基本类型, 但传入的值为" + value.type().name());
+        }
+
+        protected boolean isNumberValue(Value v) {
+            String name = v.type().name();
+            if (name.equals("int") || name.equals("long") || name.equals("float") || name.equals("double") ||
+                    name.equals("java.lang.Integer") || name.equals("java.lang.Long") ||
+                    name.equals("java.lang.Float") || name.equals("java.lang.Double")
+            ) {
+                return true;
+            }
+            return false;
         }
     }
 
@@ -331,15 +363,83 @@ public class JavaEvaluatorImpl implements Evaluator {
      * 计算类型的Token
      */
     public static class EvalToken extends AbstractToken {
-
         public EvalToken(String token, Context ctx) {
             super(token, ctx);
         }
 
+        private final Set<Character> skip = new HashSet<Character>() {{
+            add(' ');
+            add('\t');
+            add('\r');
+            add('\n');
+            add('(');
+            add(')');
+        }};
+
         @Override
         public Value getValue() {
-            // 去除最外层括号
-            return null;
+            StringBuilder sb = new StringBuilder();
+            int len = token.length();
+            for (int i = 0; i < len; i++) {
+                if (skip.contains(token.charAt(i))) {
+                    sb.append(token.charAt(i));
+                } else {
+                    Token t = tf.parseToToken(token, ctx, i);
+                    sb.append(DebugUtils.removeQuotes(Env.inspector.inspectValue(t.getValue())));
+                        /*
+                        // 最新的Engine支持String类型计算
+                        Value value = t.getValue();
+                        if (! isNumberValue(value)) {
+                            throw new DebugError("表达式计算出现错误, 在第" + i + "个字符识别得到的token " + t.getToken() + " 计算结果不是数值类型! 而是" + value.type().name());
+                        }
+                         */
+                    // skip已经匹配过的内容
+                    i += t.getToken().length() - 1; // -1是为了应对下一轮循环前的i++
+                }
+            }
+            Object execute = ComputeEngin.execute(sb.toString());
+            /*
+            Arrays.asList(
+                    "java.lang.Integer", "java.lang.Double", "java.lang.Character", "java.lang.Long",
+                    "java.lang.Float", "java.lang.Boolean", "java.lang.Byte", "java.lang.Short"
+            ),
+             */
+            String className = execute.getClass().getName();
+            Value v;
+            switch (className) {
+                case "java.lang.Integer":
+                    v = ctx.getVm().mirrorOf((Integer) execute);
+                    break;
+                case "java.lang.Double":
+                    v = ctx.getVm().mirrorOf((Double) execute);
+                    break;
+                case "java.lang.Character":
+                    v = ctx.getVm().mirrorOf((Character) execute);
+                    break;
+                case "java.lang.Long":
+                    v = ctx.getVm().mirrorOf((Long) execute);
+                    break;
+                case "java.lang.Float":
+                    v = ctx.getVm().mirrorOf((Float) execute);
+                    break;
+                case "java.lang.Boolean":
+                    v = ctx.getVm().mirrorOf((Boolean) execute);
+                    break;
+                case "java.lang.Byte":
+                    v = ctx.getVm().mirrorOf((Byte) execute);
+                    break;
+                case "java.lang.Short":
+                    v = ctx.getVm().mirrorOf((Short) execute);
+                    break;
+                default:
+                    throw new DebugError("无法识别的计算结果类型! execute = " + execute + " type = " + className);
+            }
+            try {
+                return super.PrimitiveValueToWrapperObjReference(v);
+            } catch (ClassNotLoadedException | IncompatibleThreadStateException | InvocationException |
+                     InvalidTypeException e) {
+                throw new DebugError("计算模块, 处理基本类型转包装类型出现错误! " + e.getCause());
+            }
         }
     }
 
@@ -665,20 +765,15 @@ public class JavaEvaluatorImpl implements Evaluator {
             }
             List<Integer> dims = new ArrayList<>();
             for (String s : dimsStr) {
-                try {
-                    // 获取索引数值
-                    Token t = tf.parseToToken(s, ctx);
-                    Value vv = t.getValue();
-                    String typeName = vv.type().name();
-                    if (!Objects.equals(typeName, "int")) {
-                        throw new DebugError("数组索引必须为整型!!");
-                    }
-                    int value = ((IntegerValue) vv).value();
-                    dims.add(value);
-                } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                         IllegalAccessException e) {
-                    throw new RuntimeException(e);
+                // 获取索引数值
+                Token t = tf.parseToToken(s, ctx);
+                Value vv = t.getValue();
+                String typeName = vv.type().name();
+                if (!Objects.equals(typeName, "int")) {
+                    throw new DebugError("数组索引必须为整型!!");
                 }
+                int value = ((IntegerValue) vv).value();
+                dims.add(value);
             }
             return dims;
         }
@@ -770,6 +865,17 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
     }
 
+    public static class OperatorToken extends AbstractToken {
+
+        public OperatorToken(String token, Context ctx) {
+            super(token, ctx);
+        }
+
+        @Override
+        public Value getValue() {
+            return Env.vm.mirrorOf(DebugUtils.removeQuotes(token));
+        }
+    }
 
 
 
@@ -795,32 +901,55 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         public static class Hit {
+            /**
+             * 命中规则
+             */
             final Rule rule;
+            /**
+             * 命中得到的匹配器
+             */
             final Matcher matcher;
+            /**
+             * 第一个命中token的start位置
+             */
             final int start;
+            /**
+             * 第一个命中的token的结束位置
+             */
             final int end;
+            /**
+             * 规则命中的字符串长度
+             */
             final int length;
+            /**
+             * 命中的token
+             */
+            final String token;
 
-            public Hit(Rule rule, Matcher matcher, int start, int end, int length) {
+            public Hit(Rule rule, Matcher matcher, int start, int end, int length, String token) {
                 this.rule = rule;
                 this.matcher = matcher;
                 this.start = start;
                 this.end = end;
                 this.length = length;
+                this.token = token;
             }
         }
 
         Rule[] rules = new Rule[]{
-                // 匹配计算类型的Token
-                new Rule(Pattern.compile("[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!]"), EvalToken.class),
+                // 匹配计算类型的Token(<<,>>,+,-,*,/,&,|,!,^,<,>,!). TIP: 该正则包含了匹配运算符的正则, 因此在处理EvalToken和OperatorToken时需要额外判断
+                // 详细逻辑可参考parseToToken(String, Context)的double check部分
+                new Rule(Pattern.compile("<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!]"), EvalToken.class),
+                // 匹配只含有计算符号类型的Token
+                new Rule(Pattern.compile("^(<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!])$"), OperatorToken.class),
                 // 匹配invoke类型的Token
                 new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\]]*\\])*\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\)"), InvokeToken.class),
                 // 匹配纯粹的变量
-                new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b(?!\\S)"), VariableToken.class),
+                new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b"), VariableToken.class),
                 // 匹配数组
-                new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\]]+\\])+$"), ArrayToken.class),
+                new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\[\\]]+\\])+"), ArrayToken.class),
                 // 匹配常量(数值、字符、字符串)
-                new Rule(Pattern.compile("-?\\d+(\\.\\d+)?|\"([^\"\\\\]|\\\\.)*\"|\'([^\'\\\\]|\\\\.)*\'"), ConstantToken.class)
+                new Rule(Pattern.compile("\\d+(\\.\\d+)?|\"([^\"\\\\]|\\\\.)*\"|\'([^\'\\\\]|\\\\.)*\'"), ConstantToken.class)
         };
 
         /**
@@ -831,6 +960,8 @@ public class JavaEvaluatorImpl implements Evaluator {
          * 在匹配过程中, 如果匹配得到含有EvalToken.class的Rule, 则会进行二次检查. 只有判断出运算符号
          * 并没有囊括在其他类型表达式中时, 则认为该Token为EvalToken.class. 否则表达将会从剩余Hit中
          * 选择最长匹配的规则作为targetRule, 返回对应Token
+         * <p>
+         * 如果匹配出含有OperatorToken.class的Rule, 则在二次检查时直接锁定该规则
          *
          * @param s 表达式
          * @return token
@@ -839,13 +970,10 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @throws InstantiationException 实例化异常
          * @throws IllegalAccessException 非法访问
          */
-        public Token parseToToken(String s, Context ctx) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        public Token parseToToken(String s, Context ctx) {
             // 处理s
-            s = s.trim();
-            // 判断是否存在外层括号
-            if (s.startsWith("(") && s.endsWith(")")) {
-                s = s.substring(1, s.length() - 1);
-            }
+            s = handleInput(s);
+
             List<Hit> hits = new ArrayList<>(5);
 
             // 根据解析规则解析得到不同的Token
@@ -863,7 +991,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                       如果只有一个find结果, 直接获取最大即可
                      */
                     int start = matcher.start(), end = matcher.end();
-                    hits.add(new Hit(rule, matcher, start, end, matcher.end() - matcher.start()));
+                    hits.add(new Hit(rule, matcher, start, end, matcher.end() - matcher.start(), s));
                 }
             }
 
@@ -871,10 +999,24 @@ public class JavaEvaluatorImpl implements Evaluator {
                 throw new DebugError("无法识别的表达式: " + s);
             }
 
+            Hit targetHit = null;
             // double check
+            /*
+             * 需要对OperatorToken和EvalToken做出额外说明
+             * OperatorToken:只能包含运算符, 如 '+', '-', ...
+             * EvalToken: 不能只包含运算符, 如'1+2', '1-2', ...
+             * 但因为正则编写以及后续判断逻辑的原因, 导致如果OperatorToken匹配成功, 那么EvalToken也会匹配成功
+             * 但EvalToken匹配成功, OperatorToken不一定会被匹配.
+             * 也就是说, EvalToken的正则包含OperatorToken的正则. 因此在处理OperatorToken和EvalToken时需要
+             * 额外判断
+             */
+            // 包含OperatorToken
+            if (hits.stream().anyMatch(hit -> hit.rule.clazz == OperatorToken.class)) {
+                // 如果有运算符, 那么直接返回. 因为他的正则非常严格, 只允许字符串包含运算符. 因此当他满足时, 直接返回他
+                targetHit = hits.stream().filter(hit -> hit.rule.clazz == OperatorToken.class).findFirst().get();
+            }
             // 包含EvalToken
-            Rule targetRule = null;
-            if (hits.stream().anyMatch(hit -> hit.rule.clazz == EvalToken.class)) {
+            else if (hits.stream().anyMatch(hit -> hit.rule.clazz == EvalToken.class)) {
                 // 获取EvalToken
                 Hit EvalHit = hits.stream().filter(hit -> hit.rule.clazz == EvalToken.class).findFirst().get();
                 // 差分统计区间
@@ -896,28 +1038,92 @@ public class JavaEvaluatorImpl implements Evaluator {
                     diff[i] += diff[i - 1];
                 }
                 // 判断EvalToken是否在差分区间内
-                if (diff[EvalHit.start] == 0 && diff[EvalHit.end] == 0) {
-                    targetRule = EvalHit.rule;
+                if (diff[EvalHit.start] == 0 && diff[EvalHit.end - 1] == 0) {
+                    targetHit = EvalHit;
                 } else {
                     Matcher m = EvalHit.matcher;
                     while (m.find()) {
                         if (m.start() == EvalHit.start && m.end() == EvalHit.end) {
-                            targetRule = EvalHit.rule;
+                            targetHit = EvalHit;
                             break;
                         }
                     }
                 }
                 // 从剩余元素中选择最大值
-                if (targetRule == null) {
+                if (targetHit == null) {
                     // 过滤EvalToken
-                    targetRule = hits.stream().filter(e -> !e.rule.clazz.equals(EvalToken.class)).max(Comparator.comparingInt(hit -> hit.length)).get().rule;
+                    targetHit = hits.stream().filter(e -> !e.rule.clazz.equals(EvalToken.class)).max(Comparator.comparingInt(hit -> hit.length)).get();
                 }
             } else {
                 // 获取匹配长度最大的那一个
-                targetRule = hits.stream().max(Comparator.comparingInt(hit -> hit.length)).get().rule;
+                targetHit = hits.stream().max(Comparator.comparingInt(hit -> hit.length)).get();
             }
 
-            return targetRule.clazz.getDeclaredConstructor(String.class, Context.class).newInstance(s, ctx);
+            Rule targetRule = targetHit.rule;
+            String token = targetHit.token;
+
+            String className = targetRule.clazz.getName();
+            try {
+                return targetRule.clazz.getDeclaredConstructor(String.class, Context.class).newInstance(token, ctx);
+            } catch (InstantiationException e) {
+                throw new DebugError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
+            } catch (IllegalAccessException e) {
+                throw new DebugError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
+            } catch (InvocationTargetException e) {
+                throw new DebugError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
+            } catch (NoSuchMethodException e) {
+                throw new DebugError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
+            }
+        }
+
+        /**
+         * 处理字符串s. 移除两端的空白字符和匹配的括号
+         * @param s s
+         * @return 处理后的字符串
+         */
+        public String handleInput(String s) {
+            s = s.trim();
+            // 匹配括号, 如果存在最外层匹配的括号, 移除
+            while (s.startsWith("(") && s.endsWith(")") && bracketMatch(s)) {
+                s = s.substring(1, s.length() - 1);
+                s = s.trim();
+            }
+            return s;
+        }
+
+        /**
+         * 检查字符串最外层括号是否匹配
+         * 比如() + () : false. 因为字符最开始的(和结尾的)无法对应
+         * ( () + () ) : true
+         * @param s s
+         * @return 是否匹配成功
+         */
+        public boolean bracketMatch(String s) {
+            s = s.trim();
+            if (s.charAt(0) != '(' || s.charAt(s.length() - 1) != ')') {
+                return false;
+            }
+            Stack<Character> stack = new Stack<>();
+            for (int i = 0; i < s.length(); i++) {
+                char c = s.charAt(i);
+                if (c == '(') {
+                    stack.push(c);
+                } else if (c == ')') {
+                    if (stack.isEmpty()) {
+                        // 表达式异常(一般来说不会出现这个报错, 因为在计算开始前, 会进行语法检查)
+                        throw new DebugError("表达式异常, 括号不匹配!");
+                    }
+                    stack.pop();
+                    // 最开始的(被其他的)匹配走了, 因此匹配失败
+                    if (stack.isEmpty() && i != s.length() - 1) {
+                        return false;
+                    } else if (stack.isEmpty() && i == s.length() - 1) {
+                        return true;
+                    }
+                }
+            }
+            // 一般不会走到这一步
+            return true;
         }
 
         /**
@@ -927,6 +1133,113 @@ public class JavaEvaluatorImpl implements Evaluator {
          */
         public Token parseToToken(String token) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
             return parseToToken(token, null);
+        }
+
+        /**
+         * 解析字符串得到对应的Token. 该方法限定匹配的开始范围. start表明所有规则匹配的字符串, 初始位置必须是start
+         * 如果匹配到OperatorToken, 则在double check时直接返回
+         * 如果匹配到EvalToken, 则在double check时直接返回. 否则选择匹配长度最大的规则
+         *
+         * @param token token
+         * @param ctx ctx
+         * @param start 开始位置
+         * @return Token
+         * @throws NoSuchMethodException 方法找不到
+         * @throws InvocationTargetException invoke 异常
+         * @throws InstantiationException 实例化异常
+         * @throws IllegalAccessException 非法访问
+         */
+        public Token parseToToken(String token, Context ctx, int start) {
+            token = handleInput(token);
+            List<Hit> hits = new ArrayList<>(5);
+
+            for (Rule rule : rules) {
+                Matcher matcher = rule.pattern.matcher(token);
+                // 如果遇到OperationToken, 单独处理
+                // OperationToken只能识别单纯的运算符号, 因此他只能识别简单字符串, 无需迭代
+                if (rule.clazz.equals(OperatorToken.class)) {
+                    boolean flag = matcher.find();
+                    if (!flag) {
+                        // 因为OperatorToken匹配只包含运算符的token, 因此这里需要进行字符串切割, 获取纯粹的运算符. 尝试匹配
+                        // 切割字符串. 并且必须从最大长度开始切割, 因为存在<<, <这样的运算符
+                        for (int len = 2; len > 0; len--) {
+                            String s = (start + len) > token.length() ? token.substring(start) : token.substring(start, start + len);
+                            // 匹配s
+                            Matcher m = rule.pattern.matcher(s);
+                            if (m.find()) {
+                                hits.add(new Hit(rule, m, start, start + len - 1, len, s));
+                                break;
+                            }
+                        }
+                    } else {
+                        // 直接添加. 无需判断start是否匹配
+                        // 因为OperationToken对应的正则只能匹配纯运算符, 其余规则均会被忽略
+                        hits.add(new Hit(rule, matcher, start, token.length(), token.length() - start, token));
+                    }
+                }
+                /*
+                  同一个匹配器只可能在同一个start位置匹配得到唯一的结果
+                 */
+                while (matcher.find()) {
+                    int begin = matcher.start();
+                    int end = matcher.end();
+                    // 后续也不用匹配了, 跳过
+                    if (begin > start) {
+                        break;
+                    }
+                    if (begin == start) {
+                        hits.add(new Hit(rule, matcher, begin, end, end - begin, matcher.group()));
+                        break;
+                    }
+                }
+            }
+
+            if (hits.isEmpty()) {
+                throw new DebugError("无法识别的表达式: " + token + " start = " + start);
+            }
+            // double check
+            Hit targetHit = null;
+            if (hits.stream().anyMatch(hit -> hit.rule.clazz == OperatorToken.class)) {
+                targetHit =  hits.stream().filter(hit -> hit.rule.clazz == OperatorToken.class).findFirst().get();
+            }
+            else if (hits.stream().anyMatch(hit -> hit.rule.clazz == EvalToken.class)) {
+                targetHit =  hits.stream().filter(hit -> hit.rule.clazz == EvalToken.class).findFirst().get();
+            } else {
+                // 获取最大长度的规则
+                targetHit = hits.stream().max(Comparator.comparingInt(hit -> hit.length)).get();
+            }
+
+            Rule targetRule = targetHit.rule;
+
+            String className = targetRule.clazz.getName();
+            try {
+                return targetRule.clazz.getDeclaredConstructor(String.class, Context.class).newInstance(targetHit.token, ctx);
+            } catch (InstantiationException e) {
+                throw new DebugError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
+            } catch (IllegalAccessException e) {
+                throw new DebugError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
+            } catch (InvocationTargetException e) {
+                throw new DebugError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
+            } catch (NoSuchMethodException e) {
+                throw new DebugError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
+            }
+        }
+
+        /**
+         * 解析字符串得到对应的Token. 该方法限定匹配的开始范围. start表明所有规则匹配的字符串, 初始位置必须是start
+         * 如果匹配到OperatorToken, 则在double check时直接返回
+         * 如果匹配到EvalToken, 则在double check时直接返回. 否则选择匹配长度最大的规则
+         *
+         * @param token token
+         * @param start 开始位置
+         * @return Token
+         * @throws NoSuchMethodException 方法找不到
+         * @throws InvocationTargetException invoke 异常
+         * @throws InstantiationException 实例化异常
+         * @throws IllegalAccessException 非法访问
+         */
+        public Token parseToToken(String token, int start) {
+            return parseToToken(token, null, start);
         }
     }
 
