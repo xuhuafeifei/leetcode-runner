@@ -11,14 +11,12 @@ import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
+import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -28,7 +26,6 @@ import java.util.Set;
  */
 public class Context implements ExecuteContext {
     private BreakpointEvent breakpointEvent;
-    private String output;
     private EventRequestManager erm;
     private EventSet eventSet;
     private ClassType currentClass;
@@ -50,11 +47,16 @@ public class Context implements ExecuteContext {
      */
     private final StepRequestManager stepRequestManager = new StepRequestManager();
     private Iterator<Event> itr;
+    /**
+     * 监控池, 存储被watch的表达式
+     */
+    private final Deque<String> watchPool = new LinkedList<>();
 
     /**
      * 项目运行之初, 需要等待
      */
     private volatile boolean waitFor = true;
+    private Output output;
 
     public ClassType getCurrentClass() {
         return currentClass;
@@ -72,26 +74,12 @@ public class Context implements ExecuteContext {
         this.breakpointEvent = breakpointEvent;
     }
 
-    public String getOutput() {
-        String res = output;
-        output = null;
-        return res;
-    }
-
-    public void setOutput(String output) {
-        this.output = output;
-    }
-
     public EventRequestManager getErm() {
         return erm;
     }
 
     public void setErm(EventRequestManager erm) {
         this.erm = erm;
-    }
-
-    public void addOutput(String res) {
-        this.output = res;
     }
 
     public EventSet getEventSet() {
@@ -173,6 +161,11 @@ public class Context implements ExecuteContext {
         return this.project;
     }
 
+    @Override
+    public Deque<String> getWatchPool() {
+        return watchPool;
+    }
+
     public Location setSolutionLocation(ClassPrepareEvent event) {
         String className = event.referenceType().name();
         if (!className.equals("Solution")) {
@@ -216,6 +209,14 @@ public class Context implements ExecuteContext {
             throw new DebugError("Context resume使用错误. 请在通过Context恢复Target VM运行前, 先设置vm对象 !");
         }
         vm.resume();
+    }
+
+    public void addOutput(Output output) {
+        this.output = output;
+    }
+
+    public Output getOutput() {
+        return this.output;
     }
 
     /**

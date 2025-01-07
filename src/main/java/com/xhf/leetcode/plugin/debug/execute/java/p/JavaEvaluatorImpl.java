@@ -3,7 +3,7 @@ package com.xhf.leetcode.plugin.debug.execute.java.p;
 import com.sun.jdi.*;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
-import com.xhf.leetcode.plugin.exception.DebugError;
+import com.xhf.leetcode.plugin.exception.ComputeError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.MapContext;
@@ -136,7 +136,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             return Env.inspector.inspectValue(TokenFactory.getInstance().parseToToken(expression, context).getValue());
         } catch (Exception e) {
             LogUtils.error(e);
-            throw new DebugError(e.getMessage());
+            throw new ComputeError(e.getMessage());
         }
     }
 
@@ -170,24 +170,32 @@ public class JavaEvaluatorImpl implements Evaluator {
          * 检验表达式是否符合规范
          *
          * @param expression 表达式
-         * @throws DebugError 如果括号不匹配，则抛出异常
+         * @throws ComputeError 如果括号不匹配，则抛出异常
          */
         public static void doCheck(String expression) {
             // 检查括号是否匹配
             if (!areParenthesesAndBracketsBalanced(expression)) {
-                throw new DebugError("括号没有成对出现!!");
+                throw new ComputeError("括号没有成对出现!!");
             }
             // 检查是否存在+=等赋值语句
             if (expression.contains("+=") || expression.contains("-=") || expression.contains("*=") || expression.contains("/=") || expression.contains("%=") || expression.contains("&=") || expression.contains("|=") || expression.contains("^=") || expression.contains("<<=") || expression.contains(">>=") || expression.contains(">>>=")) {
-                throw new DebugError("不允许使用 += -= *= /= %= &= |= ^= <<= >>= >>>= 等赋值语句!!");
+                throw new ComputeError("不允许使用 += -= *= /= %= &= |= ^= <<= >>= >>>= 等赋值语句!!");
+            }
+            if (expression.contains("==")) {
+                throw new ComputeError("不允许使用 == 运算符!!");
+            }
+            // 排除<=, >=的干扰
+            String tmp = expression.replaceAll("<=","").replaceAll(">=","");
+            if (tmp.contains("=")) {
+                throw new ComputeError("不允许使用 = 运算符!!");
             }
             // 判断是否存在++, --等自变化操作
             if (expression.contains("++") || expression.contains("--")) {
-                throw new DebugError("不允许使用 ++ -- 等自变化操作!!");
+                throw new ComputeError("不允许使用 ++ -- 等自变化操作!!");
             }
             // 判断是否存在链式调用
             if (Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\]]*\\])*\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\)(\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\))+").matcher(expression).find()) {
-                throw new DebugError("不允许使用链式调用!!");
+                throw new ComputeError("不允许使用链式调用!!");
             }
         }
 
@@ -234,7 +242,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 }
             }
             if (v == null) {
-                throw new DebugError("变量未定义 name = " + vName);
+                throw new ComputeError("变量未定义 name = " + vName);
             }
             return v;
         }
@@ -297,7 +305,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             else if (Env.inspector.isPrimitiveType(v)){
                 return PrimitiveValueToWrapperObjReference(v);
             }
-            throw new DebugError("不支持自动转换类型, 请检查入参类型是否正确! v = " + v.type().name() + " type = " + type.name());
+            throw new ComputeError("不支持自动转换类型, 请检查入参类型是否正确! v = " + v.type().name() + " type = " + type.name());
         }
 
         /**
@@ -390,7 +398,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                         // 最新的Engine支持String类型计算
                         Value value = t.getValue();
                         if (! isNumberValue(value)) {
-                            throw new DebugError("表达式计算出现错误, 在第" + i + "个字符识别得到的token " + t.getToken() + " 计算结果不是数值类型! 而是" + value.type().name());
+                            throw new ComputeError("表达式计算出现错误, 在第" + i + "个字符识别得到的token " + t.getToken() + " 计算结果不是数值类型! 而是" + value.type().name());
                         }
                          */
                     // skip已经匹配过的内容
@@ -432,13 +440,13 @@ public class JavaEvaluatorImpl implements Evaluator {
                     v = ctx.getVm().mirrorOf((Short) execute);
                     break;
                 default:
-                    throw new DebugError("无法识别的计算结果类型! execute = " + execute + " type = " + className);
+                    throw new ComputeError("无法识别的计算结果类型! execute = " + execute + " type = " + className);
             }
             try {
                 return super.PrimitiveValueToWrapperObjReference(v);
             } catch (ClassNotLoadedException | IncompatibleThreadStateException | InvocationException |
                      InvalidTypeException e) {
-                throw new DebugError("计算模块, 处理基本类型转包装类型出现错误! " + e.getCause());
+                throw new ComputeError("计算模块, 处理基本类型转包装类型出现错误! " + e.getCause());
             }
         }
     }
@@ -481,8 +489,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             try {
                 callV = getCallVariable();
             } catch (Exception e) {
-                LogUtils.error(e);
-                throw new DebugError(e.toString());
+                throw new ComputeError(e.toString());
             }
             // 定位方法名字
             Method method = getMethod(callV);
@@ -498,8 +505,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             try {
                 resultV = ((ObjectReference) callV).invokeMethod(ctx.getThread(), method, params, 0);
             } catch (Exception e) {
-                LogUtils.error(e);
-                throw new DebugError("invokeMethod调用错误! " + e);
+                throw new ComputeError("invokeMethod调用错误! " + e);
             }
             // invokeMethod执行结束
             ctx.invokeMethodDone();
@@ -519,7 +525,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             // 寻找methodName
             Method method = null;
             if (! checkMethodExist(callVName, methodName, callV)) {
-                throw new DebugError(callVName + "不存在" + methodName + "方法");
+                throw new ComputeError(callVName + "不存在" + methodName + "方法");
             }
             // 判断重载
             method = overloadCheck(callV, methodName);
@@ -542,7 +548,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 }
             }
             if (candidates.isEmpty()) {
-                throw new DebugError(callVName + "不存在适配表达式的" + methodName + "方法");
+                throw new ComputeError(callVName + "不存在适配表达式的" + methodName + "方法");
             }
             // 如果只有一个
             if (candidates.size() == 1) {
@@ -556,16 +562,14 @@ public class JavaEvaluatorImpl implements Evaluator {
                     try {
                         matchValueAndType(targetMethod);
                     } catch (Exception ex) {
-                        LogUtils.error(e);
-                        throw new DebugError(e.toString());
+                        throw new ComputeError(e.toString());
                     }
                 } catch (Exception e) {
-                    LogUtils.error(e);
-                    throw new DebugError(e.toString());
+                    throw new ComputeError(e.toString());
                 }
             } else {
                 // todo: 以后支持一下重载类型
-                throw new DebugError("暂不支持方法重载");
+                throw new ComputeError("暂不支持方法重载");
             }
             return targetMethod;
         }
@@ -609,7 +613,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                     return handleWrapperAndPrimitive(v, type);
                 } else {
                     // 报错
-                    throw new DebugError("变量类型错误, 变量类型和入参类型不匹配!\n 变量" + vName + "类型为" + v.type().name() + ", 入参类型为" + type.name());
+                    throw new ComputeError("变量类型错误, 变量类型和入参类型不匹配!\n 变量" + vName + "类型为" + v.type().name() + ", 入参类型为" + type.name());
                 }
             }
             return v;
@@ -634,15 +638,13 @@ public class JavaEvaluatorImpl implements Evaluator {
                             ReferenceType referenceType = Env.vm.classesByName(className).get(0); // 加载该类
                             LogUtils.simpleDebug("class " + referenceType.name() + " 被加载!");
                         } catch (Exception ex) {
-                            LogUtils.error(ex);
-                            throw new DebugError(ex.toString());
+                            throw new ComputeError(ex.toString());
                         }
                     }
                 }
 
             } catch (Exception ex) {
-                LogUtils.error(ex);
-                throw new DebugError(ex.toString());
+                throw new ComputeError(ex.toString());
             }
         }
 
@@ -652,7 +654,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             } else if (type instanceof ReferenceType) {
                 return type.name();
             }
-            throw new DebugError("未识别的type类型: " + type.name());
+            throw new ComputeError("未识别的type类型: " + type.name());
         }
 
         private List<Value> getParams(String params) {
@@ -662,7 +664,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 try {
                     values.add(tf.parseToToken(paramNames[i], ctx).getValue());
                 } catch (Exception e) {
-                    throw new DebugError(callVName + "的第" + i + "个参数解析错误! cause is " + e.getMessage());
+                    throw new ComputeError(callVName + "的第" + i + "个参数解析错误! cause is " + e.getMessage());
                 }
             }
             return values;
@@ -678,7 +680,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 dot = matcher.start(2);
             }
             if (dot == -1) {
-                throw new DebugError("代码编写有误! InvokeToken无法定位调用方法的变量名! token = " + token);
+                throw new ComputeError("代码编写有误! InvokeToken无法定位调用方法的变量名! token = " + token);
             }
             return dot;
         }
@@ -733,7 +735,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             String vName = token.substring(0, idx);
             Value v = takeValueByVName(vName);
             if (! (v instanceof ArrayReference) ) {
-                throw new DebugError("变量 " + vName + " 不是数组类型");
+                throw new ComputeError("变量 " + vName + " 不是数组类型");
             }
             return (ArrayReference) v;
         }
@@ -761,7 +763,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         private List<Integer> getDims() {
             List<String> dimsStr = getDimsStr();
             if (dimsStr.isEmpty()) {
-                throw new DebugError("数组没有维度!");
+                throw new ComputeError("数组没有维度!");
             }
             List<Integer> dims = new ArrayList<>();
             for (String s : dimsStr) {
@@ -770,7 +772,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 Value vv = t.getValue();
                 String typeName = vv.type().name();
                 if (!Objects.equals(typeName, "int")) {
-                    throw new DebugError("数组索引必须为整型!!");
+                    throw new ComputeError("数组索引必须为整型!!");
                 }
                 int value = ((IntegerValue) vv).value();
                 dims.add(value);
@@ -792,13 +794,13 @@ public class JavaEvaluatorImpl implements Evaluator {
             for (int i = 0; i < dims.size(); i++) {
                 int dim = dims.get(i);
                 if (dim >= array.length()) {
-                    throw new DebugError("数组越界!! 数组第" + i + "维度长度=" + array.length() + ", 索引=" + dim);
+                    throw new ComputeError("数组越界!! 数组第" + i + "维度长度=" + array.length() + ", 索引=" + dim);
                 }
                 value = array.getValue(dim);
                 // 如果没有迭代到最后一位, 则判断是否是数组类型
                 if (i != dims.size() - 1) {
                     if (!(value instanceof ArrayReference)) {
-                        throw new DebugError("变量" + vName + "第 " + i + " 维度不是数组类型, 是" + value.type().name() + "类型!!");
+                        throw new ComputeError("变量" + vName + "第 " + i + " 维度不是数组类型, 是" + value.type().name() + "类型!!");
                     }
                     // 跟新array
                     array = (ArrayReference) value;
@@ -996,7 +998,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             }
 
             if (hits.isEmpty()) {
-                throw new DebugError("无法识别的表达式: " + s);
+                throw new ComputeError("无法识别的表达式: " + s);
             }
 
             Hit targetHit = null;
@@ -1066,13 +1068,13 @@ public class JavaEvaluatorImpl implements Evaluator {
             try {
                 return targetRule.clazz.getDeclaredConstructor(String.class, Context.class).newInstance(token, ctx);
             } catch (InstantiationException e) {
-                throw new DebugError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
+                throw new ComputeError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
             } catch (IllegalAccessException e) {
-                throw new DebugError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
+                throw new ComputeError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
             } catch (InvocationTargetException e) {
-                throw new DebugError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
+                throw new ComputeError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
             } catch (NoSuchMethodException e) {
-                throw new DebugError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
+                throw new ComputeError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
             }
         }
 
@@ -1111,7 +1113,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 } else if (c == ')') {
                     if (stack.isEmpty()) {
                         // 表达式异常(一般来说不会出现这个报错, 因为在计算开始前, 会进行语法检查)
-                        throw new DebugError("表达式异常, 括号不匹配!");
+                        throw new ComputeError("表达式异常, 括号不匹配!");
                     }
                     stack.pop();
                     // 最开始的(被其他的)匹配走了, 因此匹配失败
@@ -1195,7 +1197,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             }
 
             if (hits.isEmpty()) {
-                throw new DebugError("无法识别的表达式: " + token + " start = " + start);
+                throw new ComputeError("无法识别的表达式: " + token + " start = " + start);
             }
             // double check
             Hit targetHit = null;
@@ -1215,13 +1217,13 @@ public class JavaEvaluatorImpl implements Evaluator {
             try {
                 return targetRule.clazz.getDeclaredConstructor(String.class, Context.class).newInstance(targetHit.token, ctx);
             } catch (InstantiationException e) {
-                throw new DebugError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
+                throw new ComputeError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
             } catch (IllegalAccessException e) {
-                throw new DebugError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
+                throw new ComputeError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
             } catch (InvocationTargetException e) {
-                throw new DebugError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
+                throw new ComputeError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
             } catch (NoSuchMethodException e) {
-                throw new DebugError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
+                throw new ComputeError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
             }
         }
 

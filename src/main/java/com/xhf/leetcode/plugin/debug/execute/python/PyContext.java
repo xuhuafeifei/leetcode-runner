@@ -5,6 +5,8 @@ import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 
+import java.util.*;
+
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -14,6 +16,10 @@ public class PyContext implements ExecuteContext {
     private PythonDebugEnv env;
     private PyClient pyClient;
     private ReadType readType;
+    /**
+     * 监控池, 存储被watch的表达式
+     */
+    private final Deque<String> watchPool = new LinkedList<>();
 
     public void setEnv(PythonDebugEnv env) {
         this.env = env;
@@ -30,6 +36,11 @@ public class PyContext implements ExecuteContext {
     @Override
     public Project getProject() {
         return this.project;
+    }
+
+    @Override
+    public Deque<String> getWatchPool() {
+        return watchPool;
     }
 
     public void setPyClient(PyClient pyClient) {

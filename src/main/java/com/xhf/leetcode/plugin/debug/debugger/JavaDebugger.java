@@ -190,6 +190,7 @@ public class JavaDebugger extends AbstractDebugger {
         this.vm = vm;
         this.erm = erm;
 
+        context.addOutput(output);
         context.setErm(erm);
         context.setVm(vm);
         context.setEnv(env);

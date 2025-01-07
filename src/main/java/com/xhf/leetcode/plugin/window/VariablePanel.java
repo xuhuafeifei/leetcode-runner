@@ -8,6 +8,7 @@ import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
+import com.xhf.leetcode.plugin.listener.PopupMenuAdaptor;
 import com.xhf.leetcode.plugin.render.VariablesCellRender;
 
 import javax.swing.*;
@@ -27,7 +28,7 @@ public class VariablePanel extends JPanel {
      * 输入表达式的文本框
      */
     private final JTextField expressionField;
-    private final String defaultText = "Evaluate expression (Enter)";
+    private final String defaultText = "Evaluate expression (Enter) or add a watch";
 
     public VariablePanel() {
         // 设置垂直布局
@@ -38,7 +39,7 @@ public class VariablePanel extends JPanel {
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.X_AXIS));
 
         // 输入框
-        this.expressionField = new JTextField("Evaluate expression (Enter) or add a watch");
+        this.expressionField = new JTextField(defaultText);
         this.expressionField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -73,13 +74,19 @@ public class VariablePanel extends JPanel {
         // 按钮（右侧图标按钮）
         JButton watchButton = new JButton(AllIcons.Debugger.AddToWatch);
         inputPanel.add(watchButton);
+        watchButton.addActionListener(e -> {
+            String exp = expressionField.getText();
+            InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.WATCH, exp));
+        });
 
         // 添加表达式输入区域到主面板
         add(inputPanel);
 
-        // 变量列表
         variableList = new MyList<>();
+        // 变量列表
         variableList.setCellRenderer(new VariablesCellRender());
+        // 添加menu
+        variableList.addMouseListener(new PopupMenuAdaptor<>(variableList));
 
         // 添加滚动面板
         JBScrollPane scrollPane = new JBScrollPane(variableList);

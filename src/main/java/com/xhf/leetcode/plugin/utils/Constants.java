@@ -39,6 +39,7 @@ public interface Constants {
     String LOCAL_VARIABLE = "Local variable";
     String STATIC_VARIABLE = "Static variable";
     String MEMBER_VARIABLE = "Member variable";
+    String WATCH = "Watch variable";
 
 
     String PY_SERVER_DISCONNECT = "PY_SERVER_DISCONNECT";

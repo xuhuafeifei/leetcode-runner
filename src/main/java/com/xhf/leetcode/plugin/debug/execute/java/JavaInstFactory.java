@@ -30,6 +30,7 @@ public class JavaInstFactory implements InstructionFactory {
             case R:
                 instExecutor = new JavaRInst();
                 break;
+            case WATCH:
             case P:
                 instExecutor = new JavaPInst();
                 break;

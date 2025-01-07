@@ -74,7 +74,11 @@ public enum Operation {
     /**
      * 帮助指令
      */
-    HELP(new HELPParameterExtractor(), "^help$|^h$", "HELP");
+    HELP(new HELPParameterExtractor(), "^help$|^h$", "HELP"),
+    /**
+     * 监视指令
+     */
+    WATCH(new WATCHParameterExtractor(), "^watch\\s*(.*)?$", "WATCH");
 
     // 每个操作对应的提取器
     private final ParameterExtractor parameterExtractor;

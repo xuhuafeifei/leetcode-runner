@@ -3,12 +3,11 @@ package com.xhf.leetcode.plugin.debug.output;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
-import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.java.JavaWInst;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
-import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
@@ -50,6 +49,7 @@ public class UIOutput extends AbstractOutput{
             case N:
                 // doAfter(r); N指令执行doAfter并不能高亮显示下一行数据. 因为此时获取的addLine是上一行, 而不是下一行
                 break;
+            case WATCH:
             case P:
                 doP(r);
                 break;

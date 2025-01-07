@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.render;
 
-import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.utils.Constants;
 
 import javax.swing.*;
@@ -17,7 +16,9 @@ public class VariablesCellRender extends DefaultListCellRenderer {
         // 是斜体 + 粗体
         if (exp.contains(Constants.STATIC_VARIABLE) ||
                 exp.contains(Constants.MEMBER_VARIABLE) ||
-                exp.contains(Constants.LOCAL_VARIABLE))
+                exp.contains(Constants.LOCAL_VARIABLE) ||
+                exp.contains(Constants.WATCH)
+        )
         {
             label.setFont(new Font(Constants.ENGLISH_FONT.getFontName(), Font.ITALIC + Font.BOLD, label.getFont().getSize()));
         }

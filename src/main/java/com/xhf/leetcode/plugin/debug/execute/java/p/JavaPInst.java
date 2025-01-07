@@ -1,17 +1,22 @@
 package com.xhf.leetcode.plugin.debug.execute.java.p;
 
 import com.sun.jdi.*;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
-import com.xhf.leetcode.plugin.debug.command.operation.Operation;
+import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.ComputeError;
+import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 
 /**
  * 执行P操作. 操作具体信息详见{@link Operation}
@@ -22,8 +27,6 @@ import java.util.*;
 public class JavaPInst extends AbstractJavaInstExecutor {
 
     private final JavaValueInspector inspector;
-    private StackFrame frame;
-
     public JavaPInst() {
         inspector = JavaValueInspector.getInstance();
     }
@@ -60,7 +63,28 @@ public class JavaPInst extends AbstractJavaInstExecutor {
     }
 
     /**
-     * 检查并获取value. 如果param有值, 则计算表达式. 否则打印当前局部变量
+     * 检查并获取value.
+     * 如果是P指令, 如果param有值, 则计算表达式. 否则打印当前局部变量
+     * 如果是WATCH指令, 将表达式存入watchPool, 然后执行P指令
+     *
+     * @param inst 指令
+     * @param context 上下文
+     * @return res
+     * @throws ClassNotLoadedException
+     * @throws IncompatibleThreadStateException
+     * @throws AbsentInformationException
+     */
+    private String checkAndGetValue(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
+        if (inst.getOperation() == Operation.P) {
+            return doP(inst, context);
+        } else if (inst.getOperation() == Operation.WATCH) {
+            return doWATCH(inst, context);
+        }
+        throw new DebugError("JavaPInst不支持的操作 " + inst.getOperation());
+    }
+
+    /**
+     * 执行watch指令
      * @param inst
      * @param context
      * @return
@@ -68,17 +92,82 @@ public class JavaPInst extends AbstractJavaInstExecutor {
      * @throws IncompatibleThreadStateException
      * @throws AbsentInformationException
      */
-    private String checkAndGetValue(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
-        String res;
+    private String doWATCH(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
         String exp = inst.getParam();
-        if (StringUtils.isNotBlank(exp)) {
-            res = new JavaEvaluatorImpl().executeExpression(exp, context);
-        } else {
-           res = getVariable(context.getThread(), context.getLocation(), context);
-        }
-        return res;
+        context.getWatchPool().addFirst(exp);
+        return doP(inst, context);
     }
 
+    /**
+     * 执行P指令
+     * @param inst
+     * @param context
+     * @return
+     * @throws ClassNotLoadedException
+     * @throws IncompatibleThreadStateException
+     * @throws AbsentInformationException
+     */
+    private String doP(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
+        StringBuilder res = new StringBuilder();
+        String exp = inst.getParam();
+        // 计算表达式(doP可能被doWATCH调用, 这里二次判断)
+        if (inst.getOperation() == Operation.P && StringUtils.isNotBlank(exp)) {
+            res.append(computeExpression(exp, context)).append("\n");
+        }
+        // 检查监视池
+        res.append(getWatchPool(context));
+        // 获取当前执行环境存在的变量
+        res.append(getVariable(context.getThread(), context.getLocation(), context));
+        return res.toString();
+    }
+
+    /**
+     * 检查watch pool, 如果存在内容, 执行计算逻辑
+     * @param context
+     * @return
+     */
+    private String getWatchPool(Context context) {
+        StringBuilder res = new StringBuilder();
+        Deque<String> watchPool = context.getWatchPool();
+        if (! watchPool.isEmpty()) {
+            res.append(Constants.WATCH + ":\n");
+            for (String watch : watchPool) {
+                res.append(computeExpression(watch, context)).append("\n");
+            }
+        }
+        return res.toString();
+    }
+
+    /**
+     * 计算表达式
+     * @param exp
+     * @param context
+     * @return
+     */
+    private String computeExpression(String exp, Context context) {
+        StringBuilder res = new StringBuilder();
+        // 设置loading data
+        Output output = context.getOutput();
+        output.output(ExecuteResult.success(Operation.NULL, "exp = 计算中..."));
+
+        try {
+            res.append(exp).append(" = ").append(new JavaEvaluatorImpl().executeExpression(exp, context));
+        } catch (ComputeError e) {
+            res.append(e.getMessage());
+        }
+        return res.toString();
+    }
+
+    /**
+     * 获取当前执行环境存在的变量
+     * @param thread
+     * @param location
+     * @param context
+     * @return
+     * @throws IncompatibleThreadStateException
+     * @throws AbsentInformationException
+     * @throws ClassNotLoadedException
+     */
     private String getVariable(ThreadReference thread, Location location, Context context) throws IncompatibleThreadStateException, AbsentInformationException, ClassNotLoadedException {
         // 获取当前栈帧
         StackFrame frame = thread.frame(0);
