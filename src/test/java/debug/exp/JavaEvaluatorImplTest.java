@@ -162,5 +162,9 @@ public class JavaEvaluatorImplTest {
 
         assert tokenFactory.parseToToken("1 + b.invoke() + arr[0][1] + b[0]", null, 4) instanceof JavaEvaluatorImpl.InvokeToken;
         assert tokenFactory.parseToToken("1 + b.invoke() + arr[0][1] + b[0]", null, 4).getToken().equals("b.invoke()");
+
+
+        assert tokenFactory.parseToToken("dfs(1,2,3)", null, 0) instanceof JavaEvaluatorImpl.PureCallToken;
+        assert tokenFactory.parseToToken("dfs(1,2,3)", null, 0).getToken().equals("dfs(1,2,3)");
     }
 }

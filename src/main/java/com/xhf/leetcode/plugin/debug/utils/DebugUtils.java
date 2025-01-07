@@ -22,14 +22,13 @@ import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointManager;
+import com.sun.jdi.Field;
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Location;
 import com.sun.jdi.Value;
-import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
-import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.execute.java.Context;
-import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
@@ -400,6 +399,11 @@ public class DebugUtils {
         }
     }
 
+    /**
+     * 服务于变量转换
+     * @param values
+     * @return
+     */
     public static Map<String, Value> convert(Map<LocalVariable, Value> values) {
         Map<String, Value> res = new HashMap<>();
         for (Map.Entry<LocalVariable, Value> entry : values.entrySet()) {
@@ -408,8 +412,21 @@ public class DebugUtils {
         return res;
     }
 
+    /**
+     * 哎，不想命名了, 就这吧
+     * @param  values
+     * @return
+     */
+    public static Map<String, Value> convert2(Map<Field, Value> values) {
+        Map<String, Value> res = new HashMap<>();
+        for (Map.Entry<Field, Value> entry : values.entrySet()) {
+            res.put(entry.getKey().name(), entry.getValue());
+        }
+        return res;
+    }
     public static String removeQuotes(String str) {
         // 除去的是字符串两端的双引号
         return str.replaceAll("^\"|\"$", "");
     }
+
 }

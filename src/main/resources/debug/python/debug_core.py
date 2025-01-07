@@ -253,11 +253,10 @@ class Debugger:
                             solution_env_global[str(key)] = value
 
                 res = eval(param, solution_env_global, solution_env_local)
-                r.result = res
+                r.result = str(param) + ': ' + str(res)
             except Exception as e:
-                # todo: 记得删除了
-                traceback.print_exc()
-                r.more_info = traceback.format_exc()
+                r.result = str(param) + ': ' + traceback.format_exc()
+                # r.more_info = traceback.format_exc()
             # 打印到日志
             self.log.log_out(res, "doP----------")
             # 存储输出

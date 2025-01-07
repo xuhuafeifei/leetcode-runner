@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.debug.execute.java;
 
+import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.project.Project;
 import com.sun.jdi.*;
 import com.sun.jdi.event.BreakpointEvent;
@@ -9,14 +10,18 @@ import com.sun.jdi.event.EventSet;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -57,6 +62,10 @@ public class Context implements ExecuteContext {
      */
     private volatile boolean waitFor = true;
     private Output output;
+
+    public Context() {
+        LCEventBus.getInstance().register(this);
+    }
 
     public ClassType getCurrentClass() {
         return currentClass;
@@ -164,6 +173,25 @@ public class Context implements ExecuteContext {
     @Override
     public Deque<String> getWatchPool() {
         return watchPool;
+    }
+
+    @Subscribe
+    @Override
+    public void removeWatchPoolListener(WatchPoolRemoveEvent event) {
+        String data = event.getData();
+        DebugUtils.simpleDebug("data = " + data, project);
+        if (StringUtils.isBlank(data)) {
+            return;
+        }
+        String[] split = data.split("=");
+        if (split.length < 2) {
+            DebugUtils.simpleDebug("java 无需删除watch pool", project);
+        }
+        split[0] = split[0].trim();
+        // match
+        List<String> arr = watchPool.stream().filter(e -> !e.startsWith(split[0])).collect(Collectors.toList());
+        watchPool.clear();
+        watchPool.addAll(arr);
     }
 
     public Location setSolutionLocation(ClassPrepareEvent event) {

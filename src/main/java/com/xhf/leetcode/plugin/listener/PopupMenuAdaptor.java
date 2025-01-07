@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.listener;
 
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 
 import javax.swing.*;
@@ -43,6 +45,8 @@ public class PopupMenuAdaptor<T> extends MouseAdapter {
                     data[i - 1] = model.getElementAt(i);
                 }
             }
+            // 通知watch pool删除对应数据, 如果删除的是watch pool内的
+            LCEventBus.getInstance().post(new WatchPoolRemoveEvent(model.getElementAt(selectedIndex).toString()));
             variableList.setListData(data);
         });
         popupMenu.add(deleteItem);

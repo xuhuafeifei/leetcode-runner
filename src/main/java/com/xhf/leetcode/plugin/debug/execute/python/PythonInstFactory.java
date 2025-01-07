@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.debug.execute.python;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.InstructionFactory;
-import com.xhf.leetcode.plugin.debug.execute.java.*;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 /**
@@ -29,6 +28,7 @@ public class PythonInstFactory implements InstructionFactory {
             case R:
                 instExecutor = new PythonRInst();
                 break;
+            case WATCH:
             case P:
                 instExecutor = new PythonPInst();
                 break;

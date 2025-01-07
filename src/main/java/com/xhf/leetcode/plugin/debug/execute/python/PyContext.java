@@ -1,11 +1,17 @@
 package com.xhf.leetcode.plugin.debug.execute.python;
 
+import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
 import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author feigebuge
@@ -20,6 +26,10 @@ public class PyContext implements ExecuteContext {
      * 监控池, 存储被watch的表达式
      */
     private final Deque<String> watchPool = new LinkedList<>();
+
+    public PyContext() {
+        LCEventBus.getInstance().register(this);
+    }
 
     public void setEnv(PythonDebugEnv env) {
         this.env = env;
@@ -57,5 +67,25 @@ public class PyContext implements ExecuteContext {
 
     public ReadType getReadType() {
         return this.readType;
+    }
+
+    @Subscribe
+    @Override
+    public void removeWatchPoolListener(WatchPoolRemoveEvent event) {
+        String data = event.getData();
+
+        DebugUtils.simpleDebug("data = " + data, project);
+        if (StringUtils.isBlank(data)) {
+            return;
+        }
+        String[] split = data.split(":");
+        if (split.length < 2) {
+            DebugUtils.simpleDebug("python 无需删除watch pool", project);
+        }
+        split[0] = split[0].trim();
+        // match
+        List<String> arr = watchPool.stream().filter(e -> !e.startsWith(split[0])).collect(Collectors.toList());
+        watchPool.clear();
+        watchPool.addAll(arr);
     }
 }

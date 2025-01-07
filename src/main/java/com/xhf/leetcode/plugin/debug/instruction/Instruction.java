@@ -100,4 +100,12 @@ public class Instruction {
                 ", param='" + param + '\'' +
                 '}';
     }
+
+    public Instruction copy() {
+        // 深拷贝
+        Instruction instruction = new Instruction(this.readType, this.operation, this.param);
+        instruction.exit = this.exit;
+        instruction.success = this.success;
+        return instruction;
+    }
 }

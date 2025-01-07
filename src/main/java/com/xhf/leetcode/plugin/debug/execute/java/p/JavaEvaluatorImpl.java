@@ -8,11 +8,13 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.internal.Engine;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 执行expression
@@ -26,29 +28,15 @@ public class JavaEvaluatorImpl implements Evaluator {
      * 环境对象
      */
     static class Env {
-        private static Map<LocalVariable, Value> localEnv;
+        private static Map<String, Value> localEnv;
+        private static Map<String, Value> memberEnv;
+        private static Map<String, Value> staticEnv;
         private static StackFrame frame;
         private static ThreadReference thread;
         private static Context ctx;
         private static VirtualMachine vm;
         private static JavaValueInspector inspector;
-
-        /**
-         * 获取当前环境存在的所有变量
-         * 目前只返回LocalEnv
-         * @return 当前环境存在的所有变量
-         */
-        public static Map<String, Value> getEnvValues() {
-            return DebugUtils.convert(localEnv);
-        }
-
-        public static Map<LocalVariable, Value> getLocalEnv() {
-            return localEnv;
-        }
-
-        public static void setLocalEnv(Map<LocalVariable, Value> localEnv) {
-            Env.localEnv = localEnv;
-        }
+        private static ObjectReference _this;
 
         public static StackFrame getFrame() {
             return frame;
@@ -94,9 +82,69 @@ public class JavaEvaluatorImpl implements Evaluator {
             // 获取当前栈帧
             thread = ctx.getThread();
             frame = thread.frame(0);
+            _this = frame.thisObject();
             // 获取所有变量
+            localEnv = takeLocalVariable(frame);
+            memberEnv = takeMemberValues(_this);
+            staticEnv = takeStaticValues(ctx.getLocation().declaringType());
+        }
+
+        /**
+         * 获取当前栈帧的所有变量
+         * @param frame
+         * @return
+         * @throws AbsentInformationException
+         */
+        public static Map<String, Value> takeLocalVariable(StackFrame frame) throws AbsentInformationException {
             List<LocalVariable> localVariables = frame.visibleVariables();
-            localEnv = frame.getValues(localVariables);
+            Map<LocalVariable, Value> values = frame.getValues(localVariables);
+            return DebugUtils.convert(values);
+        }
+
+        public static Map<String, Value> getLocalEnv() {
+            return localEnv;
+        }
+
+        /**
+         * 通过Value获取成员变量, 并转化为环境数据
+         * @param v
+         * @return
+         */
+        public static Map<String, Value> takeMemberValues(Value v) {
+            if (! (v instanceof ObjectReference)) {
+                throw new ComputeError("方法使用错误! 只有ObjectReference才会拥有成员变量! type = " + v.type());
+            }
+            ObjectReference objRef = (ObjectReference) v;
+            List<Field> fields = objRef.referenceType().fields().stream().filter(e -> !e.isStatic()).collect(Collectors.toList());
+            Map<Field, Value> values = objRef.getValues(fields);
+            return DebugUtils.convert2(values);
+        }
+
+        public static Map<String, Value> getMemberEnv() {
+            return memberEnv;
+        }
+
+        /**
+         * 从referenceType中获取静态变量
+         * @param referenceType
+         * @return
+         */
+        private @NotNull static Map<String, Value> takeStaticValues(ReferenceType referenceType ) {
+            // 获取所有静态变量
+            List<Field> fields = referenceType.fields();
+            Map<String, Value> statics = new HashMap<>();
+            for (Field field : fields) {
+                // 处理静态变量
+                if (field.isStatic()) {
+                    Value value = referenceType.getValue(field);  // 获取静态字段的值
+                    statics.put(field.name(), value);
+                }
+            }
+            return statics;
+        }
+
+        public static Map<String, Value> getStaticValues() {
+            return staticEnv;
         }
     }
 
@@ -229,20 +277,35 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         /**
          * 通过变量名获取变量值
+         * 从LocalEnv获取数据
+         * 如果都没有, 报错
+         *
          * @param vName
          * @return
          */
         protected Value takeValueByVName(String vName) {
+            Value v = takeValueByVName(vName, Env.getLocalEnv());
+//            if (v != null) {
+//                return v;
+//            }
+//            v = takeValueByVName(vName, Env.getMemberEnv());
+//            if (v != null) {
+//                return v;
+//            }
+//            v = takeValueByVName(vName, Env.getStaticValues());
+            if (v == null) {
+                throw new ComputeError("变量未定义 name = " + vName);
+            }
+            return v;
+        }
+
+        protected Value takeValueByVName(String vName, Map<String, Value> dataSource) {
             Value v = null;
-            Map<String, Value> convert = Env.getEnvValues();
-            for (Map.Entry<String, Value> next : convert.entrySet()) {
+            for (Map.Entry<String, Value> next : dataSource.entrySet()) {
                 if (next.getKey().equals(vName)) {
                     v = next.getValue();
                     break;
                 }
-            }
-            if (v == null) {
-                throw new ComputeError("变量未定义 name = " + vName);
             }
             return v;
         }
@@ -480,7 +543,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         /**
          * 调用方法的.的下标
          */
-        private int dot;
+        protected int dot;
 
         @Override
         public Value getValue() {
@@ -497,7 +560,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             return doInvoke(callV, method);
         }
 
-        private Value doInvoke(Value callV, Method method) {
+        protected Value doInvoke(Value callV, Method method) {
             Context ctx = Env.getCtx();
             // invokeMethod开始执行
             ctx.invokeMethodStart();
@@ -512,7 +575,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             return resultV;
         }
 
-        private Method getMethod(Value callV) {
+        protected Method getMethod(Value callV) {
             // 去除调用的变量名
             String suffix = token.substring(dot + 1);
             // 定位第一个(
@@ -687,6 +750,9 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         private Value getCallVariable() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
             this.callVName = getCallVName();
+            if ("this".equals(callVName)) {
+                return Env._this;
+            }
             return tf.parseToToken(callVName, ctx).getValue();
         }
 
@@ -701,6 +767,29 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
     }
 
+
+    /**
+     * 纯函数调用, 不匹配调用方法的实例, 实例默认为self. 比如dfs(1,2,3). 但a.dfs(1,2,3)或者self.dfs(1,2,3)不会被当前class承认
+     * 但在内部执行时, 会自动将调用函数的实例设置为this
+     */
+    public static class PureCallToken extends InvokeToken {
+
+        public PureCallToken(String token, Context ctx) {
+            super(token, ctx);
+        }
+
+        @Override
+        public Value getValue() {
+            // 因为是纯粹的方法调用, 所以callVName = this
+            Value callV = Env._this;
+            // 定位方法名字
+            dot = -1;
+            Method method = getMethod(callV);
+            // 触发invokeMethod
+            return doInvoke(callV, method);
+        }
+    }
+
     /**
      * Variable类型的Token
      */
@@ -712,6 +801,28 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         @Override
         public Value getValue() {
+            // 检查变量名. 如果包含.  比如this.head, 迭代获取
+            if (token.contains(".")) {
+                String[] split = token.split("\\.");
+                // 迭代获取
+                Value v = null;
+                String preName = split[0];
+                for (int i = 1; i < split.length; i++) {
+                    String vName = split[i];
+                    if (Objects.equals(preName, "this")) {
+                        v = takeValueByVName(vName, Env.getMemberEnv());
+                    }else {
+                        // md, 不支持通过.的方式获取持静态变量, 要不然太tm麻烦了
+                        // 甚至我连静态变量都不想支持, 谁特么写leetcode吃饱了撑着用静态变量
+                        v = takeValueByVName(vName, Env.takeMemberValues(v));
+                    }
+                }
+                return v;
+            }
+            // 从变量env中获取
+            if ("this".equals(token)) {
+                return Env._this;
+            }
             return super.takeValueByVName(token);
         }
     }
@@ -946,6 +1057,8 @@ public class JavaEvaluatorImpl implements Evaluator {
                 new Rule(Pattern.compile("^(<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!])$"), OperatorToken.class),
                 // 匹配invoke类型的Token
                 new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\]]*\\])*\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\)"), InvokeToken.class),
+                // 匹配纯粹的方法调用类型的Token, 比如匹配dfs(1,2), 但不匹配self.dfs(1,2)
+                new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\([^()]*\\)"), PureCallToken.class),
                 // 匹配纯粹的变量
                 new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b"), VariableToken.class),
                 // 匹配数组
