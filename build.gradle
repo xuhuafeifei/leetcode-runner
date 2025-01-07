@@ -10,6 +10,7 @@ patchPluginXml {
     untilBuild = '232.*'
 }
 
+
 intellij {
     version = '2022.2'
     type = 'IU'
