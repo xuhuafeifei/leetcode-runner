@@ -4,6 +4,7 @@ import com.sun.jdi.*;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.ComputeError;
+import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.MapContext;
@@ -198,6 +199,18 @@ public class JavaEvaluatorImpl implements Evaluator {
         Value getValue();
     }
 
+    /**
+     * 链式调用的Token
+     */
+    public interface TokenChain extends Token {
+        /**
+         * 链式法则, 通过前面的Token获取的Value作为当前链式调用的调用方
+         * @param pV
+         * @return
+         */
+        Value getValue(Value pV);
+    }
+
     public abstract static class AbstractToken implements Token {
         protected final Context ctx;
         protected final String token;
@@ -241,7 +254,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             if (expression.contains("++") || expression.contains("--")) {
                 throw new ComputeError("不允许使用 ++ -- 等自变化操作!!");
             }
-            // 判断是否存在链式调用
+            // 判断是否存在链式方法调用
             if (Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\]]*\\])*\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\)(\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\))+").matcher(expression).find()) {
                 throw new ComputeError("不允许使用链式调用!!");
             }
@@ -430,6 +443,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
     }
 
+
     /**
      * 计算类型的Token
      */
@@ -450,24 +464,21 @@ public class JavaEvaluatorImpl implements Evaluator {
         @Override
         public Value getValue() {
             StringBuilder sb = new StringBuilder();
-            int len = token.length();
+            char[] tokenChars = token.toCharArray(); // 将字符串转换为字符数组
+            int len = tokenChars.length;
             for (int i = 0; i < len; i++) {
-                if (skip.contains(token.charAt(i))) {
-                    sb.append(token.charAt(i));
+                if (skip.contains(tokenChars[i])) {
+                    sb.append(tokenChars[i]);
                 } else {
-                    Token t = tf.parseToToken(token, ctx, i);
+                    Token t = tf.parseToTokenFromStart(new String(tokenChars, i, len - i), ctx); // 使用字符数组创建子字符串
                     sb.append(DebugUtils.removeQuotes(Env.inspector.inspectValue(t.getValue())));
-                        /*
-                        // 最新的Engine支持String类型计算
-                        Value value = t.getValue();
-                        if (! isNumberValue(value)) {
-                            throw new ComputeError("表达式计算出现错误, 在第" + i + "个字符识别得到的token " + t.getToken() + " 计算结果不是数值类型! 而是" + value.type().name());
-                        }
-                         */
+
                     // skip已经匹配过的内容
                     i += t.getToken().length() - 1; // -1是为了应对下一轮循环前的i++
                 }
             }
+
+
             Object execute = ComputeEngin.execute(sb.toString());
             /*
             Arrays.asList(
@@ -767,6 +778,17 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
     }
 
+    public static class InvokeTokenChain extends InvokeToken implements TokenChain {
+
+        public InvokeTokenChain(String token, Context ctx) {
+            super(token, ctx);
+        }
+
+        @Override
+        public Value getValue(Value pV) {
+            return null;
+        }
+    }
 
     /**
      * 纯函数调用, 不匹配调用方法的实例, 实例默认为self. 比如dfs(1,2,3). 但a.dfs(1,2,3)或者self.dfs(1,2,3)不会被当前class承认
@@ -787,6 +809,23 @@ public class JavaEvaluatorImpl implements Evaluator {
             Method method = getMethod(callV);
             // 触发invokeMethod
             return doInvoke(callV, method);
+        }
+    }
+
+    public static class PureCallTokenChain extends PureCallToken implements TokenChain {
+
+        public PureCallTokenChain(String token, Context ctx) {
+            super(token, ctx);
+        }
+
+        @Override
+        public Value getValue() {
+            return super.getValue();
+        }
+
+        @Override
+        public Value getValue(Value pV) {
+            return null;
         }
     }
 
@@ -824,6 +863,23 @@ public class JavaEvaluatorImpl implements Evaluator {
                 return Env._this;
             }
             return super.takeValueByVName(token);
+        }
+    }
+
+    public static class VariableTokenChain extends VariableToken implements TokenChain {
+
+        public VariableTokenChain(String token, Context ctx) {
+            super(token, ctx);
+        }
+
+        @Override
+        public Value getValue(Value pV) {
+            return null;
+        }
+
+        @Override
+        public Value getValue() {
+            return null;
         }
     }
 
@@ -932,6 +988,18 @@ public class JavaEvaluatorImpl implements Evaluator {
 
     }
 
+    public static class ArrayTokenChain extends ArrayToken implements TokenChain {
+
+        public ArrayTokenChain(String token, Context ctx) {
+            super(token, ctx);
+        }
+
+        @Override
+        public Value getValue(Value pV) {
+            return null;
+        }
+    }
+
     public static class ConstantToken extends AbstractToken {
 
         // 正则表达式，用于判断不同的常量类型
@@ -991,7 +1059,6 @@ public class JavaEvaluatorImpl implements Evaluator {
     }
 
 
-
     /**
      * Token工厂
      */
@@ -1003,13 +1070,562 @@ public class JavaEvaluatorImpl implements Evaluator {
             return instance;
         }
 
-        public static class Rule {
-            final Pattern pattern;
+        public interface Rule {
+            /**
+             * 判断s是否完全匹配Rule的规则
+             * @param s
+             * @return
+             */
+            boolean match(String s);
+            /**
+             * 从头开始匹配, 截取匹配规则的字符串. 该方法区别于{@link Rule#match(String)}, 只要从头开始能够部分匹配, 则返回匹配的字符串
+             * @param s
+             * @return
+             */
+            String matchFromStart(String s);
+            String getName();
+            Class<? extends Token> tokenClass();
+        }
+
+        /**
+         * 链式法则, 匹配链式Token
+         */
+        public interface RuleChain extends Rule {
+        }
+
+        public static abstract class AbstractRule implements Rule {
             final Class<? extends Token> clazz;
 
-            public Rule(Pattern pattern, Class<? extends Token> clazz) {
-                this.pattern = pattern;
+            public AbstractRule(Class<? extends Token> clazz) {
                 this.clazz = clazz;
+            }
+
+            @Override
+            public Class<? extends Token> tokenClass() {
+                return this.clazz;
+            }
+
+            // 匹配计算类型的Token(<<,>>,+,-,*,/,&,|,!,^,<,>,!). TIP: 该正则包含了匹配运算符的正则, 因此在处理EvalToken和OperatorToken时需要额外判断
+            // 详细逻辑可参考parseToToken(String, Context)的double check部分
+            public static final Pattern evalPattern = Pattern.compile("<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!]");
+
+            // 匹配只含有计算符号类型的Token
+            public static final Pattern operatorPattern = Pattern.compile("^(<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!])$");
+
+            /*
+                匹配invoke类型的Token [正则只会匹配一组方法调用]
+                eg:
+                a.test -> null [不是方法调用]
+                a.test() -> 匹配得到: a.test()
+                a.test().b -> a.test()
+                a.test().b.test() -> a.test()
+             */
+            public static final Pattern invokePattern = Pattern.compile("^\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*?\\)");
+
+            /*
+             匹配纯方法调用[只能匹配一次的方法调用]
+             eg:
+             demoTest -> null 不存在函数调用
+             self.dfs(1,2) -> 匹配得到: null [不是纯粹的函数调用, 因为有self作为调用者]
+             dfs(1,2) -> 匹配得到: dfs(1,2)
+             dfs(1,2).test() -> dfs(1,2)
+             */
+            public static final Pattern pureCallPattern = Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\([^()]*\\)");
+
+            // 匹配纯粹的变量
+            public static final Pattern variablePattern = Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b");
+
+            // 匹配数组
+            public static final Pattern arrayPattern = Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\[\\]]+\\])+");
+
+            // 匹配常量(数值、字符、字符串): 该正则非常宽松: 1 + 2也能匹配
+            public static final Pattern constantPattern = Pattern.compile("\\d+(\\.\\d+)?|\"([^\"\\\\]|\\\\.)*\"|\'([^\'\\\\]|\\\\.)*\'");
+        }
+
+
+        /**
+         * 匹配EvalToken的规则
+         */
+        public static class EvalRule extends AbstractRule {
+            public EvalRule () {
+                super(EvalToken.class);
+            }
+
+            /**
+             * 匹配原理: 如果能被识别为eval rule. 那么必然存在运算符, 且运算符不属于任何别的区间, 比如arr[1 + 2]
+             * 他就不符合eval rule. 因为运算内容存在于数组内.
+             * <p>
+             * eg:
+             * arr[1+2] x
+             * dfs(1+2, b) x
+             * a.invoke(1+2, 2) x
+             * <p>
+             * arr[1+2] + (1+2) √
+             * arr[1+2] * b √
+             * <p>
+             * TIP: 字符串s已经去除无效信息, 诸如外层空格, 和最外层匹配的括号, 详见{@link TokenFactory#bracketMatch(String)}
+             *
+             * @param s
+             * @return
+             */
+            public boolean match(String s) {
+                char[] arr = s.toCharArray();
+                int len = arr.length;
+                for (int i = 0; i < len; ++i) {
+                    char c = arr[i];
+                    if (c == '(' || c== '[' || c == '{') {
+                        // stack匹配. 无需考虑合法性, 因为存在语法检查
+                        i = CharacterHelper.matchBracket(arr, i);
+                    } else if (CharacterHelper.isArabicNumber(c)) {
+                        int j = i;
+                        char cc = c;
+                        while (j < len && CharacterHelper.isArabicNumber(cc)) {
+                            j += 1;
+                            cc = arr[cc];
+                        }
+                        i = j - 1;
+                    } else if (c == '_' || CharacterHelper.isEnglishLetter(c) || c == '$') {
+                        int j = i;
+                        char cc = c;
+                        while (j < len &&
+                                (cc == '_'
+                                || CharacterHelper.isArabicNumber(cc)
+                                || CharacterHelper.isEnglishLetter(cc)
+                                || c == '$'
+                                )
+                        ) {
+                            j += 1;
+                            cc = arr[cc];
+                        }
+                        i = j - 1;
+                    } else if (operatorPattern.matcher(String.valueOf(c)).find()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public String matchFromStart(String s) {
+                if (match(s)) {
+                    return s;
+                }
+                return null;
+            }
+
+            @Override
+            public String getName() {
+                return "EvalRule";
+            }
+        }
+
+        /**
+         * 匹配OperatorToken的规则
+         */
+        public static class OperatorRule extends AbstractRule {
+            public OperatorRule() {
+                super(OperatorToken.class);
+            }
+
+            public boolean match(String s) {
+               return operatorPattern.matcher(String.valueOf(s)).find();
+            }
+
+            @Override
+            public String matchFromStart(String s) {
+                // 因为OperatorToken匹配只包含运算符的token, 因此这里需要进行字符串切割, 获取纯粹的运算符. 尝试匹配
+                // 切割字符串. 并且必须从最大长度开始切割, 因为存在<<, <这样的运算符
+                int start = 0;
+                for (int len = 2; len > 0; len--) {
+                    String tmp = (start + len) > s.length() ? s.substring(start) : s.substring(start, start + len);
+                    // 匹配s
+                    Matcher m = operatorPattern.matcher(s);
+                    if (m.find()) {
+                        return tmp;
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public String getName() {
+                return "OperatorRule";
+            }
+        }
+
+        /**
+         * 匹配InvokeToken的规则
+         */
+        public static class InvokeRule extends AbstractRule {
+            public InvokeRule() {
+                super(InvokeToken.class);
+            }
+
+            public boolean match(String s) {
+                Matcher matcher = invokePattern.matcher(s);
+                if (!matcher.find()) return false;
+                return matcher.end() >= s.length();
+            }
+
+            /**
+             * 从s的start位置开始匹配, 满足方法调用的内容将会被识别并返回
+             * eg:
+             * a.invoke(1+2, 2) + 2 -> 返回: a.invoke(1+2, 2)
+             * a.invoke(1+2, 2).test.c -> 返回: a.invoke(1+2, 2)
+             * a.invoke(1+2, 2).b.test() -> 返回: a.invoke(1+2, 2)
+             * @param s
+             * @return
+             */
+            @Override
+            public String matchFromStart(String s) {
+                Matcher matcher = invokePattern.matcher(s);
+                boolean b = matcher.find();
+                if (! b) return null;
+                return s.substring(0, matcher.end());
+            }
+
+            @Override
+            public String getName() {
+                return "InvokeRule";
+            }
+        }
+
+        /**
+         * 匹配链式方法调用: 要求字符串开头属于实例方法调用, 后续存在别的调用
+         * eg:
+         * a.invoke().a √
+         * a.invoke().demo() √
+         * a.invoke().arr[1] √
+         * a.invoke().arr[1].test() √
+         *
+         * a.invoke() x
+         * b.c.test() x
+         * b.c x
+         */
+        public static class InvokeRuleChain extends AbstractRule implements RuleChain {
+            public InvokeRuleChain() {
+                super(InvokeTokenChain.class);
+            }
+
+            public boolean match(String s) {
+                Matcher matcher = invokePattern.matcher(s);
+                if (! matcher.find()) return false;
+                int end = matcher.end();
+                if (end >= s.length()) return false;
+                return s.charAt(end) == '.';
+            }
+
+            /**
+             * 从s的start位置开始匹配, 满足方法的链式调用的内容将会被识别并返回
+             * a.invoke() -> null 【不存在链式】
+             * a.invoke().a + 1 -> a.invoke().a
+             * a.invoke().a() + 1 -> a.invoke().a()
+             * a.invoke().a().b().c -> a.invoke().a().b().c
+             *
+             * @param s
+             * @return
+             */
+            @Override
+            public String matchFromStart(String s) {
+                if (! match(s)) return null;
+                String dummyS = "." + s;
+                int end = CharacterHelper.matchChain(dummyS, 0);
+                return dummyS.substring(1, end);
+            }
+
+            @Override
+            public String getName() {
+                return "InvokeRuleChain";
+            }
+        }
+
+
+        /*
+         * 匹配PureCallToken的规则
+         * eg:
+         * dfs(1,2) √
+         *
+         * self.dfs(1,2) x
+         * dfs(1,2).a x
+         */
+        public static class PureCallRule extends AbstractRule {
+            public PureCallRule() {
+                super(PureCallToken.class);
+            }
+
+            public boolean match(String s) {
+                Matcher matcher = pureCallPattern.matcher(s);
+                if (! matcher.find()) return false;
+                return matcher.end() >= s.length();
+            }
+
+            /**
+             * 从start位置开始匹配, 满足纯函数调用的内容将会被识别并返回
+             * eg:
+             * dfs(1,2).a + 1 -> dfs(1,2)
+             * self.dfs(1,2) + 1 -> null 【不存在纯函数调用】
+             * dfs(1,2).dfs(1) -> dfs(1,2)
+             *
+             * @param s
+             * @return
+             */
+            @Override
+            public String matchFromStart(String s) {
+                Matcher matcher = pureCallPattern.matcher(s);
+                boolean b = matcher.find();
+                if (! b) return null;
+                return s.substring(0, matcher.end());
+            }
+
+            @Override
+            public String getName() {
+                return "PureCallRule";
+            }
+        }
+
+        /**
+         * 纯函数调用链
+         * eg:
+         * dfs(1,2).a √
+         * dfs(1,2).demo() √
+         * <p>
+         * dfs(1,2) x
+         */
+        public static class PureCallRuleChain extends AbstractRule implements RuleChain {
+
+            public PureCallRuleChain() {
+                super(PureCallTokenChain.class);
+            }
+
+            @Override
+            public boolean match(String s) {
+                Matcher matcher = pureCallPattern.matcher(s);
+                if (! matcher.find()) return false;
+                int end = matcher.end();
+                if (end >= s.length()) return false;
+                return s.charAt(end) == '.';
+            }
+
+            @Override
+            public String matchFromStart(String s) {
+                if (! match(s)) return null;
+                String dummyS = "." + s;
+                int end = CharacterHelper.matchChain(dummyS, 0);
+                return dummyS.substring(1, end);
+            }
+
+            @Override
+            public String getName() {
+                return "PureCallRuleChain";
+            }
+        }
+
+        /**
+         * 匹配VariableToken的规则
+         */
+        public static class VariableRule extends AbstractRule {
+            public VariableRule() {
+                super(VariableToken.class);
+            }
+
+            @Override
+            public boolean match(String s) {
+                return CharacterHelper.isVName(s);
+            }
+
+            @Override
+            public String matchFromStart(String s) {
+                int len = CharacterHelper.startVNameLen(s);
+                return len == 0 ? null : s.substring(0, len);
+            }
+
+            @Override
+            public String getName() {
+                return "VariableRule";
+            }
+        }
+
+        /**
+         * 匹配符合变量链式法则的内容: 要求字符串以合法的变量开始, 并且含有调用符号'.'
+         * eg:
+         * ---- 正确的 ------
+         * a.test
+         * a.test.b
+         * a.test.arr[0]
+         * a.test.dfs()
+         * a.test()
+         * a.arr[0]
+         * ---- 错误的 ------
+         * arr[0].test
+         * dfs().test
+         */
+        public static class VariableRuleChain extends AbstractRule implements RuleChain {
+
+            public VariableRuleChain() {
+                super(VariableTokenChain.class);
+            }
+
+            @Override
+            public boolean match(String s) {
+                int len = CharacterHelper.startVNameLen(s);
+                /*
+                len = 0, 表示s开头不存在变量名字
+                s.length() == len, 表示s只存在一个变量, 不存在链式调用
+                 */
+                if (len == 0 || s.length() == len) {
+                    return false;
+                }
+                if (s.charAt(len) != '.') {
+                    return false;
+                }
+                int cnt = CharacterHelper.getChainCnt(s, len);
+                return cnt > 1;
+            }
+
+            @Override
+            public String matchFromStart(String s) {
+                if (! match(s)) return null;
+                String dummyS = "." + s;
+                int end = CharacterHelper.matchChain(dummyS, 0);
+                return dummyS.substring(1, end);
+            }
+
+            @Override
+            public String getName() {
+                return "VariableRuleChain";
+            }
+        }
+
+        /**
+         * 匹配ArrayRule的规则. 只匹配数组, 不包含其他任何内容
+         * eg:
+         * --- 正确的 ---
+         * arr[0]
+         * arr[1][0]
+         * arr[a.test][0]
+         * <p>
+         * --- 错误的 ---
+         * arr[0].a
+         * arr[0].test(0)
+         */
+        public static class ArrayRule extends AbstractRule {
+            public ArrayRule() {
+                super(ArrayToken.class);
+            }
+
+            public boolean match(String s) {
+                // arrayPattern可以匹配arr[0][0] + 1, 因此需要做出额外判断
+                Matcher matcher = arrayPattern.matcher(s);
+                boolean b = matcher.find();
+                if (! b) return false;
+                int end = matcher.end();
+                return end >= s.length();
+            }
+
+            @Override
+            public String matchFromStart(String s) {
+                Matcher matcher = arrayPattern.matcher(s);
+                if (! matcher.find()) return null;
+                int end = matcher.end();
+                return s.substring(0, end);
+            }
+
+            @Override
+            public String getName() {
+                return "ArrayRule";
+            }
+        }
+
+        /**
+         * 匹配数组, 且数组后续内容是链式调用
+         * eg:
+         * --- 正确的 ---
+         * arr[0].abab
+         * arr[1][0].b[0][0]
+         * arr[a.test][0].invoke()
+         * <p>
+         * --- 错误的 ---
+         * arr[0]
+         * arr[0][1]
+         */
+        public static class ArrayRuleChain extends AbstractRule implements RuleChain {
+
+            public ArrayRuleChain() {
+                super(ArrayTokenChain.class);
+            }
+
+            @Override
+            public boolean match(String s) {
+                Matcher matcher = arrayPattern.matcher(s);
+                if (! matcher.find()) return false;
+                int end = matcher.end();
+                if (end >= s.length()) return false;
+                return s.charAt(end) == '.';
+            }
+
+            @Override
+            public String matchFromStart(String s) {
+                if (! match(s)) return null;
+                String dummyS = "." + s;
+                int end = CharacterHelper.matchChain(dummyS, 0);
+                return dummyS.substring(1, end);
+            }
+
+            @Override
+            public String getName() {
+                return "ArrayRuleChain";
+            }
+        }
+
+        /**
+         * 匹配常量的规则
+         * 字符串必须只存在常量才会被匹配
+         */
+        public static class ConstantRule extends AbstractRule {
+            public ConstantRule() {
+                super(ConstantToken.class);
+            }
+
+            @Override
+            public boolean match(String s) {
+                String match = matchFromStart(s);
+                // 如果返回的match的长度等于s, 表示s是完全由常量组成
+                return match.length() == s.length();
+            }
+
+            @Override
+            public String matchFromStart(String s) {
+                char[] arr = s.toCharArray();
+                int i = 0;
+                char c = arr[i];
+                if (c == '"') {
+                    // 去除""内部的所有信息,包括匹配的另一个"
+                    int j = i + 1;
+                    while (j < arr.length && arr[j] != '"') {
+                        ++j;
+                    }
+                    return j == arr.length ? s: s.substring(0, j + 1);
+                } else if (c == '\'') {
+                    // 去除''内部的所有信息,包括匹配的另一个'
+                    int j = i + 1;
+                    while (j < arr.length && arr[j] != '\'') {
+                        ++j;
+                    }
+                    return j == arr.length ? s: s.substring(0, j + 1);
+                } else if (CharacterHelper.isArabicNumber(c)) {
+                    // 如果是数字
+                    int j = i + 1;
+                    while (j < arr.length && CharacterHelper.isArabicNumber(c)) {
+                        ++j;
+                    }
+                    return j == arr.length ? s: s.substring(0, j + 1);
+                }
+                return null;
+            }
+
+            @Override
+            public String getName() {
+                return "ConstantRule";
             }
         }
 
@@ -1050,33 +1666,21 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         Rule[] rules = new Rule[]{
-                // 匹配计算类型的Token(<<,>>,+,-,*,/,&,|,!,^,<,>,!). TIP: 该正则包含了匹配运算符的正则, 因此在处理EvalToken和OperatorToken时需要额外判断
-                // 详细逻辑可参考parseToToken(String, Context)的double check部分
-                new Rule(Pattern.compile("<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!]"), EvalToken.class),
-                // 匹配只含有计算符号类型的Token
-                new Rule(Pattern.compile("^(<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!])$"), OperatorToken.class),
-                // 匹配invoke类型的Token
-                new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\]]*\\])*\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\)"), InvokeToken.class),
-                // 匹配纯粹的方法调用类型的Token, 比如匹配dfs(1,2), 但不匹配self.dfs(1,2)
-                new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\([^()]*\\)"), PureCallToken.class),
-                // 匹配纯粹的变量
-                new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b"), VariableToken.class),
-                // 匹配数组
-                new Rule(Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\[\\]]+\\])+"), ArrayToken.class),
-                // 匹配常量(数值、字符、字符串)
-                new Rule(Pattern.compile("\\d+(\\.\\d+)?|\"([^\"\\\\]|\\\\.)*\"|\'([^\'\\\\]|\\\\.)*\'"), ConstantToken.class)
+                new EvalRule(),
+                new OperatorRule(),
+                new InvokeRule(),
+                new InvokeRuleChain(),
+                new PureCallRule(),
+                new PureCallRuleChain(),
+                new VariableRule(),
+                new VariableRuleChain(),
+                new ArrayRule(),
+                new ArrayRuleChain(),
+                new ConstantRule()
         };
 
         /**
          * 解析字符串得到对应的Token
-         * <p>
-         * 该方法会贪婪的匹配所有正则规则, 得到Hits数组. 从Hits中选取匹配得到最长的规则作为targetRule, 返回的对应的Token
-         * <p>
-         * 在匹配过程中, 如果匹配得到含有EvalToken.class的Rule, 则会进行二次检查. 只有判断出运算符号
-         * 并没有囊括在其他类型表达式中时, 则认为该Token为EvalToken.class. 否则表达将会从剩余Hit中
-         * 选择最长匹配的规则作为targetRule, 返回对应Token
-         * <p>
-         * 如果匹配出含有OperatorToken.class的Rule, 则在二次检查时直接锁定该规则
          *
          * @param s 表达式
          * @return token
@@ -1089,97 +1693,30 @@ public class JavaEvaluatorImpl implements Evaluator {
             // 处理s
             s = handleInput(s);
 
-            List<Hit> hits = new ArrayList<>(5);
+            List<Rule> matches = new ArrayList<>(5);
 
             // 根据解析规则解析得到不同的Token
             for (Rule rule : rules) {
-                // 如果匹配
-                Pattern pattern = rule.pattern;
-                Matcher matcher = pattern.matcher(s);
-
-                if (matcher.find()) {
-                    /*
-                      贪婪的匹配最长内容. 以匹配出的最长内容作为匹配结果
-                      此处无需考虑存在多个find结果. 因为一旦存在多个结果, 那必然需要通过运算符作为连接
-                      最终返回的Token必然是EvalToken. 这会在double check部分检测
-
-                      如果只有一个find结果, 直接获取最大即可
-                     */
-                    int start = matcher.start(), end = matcher.end();
-                    hits.add(new Hit(rule, matcher, start, end, matcher.end() - matcher.start(), s));
+                boolean match = rule.match(s);
+                if (match) {
+                    matches.add(rule);
                 }
             }
 
-            if (hits.isEmpty()) {
-                throw new ComputeError("无法识别的表达式: " + s);
+            // 判断
+            if (matches.isEmpty()) {
+                throw new ComputeError("无法识别的内容! " + s);
+            }
+            if (matches.size() > 1) {
+                throw new ComputeError(s + " 被多条规则匹配! 请检查规则编写是否正确! + " + matches.stream().map(Rule::getName).collect(Collectors.joining()));
             }
 
-            Hit targetHit = null;
-            // double check
-            /*
-             * 需要对OperatorToken和EvalToken做出额外说明
-             * OperatorToken:只能包含运算符, 如 '+', '-', ...
-             * EvalToken: 不能只包含运算符, 如'1+2', '1-2', ...
-             * 但因为正则编写以及后续判断逻辑的原因, 导致如果OperatorToken匹配成功, 那么EvalToken也会匹配成功
-             * 但EvalToken匹配成功, OperatorToken不一定会被匹配.
-             * 也就是说, EvalToken的正则包含OperatorToken的正则. 因此在处理OperatorToken和EvalToken时需要
-             * 额外判断
-             */
-            // 包含OperatorToken
-            if (hits.stream().anyMatch(hit -> hit.rule.clazz == OperatorToken.class)) {
-                // 如果有运算符, 那么直接返回. 因为他的正则非常严格, 只允许字符串包含运算符. 因此当他满足时, 直接返回他
-                targetHit = hits.stream().filter(hit -> hit.rule.clazz == OperatorToken.class).findFirst().get();
-            }
-            // 包含EvalToken
-            else if (hits.stream().anyMatch(hit -> hit.rule.clazz == EvalToken.class)) {
-                // 获取EvalToken
-                Hit EvalHit = hits.stream().filter(hit -> hit.rule.clazz == EvalToken.class).findFirst().get();
-                // 差分统计区间
-                int[] diff = new int[s.length() + 1];
-                for (Hit hit : hits) {
-                    if (hit.equals(EvalHit)) {
-                        continue;
-                    }
-                    Matcher m = hit.matcher;
-                    diff[hit.start] += 1;
-                    diff[hit.end] -= 1;
-                    while (m.find()) {
-                        diff[m.start()] += 1;
-                        diff[m.end()] -= 1;
-                    }
-                }
-                // 复原差分
-                for (int i = 1; i < diff.length; i++) {
-                    diff[i] += diff[i - 1];
-                }
-                // 判断EvalToken是否在差分区间内
-                if (diff[EvalHit.start] == 0 && diff[EvalHit.end - 1] == 0) {
-                    targetHit = EvalHit;
-                } else {
-                    Matcher m = EvalHit.matcher;
-                    while (m.find()) {
-                        if (m.start() == EvalHit.start && m.end() == EvalHit.end) {
-                            targetHit = EvalHit;
-                            break;
-                        }
-                    }
-                }
-                // 从剩余元素中选择最大值
-                if (targetHit == null) {
-                    // 过滤EvalToken
-                    targetHit = hits.stream().filter(e -> !e.rule.clazz.equals(EvalToken.class)).max(Comparator.comparingInt(hit -> hit.length)).get();
-                }
-            } else {
-                // 获取匹配长度最大的那一个
-                targetHit = hits.stream().max(Comparator.comparingInt(hit -> hit.length)).get();
-            }
+            Rule targetRule = matches.get(0);
 
-            Rule targetRule = targetHit.rule;
-            String token = targetHit.token;
-
-            String className = targetRule.clazz.getName();
+            Class<? extends Token> tokenClass = targetRule.tokenClass();
+            String className = tokenClass.getName();
             try {
-                return targetRule.clazz.getDeclaredConstructor(String.class, Context.class).newInstance(token, ctx);
+                return tokenClass.getDeclaredConstructor(String.class, Context.class).newInstance(s, ctx);
             } catch (InstantiationException e) {
                 throw new ComputeError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
             } catch (IllegalAccessException e) {
@@ -1250,85 +1787,61 @@ public class JavaEvaluatorImpl implements Evaluator {
             return parseToToken(token, null);
         }
 
+        public static class Hit2 {
+            public final Rule rule;
+            public final String token;
+
+            public Hit2(Rule rule, String token) {
+                this.rule = rule;
+                this.token = token;
+            }
+        }
+
         /**
-         * 解析字符串得到对应的Token. 该方法限定匹配的开始范围. start表明所有规则匹配的字符串, 初始位置必须是start
-         * 如果匹配到OperatorToken, 则在double check时直接返回
-         * 如果匹配到EvalToken, 则在double check时直接返回. 否则选择匹配长度最大的规则
+         * 从字符的起始位置解析, 并得到对应的Token. 该方法区别于{@link #parseToToken(String, Context)}, 只需要局部满足规则
+         * 则视为匹配成功
+         * eg:
+         * a.demo() + 1: 从开始位置匹配, 将会被InvokeRule识别, 得到a.demo()
+         * arr[0].b + 2: 从头开始匹配, 将会被ArrayRuleChain识别, 得到arr[0].b
+         * 1 + 2 + 3: 从头开始匹配, 将会被ConstantRule识别, 得到1
+         * + 2 + 3: 从头开始匹配, 将会被OperatorRule识别, 得到+
          *
          * @param token token
          * @param ctx ctx
-         * @param start 开始位置
          * @return Token
          * @throws NoSuchMethodException 方法找不到
          * @throws InvocationTargetException invoke 异常
          * @throws InstantiationException 实例化异常
          * @throws IllegalAccessException 非法访问
          */
-        public Token parseToToken(String token, Context ctx, int start) {
+        public Token parseToTokenFromStart(String token, Context ctx) {
             token = handleInput(token);
-            List<Hit> hits = new ArrayList<>(5);
+            List<Hit2> hits = new ArrayList<>(5);
 
+            // 处理s
+            String s = handleInput(token);
+
+            // 根据解析规则解析得到不同的Token
             for (Rule rule : rules) {
-                Matcher matcher = rule.pattern.matcher(token);
-                // 如果遇到OperationToken, 单独处理
-                // OperationToken只能识别单纯的运算符号, 因此他只能识别简单字符串, 无需迭代
-                if (rule.clazz.equals(OperatorToken.class)) {
-                    boolean flag = matcher.find();
-                    if (!flag) {
-                        // 因为OperatorToken匹配只包含运算符的token, 因此这里需要进行字符串切割, 获取纯粹的运算符. 尝试匹配
-                        // 切割字符串. 并且必须从最大长度开始切割, 因为存在<<, <这样的运算符
-                        for (int len = 2; len > 0; len--) {
-                            String s = (start + len) > token.length() ? token.substring(start) : token.substring(start, start + len);
-                            // 匹配s
-                            Matcher m = rule.pattern.matcher(s);
-                            if (m.find()) {
-                                hits.add(new Hit(rule, m, start, start + len - 1, len, s));
-                                break;
-                            }
-                        }
-                    } else {
-                        // 直接添加. 无需判断start是否匹配
-                        // 因为OperationToken对应的正则只能匹配纯运算符, 其余规则均会被忽略
-                        hits.add(new Hit(rule, matcher, start, token.length(), token.length() - start, token));
-                    }
-                }
-                /*
-                  同一个匹配器只可能在同一个start位置匹配得到唯一的结果
-                 */
-                while (matcher.find()) {
-                    int begin = matcher.start();
-                    int end = matcher.end();
-                    // 后续也不用匹配了, 跳过
-                    if (begin > start) {
-                        break;
-                    }
-                    if (begin == start) {
-                        hits.add(new Hit(rule, matcher, begin, end, end - begin, matcher.group()));
-                        break;
-                    }
-                }
+                String match = rule.matchFromStart(token);
+                hits.add(new Hit2(rule, match));
             }
 
+            // 判断
             if (hits.isEmpty()) {
-                throw new ComputeError("无法识别的表达式: " + token + " start = " + start);
+                throw new ComputeError("无法识别的内容! " + s);
             }
             // double check
-            Hit targetHit = null;
-            if (hits.stream().anyMatch(hit -> hit.rule.clazz == OperatorToken.class)) {
-                targetHit =  hits.stream().filter(hit -> hit.rule.clazz == OperatorToken.class).findFirst().get();
+            Hit2 targetHit = null;
+            if (hits.size() > 1) {
+                throw new ComputeError(s + " 被多条规则匹配! 请检查规则编写是否正确! + " + hits.stream().map(e -> e.rule.getName()).collect(Collectors.joining()));
             }
-            else if (hits.stream().anyMatch(hit -> hit.rule.clazz == EvalToken.class)) {
-                targetHit =  hits.stream().filter(hit -> hit.rule.clazz == EvalToken.class).findFirst().get();
-            } else {
-                // 获取最大长度的规则
-                targetHit = hits.stream().max(Comparator.comparingInt(hit -> hit.length)).get();
-            }
+            targetHit = hits.get(0);
 
-            Rule targetRule = targetHit.rule;
-
-            String className = targetRule.clazz.getName();
+            Class<? extends Token> tokenClass = targetHit.rule.tokenClass();
+            String className = tokenClass.getName();
             try {
-                return targetRule.clazz.getDeclaredConstructor(String.class, Context.class).newInstance(targetHit.token, ctx);
+                return tokenClass.getDeclaredConstructor(String.class, Context.class).newInstance(s, ctx);
             } catch (InstantiationException e) {
                 throw new ComputeError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
             } catch (IllegalAccessException e) {
@@ -1346,15 +1859,14 @@ public class JavaEvaluatorImpl implements Evaluator {
          * 如果匹配到EvalToken, 则在double check时直接返回. 否则选择匹配长度最大的规则
          *
          * @param token token
-         * @param start 开始位置
          * @return Token
          * @throws NoSuchMethodException 方法找不到
          * @throws InvocationTargetException invoke 异常
          * @throws InstantiationException 实例化异常
          * @throws IllegalAccessException 非法访问
          */
-        public Token parseToToken(String token, int start) {
-            return parseToToken(token, null, start);
+        public Token parseToTokenFromStart(String token) {
+            return parseToTokenFromStart(token, null);
         }
     }
 

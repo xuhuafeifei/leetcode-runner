@@ -3,6 +3,13 @@
  */
 package com.xhf.leetcode.plugin.search.utils;
 
+import com.xhf.leetcode.plugin.exception.ComputeError;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * 字符集识别辅助工具类
  * @author 林良益
@@ -67,5 +74,236 @@ public class CharacterHelper {
         	input += 32;
 		}
         return input;
+	}
+
+	/**
+	 * 判断是否是变量名字
+	 * @param s
+	 * @return
+	 */
+	public static boolean isVName(String s) {
+		if (! isVNameHead(s)) {
+			return false;
+		}
+		char[] arr = s.toCharArray();
+		char c = arr[0];
+		if (c != '_' && !CharacterHelper.isEnglishLetter(c) && c != '$') {
+			return false;
+		}
+		for (int i = 1; i < arr.length; ++i) {
+			c = arr[i];
+			if (! isVNameBody(c)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 从第一个字符开始, 匹配合法变量名的长度
+	 * eg:
+	 * vname() : 5
+	 * a.test() : 1
+	 * (9 + 0) : 0
+	 *
+	 * @param s
+	 * @return 长度
+	 */
+	public static int startVNameLen(String s) {
+		if (! isVNameHead(s)) {
+			return 0;
+		}
+		int len = 0;
+		char[] arr = s.toCharArray();
+		for (char c : arr) {
+			if (isVNameBody(c)) {
+				len += 1;
+			} else  {
+				break;
+			}
+		}
+		return len;
+	}
+
+	public static boolean isVNameBody(char c) {
+        return c == '_' || isEnglishLetter(c) || isArabicNumber(c) || c == '$';
+    }
+
+	/**
+	 * 检查s是否以合法变量开头
+	 * eg:
+	 * arr : true
+	 * $arr: true
+	 * ( 1 + 1) : false
+	 *
+	 * @param s
+	 * @return
+	 */
+	public static boolean isVNameHead(String s) {
+		if (StringUtils.isBlank(s)) {
+			return false;
+		}
+		char c = s.charAt(0);
+        return c == '_' || CharacterHelper.isEnglishLetter(c) || c == '$';
+    }
+
+	/**
+	 * 返回匹配括号结束的位置
+	 * @param arr
+	 * @param start
+	 * @return
+	 */
+	public static int matchBracket(char[] arr, int start) {
+		Stack<Character> stack = new Stack<>();
+		char c = arr[start];
+		stack.push(c);
+		int j = start + 1;
+		for (; j < arr.length && ! stack.isEmpty(); ++j) {
+			if (arr[j] == '(' || arr[j] == '[' || arr[j] == '{') {
+				stack.push(arr[j]);
+			} else if (arr[j] == ')' || arr[j] == ']' || arr[j] == '}') {
+				Character pop = stack.pop();
+				if (arr[j] == ')' && pop != '(') {
+					throw new ComputeError("matchBracket error ! " + new String(arr, start, j - start));
+				}
+				if (arr[j] == ']' && pop != '[') {
+					throw new ComputeError("matchBracket error ! " + new String(arr, start, j - start));
+				}
+				if (arr[j] == '}' && pop != '{') {
+					throw new ComputeError("matchBracket error ! " + new String(arr, start, j - start));
+				}
+			}
+		}
+		if (! stack.isEmpty()) {
+			throw new ComputeError("matchBracket error ! " + new String(arr, start, j - start));
+		}
+		return j;
+	}
+
+	public static int matchBracket(String s, int start) {
+		return matchBracket(s.toCharArray(), start);
+	}
+
+	/**
+	 * 匹配数组的中括号, 并返回结束位置
+	 * @param sub
+	 * @param start
+	 * @return
+	 */
+	public static int matchArrayBracket(String sub, int start) {
+		Pattern pattern = Pattern.compile("\\[.*?\\](\\[.*?\\])*");
+		Matcher m = pattern.matcher(sub.substring(start));
+		int r = -1;
+		while (m.find()) {
+			if (m.start() >= start) {
+				r = m.end();
+				break;
+			}
+		}
+		if (r == -1) {
+			throw new ComputeError("matchArrayBracket error ! 不存在合法的数组括号 " + sub.substring(start));
+		}
+		return r - 1;
+	}
+
+
+	/**
+	 * 从start位置开始匹配, 匹配出链式调用的结束位置
+	 * 此外, start位置必须是链式调用的开始标志 : '.'
+	 * eg:
+	 * matchChain(test.a.b().arr[0] + 1, 4) : 返回值是 17, 该位置表示链式调用结束
+	 *
+	 * @param sub
+	 * @param start
+	 * @return
+	 */
+	public static int matchChain(String sub, int start) {
+		if (sub.charAt(start) != '.') {
+			throw new ComputeError("matchChain方法使用错误, sub[start] = " + sub.charAt(start) + "不是'.'! sub = " + sub + " start = " + start);
+		}
+		int end = start + 1;
+		// 链式匹配是否结束
+		boolean chainEnd = false;
+        /*
+         匹配链式: 匹配每一段的调用, 直到遇到空格, 换行符, tab
+         如果遇到(, 则匹配直至对应的). 并设置chainEnd = true, 结束当前链式匹配. 如果下一个字符为'.'
+         设置chainEnd为false, 开始新的链式匹配
+         */
+		for (; end < sub.length(); end++) {
+			char c = sub.charAt(end);
+			// 处于 链式匹配当中
+			if (! chainEnd) {
+				if (c == ' ' || c == '\n' || c == '\t') {
+					chainEnd = true;
+					break;
+				} else if (c == '(') {
+					// stack匹配到另一个)
+					end = CharacterHelper.matchBracket(sub, end);
+					chainEnd = true;
+				} else if (c == '[') {
+					// 匹配数组括号
+					end = CharacterHelper.matchArrayBracket(sub, end);
+					chainEnd = true;
+				}
+			} else {
+				if (c != '.') {
+					break;
+				} else {
+					chainEnd = false;
+				}
+			}
+		}
+		return end;
+	}
+
+	/**
+	 * 从start位置开始匹配, 匹配出链式调用的个数
+	 * 此外, start位置必须是链式调用的开始标志 : '.'
+	 * eg:
+	 * matchChain(test.a.b().arr[0] + 1, 4) : 返回值是 3
+	 *
+	 * @param sub
+	 * @param start
+	 * @return
+	 */
+	public static int getChainCnt(String sub, int start) {
+		if (sub.charAt(start) != '.') {
+			throw new ComputeError("getChainCnt方法使用错误, sub[start] = " + sub.charAt(start) + "不是'.'! sub = " + sub + " start = " + start);
+		}
+		int end = start + 1;
+		int cnt = 1;
+		// 链式匹配是否结束
+		boolean chainEnd = false;
+        /*
+         匹配链式: 匹配每一段的调用, 直到遇到空格, 换行符, tab
+         如果遇到(, 则匹配直至对应的). 并设置chainEnd = true, 结束当前链式匹配. 如果下一个字符为'.'
+         设置chainEnd为false, 开始新的链式匹配
+         */
+		for (; end < sub.length(); end++) {
+			char c = sub.charAt(end);
+			// 处于 链式匹配当中
+			if (! chainEnd) {
+				if (c == ' ' || c == '\n' || c == '\t') {
+					chainEnd = true;
+					break;
+				} else if (c == '(') {
+					// stack匹配到另一个)
+					end = CharacterHelper.matchBracket(sub, end);
+					chainEnd = true;
+				} else if (c == '[') {
+					// 匹配数组括号
+					end = CharacterHelper.matchArrayBracket(sub, end);
+					chainEnd = true;
+				}
+			} else {
+				if (c != '.') {
+					cnt += 1;
+					break;
+				} else {
+					chainEnd = false;
+				}
+			}
+		}
+		return cnt;
 	}
 }
