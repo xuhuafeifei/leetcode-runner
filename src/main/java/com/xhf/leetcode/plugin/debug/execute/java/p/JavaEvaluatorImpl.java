@@ -11,6 +11,8 @@ import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.internal.Engine;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -29,23 +31,29 @@ public class JavaEvaluatorImpl implements Evaluator {
      * 环境对象
      */
     static class Env {
+        /**
+         * TargetVM当前执行栈帧中的局部变量
+         */
         private static Map<String, Value> localEnv;
+        /**
+         * TargetVM当前执行栈帧对应的thisObject中存在的成员变量
+         */
         private static Map<String, Value> memberEnv;
+        /**
+         * TargetVM当前执行栈帧对应的thisObject中存在的静态变量
+         */
         private static Map<String, Value> staticEnv;
-        private static StackFrame frame;
+        /**
+         * TargetVM执行的线程引用
+         */
         private static ThreadReference thread;
         private static Context ctx;
         private static VirtualMachine vm;
         private static JavaValueInspector inspector;
+        /**
+         * thisObject
+         */
         private static ObjectReference _this;
-
-        public static StackFrame getFrame() {
-            return frame;
-        }
-
-        public static void setFrame(StackFrame frame) {
-            Env.frame = frame;
-        }
 
         public static ThreadReference getThread() {
             return thread;
@@ -63,16 +71,8 @@ public class JavaEvaluatorImpl implements Evaluator {
             Env.ctx = ctx;
         }
 
-        public static VirtualMachine getVm() {
-            return vm;
-        }
-
         public static void setVm(VirtualMachine vm) {
             Env.vm = vm;
-        }
-
-        public static JavaValueInspector getInspector() {
-            return inspector;
         }
 
         public static void setInspector(JavaValueInspector inspector) {
@@ -82,7 +82,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         public static void doPrepare() throws IncompatibleThreadStateException, AbsentInformationException {
             // 获取当前栈帧
             thread = ctx.getThread();
-            frame = thread.frame(0);
+            StackFrame frame = thread.frame(0);
             _this = frame.thisObject();
             // 获取所有变量
             localEnv = takeLocalVariable(frame);
@@ -92,9 +92,9 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         /**
          * 获取当前栈帧的所有变量
-         * @param frame
-         * @return
-         * @throws AbsentInformationException
+         * @param frame frame
+         * @return 返回变量池
+         * @throws AbsentInformationException 行号或者变量信息不可访问
          */
         public static Map<String, Value> takeLocalVariable(StackFrame frame) throws AbsentInformationException {
             List<LocalVariable> localVariables = frame.visibleVariables();
@@ -108,8 +108,8 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         /**
          * 通过Value获取成员变量, 并转化为环境数据
-         * @param v
-         * @return
+         * @param v Value
+         * @return 变量池
          */
         public static Map<String, Value> takeMemberValues(Value v) {
             if (! (v instanceof ObjectReference)) {
@@ -127,8 +127,8 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         /**
          * 从referenceType中获取静态变量
-         * @param referenceType
-         * @return
+         * @param referenceType 引用类型
+         * @return 变量池
          */
         private @NotNull static Map<String, Value> takeStaticValues(ReferenceType referenceType ) {
             // 获取所有静态变量
@@ -142,10 +142,6 @@ public class JavaEvaluatorImpl implements Evaluator {
                 }
             }
             return statics;
-        }
-
-        public static Map<String, Value> getStaticValues() {
-            return staticEnv;
         }
     }
 
@@ -170,9 +166,9 @@ public class JavaEvaluatorImpl implements Evaluator {
 
     /**
      * 方法入口
-     * @param expression
-     * @param context
-     * @return
+     * @param expression 计算表达式
+     * @param context context
+     * @return 计算结果
      */
     @Override
     public String executeExpression(String expression, Context context) {
@@ -205,8 +201,8 @@ public class JavaEvaluatorImpl implements Evaluator {
     public interface TokenChain extends Token {
         /**
          * 链式法则, 通过前面的Token获取的Value作为当前链式调用的调用方
-         * @param pV
-         * @return
+         * @param pV 链式调用前一个链式计算结果
+         * @return 当前第一个链式执行结果
          */
         Value getValue(Value pV);
     }
@@ -293,8 +289,8 @@ public class JavaEvaluatorImpl implements Evaluator {
          * 从LocalEnv获取数据
          * 如果都没有, 报错
          *
-         * @param vName
-         * @return
+         * @param vName 变量名
+         * @return 变量对应的Value
          */
         protected Value takeValueByVName(String vName) {
             Value v = takeValueByVName(vName, Env.getLocalEnv());
@@ -338,9 +334,9 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         /**
          * 检查变量类型和入参类型是否一致
-         * @param v
-         * @param type
-         * @return
+         * @param v 变量Value
+         * @param type 方法入参类型
+         * @return 是否匹配
          */
         protected boolean checkConsist(Value v, Type type) {
             return v.type().name().equals(type.name());
@@ -386,8 +382,8 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         /**
          * 包装类转换为基本类型
-         * @param value
-         * @return
+         * @param value value
+         * @return 转换后的Value
          */
         protected Value WrapperObjReferenceToPrimitive(Value value) {
             if (value instanceof ObjectReference) {
@@ -405,8 +401,8 @@ public class JavaEvaluatorImpl implements Evaluator {
         /**
          * 基本类型的Value转换为包装类型Ref
          * 比如IntegerValue -> ObjectReferenceImpl
-         * @param value
-         * @return
+         * @param value Value
+         * @return Value
          * @throws ClassNotLoadedException 类未加载
          * @throws IncompatibleThreadStateException 线程非法
          * @throws InvocationException 方法invoke时发生异常
@@ -433,13 +429,9 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         protected boolean isNumberValue(Value v) {
             String name = v.type().name();
-            if (name.equals("int") || name.equals("long") || name.equals("float") || name.equals("double") ||
+            return name.equals("int") || name.equals("long") || name.equals("float") || name.equals("double") ||
                     name.equals("java.lang.Integer") || name.equals("java.lang.Long") ||
-                    name.equals("java.lang.Float") || name.equals("java.lang.Double")
-            ) {
-                return true;
-            }
-            return false;
+                    name.equals("java.lang.Float") || name.equals("java.lang.Double");
         }
     }
 
@@ -528,6 +520,7 @@ public class JavaEvaluatorImpl implements Evaluator {
     /**
      * invoke类型的Token
      */
+    @Deprecated // 功能将被VariableTokenChain取代
     public static class InvokeToken extends AbstractToken {
         /**
          * 方法调用的变量名
@@ -575,7 +568,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             Context ctx = Env.getCtx();
             // invokeMethod开始执行
             ctx.invokeMethodStart();
-            Value resultV = null;
+            Value resultV;
             try {
                 resultV = ((ObjectReference) callV).invokeMethod(ctx.getThread(), method, params, 0);
             } catch (Exception e) {
@@ -597,7 +590,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             // 获取Params
             this.params = getParams(suffix.substring(start + 1, last));
             // 寻找methodName
-            Method method = null;
+            Method method;
             if (! checkMethodExist(callVName, methodName, callV)) {
                 throw new ComputeError(callVName + "不存在" + methodName + "方法");
             }
@@ -609,7 +602,7 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         private Method overloadCheck(Value callV, String methodName) {
             ObjectReference objRef = (ObjectReference) callV;
-            Method targetMethod = null;
+            Method targetMethod;
             List<Method> methods = objRef.referenceType().methods();
             // 候选方法
             List<Method> candidates = new ArrayList<>();
@@ -696,7 +689,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         /**
          * 触发targetVM 进行类加载操作
          *
-         * @param method
+         * @param method 方法
          */
         private void loadClass(Method method) {
             // 处理未加载类的情况，手动加载类
@@ -744,7 +737,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             return values;
         }
 
-        public int getDot() {
+        public void getDot() {
             // 变量名\[ {匹配任意内容但不包括[]} \] {出现0次或者多次}  . 方法名()
             Pattern pattern = Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\[\\]]*\\])*(\\.)[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\)");
             Matcher matcher = pattern.matcher(token);
@@ -756,10 +749,9 @@ public class JavaEvaluatorImpl implements Evaluator {
             if (dot == -1) {
                 throw new ComputeError("代码编写有误! InvokeToken无法定位调用方法的变量名! token = " + token);
             }
-            return dot;
         }
 
-        private Value getCallVariable() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        private Value getCallVariable() {
             this.callVName = getCallVName();
             if ("this".equals(callVName)) {
                 return Env._this;
@@ -778,6 +770,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
     }
 
+    @Deprecated // 功能将被VariableTokenChain取代
     public static class InvokeTokenChain extends InvokeToken implements TokenChain {
 
         public InvokeTokenChain(String token, Context ctx) {
@@ -866,6 +859,10 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
     }
 
+    /**
+     * VariableTokenChain将顶替InvokeTokenChain, InvokeToken的功能
+     * 匹配规则详见{@link TokenFactory.VariableRuleChain}
+     */
     public static class VariableTokenChain extends VariableToken implements TokenChain {
 
         public VariableTokenChain(String token, Context ctx) {
@@ -1070,17 +1067,25 @@ public class JavaEvaluatorImpl implements Evaluator {
             return instance;
         }
 
+        /**
+         * 表示规则的兼容
+         */
+        @Retention(RetentionPolicy.RUNTIME)
+        public @interface AdaptTo {
+            Class<? extends Rule>[] value();
+        }
+
         public interface Rule {
             /**
              * 判断s是否完全匹配Rule的规则
-             * @param s
-             * @return
+             * @param s s
+             * @return 是否匹配
              */
             boolean match(String s);
             /**
              * 从头开始匹配, 截取匹配规则的字符串. 该方法区别于{@link Rule#match(String)}, 只要从头开始能够部分匹配, 则返回匹配的字符串
-             * @param s
-             * @return
+             * @param s s
+             * @return 匹配得到的字符串
              */
             String matchFromStart(String s);
             String getName();
@@ -1107,6 +1112,7 @@ public class JavaEvaluatorImpl implements Evaluator {
 
             // 匹配计算类型的Token(<<,>>,+,-,*,/,&,|,!,^,<,>,!). TIP: 该正则包含了匹配运算符的正则, 因此在处理EvalToken和OperatorToken时需要额外判断
             // 详细逻辑可参考parseToToken(String, Context)的double check部分
+            @Deprecated
             public static final Pattern evalPattern = Pattern.compile("<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!]");
 
             // 匹配只含有计算符号类型的Token
@@ -1130,18 +1136,41 @@ public class JavaEvaluatorImpl implements Evaluator {
              dfs(1,2) -> 匹配得到: dfs(1,2)
              dfs(1,2).test() -> dfs(1,2)
              */
-            public static final Pattern pureCallPattern = Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\([^()]*\\)");
+            public static final Pattern pureCallPattern = Pattern.compile("^[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*?\\)");
 
             // 匹配纯粹的变量
             public static final Pattern variablePattern = Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b");
 
             // 匹配数组
-            public static final Pattern arrayPattern = Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\[\\]]+\\])+");
+            public static final Pattern arrayPattern = Pattern.compile("^[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\[\\]]+\\])+");
 
             // 匹配常量(数值、字符、字符串): 该正则非常宽松: 1 + 2也能匹配
             public static final Pattern constantPattern = Pattern.compile("\\d+(\\.\\d+)?|\"([^\"\\\\]|\\\\.)*\"|\'([^\'\\\\]|\\\\.)*\'");
         }
 
+        public static abstract class AbstractRuleChain extends AbstractRule implements RuleChain {
+            public AbstractRuleChain(Class<? extends Token> clazz) {
+                super(clazz);
+            }
+
+            /**
+             * 从end处开始匹配链式, 返回匹配到的字符串
+             * @param end
+             * @param s
+             * @return
+             */
+            protected String parseChainByEnd(int end, String s) {
+                if (end >= s.length()) {
+                    return null;
+                }
+                if (s.charAt(end) != '.') {
+                    return null;
+                }
+                String dummyS = "." + s;
+                end = CharacterHelper.matchChain(dummyS, 0);
+                return dummyS.substring(1, end);
+            }
+        }
 
         /**
          * 匹配EvalToken的规则
@@ -1165,44 +1194,15 @@ public class JavaEvaluatorImpl implements Evaluator {
              * <p>
              * TIP: 字符串s已经去除无效信息, 诸如外层空格, 和最外层匹配的括号, 详见{@link TokenFactory#bracketMatch(String)}
              *
-             * @param s
-             * @return
+             * @param s s
+             * @return boolean
              */
             public boolean match(String s) {
-                char[] arr = s.toCharArray();
-                int len = arr.length;
-                for (int i = 0; i < len; ++i) {
-                    char c = arr[i];
-                    if (c == '(' || c== '[' || c == '{') {
-                        // stack匹配. 无需考虑合法性, 因为存在语法检查
-                        i = CharacterHelper.matchBracket(arr, i);
-                    } else if (CharacterHelper.isArabicNumber(c)) {
-                        int j = i;
-                        char cc = c;
-                        while (j < len && CharacterHelper.isArabicNumber(cc)) {
-                            j += 1;
-                            cc = arr[cc];
-                        }
-                        i = j - 1;
-                    } else if (c == '_' || CharacterHelper.isEnglishLetter(c) || c == '$') {
-                        int j = i;
-                        char cc = c;
-                        while (j < len &&
-                                (cc == '_'
-                                || CharacterHelper.isArabicNumber(cc)
-                                || CharacterHelper.isEnglishLetter(cc)
-                                || c == '$'
-                                )
-                        ) {
-                            j += 1;
-                            cc = arr[cc];
-                        }
-                        i = j - 1;
-                    } else if (operatorPattern.matcher(String.valueOf(c)).find()) {
-                        return true;
-                    }
+                if (operatorPattern.matcher(s).find()) {
+                    // s是纯粹的计算符号, 不是计算表达式
+                    return false;
                 }
-                return false;
+                return CharacterHelper.isEvalExpression(s);
             }
 
             @Override
@@ -1239,7 +1239,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 for (int len = 2; len > 0; len--) {
                     String tmp = (start + len) > s.length() ? s.substring(start) : s.substring(start, start + len);
                     // 匹配s
-                    Matcher m = operatorPattern.matcher(s);
+                    Matcher m = operatorPattern.matcher(tmp);
                     if (m.find()) {
                         return tmp;
                     }
@@ -1256,6 +1256,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         /**
          * 匹配InvokeToken的规则
          */
+        @Deprecated
         public static class InvokeRule extends AbstractRule {
             public InvokeRule() {
                 super(InvokeToken.class);
@@ -1273,8 +1274,8 @@ public class JavaEvaluatorImpl implements Evaluator {
              * a.invoke(1+2, 2) + 2 -> 返回: a.invoke(1+2, 2)
              * a.invoke(1+2, 2).test.c -> 返回: a.invoke(1+2, 2)
              * a.invoke(1+2, 2).b.test() -> 返回: a.invoke(1+2, 2)
-             * @param s
-             * @return
+             * @param s s
+             * @return s
              */
             @Override
             public String matchFromStart(String s) {
@@ -1297,11 +1298,12 @@ public class JavaEvaluatorImpl implements Evaluator {
          * a.invoke().demo() √
          * a.invoke().arr[1] √
          * a.invoke().arr[1].test() √
-         *
+         * <p>
          * a.invoke() x
          * b.c.test() x
          * b.c x
          */
+        @Deprecated
         public static class InvokeRuleChain extends AbstractRule implements RuleChain {
             public InvokeRuleChain() {
                 super(InvokeTokenChain.class);
@@ -1312,7 +1314,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 if (! matcher.find()) return false;
                 int end = matcher.end();
                 if (end >= s.length()) return false;
-                return s.charAt(end) == '.';
+                return s.charAt(end) == '.' && ! CharacterHelper.isEvalExpression(s);
             }
 
             /**
@@ -1322,8 +1324,8 @@ public class JavaEvaluatorImpl implements Evaluator {
              * a.invoke().a() + 1 -> a.invoke().a()
              * a.invoke().a().b().c -> a.invoke().a().b().c
              *
-             * @param s
-             * @return
+             * @param s s
+             * @return s
              */
             @Override
             public String matchFromStart(String s) {
@@ -1366,14 +1368,22 @@ public class JavaEvaluatorImpl implements Evaluator {
              * self.dfs(1,2) + 1 -> null 【不存在纯函数调用】
              * dfs(1,2).dfs(1) -> dfs(1,2)
              *
-             * @param s
-             * @return
+             * @param s s
+             * @return s
              */
             @Override
             public String matchFromStart(String s) {
                 Matcher matcher = pureCallPattern.matcher(s);
                 boolean b = matcher.find();
                 if (! b) return null;
+                int len = matcher.end();
+                if (len == s.length()) {
+                    return s;
+                }
+                // 判断是否属于函数, 数组, 链式调用
+                if (s.charAt(len) == '(' || s.charAt(len) == '[' || s.charAt(len) == '{' || s.charAt(len) == '.') {
+                    return null;
+                }
                 return s.substring(0, matcher.end());
             }
 
@@ -1391,7 +1401,7 @@ public class JavaEvaluatorImpl implements Evaluator {
          * <p>
          * dfs(1,2) x
          */
-        public static class PureCallRuleChain extends AbstractRule implements RuleChain {
+        public static class PureCallRuleChain extends AbstractRuleChain {
 
             public PureCallRuleChain() {
                 super(PureCallTokenChain.class);
@@ -1399,19 +1409,16 @@ public class JavaEvaluatorImpl implements Evaluator {
 
             @Override
             public boolean match(String s) {
-                Matcher matcher = pureCallPattern.matcher(s);
-                if (! matcher.find()) return false;
-                int end = matcher.end();
-                if (end >= s.length()) return false;
-                return s.charAt(end) == '.';
+                String match = matchFromStart(s);
+                if (match == null) return false;
+                return match.length() == s.length();
             }
 
             @Override
             public String matchFromStart(String s) {
-                if (! match(s)) return null;
-                String dummyS = "." + s;
-                int end = CharacterHelper.matchChain(dummyS, 0);
-                return dummyS.substring(1, end);
+                Matcher matcher = pureCallPattern.matcher(s);
+                if (! matcher.find()) return null;
+                return super.parseChainByEnd(matcher.end(), s);
             }
 
             @Override
@@ -1436,7 +1443,14 @@ public class JavaEvaluatorImpl implements Evaluator {
             @Override
             public String matchFromStart(String s) {
                 int len = CharacterHelper.startVNameLen(s);
-                return len == 0 ? null : s.substring(0, len);
+                if (len == 0) {
+                    return null;
+                }
+                // 判断是否属于函数, 数组, 链式调用
+                if (s.charAt(len) == '(' || s.charAt(len) == '[' || s.charAt(len) == '{' || s.charAt(len) == '.') {
+                    return null;
+                }
+                return s.substring(0, len);
             }
 
             @Override
@@ -1459,35 +1473,31 @@ public class JavaEvaluatorImpl implements Evaluator {
          * arr[0].test
          * dfs().test
          */
-        public static class VariableRuleChain extends AbstractRule implements RuleChain {
+        @AdaptTo(value = {InvokeRuleChain.class, InvokeRule.class})
+        public static class VariableRuleChain extends AbstractRuleChain {
 
             public VariableRuleChain() {
                 super(VariableTokenChain.class);
             }
 
+            /**
+             * 需要满足Variable链式调用, 且不满足EvalRule
+             * @param s s
+             * @return boolean
+             */
             @Override
             public boolean match(String s) {
-                int len = CharacterHelper.startVNameLen(s);
-                /*
-                len = 0, 表示s开头不存在变量名字
-                s.length() == len, 表示s只存在一个变量, 不存在链式调用
-                 */
-                if (len == 0 || s.length() == len) {
+                String match = matchFromStart(s);
+                if (match == null) {
                     return false;
                 }
-                if (s.charAt(len) != '.') {
-                    return false;
-                }
-                int cnt = CharacterHelper.getChainCnt(s, len);
-                return cnt > 1;
+                return match.length() == s.length();
             }
 
             @Override
             public String matchFromStart(String s) {
-                if (! match(s)) return null;
-                String dummyS = "." + s;
-                int end = CharacterHelper.matchChain(dummyS, 0);
-                return dummyS.substring(1, end);
+                int len = CharacterHelper.startVNameLen(s);
+                return super.parseChainByEnd(len, s);
             }
 
             @Override
@@ -1527,6 +1537,11 @@ public class JavaEvaluatorImpl implements Evaluator {
                 Matcher matcher = arrayPattern.matcher(s);
                 if (! matcher.find()) return null;
                 int end = matcher.end();
+                if (end >= s.length()) return s;
+                // 属于ArrayRuleChain链式调用, 不属于ArrayRule
+                if (s.charAt(end) == '.') {
+                    return null;
+                }
                 return s.substring(0, end);
             }
 
@@ -1548,7 +1563,7 @@ public class JavaEvaluatorImpl implements Evaluator {
          * arr[0]
          * arr[0][1]
          */
-        public static class ArrayRuleChain extends AbstractRule implements RuleChain {
+        public static class ArrayRuleChain extends AbstractRuleChain {
 
             public ArrayRuleChain() {
                 super(ArrayTokenChain.class);
@@ -1556,19 +1571,20 @@ public class JavaEvaluatorImpl implements Evaluator {
 
             @Override
             public boolean match(String s) {
-                Matcher matcher = arrayPattern.matcher(s);
-                if (! matcher.find()) return false;
-                int end = matcher.end();
-                if (end >= s.length()) return false;
-                return s.charAt(end) == '.';
+                String match = matchFromStart(s);
+                if (match == null) {
+                    return false;
+                }
+                return match.length() == s.length();
             }
 
             @Override
             public String matchFromStart(String s) {
-                if (! match(s)) return null;
-                String dummyS = "." + s;
-                int end = CharacterHelper.matchChain(dummyS, 0);
-                return dummyS.substring(1, end);
+                Matcher matcher = arrayPattern.matcher(s);
+                if (! matcher.find()) {
+                    return null;
+                }
+                return super.parseChainByEnd(matcher.end(), s);
             }
 
             @Override
@@ -1589,6 +1605,10 @@ public class JavaEvaluatorImpl implements Evaluator {
             @Override
             public boolean match(String s) {
                 String match = matchFromStart(s);
+                // match 为null, 表示s不是常量
+                if (match == null) {
+                    return false;
+                }
                 // 如果返回的match的长度等于s, 表示s是完全由常量组成
                 return match.length() == s.length();
             }
@@ -1604,21 +1624,42 @@ public class JavaEvaluatorImpl implements Evaluator {
                     while (j < arr.length && arr[j] != '"') {
                         ++j;
                     }
-                    return j == arr.length ? s: s.substring(0, j + 1);
+                    if (j == arr.length) {
+                        throw new ComputeError("表达式错误, 字符串类型表达式必须包含一个匹配的\" " + s);
+                    }
+                    // j 指向", 因此需要j + 1
+                    return s.substring(0, j + 1);
                 } else if (c == '\'') {
                     // 去除''内部的所有信息,包括匹配的另一个'
                     int j = i + 1;
                     while (j < arr.length && arr[j] != '\'') {
                         ++j;
                     }
-                    return j == arr.length ? s: s.substring(0, j + 1);
+                    if (j == arr.length) {
+                        throw new ComputeError("表达式错误, 字符类型表达式必须包含一个匹配的' " + s);
+                    }
+                    // j指向', 因此需要j + 1
+                    return s.substring(0, j + 1);
                 } else if (CharacterHelper.isArabicNumber(c)) {
                     // 如果是数字
                     int j = i + 1;
-                    while (j < arr.length && CharacterHelper.isArabicNumber(c)) {
-                        ++j;
+                    // 是否检测到过小数点
+                    boolean dot = false;
+                    while (j < arr.length) {
+                        if (! CharacterHelper.isArabicNumber(arr[j])) {
+                            // 检测小数
+                            if (arr[j] != '.') {
+                                break;
+                            } else if (!dot && arr[j] == '.') {
+                                dot = true;
+                            } else if (dot && arr[j] == '.') {
+                                throw new ComputeError("表达式错误, 数字类型表达式不允许出现两个小数点 " + s);
+                            }
+                        }
+                        j += 1;
                     }
-                    return j == arr.length ? s: s.substring(0, j + 1);
+                    // j指向非数字, 因此无需j - 1
+                    return j == arr.length ? s: s.substring(0, j);
                 }
                 return null;
             }
@@ -1629,47 +1670,11 @@ public class JavaEvaluatorImpl implements Evaluator {
             }
         }
 
-        public static class Hit {
-            /**
-             * 命中规则
-             */
-            final Rule rule;
-            /**
-             * 命中得到的匹配器
-             */
-            final Matcher matcher;
-            /**
-             * 第一个命中token的start位置
-             */
-            final int start;
-            /**
-             * 第一个命中的token的结束位置
-             */
-            final int end;
-            /**
-             * 规则命中的字符串长度
-             */
-            final int length;
-            /**
-             * 命中的token
-             */
-            final String token;
-
-            public Hit(Rule rule, Matcher matcher, int start, int end, int length, String token) {
-                this.rule = rule;
-                this.matcher = matcher;
-                this.start = start;
-                this.end = end;
-                this.length = length;
-                this.token = token;
-            }
-        }
-
         Rule[] rules = new Rule[]{
                 new EvalRule(),
                 new OperatorRule(),
-                new InvokeRule(),
-                new InvokeRuleChain(),
+//                new InvokeRule(),
+//                new InvokeRuleChain(),
                 new PureCallRule(),
                 new PureCallRuleChain(),
                 new VariableRule(),
@@ -1684,10 +1689,6 @@ public class JavaEvaluatorImpl implements Evaluator {
          *
          * @param s 表达式
          * @return token
-         * @throws NoSuchMethodException 方法找不到
-         * @throws InvocationTargetException invoke 异常
-         * @throws InstantiationException 实例化异常
-         * @throws IllegalAccessException 非法访问
          */
         public Token parseToToken(String s, Context ctx) {
             // 处理s
@@ -1708,7 +1709,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 throw new ComputeError("无法识别的内容! " + s);
             }
             if (matches.size() > 1) {
-                throw new ComputeError(s + " 被多条规则匹配! 请检查规则编写是否正确! + " + matches.stream().map(Rule::getName).collect(Collectors.joining()));
+                throw new ComputeError(s + " 被多条规则匹配! 请检查规则编写是否正确! + " + matches.stream().map(Rule::getName).collect(Collectors.joining(",")));
             }
 
             Rule targetRule = matches.get(0);
@@ -1726,6 +1727,50 @@ public class JavaEvaluatorImpl implements Evaluator {
             } catch (NoSuchMethodException e) {
                 throw new ComputeError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
             }
+        }
+
+        /**
+         * 处理兼容规则
+         *
+         * @param matches List<Rule>
+         * @return 处理后的Rule
+         */
+        @Deprecated // 通过修改需要匹配的规则, 废除兼容导致的多个matches结果
+        private List<Rule> handleRuleAdapter(List<Rule> matches) {
+            List<Rule> newMatches = new ArrayList<>();
+            Set<Class<? extends Rule>> filtered = new HashSet<>();
+            for (Rule match : matches) {
+                AdaptTo annotation = match.getClass().getAnnotation(AdaptTo.class);
+                if (! filtered.contains(match.getClass())) {
+                    newMatches.add(match);
+                }
+                if (annotation != null) {
+                    Collections.addAll(filtered, annotation.value());
+                }
+            }
+            return newMatches;
+        }
+
+        /**
+         * 处理兼容规则
+         *
+         * @param hits hits
+         * @return hits
+         */
+        @Deprecated // 通过修改需要匹配的规则, 废除兼容导致的多个matches结果
+        private List<Hit2> handleHitAdapter(List<Hit2> hits) {
+            List<Hit2> newHits = new ArrayList<>();
+            Set<Class<? extends Rule>> filtered = new HashSet<>();
+            for (Hit2 hit : hits) {
+                AdaptTo annotation = hit.rule.getClass().getAnnotation(AdaptTo.class);
+                if (! filtered.contains(hit.rule.getClass())) {
+                    newHits.add(hit);
+                }
+                if (annotation != null) {
+                    Collections.addAll(filtered, annotation.value());
+                }
+            }
+            return newHits;
         }
 
         /**
@@ -1783,7 +1828,7 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @param token 表达式
          * @return 返回Token
          */
-        public Token parseToToken(String token) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        public Token parseToToken(String token) {
             return parseToToken(token, null);
         }
 
@@ -1809,10 +1854,6 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @param token token
          * @param ctx ctx
          * @return Token
-         * @throws NoSuchMethodException 方法找不到
-         * @throws InvocationTargetException invoke 异常
-         * @throws InstantiationException 实例化异常
-         * @throws IllegalAccessException 非法访问
          */
         public Token parseToTokenFromStart(String token, Context ctx) {
             token = handleInput(token);
@@ -1824,7 +1865,9 @@ public class JavaEvaluatorImpl implements Evaluator {
             // 根据解析规则解析得到不同的Token
             for (Rule rule : rules) {
                 String match = rule.matchFromStart(token);
-                hits.add(new Hit2(rule, match));
+                if (match != null) {
+                    hits.add(new Hit2(rule, match));
+                }
             }
 
             // 判断
@@ -1833,15 +1876,27 @@ public class JavaEvaluatorImpl implements Evaluator {
             }
             // double check
             Hit2 targetHit = null;
-            if (hits.size() > 1) {
-                throw new ComputeError(s + " 被多条规则匹配! 请检查规则编写是否正确! + " + hits.stream().map(e -> e.rule.getName()).collect(Collectors.joining()));
+            if (hits.size() == 1) {
+                targetHit = hits.get(0);
+            } else if (hits.size() == 2) {
+                if (hits.stream().anyMatch(e -> e.rule instanceof EvalRule) ) {
+                    // 过滤EvalRule, 选择剩下的那一个Rule
+                    targetHit = hits.stream().filter(e -> ! (e.rule instanceof EvalRule)).findFirst().orElse(null);
+                    // 如果targetHit == 0, 表示EvalRule被重复匹配两次, 程序编写异常
+                    if (targetHit == null) {
+                        throw new ComputeError(s + " 被EvalRule重复匹配两次! 请检查规则编写是否正确! + " + hits.stream().map(e -> e.rule.getName()).collect(Collectors.joining(",")));
+                    }
+                } else  {
+                    throw new ComputeError(s + " 被两条规则匹配! 请检查规则编写是否正确! + " + hits.stream().map(e -> e.rule.getName()).collect(Collectors.joining(",")));
+                }
+            } else {
+                throw new ComputeError(s + " 被多条规则匹配! 请检查规则编写是否正确! + " + hits.stream().map(e -> e.rule.getName()).collect(Collectors.joining(",")));
             }
-            targetHit = hits.get(0);
 
             Class<? extends Token> tokenClass = targetHit.rule.tokenClass();
             String className = tokenClass.getName();
             try {
-                return tokenClass.getDeclaredConstructor(String.class, Context.class).newInstance(s, ctx);
+                return tokenClass.getDeclaredConstructor(String.class, Context.class).newInstance(targetHit.token, ctx);
             } catch (InstantiationException e) {
                 throw new ComputeError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
             } catch (IllegalAccessException e) {
@@ -1860,10 +1915,6 @@ public class JavaEvaluatorImpl implements Evaluator {
          *
          * @param token token
          * @return Token
-         * @throws NoSuchMethodException 方法找不到
-         * @throws InvocationTargetException invoke 异常
-         * @throws InstantiationException 实例化异常
-         * @throws IllegalAccessException 非法访问
          */
         public Token parseToTokenFromStart(String token) {
             return parseToTokenFromStart(token, null);

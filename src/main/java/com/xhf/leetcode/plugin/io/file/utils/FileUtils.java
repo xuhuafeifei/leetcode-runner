@@ -268,6 +268,10 @@ public class FileUtils {
 
         public PathBuilder append(String path) {
             int len = sb.length();
+            if (len == 0) {
+                sb.append(path);
+                return this;
+            }
             char c = sb.charAt(len - 1);
             if (c != '\\' && c != '/') {
                 sb.append('\\');

@@ -10,6 +10,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.xhf.leetcode.plugin.debug.execute.java.p.JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern;
+
 /**
  * 字符集识别辅助工具类
  * @author 林良益
@@ -58,7 +60,8 @@ public class CharacterHelper {
 		//|| ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
 		//|| ub == Character.UnicodeBlock.GENERAL_PUNCTUATION  
 	}
-	
+
+	/*---------------------------------------------------下方代码作者: @auth feigebuge---------------------------------------------------------------*/
 	
 	/**
 	 * 进行字符规格化（全角转半角，大写转小写处理）
@@ -148,7 +151,9 @@ public class CharacterHelper {
     }
 
 	/**
-	 * 返回匹配括号结束的位置
+	 * 返回匹配括号结束的位置. 结束位置为对应括号的下一个字符
+	 * eg:
+	 * ()+1, 返回的则是+号的位置
 	 * @param arr
 	 * @param start
 	 * @return
@@ -185,14 +190,17 @@ public class CharacterHelper {
 	}
 
 	/**
-	 * 匹配数组的中括号, 并返回结束位置
+	 * 匹配数组的中括号, 并返回结束位置. 结束位置是数组括号结束位置的下一位
+	 * eg:
+	 * arr[0][1]+1, 返回的是+号的位置
+	 *
 	 * @param sub
 	 * @param start
 	 * @return
 	 */
 	public static int matchArrayBracket(String sub, int start) {
 		Pattern pattern = Pattern.compile("\\[.*?\\](\\[.*?\\])*");
-		Matcher m = pattern.matcher(sub.substring(start));
+		Matcher m = pattern.matcher(sub);
 		int r = -1;
 		while (m.find()) {
 			if (m.start() >= start) {
@@ -203,7 +211,7 @@ public class CharacterHelper {
 		if (r == -1) {
 			throw new ComputeError("matchArrayBracket error ! 不存在合法的数组括号 " + sub.substring(start));
 		}
-		return r - 1;
+		return r;
 	}
 
 
@@ -238,11 +246,13 @@ public class CharacterHelper {
 					break;
 				} else if (c == '(') {
 					// stack匹配到另一个)
-					end = CharacterHelper.matchBracket(sub, end);
+					end = CharacterHelper.matchBracket(sub, end) - 1;
 					chainEnd = true;
 				} else if (c == '[') {
 					// 匹配数组括号
-					end = CharacterHelper.matchArrayBracket(sub, end);
+					end = CharacterHelper.matchArrayBracket(sub, end) - 1;
+					chainEnd = true;
+				} else if (end + 1 < sub.length() && sub.charAt(end + 1) == '.') {
 					chainEnd = true;
 				}
 			} else {
@@ -256,11 +266,15 @@ public class CharacterHelper {
 		return end;
 	}
 
+	public static void main(String[] args) {
+		System.out.println(getChainCnt("test.a.b().arr[0] + 1", 4));
+	}
+
 	/**
-	 * 从start位置开始匹配, 匹配出链式调用的个数
+	 * 从start位置开始匹配, 匹配出从start位置开始的链式调用的个数
 	 * 此外, start位置必须是链式调用的开始标志 : '.'
 	 * eg:
-	 * matchChain(test.a.b().arr[0] + 1, 4) : 返回值是 3
+	 * getChainCnt(test.a.b().arr[0] + 1, 4) : 返回值是 3
 	 *
 	 * @param sub
 	 * @param start
@@ -288,22 +302,63 @@ public class CharacterHelper {
 					break;
 				} else if (c == '(') {
 					// stack匹配到另一个)
-					end = CharacterHelper.matchBracket(sub, end);
+					end = CharacterHelper.matchBracket(sub, end) - 1;
 					chainEnd = true;
 				} else if (c == '[') {
 					// 匹配数组括号
-					end = CharacterHelper.matchArrayBracket(sub, end);
+					end = CharacterHelper.matchArrayBracket(sub, end) - 1;
+					chainEnd = true;
+				} else if (end + 1 < sub.length() && sub.charAt(end + 1) == '.') {
 					chainEnd = true;
 				}
 			} else {
 				if (c != '.') {
-					cnt += 1;
 					break;
 				} else {
+					cnt += 1;
 					chainEnd = false;
 				}
 			}
 		}
 		return cnt;
+	}
+
+	/**
+	 * 判断是否是eval 表达式
+	 * 详细规则可以查看{@link com.xhf.leetcode.plugin.debug.execute.java.p.JavaEvaluatorImpl.TokenFactory.EvalRule#match(String)}
+	 * @param s
+	 * @return
+	 */
+	public static boolean isEvalExpression(String s) {
+		char[] arr = s.toCharArray();
+		int len = arr.length;
+		for (int i = 0; i < len; ++i) {
+			char c = arr[i];
+			if (c == '(' || c== '[' || c == '{') {
+				// stack匹配. 无需考虑合法性, 因为存在语法检查
+				i = CharacterHelper.matchBracket(arr, i);
+			} else if (CharacterHelper.isArabicNumber(c)) {
+				int j = i;
+				while (j < len && CharacterHelper.isArabicNumber(arr[j])) {
+					j += 1;
+				}
+				i = j - 1;
+			} else if (c == '_' || CharacterHelper.isEnglishLetter(c) || c == '$') {
+				int j = i;
+				while (j < len &&
+						(arr[j] == '_'
+								|| CharacterHelper.isArabicNumber(arr[j])
+								|| CharacterHelper.isEnglishLetter(arr[j])
+								|| c == '$'
+						)
+				) {
+					j += 1;
+				}
+				i = j - 1;
+			} else if (operatorPattern.matcher(String.valueOf(c)).find()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

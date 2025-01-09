@@ -21,7 +21,7 @@ test {
 }
 
 // Solve the problem when garble build, the console will output messy character
-tasks.withType(JavaExec).configureEach {
+tasks.withType(JavaExec){
     jvmArgs = ['-Xmx512m', '-Dfile.encoding=UTF-8', '-Dsun.stdout.encoding=UTF-8', '-Dsun.stderr.encoding=UTF-8']
 }
 
@@ -36,7 +36,12 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+dependencies {
+    testImplementation("junit:junit:4.13.2")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
 }
 
 dependencies {
