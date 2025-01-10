@@ -81,8 +81,8 @@ public class CharacterHelper {
 
 	/**
 	 * 判断是否是变量名字
-	 * @param s
-	 * @return
+	 * @param s s
+	 * @return boolean
 	 */
 	public static boolean isVName(String s) {
 		if (! isVNameHead(s)) {
@@ -202,11 +202,15 @@ public class CharacterHelper {
 		Pattern pattern = Pattern.compile("\\[.*?\\](\\[.*?\\])*");
 		Matcher m = pattern.matcher(sub);
 		int r = -1;
-		while (m.find()) {
+		boolean b = m.find();
+		while (b) {
 			if (m.start() >= start) {
 				r = m.end();
 				break;
 			}
+		}
+		if (! b) {
+			return -1;
 		}
 		if (r == -1) {
 			throw new ComputeError("matchArrayBracket error ! 不存在合法的数组括号 " + sub.substring(start));

@@ -19,6 +19,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.xhf.leetcode.plugin.debug.execute.java.p.JavaEvaluatorImpl.TokenFactory.AbstractRule.arrayPattern;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.JavaEvaluatorImpl.TokenFactory.AbstractRule.pureCallPattern;
+
 /**
  * 执行expression
  *
@@ -143,6 +146,14 @@ public class JavaEvaluatorImpl implements Evaluator {
             }
             return statics;
         }
+
+        private @NotNull static Map<String, Value> takeStaticValues(Value v) {
+            if (v instanceof ObjectReference) {
+                ReferenceType referenceType = ((ObjectReference) v).referenceType();
+                return takeStaticValues(referenceType);
+            }
+            return new HashMap<>();
+        }
     }
 
     /**
@@ -199,6 +210,8 @@ public class JavaEvaluatorImpl implements Evaluator {
      * 链式调用的Token
      */
     public interface TokenChain extends Token {
+        boolean isLastChain(String token);
+
         /**
          * 链式法则, 通过前面的Token获取的Value作为当前链式调用的调用方
          * @param pV 链式调用前一个链式计算结果
@@ -435,7 +448,6 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
     }
 
-
     /**
      * 计算类型的Token
      */
@@ -463,7 +475,11 @@ public class JavaEvaluatorImpl implements Evaluator {
                     sb.append(tokenChars[i]);
                 } else {
                     Token t = tf.parseToTokenFromStart(new String(tokenChars, i, len - i), ctx); // 使用字符数组创建子字符串
-                    sb.append(DebugUtils.removeQuotes(Env.inspector.inspectValue(t.getValue())));
+                    Value v = t.getValue();
+                    if (super.isNumberValue(v) && ! (v instanceof StringReference) ) {
+                        throw new ComputeError(t.getToken() + "的结果值既不是数值类型, 也不是String类型, 无法参与计算! type = " + v.type().name());
+                    }
+                    sb.append(DebugUtils.removeQuotes(Env.inspector.inspectValue(v)));
 
                     // skip已经匹配过的内容
                     i += t.getToken().length() - 1; // -1是为了应对下一轮循环前的i++
@@ -520,57 +536,93 @@ public class JavaEvaluatorImpl implements Evaluator {
     /**
      * invoke类型的Token
      */
-    @Deprecated // 功能将被VariableTokenChain取代
     public static class InvokeToken extends AbstractToken {
-        /**
-         * 方法调用的变量名
-         */
-
-        private String callVName;
-        /**
-         * 调用方法需要使用的参数变量
-         */
-        private List<Value> params;
-        /**
-         * 方法名字
-         */
-        private String methodName;
-        /**
-         * 调用方法使用参数的名字
-         */
-        private String[] paramNames;
-
         public InvokeToken(String token, Context ctx) {
             super(token, ctx);
         }
 
-        /**
-         * 调用方法的.的下标
-         */
-        protected int dot;
+        public static class InvokeInfo {
+            /**
+             * 方法调用的变量名
+             */
+            public String callVName;
+            /**
+             * 调用方法需要使用的参数变量
+             */
+            public List<Value> params;
+            /**
+             * 方法名字
+             */
+            public String methodName;
+            /**
+             * 调用方法使用参数的名字
+             */
+            public String[] paramNames;
+        }
 
         @Override
         public Value getValue() {
             // 找到最外层调用方法的变量名
             Value callV;
+            InvokeInfo info;
             try {
-                callV = getCallVariable();
+                info = parseForInvokeInfo();
+                callV = getCallVariable(info);
             } catch (Exception e) {
                 throw new ComputeError(e.toString());
             }
             // 定位方法名字
-            Method method = getMethod(callV);
+            Method method = getMethod(callV, info);
             // 触发invokeMethod
-            return doInvoke(callV, method);
+            return doInvoke(callV, method, info);
         }
 
-        protected Value doInvoke(Value callV, Method method) {
+        public InvokeInfo parseForInvokeInfo() {
+            return parseForInvokeInfo(token);
+        }
+
+        /**
+         * token只能识别函数调用类型, 不支持链式调用
+         * @param token token
+         * @return info
+         */
+        public InvokeInfo parseForInvokeInfo(String token) {
+            if (! new TokenFactory.InvokeRule().match(token) && ! new TokenFactory.PureCallRule().match(token)) {
+                throw new ComputeError("parseForInvokeInfo方法只能识别方法调用, 或者纯函数调用类型, 方法使用错误! token = " + token);
+            }
+            InvokeInfo info = new InvokeInfo();
+            // 获取dot
+            int dot = getDot(token);
+            // 解析调用者的名字(适配纯函数调用: PureCallToken)
+            if (dot != -1) {
+                info.callVName = token.substring(0, dot);
+            } else {
+                info.callVName = "this";
+            }
+            // 解析方法名 + 方法参数
+            {
+                // 去除调用的变量名
+                String suffix = token.substring(dot + 1);
+                // 定位第一个(
+                int start = suffix.indexOf("(");
+                int last = suffix.lastIndexOf(")");
+                // 方法名字
+                info.methodName = suffix.substring(0, start);
+                String params = suffix.substring(start + 1, last);
+                info.paramNames = params.split(",");
+                info.params = getParams(info.paramNames);
+            }
+
+            return info;
+        }
+
+        protected Value doInvoke(Value callV, Method method, InvokeInfo info) {
             Context ctx = Env.getCtx();
             // invokeMethod开始执行
             ctx.invokeMethodStart();
             Value resultV;
             try {
-                resultV = ((ObjectReference) callV).invokeMethod(ctx.getThread(), method, params, 0);
+                resultV = ((ObjectReference) callV).invokeMethod(ctx.getThread(), method, info.params, 0);
             } catch (Exception e) {
                 throw new ComputeError("invokeMethod调用错误! " + e);
             }
@@ -579,33 +631,33 @@ public class JavaEvaluatorImpl implements Evaluator {
             return resultV;
         }
 
-        protected Method getMethod(Value callV) {
-            // 去除调用的变量名
-            String suffix = token.substring(dot + 1);
-            // 定位第一个(
-            int start = suffix.indexOf("(");
-            int last = suffix.lastIndexOf(")");
+        public Method getMethod(Value callV, InvokeInfo info) {
+            String callVName = info.callVName;
             // 方法名字
-            this.methodName = suffix.substring(0, start);
-            // 获取Params
-            this.params = getParams(suffix.substring(start + 1, last));
+            String methodName = info.methodName;
             // 寻找methodName
             Method method;
             if (! checkMethodExist(callVName, methodName, callV)) {
                 throw new ComputeError(callVName + "不存在" + methodName + "方法");
             }
             // 判断重载
-            method = overloadCheck(callV, methodName);
+            method = overloadCheck(callV, info);
 
             return method;
         }
 
-        private Method overloadCheck(Value callV, String methodName) {
+        private Method overloadCheck(Value callV, InvokeInfo info) {
             ObjectReference objRef = (ObjectReference) callV;
             Method targetMethod;
             List<Method> methods = objRef.referenceType().methods();
             // 候选方法
             List<Method> candidates = new ArrayList<>();
+            // 获取Params
+            List<Value> params = info.params;
+            // 方法名
+            String methodName = info.methodName;
+            // 调用名
+            String callVName = info.callVName;
 
             for (Method method : methods) {
                 if (method.name().equals(methodName)
@@ -622,12 +674,12 @@ public class JavaEvaluatorImpl implements Evaluator {
                 targetMethod = candidates.get(0);
                 try {
                     // 获取方法的参数类型
-                    matchValueAndType(targetMethod);
+                    matchValueAndType(targetMethod, info);
                 } catch (ClassNotLoadedException e) {
                     // 手动类加载, 并重新匹配
                     loadClass(targetMethod);
                     try {
-                        matchValueAndType(targetMethod);
+                        matchValueAndType(targetMethod, info);
                     } catch (Exception ex) {
                         throw new ComputeError(e.toString());
                     }
@@ -650,7 +702,10 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @throws InvocationException invoke异常
          * @throws InvalidTypeException 类型错误
          */
-        private void matchValueAndType(Method targetMethod) throws ClassNotLoadedException, IncompatibleThreadStateException, InvocationException, InvalidTypeException {
+        private void matchValueAndType(Method targetMethod, InvokeInfo info) throws ClassNotLoadedException, IncompatibleThreadStateException, InvocationException, InvalidTypeException {
+            List<Value> params = info.params;
+            String[] paramNames = info.paramNames;
+
             List<Type> types = targetMethod.argumentTypes();
             for (int i = 0; i < types.size(); i++) {
                 Type type = types.get(i);
@@ -724,62 +779,41 @@ public class JavaEvaluatorImpl implements Evaluator {
             throw new ComputeError("未识别的type类型: " + type.name());
         }
 
-        private List<Value> getParams(String params) {
-            this.paramNames = params.split(",");
+        private List<Value> getParams(String[] paramNames) {
             List<Value> values = new ArrayList<>();
             for (int i = 0; i < paramNames.length; i++) {
                 try {
                     values.add(tf.parseToToken(paramNames[i], ctx).getValue());
                 } catch (Exception e) {
-                    throw new ComputeError(callVName + "的第" + i + "个参数解析错误! cause is " + e.getMessage());
+                    throw new ComputeError(token + "的第" + i + "个参数" + paramNames[i] + "解析错误! cause is " + e.getMessage());
                 }
             }
             return values;
         }
 
-        public void getDot() {
+        /**
+         * 获取函数调用的调用符号位置
+         * @param token token 如: a.invoke(9)
+         * @return dot位置
+         */
+        public int getDot(String token) {
             // 变量名\[ {匹配任意内容但不包括[]} \] {出现0次或者多次}  . 方法名()
             Pattern pattern = Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\[\\]]*\\])*(\\.)[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\)");
             Matcher matcher = pattern.matcher(token);
-            dot = -1;
+            int dot = -1;
             // 查找 "." 的位置
             if (matcher.find()){
                 dot = matcher.start(2);
             }
-            if (dot == -1) {
-                throw new ComputeError("代码编写有误! InvokeToken无法定位调用方法的变量名! token = " + token);
-            }
+            return dot;
         }
 
-        private Value getCallVariable() {
-            this.callVName = getCallVName();
+        public Value getCallVariable(InvokeInfo info) {
+            String callVName = info.callVName;
             if ("this".equals(callVName)) {
                 return Env._this;
             }
             return tf.parseToToken(callVName, ctx).getValue();
-        }
-
-        /**
-         * 获取调用的变量名
-         * @return 变量名
-         */
-        public String getCallVName() {
-            // 获取dot坐标
-            getDot();
-            return token.substring(0, dot);
-        }
-    }
-
-    @Deprecated // 功能将被VariableTokenChain取代
-    public static class InvokeTokenChain extends InvokeToken implements TokenChain {
-
-        public InvokeTokenChain(String token, Context ctx) {
-            super(token, ctx);
-        }
-
-        @Override
-        public Value getValue(Value pV) {
-            return null;
         }
     }
 
@@ -795,13 +829,17 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         @Override
         public Value getValue() {
+            return getValue(token);
+        }
+
+        protected Value getValue(String token) {
             // 因为是纯粹的方法调用, 所以callVName = this
             Value callV = Env._this;
             // 定位方法名字
-            dot = -1;
-            Method method = getMethod(callV);
+            InvokeInfo info = super.parseForInvokeInfo(token);
+            Method method = getMethod(callV, info);
             // 触发invokeMethod
-            return doInvoke(callV, method);
+            return doInvoke(callV, method, info);
         }
     }
 
@@ -811,14 +849,58 @@ public class JavaEvaluatorImpl implements Evaluator {
             super(token, ctx);
         }
 
+
+        /**
+         * 从token中截取pureCall: 如dfs(1).invoke(1) -> dfs(1)
+         * @param token token
+         * @return pureCall
+         */
+        private String getPureCall(String token) {
+            Matcher matcher = pureCallPattern.matcher(token);
+            if (! matcher.find()) {
+                throw new ComputeError("PureCallTokenChain无法识别token: " + token);
+            }
+            int end = matcher.end();
+            return token.substring(0, end);
+        }
+
         @Override
         public Value getValue() {
-            return super.getValue();
+            String pureCall = getPureCall(token);
+            Value value = super.getValue(pureCall);
+            // 链式调用
+            String chain = token.substring(pureCall.length() + 1);
+            TokenChain tokenChain = tf.parseToTokenChain(chain, ctx);
+            return tokenChain.getValue(value);
+        }
+
+        @Override
+        public boolean isLastChain(String token) {
+            Matcher matcher = pureCallPattern.matcher(token);
+            if (! matcher.find()) {
+                throw new ComputeError("PureCallTokenChain无法识别token: " + token);
+            }
+            int end = matcher.end();
+            return end == token.length();
         }
 
         @Override
         public Value getValue(Value pV) {
-            return null;
+            String pureCall = getPureCall(token);
+            InvokeInfo info = super.parseForInvokeInfo(pureCall);
+
+            if (! (pV instanceof ObjectReference) ) {
+                throw new ComputeError("链式调用错误! 只有对象才拥有方法! pV = " + pV.type().name());
+            }
+            if (! isLastChain(token)) {
+                Value value = super.doInvoke(pV, super.getMethod(pV, info), info);
+                // 链式调用
+                String chain = token.substring(pureCall.length() + 1);
+                TokenChain tokenChain = tf.parseToTokenChain(chain, ctx);
+                return tokenChain.getValue(value);
+            } else {
+                return super.doInvoke(pV, super.getMethod(pV, info), info);
+            }
         }
     }
 
@@ -833,6 +915,15 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         @Override
         public Value getValue() {
+            return getValue(token);
+        }
+
+        /**
+         * 从当Env中找寻等于token的变量
+         * @param token token
+         * @return Value
+         */
+        public Value getValue(String token) {
             // 检查变量名. 如果包含.  比如this.head, 迭代获取
             if (token.contains(".")) {
                 String[] split = token.split("\\.");
@@ -870,13 +961,48 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         @Override
+        public boolean isLastChain(String token) {
+            return CharacterHelper.isVName(token);
+        }
+
+        @Override
         public Value getValue(Value pV) {
-            return null;
+            String vName = token.substring(0, CharacterHelper.startVNameLen(token));
+
+            // 从pV中获取名为vName的变量值
+            Value value = getVariableValue(vName, pV);
+
+            if (isLastChain(this.token)) {
+                return value;
+            } else {
+                String chain = token.substring(vName.length() + 1);
+                TokenChain tokenChain = tf.parseToTokenChain(chain, ctx);
+                return tokenChain.getValue(value);
+            }
+        }
+
+        // 提取获取变量值的公共方法
+        private Value getVariableValue(String vName, Value pV) {
+            Map<String, Value> memberSource = Env.takeMemberValues(pV);
+            Value value = takeValueByVName(vName, memberSource);
+            if (value == null) {
+                value = takeValueByVName(vName, Env.takeStaticValues(pV));
+                if (value == null) {
+                    throw new ComputeError("变量" + vName + "不存在!");
+                }
+            }
+            return value;
         }
 
         @Override
         public Value getValue() {
-            return null;
+            int len = CharacterHelper.startVNameLen(token);
+            String vName = token.substring(0, len);
+            Value value = super.getValue(vName);
+            // 从vName后开始为链式调用
+            String chain = token.substring(vName.length() + 1);
+            TokenChain tokenChain = tf.parseToTokenChain(chain, ctx);
+            return tokenChain.getValue(value);
         }
     }
 
@@ -894,9 +1020,13 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @return 返回array变量的引用
          */
         private ArrayReference getArrayValue() {
+            return getArrayValue(this.token);
+        }
+
+        public ArrayReference getArrayValue(String arrayId) {
             // 识别变量, 并获取array变量
-            int idx = token.indexOf("[");
-            String vName = token.substring(0, idx);
+            int idx = arrayId.indexOf("[");
+            String vName = arrayId.substring(0, idx);
             Value v = takeValueByVName(vName);
             if (! (v instanceof ArrayReference) ) {
                 throw new ComputeError("变量 " + vName + " 不是数组类型");
@@ -904,7 +1034,17 @@ public class JavaEvaluatorImpl implements Evaluator {
             return (ArrayReference) v;
         }
 
+        // 该方法用于测试, 请勿随意调用
         public List<String> getDimsStr() {
+            return getDimsStr(this.token);
+        }
+
+        /**
+         * 从token中解析维度信息
+         * @param token token 形如: arr[1][2][3], arr[1], arr[a.invoke()][1+2], [1][2] 属于完全的数组类型(为了配合隐式调用, 支持只有数组括号内容的解析), 不会包含除数组外的任何内容
+         * @return 维度信息: 每一个维度的表达式: 如{1,2,3}; {1}, {a.invoke(), 1+2}, {1,2}
+         */
+        public List<String> getDimsStr(String token) {
             // 计算array的维度, 并计算索引
             int idx = token.indexOf("[");
             Pattern compile = Pattern.compile("(\\[[^\\]]*\\])");
@@ -921,11 +1061,20 @@ public class JavaEvaluatorImpl implements Evaluator {
 
 
         /**
-         * 通过token获取维度信息
+         * 通过this.token获取维度信息
          * @return 维度信息: 每一个维度的整形数据
          */
-        private List<Integer> getDims() {
-            List<String> dimsStr = getDimsStr();
+        public List<Integer> getDims() {
+            return getDims(this.token);
+        }
+
+        /**
+         * 从arrayId中解析维度
+         * @param arrayId 形如: arr[1][2][3], arr[1], arr[a.invoke()][1+2] 属于完全的数组类型, 不会包含除数组外的任何内容
+         * @return 维度信息: 每一个维度的int索引数据
+         */
+        public List<Integer> getDims(String arrayId) {
+            List<String> dimsStr = getDimsStr(arrayId);
             if (dimsStr.isEmpty()) {
                 throw new ComputeError("数组没有维度!");
             }
@@ -934,14 +1083,44 @@ public class JavaEvaluatorImpl implements Evaluator {
                 // 获取索引数值
                 Token t = tf.parseToToken(s, ctx);
                 Value vv = t.getValue();
-                String typeName = vv.type().name();
-                if (!Objects.equals(typeName, "int")) {
-                    throw new ComputeError("数组索引必须为整型!!");
-                }
-                int value = ((IntegerValue) vv).value();
+                int value = getDimValue(vv);
                 dims.add(value);
             }
             return dims;
+        }
+
+        /**
+         * 将Value转换为索引数值
+         * @param vv Value
+         * @return int
+         */
+        private int getDimValue(Value vv) {
+            String typeName = vv.type().name();
+            int value;
+            switch (typeName) {
+                case "int":
+                    value = ((IntegerValue) vv).value();
+                    break;
+                case "java.lang.Integer":
+                    value = ((IntegerValue) WrapperObjReferenceToPrimitive(vv)).value();
+                    break;
+                case "long":
+                    // 忽略精度损失. 谁吃饱了撑着拿个long型的作为索引, feigebuge能支持这种离谱的计算都算是仁慈了
+                    value = (int) ((LongValue) vv).value();
+                    break;
+                case "java.lang.Long":
+                    value = (int) ((LongValue) WrapperObjReferenceToPrimitive(vv)).value();
+                    break;
+                case "short":
+                    value = ((ShortValue) vv).value();
+                    break;
+                case "java.lang.Short":
+                    value = ((ShortValue) WrapperObjReferenceToPrimitive(vv)).value();
+                    break;
+                default:
+                    throw new ComputeError("数组索引必须为整型!!");
+            }
+            return value;
         }
 
         /**
@@ -951,8 +1130,10 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @return Value
          */
         public Value itrArray(ArrayReference array, List<Integer> dims) {
-            int idx = token.indexOf("[");
-            String vName = token.substring(0, idx);
+            return itrArray(array, dims, getArrayIdentify(this.token));
+        }
+
+        public Value itrArray(ArrayReference array, List<Integer> dims, String arrayId) {
             Value value = null;
             // 迭代array
             for (int i = 0; i < dims.size(); i++) {
@@ -960,11 +1141,14 @@ public class JavaEvaluatorImpl implements Evaluator {
                 if (dim >= array.length()) {
                     throw new ComputeError("数组越界!! 数组第" + i + "维度长度=" + array.length() + ", 索引=" + dim);
                 }
+                if (dim <= -1) {
+                    throw new ComputeError("数组索引必须为正数!! index = " + value);
+                }
                 value = array.getValue(dim);
                 // 如果没有迭代到最后一位, 则判断是否是数组类型
                 if (i != dims.size() - 1) {
                     if (!(value instanceof ArrayReference)) {
-                        throw new ComputeError("变量" + vName + "第 " + i + " 维度不是数组类型, 是" + value.type().name() + "类型!!");
+                        throw new ComputeError("变量" + arrayId + "第 " + i + " 维度不是数组类型, 是" + value.type().name() + "类型!!");
                     }
                     // 跟新array
                     array = (ArrayReference) value;
@@ -983,8 +1167,35 @@ public class JavaEvaluatorImpl implements Evaluator {
             return itrArray(array, dims);
         }
 
+        protected Value getValue(String token) {
+            // 获取array变量
+            ArrayReference array = getArrayValue(token);
+            // 获取索引
+            List<Integer> dims = getDims(token);
+            // 迭代所有的维度, 获取最终的value
+            return itrArray(array, dims, token);
+        }
+
+        /**
+         * 从token解析数组的标识
+         * arr[1].invoke -> arr[1]
+         * @param token token
+         * @return 数组标识
+         */
+        private String getArrayIdentify(String token) {
+            Matcher matcher = arrayPattern.matcher(token);
+            if (! matcher.find()) {
+                throw new ComputeError("无法匹配数组, ArrayChainRule规则错误! " + token);
+            }
+            int end = matcher.end();
+            return token.substring(0, end);
+        }
     }
 
+    /**
+     * Rule: {@link TokenFactory.ArrayRuleChain}
+     * 计算Array链式调用的结果
+     */
     public static class ArrayTokenChain extends ArrayToken implements TokenChain {
 
         public ArrayTokenChain(String token, Context ctx) {
@@ -992,8 +1203,69 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         @Override
+        public boolean isLastChain(String token) {
+            String array = super.getArrayIdentify(token);
+            int end = array.length();
+            return end == token.length();
+        }
+
+        /**
+         * 无需判断是否是链式调用结尾的情况. 可以从一下两个角度解释
+         * 1: 变量角度:
+         *      如果是链式调用结尾, 必然存在Value pV, 也就是当前链式的调用方. 含有pV的方法是getValue(Value), 不是本方法, 因此不用考虑链式结尾
+         * 2: 链式结尾产生条件:
+         *      想要产生链式结尾, 必须是在链式表达式计算过程中不断迭代, 直到末尾. 然而链式迭代计算过程中, 指挥调用getValue(Value), 因此getValue()无需考虑链式结尾
+         * @return Value
+         */
+        public Value getValue() {
+            // 获取arrayId
+            String arrayId = super.getArrayIdentify(token);
+            /*
+            切忌不要直接调用super.getValue(), 否则内部处理时, 默认使用的是包含链式的token, 存在极大的安全隐患.
+
+            ArrayToken().getValue()内部逻辑处理时, 没有考虑兼容ArrayTokenChain的处理逻辑
+            因此此处需要截取链式token, 传递arrayId给ArrayToken进行处理
+             */
+            Value value = super.getValue(arrayId);
+            // 从array后开始为链式调用
+            String chain = token.substring(arrayId.length() + 1);
+            TokenChain tokenChain = tf.parseToTokenChain(chain, ctx);
+            return tokenChain.getValue(value);
+        }
+
+        @Override
         public Value getValue(Value pV) {
-            return null;
+            boolean flag = isImplicitCall(token);
+            String arrayId = flag ? token : super.getArrayIdentify(token); // 判断是否为隐式调用
+            Value value = getArrayValue(pV, arrayId); // 获取数组值
+
+            // 判断是否是最后一个链式调用
+            if (isLastChain(token)) {
+                return value;
+            } else {
+                // 链式调用
+                String chain = flag ? token.substring(token.length() + 1) : token.substring(arrayId.length() + 1);
+                TokenChain tokenChain = tf.parseToTokenChain(chain, ctx);
+                return tokenChain.getValue(value);
+            }
+        }
+
+        /**
+         * 从array名字中解析对应的Value
+         * @param pV 当前链式调用的调用方
+         * @param arrayId 数组名, 如 arr[1][2], arr[invoke][c.invoke()]
+         * @return Value
+         */
+        private Value getArrayValue(Value pV, String arrayId) {
+            if (! (pV instanceof ArrayReference) ) {
+                throw new ComputeError("pV不是Array类型的变量! 表达式计算结果错误! type = " + pV.type().name());
+            }
+            List<Integer> dims = super.getDims(arrayId);
+            return super.itrArray((ArrayReference) pV, dims, arrayId);
+        }
+
+        private boolean isImplicitCall(String token) {
+            return token.startsWith("[");
         }
     }
 
@@ -1149,26 +1421,27 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         public static abstract class AbstractRuleChain extends AbstractRule implements RuleChain {
-            public AbstractRuleChain(Class<? extends Token> clazz) {
+            public AbstractRuleChain(Class<? extends TokenChain> clazz) {
                 super(clazz);
             }
 
             /**
-             * 从end处开始匹配链式, 返回匹配到的字符串
-             * @param end
+             * 从start处开始匹配链式, 如果能匹配到, 返回匹配到的字符串, 同时包含start以前的字符串
+             * 否则返回null
+             * @param start
              * @param s
              * @return
              */
-            protected String parseChainByEnd(int end, String s) {
-                if (end >= s.length()) {
+            protected String parseChainByEnd(int start, String s) {
+                if (start >= s.length()) {
                     return null;
                 }
-                if (s.charAt(end) != '.') {
+                // 检查是否存在链式调用
+                if (s.charAt(start) != '.') {
                     return null;
                 }
-                String dummyS = "." + s;
-                end = CharacterHelper.matchChain(dummyS, 0);
-                return dummyS.substring(1, end);
+                int end = CharacterHelper.matchChain(s, start);
+                return s.substring(0, end);
             }
         }
 
@@ -1256,7 +1529,6 @@ public class JavaEvaluatorImpl implements Evaluator {
         /**
          * 匹配InvokeToken的规则
          */
-        @Deprecated
         public static class InvokeRule extends AbstractRule {
             public InvokeRule() {
                 super(InvokeToken.class);
@@ -1288,56 +1560,6 @@ public class JavaEvaluatorImpl implements Evaluator {
             @Override
             public String getName() {
                 return "InvokeRule";
-            }
-        }
-
-        /**
-         * 匹配链式方法调用: 要求字符串开头属于实例方法调用, 后续存在别的调用
-         * eg:
-         * a.invoke().a √
-         * a.invoke().demo() √
-         * a.invoke().arr[1] √
-         * a.invoke().arr[1].test() √
-         * <p>
-         * a.invoke() x
-         * b.c.test() x
-         * b.c x
-         */
-        @Deprecated
-        public static class InvokeRuleChain extends AbstractRule implements RuleChain {
-            public InvokeRuleChain() {
-                super(InvokeTokenChain.class);
-            }
-
-            public boolean match(String s) {
-                Matcher matcher = invokePattern.matcher(s);
-                if (! matcher.find()) return false;
-                int end = matcher.end();
-                if (end >= s.length()) return false;
-                return s.charAt(end) == '.' && ! CharacterHelper.isEvalExpression(s);
-            }
-
-            /**
-             * 从s的start位置开始匹配, 满足方法的链式调用的内容将会被识别并返回
-             * a.invoke() -> null 【不存在链式】
-             * a.invoke().a + 1 -> a.invoke().a
-             * a.invoke().a() + 1 -> a.invoke().a()
-             * a.invoke().a().b().c -> a.invoke().a().b().c
-             *
-             * @param s s
-             * @return s
-             */
-            @Override
-            public String matchFromStart(String s) {
-                if (! match(s)) return null;
-                String dummyS = "." + s;
-                int end = CharacterHelper.matchChain(dummyS, 0);
-                return dummyS.substring(1, end);
-            }
-
-            @Override
-            public String getName() {
-                return "InvokeRuleChain";
             }
         }
 
@@ -1417,8 +1639,20 @@ public class JavaEvaluatorImpl implements Evaluator {
             @Override
             public String matchFromStart(String s) {
                 Matcher matcher = pureCallPattern.matcher(s);
+                // 纯函数的链式调用可能存在隐链式调用, 比如dfs(1)[0][0], 因此需要特殊判断
+                // 不能调用super.parseChainByEnd
                 if (! matcher.find()) return null;
-                return super.parseChainByEnd(matcher.end(), s);
+                int end = matcher.end();
+                if (end >= s.length()) {
+                    return null;
+                }
+                // 检查是否存在链式调用
+                if (s.charAt(end) != '.' && s.charAt(end) != '[') {
+                    return null;
+                }
+                String dummyS = "." + s;
+                end = CharacterHelper.matchChain(dummyS, 0);
+                return dummyS.substring(1, end);
             }
 
             @Override
@@ -1473,7 +1707,6 @@ public class JavaEvaluatorImpl implements Evaluator {
          * arr[0].test
          * dfs().test
          */
-        @AdaptTo(value = {InvokeRuleChain.class, InvokeRule.class})
         public static class VariableRuleChain extends AbstractRuleChain {
 
             public VariableRuleChain() {
@@ -1578,13 +1811,41 @@ public class JavaEvaluatorImpl implements Evaluator {
                 return match.length() == s.length();
             }
 
+            /**
+             * 从开始位置匹配数组链式调用, 同时支持隐链式调用
+             * 所谓隐链式调用, 是指在链式调用迭代过程中产生的不含调用符号的表达式, 如dfs()[0][1], 虽然不存在调用符号.
+             * 但他却是方法调用 + 数组调用. 本质上属于两种调用, 因此被称为隐式调用
+             * @param s s
+             * @return s
+             */
             @Override
             public String matchFromStart(String s) {
                 Matcher matcher = arrayPattern.matcher(s);
                 if (! matcher.find()) {
-                    return null;
+                    // 链式调用可能会存在如下情况
+                    /*
+                        dfs()[0][1]
+                        整体会被PureRuleChain识别, 在迭代计算时, 会产生[0][1]这样的隐链式调用表达式
+                        为了支持链式调用, 因此需要在ArrayRuleChain中支持相应规则
+                     */
+                    if (s.charAt(0) == '[') {
+                        int end = CharacterHelper.matchArrayBracket(s, 0);
+                        // 纯隐链式调用, 如[1][2]
+                        if (end == s.length()) {
+                            return s;
+                        } else if (s.charAt(end) == '.') {
+                            // 隐链式存在后续的链式调用, 如 [1][2].invoke()
+                            return super.parseChainByEnd(end, s);
+                        } else {
+                            return s.substring(0, end);
+                        }
+                    } else {
+                        // 不是隐链式调用
+                        return null;
+                    }
+                } else {
+                    return super.parseChainByEnd(matcher.end(), s);
                 }
-                return super.parseChainByEnd(matcher.end(), s);
             }
 
             @Override
@@ -1918,6 +2179,71 @@ public class JavaEvaluatorImpl implements Evaluator {
          */
         public Token parseToTokenFromStart(String token) {
             return parseToTokenFromStart(token, null);
+        }
+
+        public Map<String, Rule> ruleMap = new HashMap<>(3);
+
+        {
+            ruleMap.put("ArrayRule", new ArrayRuleChain());
+            ruleMap.put("PureCallRule", new PureCallRuleChain());
+            ruleMap.put("VariableRule", new VariableRuleChain());
+        }
+
+        /**
+         * 解析TokenChain
+         * @param s
+         * @param ctx
+         * @return
+         */
+        public TokenChain parseToTokenChain(String s, Context ctx) {
+            // 处理s
+            s = handleInput(s);
+
+            List<Rule> matches = new ArrayList<>(3);
+
+            // 根据解析规则解析得到不同的Token
+            for (Rule rule : rules) {
+                if (rule.match(s)) {
+                    matches.add(rule);
+                }
+            }
+
+            // 判断
+            if (matches.isEmpty()) {
+                throw new ComputeError("无法识别的内容! " + s);
+            }
+            if (matches.size() > 1) {
+                throw new ComputeError(s + " 被多条规则匹配! 请检查规则编写是否正确! + " + matches.stream().map(Rule::getName).collect(Collectors.joining(",")));
+            }
+            // 如果包含EvalRule, 报错
+            if (matches.stream().anyMatch(e -> e instanceof EvalRule)) {
+                throw new ComputeError(s + " 被EvalRule匹配! 无法得到对应的链式! parseToTokenChain方法使用错误! + " + matches.stream().map(Rule::getName).collect(Collectors.joining(",")));
+            }
+            Rule targetRule;
+            // 规则转换
+            if (! (matches.get(0) instanceof RuleChain) ) {
+                String key = matches.get(0).getName();
+                if (!ruleMap.containsKey(key)) {
+                    throw new ComputeError(s + " 被" + key + "匹配! 无法得到对应的链式! parseToTokenChain方法使用错误! + " + matches.stream().map(Rule::getName).collect(Collectors.joining(",")));
+                }
+                targetRule = ruleMap.get(key);
+            }else {
+                targetRule = matches.get(0);
+            }
+
+            Class<? extends Token> tokenClass = targetRule.tokenClass();
+            String className = tokenClass.getName();
+            try {
+                return (TokenChain) tokenClass.getDeclaredConstructor(String.class, Context.class).newInstance(s, ctx);
+            } catch (InstantiationException e) {
+                throw new ComputeError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
+            } catch (IllegalAccessException e) {
+                throw new ComputeError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
+            } catch (InvocationTargetException e) {
+                throw new ComputeError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
+            } catch (NoSuchMethodException e) {
+                throw new ComputeError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
+            }
         }
     }
 

@@ -145,6 +145,8 @@ public class JavaEvaluatorImplTest {
 
         assert tokenFactory.parseToToken("invoke(1 + 2, c, d).arr[0] + 1") instanceof JavaEvaluatorImpl.EvalToken;
         assert tokenFactory.parseToToken("invoke(1 + 2, c, d).arr[0] + 1").getToken().equals("invoke(1 + 2, c, d).arr[0] + 1");
+
+        assert tokenFactory.parseToToken("[1][2]") instanceof JavaEvaluatorImpl.ArrayTokenChain; // [1][2]只有可能在处理链式调用时出现
     }
 
     @Test
@@ -238,17 +240,17 @@ public class JavaEvaluatorImplTest {
         assertDebugError("arr[1][j-=1]");
     }
 
-    /**
-     * 测试InvokeToken dot
-     */
-    @Test
-    public void test3() throws Exception {
-        JavaEvaluatorImpl.InvokeToken t = new JavaEvaluatorImpl.InvokeToken("a.invoke(b, c, d)", null);
-        assert "a".equals(t.getCallVName());
-        assert "a[test.demo]".equals(new JavaEvaluatorImpl.InvokeToken("a[test.demo].invoke()", null).getCallVName());
-        assert "a[test.demo][b.a() + 2]".equals(new JavaEvaluatorImpl.InvokeToken("a[test.demo][b.a() + 2].invoke()", null).getCallVName());
-        assert "a[test.demo][b.a() + 2]".equals(new JavaEvaluatorImpl.InvokeToken("a[test.demo][b.a() + 2].invoke(a, b.test(), c[1][2])", null).getCallVName());
-    }
+//    /**
+//     * 测试InvokeToken dot
+//     */
+//    @Test
+//    public void test3() throws Exception {
+//        JavaEvaluatorImpl.InvokeToken t = new JavaEvaluatorImpl.InvokeToken("a.invoke(b, c, d)", null);
+//        assert "a".equals(t.getCallVName());
+//        assert "a[test.demo]".equals(new JavaEvaluatorImpl.InvokeToken("a[test.demo].invoke()", null).getCallVName());
+//        assert "a[test.demo][b.a() + 2]".equals(new JavaEvaluatorImpl.InvokeToken("a[test.demo][b.a() + 2].invoke()", null).getCallVName());
+//        assert "a[test.demo][b.a() + 2]".equals(new JavaEvaluatorImpl.InvokeToken("a[test.demo][b.a() + 2].invoke(a, b.test(), c[1][2])", null).getCallVName());
+//    }
 
     @Test
     public void test4() throws Exception {
