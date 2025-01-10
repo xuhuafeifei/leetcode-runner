@@ -37,10 +37,7 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -429,4 +426,10 @@ public class DebugUtils {
         return str.replaceAll("^\"|\"$", "");
     }
 
+    public static String getStackTraceAsString(Throwable throwable) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        throwable.printStackTrace(pw);
+        return sw.toString();
+    }
 }

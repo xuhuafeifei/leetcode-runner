@@ -220,7 +220,8 @@ public class CodeService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        // 刷新文件系统
+        LocalFileSystem.getInstance().refreshAndFindFileByPath(filePath);
         return filePath;
     }
 

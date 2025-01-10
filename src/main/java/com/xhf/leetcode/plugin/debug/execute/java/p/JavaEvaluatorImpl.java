@@ -191,7 +191,9 @@ public class JavaEvaluatorImpl implements Evaluator {
             Env.doPrepare();
             return Env.inspector.inspectValue(TokenFactory.getInstance().parseToToken(expression, context).getValue());
         } catch (Exception e) {
-            LogUtils.error(e);
+            // 把他变成字符串
+            String err = DebugUtils.getStackTraceAsString(e);
+            LogUtils.warn(err);
             throw new ComputeError(e.getMessage());
         }
     }
@@ -476,7 +478,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 } else {
                     Token t = tf.parseToTokenFromStart(new String(tokenChars, i, len - i), ctx); // 使用字符数组创建子字符串
                     Value v = t.getValue();
-                    if (super.isNumberValue(v) && ! (v instanceof StringReference) ) {
+                    if (! super.isNumberValue(v) && ! (v instanceof StringReference) && ! (t instanceof OperatorToken)) {
                         throw new ComputeError(t.getToken() + "的结果值既不是数值类型, 也不是String类型, 无法参与计算! type = " + v.type().name());
                     }
                     sb.append(DebugUtils.removeQuotes(Env.inspector.inspectValue(v)));
@@ -1139,7 +1141,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             for (int i = 0; i < dims.size(); i++) {
                 int dim = dims.get(i);
                 if (dim >= array.length()) {
-                    throw new ComputeError("数组越界!! 数组第" + i + "维度长度=" + array.length() + ", 索引=" + dim);
+                    throw new ComputeError("数组 " + arrayId + " 访问越界越界!! 数组第" + (i + 1) + "维度的元素个数=" + array.length() + ", 索引=" + dim);
                 }
                 if (dim <= -1) {
                     throw new ComputeError("数组索引必须为正数!! index = " + value);

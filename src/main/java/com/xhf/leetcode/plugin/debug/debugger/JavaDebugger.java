@@ -25,6 +25,7 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.jetbrains.annotations.Debug;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -77,6 +78,9 @@ public class JavaDebugger extends AbstractDebugger {
                 env.stopDebug();
                 return;
             }
+        } catch (DebugError e) {
+            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         } catch (Exception e) {
             ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
             LogUtils.error(e);
@@ -221,7 +225,12 @@ public class JavaDebugger extends AbstractDebugger {
             // 确保执行指令时, JEventHandler已经处理好必要逻辑
             context.waitForJEventHandler("doRun");
 
-            ProcessResult pR = processDebugCommand();
+            ProcessResult pR;
+            try {
+                pR = processDebugCommand();
+            } catch (VMDisconnectedException e) {
+                return;
+            }
             if (pR.isContinue) {
                 continue;
             } else if (pR.isReturn) {
