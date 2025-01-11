@@ -93,6 +93,8 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         // 添加 Variables 选项卡
         stdPanel = new StdPanel();
         variablePanel = new VariablePanel();
+        variablePanel.setAlignmentX(0);
+        variablePanel.setAlignmentY(0);
         JBSplitter varAndExpSplitter = new JBSplitter();
         varAndExpSplitter.setFirstComponent(variablePanel);
         varAndExpSplitter.setSecondComponent(stdPanel);

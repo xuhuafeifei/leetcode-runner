@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.io.file.utils;
 
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.net.URL;
@@ -84,7 +85,11 @@ public class FileUtils {
     }
 
     public static void writePropertiesFileContent(String path, Properties properties) throws IOException {
-        checkAndCreateNewFile(path);
+        boolean flag = checkAndCreateNewFile(path);
+        if (! flag) {
+            LogUtils.warn("文件持久化失败!");
+            return;
+        }
 
         try (FileOutputStream fos = new FileOutputStream(path)) {
             // write properties to file
@@ -92,9 +97,10 @@ public class FileUtils {
         }
     }
 
-    private static void checkAndCreateNewFile(String path) throws IOException {
+    private static boolean checkAndCreateNewFile(String path) throws IOException {
         if (! isPath(path)) {
-            throw new IllegalArgumentException("path is not a file path");
+            LogUtils.warn("path is not valid ! path = " + path);
+            return false;
         }
         // check file exists
         File file = new File(path);
@@ -109,7 +115,7 @@ public class FileUtils {
             }
         }
         // create new file
-        file.createNewFile();
+        return file.createNewFile();
     }
 
     public static boolean fileExists(String path) {

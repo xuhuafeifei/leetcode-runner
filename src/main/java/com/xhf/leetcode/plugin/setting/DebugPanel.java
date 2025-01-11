@@ -20,16 +20,14 @@ public class DebugPanel extends JPanel{
     public DebugPanel() {
         JPanel readType = createReadType("read type", ReadType.getNames());
         JPanel outputType = createOutputType("output type", OutputType.getNames());
-        add(readType, BorderLayout.WEST);
-        add(outputType, BorderLayout.EAST);
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        add(readType);
+        add(outputType);
     }
 
     private JPanel createOutputType(String title, String[] options) {
         // 创建一个 Panel
         JBPanel<?> panel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
-        panel.setBorder(new TitledBorder(title)); // 给 Panel 设置边框和标题
-//        panel.setBackground(Constants.BACKGROUND_COLOR);
-
 
         // 创建 ButtonGroup 用于管理单选按钮
         this.outputType = new ButtonGroup();
@@ -41,14 +39,19 @@ public class DebugPanel extends JPanel{
             panel.add(radioButton);
         }
 
-        return panel;
+        JPanel targetComponent = InnerHelpTooltip
+                .FlowLayout(FlowLayout.LEFT)
+                .add(panel)
+                .addHelp("设置debug模式下, 调试内容显示位置。推荐使用UI显示。标准输出显示/console显示适合熟悉命令行的开发人员")
+                .getTargetComponent();
+
+        targetComponent.setBorder(new TitledBorder(title));
+        return targetComponent;
     }
 
     public JPanel createReadType(String title, String[] options) {
         // 创建一个 Panel
         JBPanel<?> panel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT));
-        panel.setBorder(new TitledBorder(title)); // 给 Panel 设置边框和标题
-//        panel.setBackground(Constants.BACKGROUND_COLOR);
 
         // 创建 ButtonGroup 用于管理单选按钮
         this.readTypeGroup = new ButtonGroup();
@@ -60,20 +63,26 @@ public class DebugPanel extends JPanel{
             panel.add(radioButton);
         }
 
-        return panel;
+        JPanel targetComponent = InnerHelpTooltip
+                .FlowLayout(FlowLayout.LEFT)
+                .add(panel)
+                .addHelp("设置debug模式下, 指令输入来源。推荐使用UI指令读取。标准输入读取指令/命令行读取指令适合熟悉命令行的开发人员")
+                .getTargetComponent();
+
+        targetComponent.setBorder(new TitledBorder(title));
+        return targetComponent;
     }
 
     public String getReadTypeName() {
-        for (Enumeration<AbstractButton> buttons = readTypeGroup.getElements(); buttons.hasMoreElements();) {
-            AbstractButton button = buttons.nextElement();
-            if (button.isSelected()) {
-                return button.getText();
-            }
-        }
-        return "";
+        return getString(readTypeGroup);
     }
 
     public String getOutputTypeName() {
+        return getString(outputType);
+    }
+
+    private String getString(ButtonGroup outputType) {
+        if (outputType == null) return "";
         for (Enumeration<AbstractButton> buttons = outputType.getElements(); buttons.hasMoreElements();) {
             AbstractButton button = buttons.nextElement();
             if (button.isSelected()) {

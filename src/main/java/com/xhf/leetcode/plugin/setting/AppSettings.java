@@ -4,6 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
@@ -156,5 +157,13 @@ public final class AppSettings
 
   public boolean initOrNot() {
     return !myState.isEmptyFilePath() && !myState.isEmptyLangType();
+  }
+
+  /**
+   * 允许用户重新修改coreFilePath的路径
+   * @param event event
+   */
+  public void clearCacheEventListener(ClearCacheEvent event) {
+    myState.coreFilePath = "";
   }
 }

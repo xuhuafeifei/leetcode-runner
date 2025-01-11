@@ -1,23 +1,22 @@
 package com.xhf.leetcode.plugin.setting;
 
+import com.intellij.icons.AllIcons;
+import com.intellij.ide.HelpTooltip;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
-import com.intellij.ui.JBSplitter;
+import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
-import com.xhf.leetcode.plugin.debug.output.OutputType;
-import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LangType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Objects;
 
@@ -39,15 +38,22 @@ public class AppSettingsComponent {
   // file path
   private final TextFieldWithBrowseButton myFileBrowserBtn = new TextFieldWithBrowseButton();
 
+  private static final String LANG_TYPE_HELP_TEXT = "选择支持的编程语言类型, 该设置将决定后续创建,提交的代码类型. 此外, 语言类型将决定debug功能启动的执行器类型";
+  private static final String STORE_PATH_HELP_TEXT = "选择文件的存储路径. 该参数将影响后续代码文件创建的位置";
+
   /*---------debug----------*/
   private final DebugPanel debugPanel = new DebugPanel();
+
+
 
   public AppSettingsComponent() {
     initComponent();
     myMainPanel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(new JBLabel("Lang type"), myLangType, 1, false)
-            .addLabeledComponent(new JBLabel("Store path:"), myFileBrowserBtn, 1, false)
-            .addComponent(createSeparatorWithText("debug 配置"))
+            .addLabeledComponent(new JBLabel("Lang type"), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(myLangType).addHelp(LANG_TYPE_HELP_TEXT).getTargetComponent(), 1, false)
+            .addLabeledComponent(new JBLabel("Store path"), InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(STORE_PATH_HELP_TEXT).getTargetComponent(), 1, false)
+            .addComponent((JComponent) Box.createVerticalStrut(10))
+            .addComponent(createSeparatorWithText("debug configuration"))
+            .addComponent((JComponent) Box.createVerticalStrut(5))
             .addComponent(debugPanel)
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel();
@@ -55,43 +61,10 @@ public class AppSettingsComponent {
 
   // 创建一个带文字的分割线
   public JComponent createSeparatorWithText(String text) {
-    JPanel panel = new JPanel(new GridBagLayout()); // 使用 GridBagLayout 实现居中布局
-    panel.setOpaque(false); // 背景透明
-
-    // 创建分割线和文字
-    JSeparator leftLine = new JSeparator(SwingConstants.HORIZONTAL);
-    JSeparator rightLine = new JSeparator(SwingConstants.HORIZONTAL);
-    JLabel label = new JLabel(text);
-
-    // 设置分割线和文字的颜色适配当前主题
-    Color separatorColor = UIManager.getColor("Separator.foreground");
-    if (separatorColor == null) {
-      separatorColor = Constants.BACKGROUND_COLOR; // 默认颜色
-    }
-    leftLine.setForeground(separatorColor);
-    rightLine.setForeground(separatorColor);
-
-    // 使用 GridBagConstraints 对齐布局
-    GridBagConstraints gbc = new GridBagConstraints();
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.weightx = 1.0;
-
-    // 左边分割线
-    gbc.gridx = 0;
-    panel.add(leftLine, gbc);
-
-    // 中间文字
-    gbc.gridx = 1;
-    gbc.weightx = 0; // 文字部分不扩展
-    gbc.insets = JBUI.insets(0, 5); // 文字两侧间距
-    panel.add(label, gbc);
-
-    // 右边分割线
-    gbc.gridx = 2;
-    gbc.weightx = 1.0; // 右侧分割线扩展
-    panel.add(rightLine, gbc);
-
-    return panel;
+    TitledSeparator titledSeparator = new TitledSeparator(text);
+    titledSeparator.setBorder(BorderFactory.createMatteBorder(0, 0, 3, 0, Constants.BACKGROUND_COLOR));
+    titledSeparator.setTitleFont(new Font(titledSeparator.getFont().getName(), Font.BOLD, 14));
+    return titledSeparator;
   }
   private void initComponent() {
     // init langType

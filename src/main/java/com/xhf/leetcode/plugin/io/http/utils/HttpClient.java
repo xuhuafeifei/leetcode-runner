@@ -6,6 +6,8 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -15,6 +17,7 @@ import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
@@ -37,9 +40,16 @@ public class HttpClient {
         return instance;
     }
 
-    private final CloseableHttpClient httpClient = HttpClients.createDefault();
-
     private final CookieStore cookieStore = new BasicCookieStore();
+
+    // private final CloseableHttpClient httpClient = HttpClients.createDefault();
+    // 更新为带宽松 cookie 策略的 httpClient, 解决leetcode平台返回的cookie, expire time无法识别的警告
+    private final CloseableHttpClient httpClient = HttpClientBuilder.create()
+            .setDefaultRequestConfig(RequestConfig.custom()
+                    .setCookieSpec(CookieSpecs.STANDARD) // 使用宽松的 cookie 解析策略
+                    .build())
+            .setDefaultCookieStore(cookieStore) // 使用自定义的 CookieStore
+            .build();
 
     @Deprecated
     public List<Cookie> getCookies() {

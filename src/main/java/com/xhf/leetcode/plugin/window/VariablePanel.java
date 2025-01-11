@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.window;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.fields.ExtendableTextComponent;
 import com.intellij.ui.components.fields.ExtendableTextField;
@@ -14,6 +15,7 @@ import com.xhf.leetcode.plugin.listener.PopupMenuAdaptor;
 import com.xhf.leetcode.plugin.render.VariablesCellRender;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
@@ -34,8 +36,7 @@ public class VariablePanel extends JPanel {
 
     public VariablePanel() {
         // 设置垂直布局
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
+        setLayout(new BorderLayout());
         // 输入框
         this.expressionField = new ExtendableTextField(defaultText);
         this.expressionField.addFocusListener(new FocusListener() {
@@ -66,7 +67,7 @@ public class VariablePanel extends JPanel {
             }
             InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, text));
         });
-        add(expressionField);
+        add(expressionField, BorderLayout.NORTH);
 
         // 按钮（右侧图标按钮）
         ExtendableTextComponent.Extension watchButton = ExtendableTextComponent.Extension.create(
@@ -87,7 +88,8 @@ public class VariablePanel extends JPanel {
 
         // 添加滚动面板
         JBScrollPane scrollPane = new JBScrollPane(variableList);
-        add(scrollPane);
+
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     /**
