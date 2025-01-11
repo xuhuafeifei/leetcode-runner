@@ -63,7 +63,7 @@ public class JavaEvaluatorImplTest {
         assert !JavaEvaluatorImpl.TokenFactory.AbstractRule.pureCallPattern.matcher("a.invoke()").find();
         assert JavaEvaluatorImpl.TokenFactory.AbstractRule.pureCallPattern.matcher("invoke()").find();
 
-        Matcher matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.pureCallPattern.matcher("invoke().invoke()");
+        JavaEvaluatorImpl.TokenFactory.MyMatcher matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.pureCallPattern.matcher("invoke().invoke()");
         assert matcher.find();
         assert matcher.end() == 8;
 
@@ -310,5 +310,19 @@ public class JavaEvaluatorImplTest {
 
         assert tokenFactory.parseToTokenFromStart("dfs(1,2,3)") instanceof JavaEvaluatorImpl.PureCallToken;
         assert tokenFactory.parseToTokenFromStart("dfs(1,2,3)").getToken().equals("dfs(1,2,3)");
+    }
+
+    @Test
+    public void test7() throws Exception {
+        JavaEvaluatorImpl.TokenFactory.MyMatcher matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.pureCallPattern.matcher("dfs(1, (1 + 2) * 3, 4)");
+        assert matcher.find();
+        assert matcher.end() == (150 - 129 + 1);
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.pureCallPattern.matcher("a.dfs(1, (1 + 2) * 3, 4)");
+        assert ! matcher.find();
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.invokePattern.matcher("a.dfs(1, (1 + 2) * 3, 4)");
+        assert matcher.find();
+        assert matcher.end() == (111 - 88 + 1);
     }
 }

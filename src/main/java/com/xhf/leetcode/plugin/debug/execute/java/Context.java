@@ -368,6 +368,7 @@ public class Context implements ExecuteContext {
      * 该方法只服务于JavaEvaluatorImpl
      */
     public void invokeMethodStart() {
+        LogUtils.simpleDebug("invokeMethod start ... ");
         invokeStatus = InvokeStatus.INVOKE_START;
     }
 

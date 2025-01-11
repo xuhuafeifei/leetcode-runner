@@ -140,10 +140,10 @@ public class JEventHandler implements Runnable {
         // 如果JavaEvaluatorImpl开启invokeMethod, 需要resume
         // 否则invokeMethod方法可能会被阻塞
         if (context.isInvokeMethodStart()) {
-             LogUtils.simpleDebug("step event检测到JavaEvaluatorImpl触发invokeMethod, resume TargetVM");
+             // LogUtils.simpleDebug("step event检测到JavaEvaluatorImpl触发invokeMethod, resume TargetVM");
             return false;
         }
-         LogUtils.simpleDebug("JavaEvaluatorImpl并未触发invokeMethod, stop TargetVM");
+         // LogUtils.simpleDebug("JavaEvaluatorImpl并未触发invokeMethod, stop TargetVM");
         // 后台准备完毕, 前台可以执行指令
         context.JEventHandlerDone();
         return true;
@@ -208,8 +208,22 @@ public class JEventHandler implements Runnable {
         context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_INTO);
 
         if (AppSettings.getInstance().isUIOutput()) {
-            // 输入UI打印指令. UI总是会在遇到断点时打印局部变量. 因此输入P指令
-            InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, ""));
+            // 这里之所以invoke method check, 是因为在测试时发现一个很操蛋的bug
+            /*
+                假设如下场景:
+                代码执行到line 13, 并且line 13存在breakpoint, line 13属于method()
+                此时用户执行表达式method(). 在运行时, TargetVM会执重新执行并在line 13
+                此时任然处于invokeMethod状态, 但是会产生breakpoint event.
+
+                该事件会被当前方法捕获, 如果没有invokeMethod状态检测, 则会产生新的w指令, 而
+                新的w指令将会cover用户输入表达式执行的结果. 导致用户看不到method()表达式计算结果
+
+                因此, 需要做额外检测
+             */
+            if (! context.isInvokeMethodStart()) {
+                // 输入UI打印指令. UI总是会在遇到断点时打印局部变量. 因此输入P指令
+                InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, ""));
+            }
             // 高亮指令
             InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, ""));
         }

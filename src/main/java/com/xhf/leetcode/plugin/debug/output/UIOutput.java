@@ -220,7 +220,7 @@ public class UIOutput extends AbstractOutput{
     private void doP(ExecuteResult r) {
         if (r.isSuccess()) {
             String result = r.getResult();
-            String[] split = result.split("\n|\r");
+            String[] split = result.split("\\n");
             variables.setListData(split);
         } else {
             // 打印局部变量失败, 说明出问题了. 问题可能并不严重, 只是受限于debug功能

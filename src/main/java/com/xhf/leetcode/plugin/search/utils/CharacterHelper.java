@@ -154,9 +154,10 @@ public class CharacterHelper {
 	 * 返回匹配括号结束的位置. 结束位置为对应括号的下一个字符
 	 * eg:
 	 * ()+1, 返回的则是+号的位置
-	 * @param arr
-	 * @param start
-	 * @return
+	 * @param arr arr
+	 * @param start start
+	 * @return int
+	 * @throws ComputeError: 括号匹配错误
 	 */
 	public static int matchBracket(char[] arr, int start) {
 		Stack<Character> stack = new Stack<>();
@@ -203,13 +204,15 @@ public class CharacterHelper {
 		Matcher m = pattern.matcher(sub);
 		int r = -1;
 		boolean b = m.find();
-		while (b) {
-			if (m.start() >= start) {
-				r = m.end();
-				break;
+		if (b) {
+			while (b) {
+				if (m.start() >= start) {
+					r = m.end();
+					break;
+				}
+				b = m.find();
 			}
-		}
-		if (! b) {
+		} else {
 			return -1;
 		}
 		if (r == -1) {
@@ -340,7 +343,7 @@ public class CharacterHelper {
 			char c = arr[i];
 			if (c == '(' || c== '[' || c == '{') {
 				// stack匹配. 无需考虑合法性, 因为存在语法检查
-				i = CharacterHelper.matchBracket(arr, i);
+				i = CharacterHelper.matchBracket(arr, i) - 1;
 			} else if (CharacterHelper.isArabicNumber(c)) {
 				int j = i;
 				while (j < len && CharacterHelper.isArabicNumber(arr[j])) {

@@ -76,6 +76,7 @@ public class JavaDebugEnv extends AbstractDebugEnv {
     @Override
     protected boolean copyFile() {
         return
+                // 不要拷贝/debug/java/test目录下的任何内容
                 copyFileHelper("/debug/java/ListNode.java") &&
                 copyFileHelper("/debug/java/TreeNode.java");
     }
