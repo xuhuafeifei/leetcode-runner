@@ -27,6 +27,5 @@ public class MyList<T> extends JBList<T> {
 
     public void setNonData() {
         setListData(new ArrayList<T>());
-        setEmptyText("Noting to show");
     }
 }

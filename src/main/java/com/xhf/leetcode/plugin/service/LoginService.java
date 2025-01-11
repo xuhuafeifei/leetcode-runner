@@ -64,6 +64,7 @@ public final class LoginService {
         try {
             jcefLoginWindow.start();
         } catch (Exception e) {
+            ConsoleUtils.getInstance(project).showInfo("JCEF登录失败, 错误原因为: " + e.getMessage() + "\n请尝试重启idea, 否则系统将采用cookie登录");
             LogUtils.error("JCEF Login Failed, Start Cookie Login...", e);
             startCookieLogin(project);
         }
