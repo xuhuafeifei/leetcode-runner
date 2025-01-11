@@ -3,6 +3,8 @@ package com.xhf.leetcode.plugin.window;
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.components.fields.ExtendableTextComponent;
+import com.intellij.ui.components.fields.ExtendableTextField;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
@@ -27,19 +29,15 @@ public class VariablePanel extends JPanel {
     /**
      * 输入表达式的文本框
      */
-    private final JTextField expressionField;
+    private final ExtendableTextField expressionField;
     private final String defaultText = "Evaluate expression (Enter) or add a watch";
 
     public VariablePanel() {
         // 设置垂直布局
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        // 创建表达式输入区域（包含输入框和按钮）
-        JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.X_AXIS));
-
         // 输入框
-        this.expressionField = new JTextField(defaultText);
+        this.expressionField = new ExtendableTextField(defaultText);
         this.expressionField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -68,19 +66,18 @@ public class VariablePanel extends JPanel {
             }
             InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, text));
         });
-        inputPanel.add(expressionField);
-
+        add(expressionField);
 
         // 按钮（右侧图标按钮）
-        JButton watchButton = new JButton(AllIcons.Debugger.AddToWatch);
-        inputPanel.add(watchButton);
-        watchButton.addActionListener(e -> {
-            String exp = expressionField.getText();
-            InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.WATCH, exp));
-        });
-
-        // 添加表达式输入区域到主面板
-        add(inputPanel);
+        ExtendableTextComponent.Extension watchButton = ExtendableTextComponent.Extension.create(
+                AllIcons.Debugger.AddToWatch,
+                AllIcons.Debugger.AddToWatch,
+                "Add to Watch",
+                () -> {
+                    String exp = expressionField.getText();
+                    InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.WATCH, exp));
+                });
+        this.expressionField.addExtension(watchButton);
 
         variableList = new MyList<>();
         // 变量列表

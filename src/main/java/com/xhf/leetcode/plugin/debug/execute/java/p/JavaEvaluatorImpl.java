@@ -333,7 +333,7 @@ public class JavaEvaluatorImpl implements Evaluator {
 //            }
 //            v = takeValueByVName(vName, Env.getStaticValues());
             if (v == null) {
-                throw new ComputeError("变量未定义 name = " + vName);
+                throw new ComputeError("变量" + vName + "未定义!");
             }
             return v;
         }
@@ -407,7 +407,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             else if (Env.inspector.isPrimitiveType(v)){
                 return PrimitiveValueToWrapperObjReference(v);
             }
-            throw new ComputeError("不支持自动转换类型, 请检查入参类型是否正确! v = " + v.type().name() + " type = " + type.name());
+            throw new ComputeError("方法编写错误! 不支持自动转换类型, 请检查入参类型是否正确! v = " + v.type().name() + " type = " + type.name());
         }
 
         /**
@@ -422,10 +422,10 @@ public class JavaEvaluatorImpl implements Evaluator {
                     return Env.inspector.getWrapperValue(objRef);
                 } else {
                     // todo: 抛出异常, 方法使用错误! 该方法只接受包装类型
-                    throw new RuntimeException("该方法只接受包装类型, 但传入的值为" + value.type().name());
+                    throw new ComputeError("该方法只接受包装类型, 但传入的值为" + value.type().name());
                 }
             }
-            throw new RuntimeException("该方法只接受包装类型, 但传入的值为" + value.type().name());
+            throw new ComputeError("该方法只接受包装类型, 但传入的值为" + value.type().name());
         }
 
         /**
