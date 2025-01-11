@@ -280,10 +280,6 @@ public class JavaEvaluatorImpl implements Evaluator {
             if (expression.contains("++") || expression.contains("--")) {
                 throw new ComputeError("不允许使用 ++ -- 等自变化操作!!");
             }
-            // 判断是否存在链式方法调用
-            if (Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\]]*\\])*\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\)(\\.\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*\\))+").matcher(expression).find()) {
-                throw new ComputeError("不允许使用链式调用!!");
-            }
         }
 
         /**
