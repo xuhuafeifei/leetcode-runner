@@ -8,7 +8,11 @@
 
 ## 插件介绍
 
-`Leetcode-runner`是一款idea插件，旨在实现一个核心功能完备，且简洁容易上手的LC刷题插件。Leetcode-runner支持日常刷题所需的一切功能，实现脱离Web端LeetCode刷算法
+`Leetcode-runner`是一款idea插件。旨在实现一个核心功能完备，且简洁容易上手的Leetcode刷题插件。Leetcode-runner支持日常刷题所需的一切功能，如**代码编写**、**代码运行/提交**、**测试案例更换**、**运行结果显示**、**题解展示**、**提交记录展示**、**代码替换**、**测试案例替换**等功能，实现脱离Web端LeetCode刷算法
+
+此外，插件项目还提供另外两个极为强大的功能。分别是**大批量题目快速检索**，**核心代码断点调试**
+
+关于项目，拥有详细的使用文档和开发文档，并且拥有详细的注释且代码符合Java行业通用的开发规范
 
 
 
@@ -16,13 +20,13 @@
 
 插件项目启动后，会出现两块工具栏
 
-![image-20241213160625306](README.assets/image-20241213160625306.png)
+![image-20250113105329839](README.assets/image-20250113105329839.png)
 
 
 
 如果没有出现，可以通过`View -> Tool Windows -> Leetcode Console Plugin / Leetcode Plugin` 打开工具窗口
 
-<img src="README.assets/image-20241128122143896.png" alt="image-20241128122143896" style="zoom:50%;" />
+<img src="README.assets/image-20250113105416823.png" alt="image-20250113105416823" style="zoom:50%;" />
 
 
 
@@ -32,17 +36,21 @@
 
 1. 打开设置栏
 
-   <img src="README.assets/image-20241213160716483.png" alt="image-20241213160716483" style="zoom: 50%;" />
+   <img src="README.assets/image-20250113110304269.png" alt="image-20250113110304269" style="zoom:50%;" />
 
-2. 选择lang type和store path![image-20241128122750039](README.assets/image-20241128122750039.png)
+2. 选择lang type和store path
+
+   <img src="README.assets/image-20250113110352483.png" alt="image-20250113110352483" style="zoom:50%;" />
 
    > lang type: 指定当前用何种语言解决问题
    >
    > store path: 指定code文件创建的目录
 
+   > tip: 有关各种设置的介绍，可以通过最右侧的问号图标得到解答<img src="README.assets/image-20250113110457351.png" alt="image-20250113110457351" style="zoom:50%;" />
+
 3. 点击登录按钮，进行登录操作
 
-   <img src="README.assets/image-20241213160752415.png" alt="image-20241213160752415" style="zoom:50%;" />
+   <img src="README.assets/image-20250113110529723.png" alt="image-20250113110529723" style="zoom:50%;" />
 
 4. 正常情况下，插件会模拟浏览器，出现leetcode官网登录界面，具体如下
 
@@ -50,9 +58,7 @@
 
    如果登录成功，则会加载数据内容，并在右侧的工具栏中出现问题内容
 
-<img src="README.assets/image-20241213160955109.png" alt="image-20241213160955109" style="zoom:50%;" />
-
-
+<img src="README.assets/image-20250113110714192.png" alt="image-20250113110714192" style="zoom:50%;" />
 
 > tip: 第一次登录需要加载所有题目，这可能会耗费3-5s左右的时间，在此期间会在后台加载数据，并锁定部分功能。这是正常行为
 
@@ -64,7 +70,7 @@
 
 点击右侧问题内容，插件会创建代码文件，并进行问题内容预览
 
-![image-20241213161112054](README.assets/image-20241213161112054.png)
+![image-20250113111004920](README.assets/image-20250113111004920.png)
 
 
 
@@ -76,17 +82,15 @@
 
 第三个按钮，会隐藏左侧代码编辑区域，只留下右侧部分
 
-<img src="README.assets/image-20241128123830344.png" alt="image-20241128123830344" style="zoom:50%;" />
-
-
+<img src="README.assets/image-20250113111402768.png" alt="image-20250113111402768" style="zoom:33%;" />
 
 
 
 ### 4. 运行代码
 
-编辑栏左侧存在三个按钮
+编辑栏左侧存在六个按钮，前三个和代码运行有关。后三个将在`辅助功能`中进行介绍
 
-![image-20241128124011434](README.assets/image-20241128124011434.png)
+![image-20250113111532390](README.assets/image-20250113111532390.png)
 
 第一个按钮，runcode，使用题目的默认测试样例运行代码
 
@@ -98,15 +102,15 @@
 
 点击第一、第二个按钮后，会在**插件自带的控制台**输出执行信息
 
-<img src="README.assets/image-20241128124351474.png" alt="image-20241128124351474" style="zoom:50%;" />
+<img src="README.assets/image-20250113111558701.png" alt="image-20250113111558701" style="zoom:50%;" />
 
 
 
 第三个按钮，会出现弹框，可以自定义测试数据
 
-<img src="README.assets/image-20241128124505627.png" alt="image-20241128124505627" style="zoom:50%;" />
+<img src="README.assets/image-20250113111615478.png" alt="image-20250113111615478" style="zoom:50%;" />
 
-Reset按钮可以恢复题目的默认测试样例
+> Reset按钮可以恢复题目的默认测试样例
 
 
 
@@ -144,7 +148,19 @@ Reset按钮可以恢复题目的默认测试样例
 
 ## 辅助功能介绍
 
-### 1. Reposition
+### 1 default code
+
+![image-20250113112140245](README.assets/image-20250113112140245.png)
+
+恢复默认代码，能将当前打开的文件按照设置的语言恢复为默认代码
+
+![default-code](README.assets/default-code.gif)
+
+
+
+### 2. Reposition
+
+> 该功能在v2.6.4版本引入
 
 该功能所在位置如图所示
 
@@ -156,7 +172,7 @@ Reset按钮可以恢复题目的默认测试样例
 
 
 
-`Reposition`允许用户重新定位当前文件所代表的问题，重新加载文件，通过插件提供的编辑器打开
+`Reposition`允许用户重新定位当前文件所代表的问题，重新加载文件，并通过插件提供的编辑器打开
 
 ![image-20241215154642283](README.assets/image-20241215154642283.png)
 
@@ -164,9 +180,9 @@ Reset按钮可以恢复题目的默认测试样例
 
 
 
-### 2. submission界面
+### 3. submission界面
 
-在大于2.6.2版本中，争对提交界面做出了优化，额外增加`显示错误信息`, `代码替换`，`新增测试样例`功能，具体如下
+在大于等于2.6.4版本中，针对提交界面做出了优化，额外增加`显示错误信息`, `代码替换`，`新增测试样例`功能，具体如下
 
 ![image-20241216205632916](README.assets/image-20241216205632916.png)
 
@@ -176,7 +192,7 @@ Reset按钮可以恢复题目的默认测试样例
 
 
 
-另外，此版本还允许用户直接替换代码，新增测试样例
+另外，大于等于v.2.6.4的版本允许用户直接替换代码，新增测试样例
 
 
 
@@ -189,3 +205,20 @@ Reset按钮可以恢复题目的默认测试样例
 **测试样例cv/新增**
 
 ![测试样例](README.assets/测试样例.gif)
+
+
+
+
+
+
+
+## 可能遇到的bug
+
+### 1.题目内容没有以markdown形式呈现
+
+![image-20250113111058959](README.assets/image-20250113111058959.png)
+
+点击solution或者submission, 然后再切换回content. 如果html还未渲染完毕, 可通过Reposition功能重新打开
+
+
+

@@ -25,7 +25,6 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.jetbrains.annotations.Debug;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -81,6 +80,7 @@ public class JavaDebugger extends AbstractDebugger {
         } catch (DebugError e) {
             ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
             LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            return;
         } catch (Exception e) {
             ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
             LogUtils.error(e);
