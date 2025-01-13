@@ -76,13 +76,13 @@ public class JEventHandler implements Runnable {
     /**
      * 处理event, 同时返回是否resume
      *
-     * @param event
+     * @param event event
      * @return false: 需要resume; true: 不需要resume, 需要阻塞
-     * @throws AbsentInformationException
+     * @throws AbsentInformationException exception
      */
     private boolean handleEvent(Event event) throws AbsentInformationException {
         /*
-         debug: 该日志信息在处理invokeMethod导致的阻塞等诸多bug
+         debug: 该日志信息在处理invokeMethod导致阻塞等诸多bug时
          起到关键性作用, 为了纪念下方代码对@author feigebuge
          排查bug做出的杰出贡献, 保留注释forever...
          @date 2025/1/4 17:25
@@ -97,9 +97,9 @@ public class JEventHandler implements Runnable {
         if (event instanceof ClassPrepareEvent) {
             return handleClassPrepareEvent((ClassPrepareEvent) event);
         } else if (event instanceof BreakpointEvent) {
-            return handleBreakpointEvent((BreakpointEvent) event); // 需要停止
+            return handleBreakpointEvent((BreakpointEvent) event);
         } else if (event instanceof StepEvent) {
-            return handleStepEvent((StepEvent) event); // 需要停止
+            return handleStepEvent((StepEvent) event);
         } else if (event instanceof VMStartEvent) {
             return false;
         } else if (event instanceof VMDisconnectEvent) {
@@ -118,17 +118,19 @@ public class JEventHandler implements Runnable {
 
     private boolean handleStepEvent(StepEvent event) {
         /*
-         此处需要区分是否要update location/thread信息. 如果前台正在执行JavaEvaluatorImpl方法, 并且触发invokeMethod
+         此处需要区分前台是否触发invokeMethod方法, 如果前台触发了invokeMethod方法,
          那么不能修改context中的location, thread信息.
          因为invokeMethod会导致stack frame状态变化, 进而导致location, thread等数据发生变化
-         此时如果执行 '非运行TargetVM' 类指令, 如W, P(不进行表达式计算的P指令), 那么会导致得到预料之外的结果
+         此时如果前台执行'非运行TargetVM'类指令, 如W, P指令, 那么会导致得到预料之外的结果
+
          比如:
          现在代码执行到 line 10: int a = 10
          此时用户输入P demo.test(). 那么JavaPInst在解析并执行表达式时, 底层会调用
-         invokeMethod. 而该方法会改变TargetVM的状态, 最终导致的stack frame的变化
-         此时再执行W, P指令, 得到的是demo.test()方法内部的数据, 而不是int a = 10这行
-         代码所在方法的数据.
-         因此需要做出location, thread数据的备份. 保留处理int a = 10时后的stack状态
+         invokeMethod. 而该方法会改变TargetVM的状态, 最终导致的stack frame的变化. 如果此时更新
+         location, thread. 那么这些信息将存储的时demo.test()内部的数据.
+         此时再执行W, P指令, 将无法得到int a = 10这行代码所处函数栈的数据
+
+         因此如果前台触发invokeMethod方法, 则不能修改location, thread信息. 需要保留处理int a = 10时的stack状态
          */
         if (! context.isInvokeMethodStart()) {
             context.setLocation(event.location());
@@ -211,9 +213,9 @@ public class JEventHandler implements Runnable {
             // 这里之所以invoke method check, 是因为在测试时发现一个很操蛋的bug
             /*
                 假设如下场景:
-                代码执行到line 13, 并且line 13存在breakpoint, line 13属于method()
-                此时用户执行表达式method(). 在运行时, TargetVM会执重新执行并在line 13
-                此时任然处于invokeMethod状态, 但是会产生breakpoint event.
+                代码执行到line 13, line 13存在breakpoint, 并且line 13属于method()
+                此时用户执行表达式method(). 在运行时, TargetVM会执method方法, 并会运行到breakpoint 13行
+                与此同时, TargetVM会返回breakpoint event
 
                 该事件会被当前方法捕获, 如果没有invokeMethod状态检测, 则会产生新的w指令, 而
                 新的w指令将会cover用户输入表达式执行的结果. 导致用户看不到method()表达式计算结果
@@ -253,7 +255,7 @@ public class JEventHandler implements Runnable {
     /**
      * 设置基础信息, 比如location和thread
      *
-     * @param event
+     * @param event event
      */
     private void setContextBasicInfo(LocatableEvent event) {
         context.setLocation(event.location());
