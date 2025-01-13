@@ -85,7 +85,7 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
         int len = testCases.length;
         // 判断测试输入和参数个数是否匹配
         if (len != result.getParameterTypes().length) {
-            throw new DebugError("测试样例数量与" + result.getMethodName() + "入参数量不匹配, 请检查!\r\n测试样例格式 = "
+            throw new DebugError("测试样例数量与" + result.getMethodName() + "入参数量不匹配, 请检查!\r\n测试样例个数 = "
                     + len + " " + result.getMethodName() + "入参个数 = " + result.getParameterTypes().length);
         }
         // 参数类型
