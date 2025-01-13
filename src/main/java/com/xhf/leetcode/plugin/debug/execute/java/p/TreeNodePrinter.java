@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.debug.execute.java.p;
 import com.xhf.leetcode.plugin.debug.analysis.converter.convert.TreeNode;
 
 import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.*;
-import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.WHITE;
 
 /**
  * @author feigebuge

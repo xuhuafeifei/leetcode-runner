@@ -8,6 +8,7 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 /**
+ * 抽象代码分析器, 分析核心代码片段, 返回分析结果{@link AnalysisResult}
  * @author feigebuge
  * @email 2508020102@qq.com
  */

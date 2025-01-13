@@ -18,14 +18,14 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang.ArrayUtils;
 
 import javax.swing.*;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static javax.swing.JOptionPane.*;
+import static javax.swing.JOptionPane.OK_OPTION;
 
 /**
  * @author feigebuge

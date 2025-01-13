@@ -17,7 +17,7 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
 
-import static javax.swing.JOptionPane.*;
+import static javax.swing.JOptionPane.OK_OPTION;
 
 /**
  * 启动Java环境的debug

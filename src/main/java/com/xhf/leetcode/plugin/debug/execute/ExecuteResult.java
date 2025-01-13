@@ -16,6 +16,8 @@ public class ExecuteResult {
      * 现在不配合Operation.NULL, moreInfo服务于捕获debug代码的std out / std error
      * ---------------------
      * 该字段目前存在新用途(PyDebugger中使用), 需要保留
+     * ------------------------
+     * 该字段存在很多用途, 可以很好的适配无法统一到Instruction体系的特殊指令
      */
     @SerializedName("more_info")
     private String moreInfo;

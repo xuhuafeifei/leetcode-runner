@@ -14,14 +14,11 @@ import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.Safe;
 import com.xhf.leetcode.plugin.utils.UnSafe;
-import com.xhf.leetcode.plugin.window.LCConsolePanel;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.Date;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author feigebuge

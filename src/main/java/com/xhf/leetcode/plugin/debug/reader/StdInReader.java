@@ -19,7 +19,6 @@ public class StdInReader extends CommandReader{
     @Override
     protected String readCommand() {
         Scanner sc = new Scanner(System.in);
-        String res = sc.nextLine();
-        return res;
+        return sc.nextLine();
     }
 }

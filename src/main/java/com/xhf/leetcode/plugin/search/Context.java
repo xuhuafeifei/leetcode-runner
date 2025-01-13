@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.search;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Stack;
 
 /**
  * 上下文数据, 保留文本处理过程中的上下文信息

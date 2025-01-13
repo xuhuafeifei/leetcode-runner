@@ -51,7 +51,7 @@ import java.util.Map;
 public class DebugUtils {
     /**
      * 打印进程输出结果
-     * @param process
+     * @param process process
      * @param asyn 是否异步
      */
     public static void printProcess(Process process, boolean asyn, Project project) {
@@ -115,8 +115,8 @@ public class DebugUtils {
 
     /**
      * 同时写入log和consoleView
-     * @param message
-     * @param project
+     * @param message message
+     * @param project project
      */
     public static void simpleDebug(String message, Project project) {
         simpleDebug(message, project, ConsoleViewContentType.NORMAL_OUTPUT);
@@ -349,7 +349,7 @@ public class DebugUtils {
     /**
      * 根据Location构建行信息
      * @param location location
-     * @return
+     * @return 行信息
      */
     public static String buildCurrentLineInfoByLocation(Location location) {
         String className = location.declaringType().name(); // 类名
@@ -398,8 +398,8 @@ public class DebugUtils {
 
     /**
      * 服务于变量转换
-     * @param values
-     * @return
+     * @param values values
+     * @return  map
      */
     public static Map<String, Value> convert(Map<LocalVariable, Value> values) {
         Map<String, Value> res = new HashMap<>();
@@ -411,8 +411,8 @@ public class DebugUtils {
 
     /**
      * 哎，不想命名了, 就这吧
-     * @param  values
-     * @return
+     * @param  values values
+     * @return map
      */
     public static Map<String, Value> convert2(Map<Field, Value> values) {
         Map<String, Value> res = new HashMap<>();

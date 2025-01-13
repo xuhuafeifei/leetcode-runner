@@ -1,11 +1,9 @@
 package com.xhf.leetcode.plugin.utils;
 
-import com.google.common.base.CharMatcher;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.actionSystem.DataKey;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.model.Question;
-import com.xhf.leetcode.plugin.window.LCPanel;
 import com.xhf.leetcode.plugin.window.StdPanel;
 
 /**

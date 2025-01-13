@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.window;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.JBColor;
-import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.fields.ExtendableTextComponent;
 import com.intellij.ui.components.fields.ExtendableTextField;

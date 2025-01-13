@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.io.file.utils;
 
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.net.URL;

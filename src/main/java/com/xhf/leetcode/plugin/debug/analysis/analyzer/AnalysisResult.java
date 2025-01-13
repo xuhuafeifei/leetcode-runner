@@ -1,5 +1,11 @@
 package com.xhf.leetcode.plugin.debug.analysis.analyzer;
 
+/**
+ * 核心代码分析结果
+ * methodName: 方法名
+ * returnType: 返回类型
+ * parameterTypes: 参数类型
+ */
 public class AnalysisResult {
     private String methodName;
     private String returnType;

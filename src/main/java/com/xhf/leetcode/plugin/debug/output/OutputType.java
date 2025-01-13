@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.debug.output;
 
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.reader.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -52,14 +51,15 @@ public enum OutputType {
 
     /**
      * 通过output子类构造函数创建
-     * @param outputTypeName
-     * @param project
-     * @return
+     * @param outputTypeName outputType
+     * @param project project
+     * @return output
      */
     public static Output getOutputInstanceByTypeName(@NotNull String outputTypeName, @NotNull Project project) {
         OutputType outputType = getByName(outputTypeName);
         try {
             assert outputType != null;
+            // 通过output的构造函数创建output. 所有output子类必须继承AbstractOutput, 并且必须有Project的构造函数
             return outputType.output.getDeclaredConstructor(Project.class).newInstance(project);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);

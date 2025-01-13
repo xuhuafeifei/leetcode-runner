@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.debug.output;
 
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 
 /**
@@ -32,5 +31,9 @@ public abstract class IOOutput extends AbstractOutput{
         outputTo(output);
     }
 
+    /**
+     * 允许子类确定不同的输出位置
+     * @param output 输出内容
+     */
     protected abstract void outputTo(String output);
 }

@@ -1,8 +1,6 @@
 package com.xhf.leetcode.plugin.debug.analysis.analyzer;
 
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.analysis.analyzer.AbstractCodeAnalyzer;
-import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
@@ -12,6 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * python 代码分析器
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

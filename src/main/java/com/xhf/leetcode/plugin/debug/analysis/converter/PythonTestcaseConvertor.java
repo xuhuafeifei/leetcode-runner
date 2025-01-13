@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.debug.analysis.converter;
 
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
-import com.xhf.leetcode.plugin.debug.analysis.converter.convert.AbstractVariableConvertor;
 import com.xhf.leetcode.plugin.debug.analysis.converter.convert.VariableConvertor;
 
 /**
@@ -18,7 +17,8 @@ public class PythonTestcaseConvertor extends AbstractTestcaseConvertor {
     }
 
     @Override
-    protected String doConvert(String[] testCases, StringBuilder sb) {
+    protected String createInstanceCallCode(String[] varNames, String instanceName) {
+        StringBuilder sb = new StringBuilder();
         sb.append(VariableConvertor.TAB).append(instanceName).append(".").append(result.getMethodName()).append("(");
         // 添加方法调用
         for (int i = 0; i < varNames.length; i++) {

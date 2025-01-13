@@ -52,17 +52,14 @@ public abstract class AbstractPythonInstExecutor implements InstExecutor {
         if (pyResponse == null) {
             return disConnectedResult(inst.getOperation());
         }
-        ExecuteResult data = pyResponse.getData();
-        // data.setHasResult(true);
-        return data;
+        return pyResponse.getData();
     }
 
     /**
-     * 纠正结果操作, 目前用于处理addLine. 因为python用于debugger的文件添加了通用import 语句
-     * 和真实编写的文件相比, 存在行数上的偏差
+     * 纠正结果操作, 目前用于处理行号信息. 因为python调试服务对于用户编写的文件做出额外处理, 在debug过程中新增大量的import语句
+     * 因此和编写的文件相比, 存在行数上的偏差, 需要进行结果纠正
      *
-     * @param result
-     * @return
+     * @param result 执行结果
      */
     protected final void correctResult(ExecuteResult result, PyContext pCtx) {
         int addLine = result.getAddLine();
@@ -76,12 +73,12 @@ public abstract class AbstractPythonInstExecutor implements InstExecutor {
 
     /**
      * 匹配与更换信息
-     * 该方法匹配形如 breakpoint at line 数字   的String. 并且将数字加上offset
+     * 该方法匹配形如 'breakpoint at line 数字' 的内容. 并且在'数字'累加offset
      * 请注意, 该方法只能匹配单行数据, 也就是说input不能包含换行符, 且必须是 line 数字 这样的形式
      *
-     * @param input
-     * @param offset
-     * @return
+     * @param input input
+     * @param offset offset
+     * @return String
      */
     protected String matchLine(String input, int offset) {
         // 正则匹配数字的模式
@@ -103,6 +100,11 @@ public abstract class AbstractPythonInstExecutor implements InstExecutor {
         inst.setParam(String.valueOf(lineNumber));
     }
 
+    /**
+     * 返回断开连接的result
+     * @param op operation
+     * @return r
+     */
     protected ExecuteResult disConnectedResult(Operation op) {
         ExecuteResult success = ExecuteResult.success(op);
         success.setMoreInfo(PY_SERVER_DISCONNECT);

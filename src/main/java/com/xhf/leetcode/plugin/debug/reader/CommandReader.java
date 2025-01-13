@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.command.parser.InstParserImpl;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * 命令读取器, 读取命令并解析为指令
@@ -26,7 +25,7 @@ public abstract class CommandReader extends AbstractInstReader{
             throw new InterruptedException("阻塞队列消费被打断");
         }
         DebugUtils.simpleDebug("command = " + res, project, ConsoleViewContentType.USER_INPUT);
-        if (res == null || res.equals("stop") || res.equals("exit")) {
+        if (res.equals("stop") || res.equals("exit")) {
             return Instruction.quit(this.readType);
         }
         // 解析指令, 并执行
@@ -37,5 +36,9 @@ public abstract class CommandReader extends AbstractInstReader{
         return parse;
     }
 
+    /**
+     * 返回读取到的命令, 允许子类从不同的来源读取
+     * @return 命令
+     */
     protected abstract String readCommand();
 }

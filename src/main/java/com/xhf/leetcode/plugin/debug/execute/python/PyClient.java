@@ -2,21 +2,14 @@ package com.xhf.leetcode.plugin.debug.execute.python;
 
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.DebugManager;
-import com.xhf.leetcode.plugin.debug.command.operation.Operation;
-import com.xhf.leetcode.plugin.debug.debugger.Debugger;
 import com.xhf.leetcode.plugin.debug.debugger.PythonDebugger;
-import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
-import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.model.HttpRequest;
 import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
-import org.junit.Test;
-
-import java.util.Map;
 
 /**
  * python client, 负责于启动debug的python服务交互

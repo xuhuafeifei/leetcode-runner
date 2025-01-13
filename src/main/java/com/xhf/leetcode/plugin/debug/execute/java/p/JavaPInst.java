@@ -70,9 +70,9 @@ public class JavaPInst extends AbstractJavaInstExecutor {
      * @param inst 指令
      * @param context 上下文
      * @return res
-     * @throws ClassNotLoadedException
-     * @throws IncompatibleThreadStateException
-     * @throws AbsentInformationException
+     * @throws ClassNotLoadedException ClassNotLoadedException
+     * @throws IncompatibleThreadStateException IncompatibleThreadStateException
+     * @throws AbsentInformationException AbsentInformationException
      */
     private String checkAndGetValue(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
         if (inst.getOperation() == Operation.P) {
@@ -85,12 +85,12 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     /**
      * 执行watch指令
-     * @param inst
-     * @param context
-     * @return
-     * @throws ClassNotLoadedException
-     * @throws IncompatibleThreadStateException
-     * @throws AbsentInformationException
+     * @param inst inst
+     * @param context context
+     * @return string
+     * @throws ClassNotLoadedException ClassNotLoadedException
+     * @throws IncompatibleThreadStateException IncompatibleThreadStateException
+     * @throws AbsentInformationException AbsentInformationException
      */
     private String doWATCH(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
         String exp = inst.getParam();
@@ -100,12 +100,12 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     /**
      * 执行P指令
-     * @param inst
-     * @param context
-     * @return
-     * @throws ClassNotLoadedException
-     * @throws IncompatibleThreadStateException
-     * @throws AbsentInformationException
+     * @param inst inst
+     * @param context context
+     * @return string
+     * @throws ClassNotLoadedException ClassNotLoadedException
+     * @throws IncompatibleThreadStateException IncompatibleThreadStateException
+     * @throws AbsentInformationException AbsentInformationException
      */
     private String doP(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
         StringBuilder res = new StringBuilder();
@@ -123,8 +123,8 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     /**
      * 检查watch pool, 如果存在内容, 执行计算逻辑
-     * @param context
-     * @return
+     * @param context context
+     * @return string
      */
     private String getWatchPool(Context context) {
         StringBuilder res = new StringBuilder();
@@ -140,9 +140,9 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     /**
      * 计算表达式
-     * @param exp
-     * @param context
-     * @return
+     * @param exp exp
+     * @param context context
+     * @return string
      */
     private String computeExpression(String exp, Context context) {
         StringBuilder res = new StringBuilder();
@@ -160,13 +160,13 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     /**
      * 获取当前执行环境存在的变量
-     * @param thread
-     * @param location
-     * @param context
-     * @return
-     * @throws IncompatibleThreadStateException
-     * @throws AbsentInformationException
-     * @throws ClassNotLoadedException
+     * @param thread thread
+     * @param location location
+     * @param context context
+     * @return string
+     * @throws ClassNotLoadedException ClassNotLoadedException
+     * @throws IncompatibleThreadStateException IncompatibleThreadStateException
+     * @throws AbsentInformationException AbsentInformationException
      */
     private String getVariable(ThreadReference thread, Location location, Context context) throws IncompatibleThreadStateException, AbsentInformationException, ClassNotLoadedException {
         // 获取当前栈帧

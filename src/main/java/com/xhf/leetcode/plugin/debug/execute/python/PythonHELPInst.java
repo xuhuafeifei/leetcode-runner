@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.debug.execute.python;
 
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
-import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 
 /**

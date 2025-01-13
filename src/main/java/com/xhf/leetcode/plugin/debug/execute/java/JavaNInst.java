@@ -18,12 +18,12 @@ public class JavaNInst extends AbstractJavaInstExecutor {
     @Override
     public ExecuteResult doExecute(Instruction inst, Context context) {
         /*
-         * 如果是UI输出, 则生产打印指令, 并且不执行任何操作
+         * 如果是UI输出, 则生产打印指令, 如此则能实现的效果是高亮下一行代码. 如果在N指令执行时高亮代码, 则无法达成效果
          *
-         * 该功能实现的效果是高亮下一行代码. 因为N指令执行具有延迟性, N指令执行时获取的任何数据都没有下一行的信息
+         * 因为N指令执行具有延迟性, N指令执行时获取的任何数据都没有下一行的信息
          * 因此无法直接高亮显示下一行代码.
          *
-         * 之所以要生成打印指令, 是因为N指令执行无法真正让代码运行到下一行. 因此高亮显示的代码
+         * N指令执行无法真正让代码运行到下一行. 因此高亮显示的代码
          * 是当前行, 而不是下一行.
          *
          * 为了解决上述问题, 通过延迟高亮显示的方式解决. 每次执行N指令, 都会产生一条W指令. 当N指令执行完成
@@ -35,7 +35,7 @@ public class JavaNInst extends AbstractJavaInstExecutor {
          * step0: 输入N指令
          * step1 :读取N指令
          * step2: 执行N指令, 产生W指令
-         * step3: 检测到N指令, 终止读取, 回复所有线程, debug运行下一行代码 -> line code 14
+         * step3: 检测到N指令, 恢复所有线程, debug运行下一行代码 -> line code 14
          * step4: 读取到W指令
          * step5: 执行W指令
          * step6: 高亮当前代码 -> line code 14

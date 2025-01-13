@@ -1,10 +1,10 @@
 package com.xhf.leetcode.plugin.debug.execute.java;
 
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.InstructionFactory;
 import com.xhf.leetcode.plugin.debug.execute.java.p.JavaPInst;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
-import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 
 /**
  * @author feigebuge

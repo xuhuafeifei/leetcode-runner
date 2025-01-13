@@ -1,11 +1,7 @@
 package com.xhf.leetcode.plugin.debug.execute.python;
 
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import org.apache.commons.lang.StringUtils;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author feigebuge

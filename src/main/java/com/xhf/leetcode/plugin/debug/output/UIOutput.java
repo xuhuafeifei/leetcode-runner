@@ -141,7 +141,7 @@ public class UIOutput extends AbstractOutput{
     /**
      * 如果是命令行输入, 则需要将结果输出到UI界面
      * 如果是UI输入, 则高亮显示
-     * @param r
+     * @param r r
      */
     @Adapt(adaptType = {ReadType.COMMAND_IN})
     private void doW(ExecuteResult r) {
@@ -189,7 +189,7 @@ public class UIOutput extends AbstractOutput{
 
     /**
      * 该方法同样是为了拓展功能适配. [Command-Reader + UI-output]时, 才进行输出
-     * @param r
+     * @param r r
      */
     @Adapt(adaptType = {ReadType.COMMAND_IN})
     private void doB_new(ExecuteResult r) {
@@ -214,7 +214,7 @@ public class UIOutput extends AbstractOutput{
     /**
      * 当作小trick. 从最开始的设计角度来说, P指令是服务于{Command_line_input, Console_output}, 并不适合与UI显示.
      * 但为了方便用户, 拓展不同的组合, 允许P指令在UI界面显示.
-     * @param r
+     * @param r r
      */
     @Adapt(adaptType = {ReadType.COMMAND_IN, ReadType.UI_IN})
     private void doP(ExecuteResult r) {
@@ -240,7 +240,7 @@ public class UIOutput extends AbstractOutput{
     @interface Adapt {
         /**
          * 适配的输入类型
-         * @return
+         * @return ReadType[]
          */
         ReadType[] adaptType();
     }

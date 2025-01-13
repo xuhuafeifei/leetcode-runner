@@ -4,8 +4,10 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
-import java.util.regex.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Java代码分析器

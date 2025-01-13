@@ -17,10 +17,9 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
-
 import java.io.IOException;
 
-import static javax.swing.JOptionPane.*;
+import static javax.swing.JOptionPane.OK_OPTION;
 
 /**
  * @author feigebuge

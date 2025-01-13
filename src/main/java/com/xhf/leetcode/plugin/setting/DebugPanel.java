@@ -2,10 +2,8 @@ package com.xhf.leetcode.plugin.setting;
 
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBRadioButton;
-import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
-import com.xhf.leetcode.plugin.utils.Constants;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;

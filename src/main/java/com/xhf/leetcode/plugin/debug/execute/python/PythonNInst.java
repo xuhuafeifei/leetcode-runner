@@ -1,14 +1,10 @@
 package com.xhf.leetcode.plugin.debug.execute.python;
 
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
-import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
-import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
-import com.xhf.leetcode.plugin.model.HttpRequest;
-import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 
 /**

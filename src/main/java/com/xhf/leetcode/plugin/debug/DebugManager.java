@@ -3,14 +3,9 @@ package com.xhf.leetcode.plugin.debug;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.bus.DebugEndEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.debugger.*;
-import com.xhf.leetcode.plugin.debug.env.AbstractDebugEnv;
-import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
-import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
-import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import java.util.HashMap;

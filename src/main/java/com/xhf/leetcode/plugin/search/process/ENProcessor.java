@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.search.process;
 import com.xhf.leetcode.plugin.search.Context;
 import com.xhf.leetcode.plugin.search.Iterator;
 import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
-import org.apache.lucene.analysis.CharacterUtils;
 
 /**
  * @author feigebuge

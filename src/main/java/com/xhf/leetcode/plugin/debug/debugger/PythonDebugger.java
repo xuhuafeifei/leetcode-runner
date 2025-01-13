@@ -24,7 +24,6 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import com.xhf.leetcode.plugin.window.StdPanel;
 
 import java.io.File;
 import java.io.IOException;

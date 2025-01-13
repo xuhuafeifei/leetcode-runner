@@ -1,8 +1,5 @@
 package com.xhf.leetcode.plugin.service;
 
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.editors.SubmissionEditor;

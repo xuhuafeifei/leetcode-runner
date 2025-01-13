@@ -7,14 +7,9 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.SplitEditorToolbar;
-import com.intellij.openapi.util.Key;
-import com.xhf.leetcode.plugin.utils.RandomUtils;
-import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.beans.PropertyChangeListener;
 
 /**
  * 拥有包含copy能力的toolbar的fileEditor

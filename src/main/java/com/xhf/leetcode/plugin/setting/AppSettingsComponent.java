@@ -1,7 +1,5 @@
 package com.xhf.leetcode.plugin.setting;
 
-import com.intellij.icons.AllIcons;
-import com.intellij.ide.HelpTooltip;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
@@ -11,7 +9,6 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LangType;
 import org.jetbrains.annotations.NotNull;

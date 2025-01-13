@@ -56,8 +56,8 @@ public class InstSource {
 
     /**
      * 存储指令
-     * @param instruction
-     * @return
+     * @param instruction 指令信息
+     * @return 是否存储成功
      */
     public static boolean uiInstInput(Instruction instruction) {
         return uiBQ.offer(instruction);
@@ -66,7 +66,7 @@ public class InstSource {
     /**
      * 消费指令
      * 不能给方法上锁, 因为take()方法是阻塞的
-     * @return
+     * @return 指令信息
      */
     public static Instruction consumeInst() {
         try {
