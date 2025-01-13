@@ -8,11 +8,11 @@
 
 ## 插件介绍
 
-`Leetcode-runner`是一款idea插件。旨在实现一个核心功能完备，且简洁容易上手的Leetcode刷题插件。Leetcode-runner支持日常刷题所需的一切功能，如**代码编写**、**代码运行/提交**、**测试案例更换**、**运行结果显示**、**题解展示**、**提交记录展示**、**代码替换**、**测试案例替换**等功能，实现脱离Web端LeetCode刷算法
+`Leetcode-runner`是一款idea插件。旨在实现一个核心功能完备，且简洁容易上手的Leetcode刷题插件。插件支持日常刷题所需的一切功能，如**代码编写**、**代码运行/提交**、**测试案例更换**、**运行结果显示**、**题解展示**、**提交记录展示**、**代码替换**、**测试案例替换**等功能，实现脱离Web端刷leetcode
 
 此外，插件项目还提供另外两个极为强大的功能。分别是**大批量题目快速检索**，**核心代码断点调试**
 
-关于项目，拥有详细的使用文档和开发文档，并且拥有详细的注释且代码符合Java行业通用的开发规范
+本项目拥有详细的使用文档和开发文档，代码有着详细的注释且符合Java行业通用的开发规范
 
 
 
@@ -114,6 +114,67 @@
 
 
 
+## 支持功能
+
+**v3.4.0**
+
+| 所属模块                       | 功能                              | 介绍                           |
+| ------------------------------ | --------------------------------- | ------------------------------ |
+| 登录                           | Web Auth                          | 模拟web登录                    |
+|                                | Cookie Login                      | 设置cookie登录                 |
+| 题目列表                       | list all                          | 展示所有题目                   |
+|                                | pick one                          | 随机一题                       |
+|                                | daily question                    | 每日一题                       |
+|                                | search question                   | 搜索题目                       |
+|                                | filter question                   | 筛选题目                       |
+|                                | reposition                        | 重定位代码文件                 |
+|                                | reload question                   | 重新查询题目                   |
+|                                | reposition                        | 重定位并重新打开题目文件       |
+| 题目详情                       | 题目展示                          | 题目展示                       |
+|                                | 题解展示                          | 题解展示                       |
+|                                | 提交记录展示                      | 提交记录展示                   |
+|                                | 提交记录代码替换                  | 提交记录代码替换               |
+|                                | 提交记录代码copy                  | 提交记录代码copy               |
+|                                | 错误提交记录的错误信息呈现        | 错误提交记录的错误信息呈现     |
+|                                | 错误提交记录的错误测试案例新增    | 错误提交记录的错误测试案例新增 |
+|                                | 错误提交记录的错误测试案例copy    | 错误提交记录的错误测试案例新增 |
+| coding editor                  | Run Code                          | 运行代码                       |
+|                                | Submit Code                       | 提交代码                       |
+|                                | Test cases                        | 设置测试案例                   |
+|                                | default Code                      | 恢复默认代码                   |
+|                                | RePosition                        | 定位代码                       |
+|                                | Debug                             | 调试当前代码                   |
+| plugin setting                 | 设置语言                          | 设置语言                       |
+|                                | 设置存储路径                      | 设置存储路径                   |
+|                                | 设置debug read type               | 设置debug read type            |
+|                                | 设置debug output type             | 设置debug output type          |
+| debug【支持指令】              | run                               | 运行代码                       |
+|                                | b 行号                            | 在对应行添加断点               |
+|                                | step into                         | step into                      |
+|                                | step over                         | step over                      |
+|                                | step out                          | step out                       |
+|                                | p                                 | 打印当前变量                   |
+|                                | p exp                             | 计算表达式exp                  |
+|                                | watch exp                         | 监视表达式exp                  |
+|                                | remove b 行号                     | 移除断点                       |
+|                                | remove all b                      | 移除所有断点                   |
+|                                | show b                            | 展示所有断点                   |
+|                                | w                                 | 显示当前执行代码               |
+|                                | help                              | help指令，显示所有命令行功能   |
+|                                | stop/quit                         | 终止debug                      |
+| debug【模块功能-read模块】     | 标准输入读取指令                  |                                |
+|                                | 命令行读取指令                    |                                |
+|                                | 通过UI读取指令                    |                                |
+| debug【模块功能-execute模块】  | Java debug执行                    |                                |
+|                                | python debug执行                  |                                |
+| debug【模块功能-output模块】   | 标准输出显示结果                  |                                |
+|                                | Console显示结果                   |                                |
+|                                | UI显示结果                        |                                |
+| debug【模块功能-标准输出捕获】 | 支持Java代码的stdout/stderr捕获   |                                |
+|                                | 支持python代码的stdout/stderr捕获 |                                |
+
+
+
 ## 插件安装
 
 当前版本，leetcode-runner并未在idea的插件市场上注册，如果想要使用插件，需要通过手动方式按照
@@ -208,6 +269,80 @@
 
 
 
+### 4. 每日一题
+
+![image-20250113112630371](README.assets/image-20250113112630371.png)
+
+点击按钮，将获得当天需要完成的每日一题，该功能也是作者常用的功能，桀桀
+
+
+
+### 5. 搜索 + 筛选功能
+
+![searcg](README.assets/searcg.gif)
+
+
+
+### 3. debug
+
+debug模块是leetcode-runner提供的一个较为强大的功能。该功能允许用户无需任何操作，省去函数入口编写，测试案例转换等诸多繁琐的额外编码，直接对核心代码断点调试，且适用于绝大部分的leetcode题目。值得一提的是，市场上同类型的插件产品**都不支持对核心代码debug调试**，且该功能在leetcode官网使用需要付费
+
+
+
+leetcode-runner目前支持Java、python的代码断点调试。支持`运行`, `step over`，`step into`，`step out`，`打印局部、成员、静态变量`，`表达式计算`，`表达式监视`，`执行代码高光`等诸多功能。并且支持标准输入读取、命令行读取、UI读取 + 标准输出显示、控制台显示 、UI显示等组合功能
+
+
+
+[视频介绍链接](https://www.bilibili.com/video/BV15tc1eLEpa/)
+
+
+
+#### 3.1. debug设置
+
+在使用debug功能前，系统会进行配置检测。如果debug configuration为空，则会自动弹出设置界面，要求进行debug配置
+
+![image-20250113113551833](README.assets/image-20250113113551833.png)
+
+- read type
+  - 设置debug模式下, 指令输入来源。推荐使用UI指令读取。标准输入读取指令/命令行读取指令适合熟悉命令行的开发人员
+
+- output type
+  - 设置debug模式下, 调试内容显示位置。推荐使用UI显示。标准输出显示/console显示适合熟悉命令行的开发人员
+
+
+
+#### 3.2. 启动debug功能
+
+<img src="README.assets/image-20250113113950554.png" alt="image-20250113113950554" style="zoom:50%;" />
+
+点击debug按钮，开启debug功能
+
+随后系统将会弹出引导对话框，要求用户进行必要的设置
+
+- Java目录选择
+
+  - 该选择要求用户指定debug启动的Java版本，指定Java目录后，系统会自动检测{home}\bin\java.exe是否存在
+
+    <img src="README.assets/image-20250113114109071.png" alt="image-20250113114109071" style="zoom:50%;" />
+
+  - 如果不存在，则会报错<img src="README.assets/image-20250113114409128.png" alt="image-20250113114409128" style="zoom:50%;" />
+
+- 测试案例选择
+
+  - 有关测试案例，系统只允许提供一轮的测试案例
+
+    <img src="README.assets/image-20250113114448067.png" alt="image-20250113114448067" style="zoom:50%;" />
+
+  - 如果提供多轮，系统则会报错
+
+    ![image-20250113120003319](README.assets/image-20250113120003319.png)
+
+
+
+#### 3.3. debug成功
+
+<img src="README.assets/image-20250113124652809.png" alt="image-20250113124652809" style="zoom:50%;" />
+
 
 
 
@@ -216,9 +351,18 @@
 
 ### 1.题目内容没有以markdown形式呈现
 
-![image-20250113111058959](README.assets/image-20250113111058959.png)
+<img src="README.assets/image-20250113111058959.png" alt="image-20250113111058959" style="zoom:50%;" />
 
 点击solution或者submission, 然后再切换回content. 如果html还未渲染完毕, 可通过Reposition功能重新打开
 
+![image-20250113132718495](README.assets/image-20250113132718495.png)
 
 
+
+### 2. 过滤得不到任何题目
+
+<img src="README.assets/image-20250113132532417.png" alt="image-20250113132532417" style="zoom:50%;" />
+
+点击reload question，重新查询题目
+
+![image-20250113132633574](README.assets/image-20250113132633574.png)
