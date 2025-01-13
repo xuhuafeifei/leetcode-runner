@@ -10,8 +10,8 @@ import org.junit.Test;
 public class JexlTest {
     @Test
     public void test1() {
-        Object execute = JavaEvaluatorImpl.ComputeEngin.execute("1+1");
-        execute = JavaEvaluatorImpl.ComputeEngin.execute("\"1234\"+1");
+        Object execute = JavaEvaluatorImpl.ComputeEngine.execute("1+1");
+        execute = JavaEvaluatorImpl.ComputeEngine.execute("\"1234\"+1");
         System.out.println(execute);
     }
 }

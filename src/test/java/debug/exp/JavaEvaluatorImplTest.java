@@ -8,8 +8,6 @@ import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.regex.Matcher;
-
 import static org.junit.Assert.assertTrue;
 
 public class JavaEvaluatorImplTest {
@@ -73,7 +71,16 @@ public class JavaEvaluatorImplTest {
         assert JavaEvaluatorImpl.TokenFactory.AbstractRule.arrayPattern.matcher("arr[0] + 1").find();
         assert JavaEvaluatorImpl.TokenFactory.AbstractRule.arrayPattern.matcher("arr[0].invoke() + 1").find();
 
-        Matcher matcher1 = JavaEvaluatorImpl.TokenFactory.AbstractRule.arrayPattern.matcher("arr[0].invoke() + 1");
+
+        JavaEvaluatorImpl.TokenFactory.MyMatcher matcher2 = JavaEvaluatorImpl.TokenFactory.AbstractRule.arrayPattern.matcher("arr[0][b[1][2]] + 2");
+        matcher2.find();
+        assert matcher2.end() == (108 - 94 + 1);
+
+        JavaEvaluatorImpl.TokenFactory.MyMatcher matcher3 = JavaEvaluatorImpl.TokenFactory.AbstractRule.arrayPattern.matcher("arr[d.demo][b[1][2] + 2.b * c[0]] + 2");
+        matcher3.find();
+        assert matcher3.end() == (159 - 127 + 1);
+
+        JavaEvaluatorImpl.TokenFactory.MyMatcher matcher1 = JavaEvaluatorImpl.TokenFactory.AbstractRule.arrayPattern.matcher("arr[0].invoke() + 1");
         assert matcher1.find();
         assert matcher1.end() == 6;
     }
@@ -229,9 +236,11 @@ public class JavaEvaluatorImplTest {
 
     @Test
     public void test2() throws Exception{
+        assert 13 == CharacterHelper.matchArrayBracketSafe("a[0][b[1][2]]", 1);
+//        assert 12 == CharacterHelper.matchArrayBracket("a[0][b[1][2]]", 0);
         assertNoDebugError("1 + a.invoke(b, c, d)");
         assertDebugError("[(1)");
-        assertDebugError("a.invoke(1 + 2, b, c).test()");
+        assertNoDebugError("a.invoke(1 + 2, b, c).test()");
         assertNoDebugError("a.invoke(b.test(), c[0][1][2].demo()) + 2");
         assertDebugError("[(1)");
         assertDebugError("a.invoke(1 += 2, b, c).test()");

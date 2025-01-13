@@ -4,6 +4,8 @@
 package com.xhf.leetcode.plugin.search.utils;
 
 import com.xhf.leetcode.plugin.exception.ComputeError;
+import com.xhf.leetcode.plugin.utils.Safe;
+import com.xhf.leetcode.plugin.utils.UnSafe;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Stack;
@@ -191,14 +193,51 @@ public class CharacterHelper {
 	}
 
 	/**
+	 * 匹配中括号, 要求start位置必须是[. 如果匹配成功, 返回匹配]的下一个位置. 如果匹配失败, 返回-1
+	 * 该方法区别于{@link #matchArrayBracket(String, int)}, 如果匹配失败, 不会报错
+	 * @param sub string
+	 * @param start 开始位置
+	 * @return end结尾位置
+	 */
+	@Safe
+	public static int matchArrayBracketSafe(String sub, int start) {
+		int res = -1;
+		if (sub.charAt(start) != '[') {
+			return res;
+		}
+		Stack<Character> stack = new Stack<>();
+		for (int i = start; i < sub.length(); ++i) {
+			char c = sub.charAt(i);
+			if (c == '[') {
+				stack.add(c);
+			} else if (c == ']') {
+				// 此处理应报错, 但方法是safe, 不进行异常的抛出
+				if (stack.isEmpty()) {
+					return -1;
+				}
+				stack.pop();
+				// 检测下一位的合法性. 如果下一位不是[  , 说明数组括号已经匹配完毕
+				if (i + 1 < sub.length() && stack.isEmpty() && sub.charAt(i + 1) != '[') {
+					return i + 1;
+				}
+				res = i + 1;
+			}
+		}
+		return res;
+	}
+
+	/**
 	 * 匹配数组的中括号, 并返回结束位置. 结束位置是数组括号结束位置的下一位
 	 * eg:
 	 * arr[0][1]+1, 返回的是+号的位置
 	 *
-	 * @param sub
-	 * @param start
-	 * @return
+	 * @param sub string
+	 * @param start 开始位置
+	 * @return end
 	 */
+	@UnSafe("该方法如果无法匹配到合法括号, 会抛出异常" +
+			"此外, 该方法还存在严重缺陷, 对于[]内还包含[], 可能会匹配得到错误的下标, 如a[b[1][2]]")
+	@Deprecated
 	public static int matchArrayBracket(String sub, int start) {
 		Pattern pattern = Pattern.compile("\\[.*?\\](\\[.*?\\])*");
 		Matcher m = pattern.matcher(sub);
@@ -221,16 +260,15 @@ public class CharacterHelper {
 		return r;
 	}
 
-
 	/**
 	 * 从start位置开始匹配, 匹配出链式调用的结束位置
 	 * 此外, start位置必须是链式调用的开始标志 : '.'
 	 * eg:
 	 * matchChain(test.a.b().arr[0] + 1, 4) : 返回值是 17, 该位置表示链式调用结束
 	 *
-	 * @param sub
-	 * @param start
-	 * @return
+	 * @param sub string
+	 * @param start start
+	 * @return int
 	 */
 	public static int matchChain(String sub, int start) {
 		if (sub.charAt(start) != '.') {
@@ -257,7 +295,7 @@ public class CharacterHelper {
 					chainEnd = true;
 				} else if (c == '[') {
 					// 匹配数组括号
-					end = CharacterHelper.matchArrayBracket(sub, end) - 1;
+					end = CharacterHelper.matchArrayBracketSafe(sub, end) - 1;
 					chainEnd = true;
 				} else if (end + 1 < sub.length() && sub.charAt(end + 1) == '.') {
 					chainEnd = true;
@@ -283,9 +321,9 @@ public class CharacterHelper {
 	 * eg:
 	 * getChainCnt(test.a.b().arr[0] + 1, 4) : 返回值是 3
 	 *
-	 * @param sub
-	 * @param start
-	 * @return
+	 * @param sub string
+	 * @param start start
+	 * @return count
 	 */
 	public static int getChainCnt(String sub, int start) {
 		if (sub.charAt(start) != '.') {
@@ -313,7 +351,7 @@ public class CharacterHelper {
 					chainEnd = true;
 				} else if (c == '[') {
 					// 匹配数组括号
-					end = CharacterHelper.matchArrayBracket(sub, end) - 1;
+					end = CharacterHelper.matchArrayBracketSafe(sub, end) - 1;
 					chainEnd = true;
 				} else if (end + 1 < sub.length() && sub.charAt(end + 1) == '.') {
 					chainEnd = true;
@@ -333,8 +371,8 @@ public class CharacterHelper {
 	/**
 	 * 判断是否是eval 表达式
 	 * 详细规则可以查看{@link com.xhf.leetcode.plugin.debug.execute.java.p.JavaEvaluatorImpl.TokenFactory.EvalRule#match(String)}
-	 * @param s
-	 * @return
+	 * @param s s
+	 * @return boolean
 	 */
 	public static boolean isEvalExpression(String s) {
 		char[] arr = s.toCharArray();

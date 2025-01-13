@@ -112,7 +112,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         /**
-         * 通过Value获取成员变量, 并转化为环境数据
+         * 通过Value获取他的成员变量, 并转化为环境数据. Value必须是ObjectReference
          * @param v Value
          * @return 变量池
          */
@@ -149,6 +149,11 @@ public class JavaEvaluatorImpl implements Evaluator {
             return statics;
         }
 
+        /**
+         * 从v中获取静态变量, v必须是ObjectReference
+         * @param v Value
+         * @return map
+         */
         private @NotNull static Map<String, Value> takeStaticValues(Value v) {
             if (v instanceof ObjectReference) {
                 ReferenceType referenceType = ((ObjectReference) v).referenceType();
@@ -161,7 +166,7 @@ public class JavaEvaluatorImpl implements Evaluator {
     /**
      * 计算工具
      */
-    public static class ComputeEngin {
+    public static class ComputeEngine {
         private static final Engine engine = new Engine();
 
         public static Object execute(String expression) {
@@ -217,18 +222,32 @@ public class JavaEvaluatorImpl implements Evaluator {
      * 链式调用的Token
      */
     public interface TokenChain extends Token {
+        /**
+         * 当前Token是否是链式调用的最后一个Token
+         * @param token token
+         * @return boolean
+         */
         boolean isLastChain(String token);
 
         /**
-         * 链式法则, 通过前面的Token获取的Value作为当前链式调用的调用方
+         * 链式调用法则, 通过token前一个调用链封装的到的PValue作为当前链式调用的调用方
          * @param pV 链式调用前一个链式计算结果
          * @return 当前第一个链式执行结果
          */
         Value getValue(PValue pV);
     }
 
+    /**
+     * 封装链式调用的前一个调用者的信息
+     */
     public static class PValue {
+        /**
+         * 前一个调用者的Value
+         */
         final Value value;
+        /**
+         * 前一个调用者的name
+         */
         final String preName;
 
         public PValue(Value value, String preName) {
@@ -334,6 +353,12 @@ public class JavaEvaluatorImpl implements Evaluator {
             return v;
         }
 
+        /**
+         * 从数据源中获取名为vName的变量
+         * @param vName vName
+         * @param dataSource 数据源
+         * @return value
+         */
         protected Value takeValueByVName(String vName, Map<String, Value> dataSource) {
             Value v = null;
             for (Map.Entry<String, Value> next : dataSource.entrySet()) {
@@ -374,7 +399,7 @@ public class JavaEvaluatorImpl implements Evaluator {
          *
          * @param v 参数Value
          * @param type 方法入参类型
-         * @return 是否存在基本类型/包装类型的问题, 并且对应
+         * @return v和type类型不同且是对应的包装类型/基本类型, 或者基本类型/包装类型
          */
         protected boolean checkWrapperAndPrimitive(Value v, Type type) {
             // 判断v和type是否是对应的类型
@@ -505,7 +530,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             }
 
 
-            Object execute = ComputeEngin.execute(sb.toString());
+            Object execute = ComputeEngine.execute(sb.toString());
             /*
             Arrays.asList(
                     "java.lang.Integer", "java.lang.Double", "java.lang.Character", "java.lang.Long",
@@ -617,7 +642,17 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         /**
-         * token只能识别函数调用类型, 不支持链式调用
+         * 解析token, 并返回调用信息
+         * token只能是方法调用或者纯函数调用类型, 且不能是链式调用
+         * <p>
+         * eg:
+         * ----- 正确的 -----
+         * a.invoke()
+         * invoke()
+         * ----- 错误的 -----
+         * a.invoke().b
+         * invoke().b
+         *
          * @param token token
          * @return info
          */
@@ -652,7 +687,11 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         /**
-         * 链式调用过程中, 获取调用者变量
+         * 解析token, 并返回调用信息
+         * token只能是方法调用或者纯函数调用类型, 且不能是链式调用
+         * <p>
+         * 如果是纯函数调用, info.callVName 赋值为前一个链式调用的信息
+         *
          * @param token token
          * @param pValue pValue
          * @return InvokeInfo
@@ -688,6 +727,13 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
 
+        /**
+         * invokeMethod
+         * @param callV 调用Value
+         * @param method 被调用的方法
+         * @param info InvokeInfo
+         * @return 方法返回结果
+         */
         protected Value doInvoke(Value callV, Method method, InvokeInfo info) {
             Context ctx = Env.getCtx();
             // invokeMethod开始执行
@@ -703,6 +749,12 @@ public class JavaEvaluatorImpl implements Evaluator {
             return resultV;
         }
 
+        /**
+         * 从callV中获取method
+         * @param callV 调用者
+         * @param info InvokeInfo
+         * @return Method
+         */
         public Method getMethod(Value callV, InvokeInfo info) {
             String callVName = info.callVName;
             // 方法名字
@@ -718,6 +770,12 @@ public class JavaEvaluatorImpl implements Evaluator {
             return method;
         }
 
+        /**
+         * 处理重载, 目前不支持...
+         * @param callV 调用者
+         * @param info InvokeInfo
+         * @return Method
+         */
         private Method overloadCheck(Value callV, InvokeInfo info) {
             ObjectReference objRef = (ObjectReference) callV;
             Method targetMethod;
@@ -792,7 +850,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         /**
-         * 尝试匹配value类型和方法的入参类型
+         * 尝试匹配value类型和方法的入参类型. 如果Value类型和type类型不一致, 会尝试纠正
          * <p>
          * 如果不匹配, 并且value和type是对应的 基本类型/包装类型, 则自动进行转换
          * <p>
@@ -894,8 +952,17 @@ public class JavaEvaluatorImpl implements Evaluator {
     }
 
     /**
-     * 纯函数调用, 不匹配调用方法的实例, 实例默认为self. 比如dfs(1,2,3). 但a.dfs(1,2,3)或者self.dfs(1,2,3)不会被当前class承认
-     * 但在内部执行时, 会自动将调用函数的实例设置为this
+     * 纯函数调用Token, 匹配规则可见{@link TokenFactory.PureCallRule}
+     * 不匹配调用方法的实例, 实例默认为self.
+     * eg:
+     * -------- 正确的 ----------
+     * dfs(1,2,3)
+     * -------- 错误的 ----------
+     * a.dfs(1,2,3)
+     * self.dfs(1,2,3)
+     * <p>
+     *
+     * 对于dfs(1,2,3), 在系统执行时, 会默认调用者为this
      */
     public static class PureCallToken extends InvokeToken {
 
@@ -919,6 +986,24 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
     }
 
+    /**
+     * 纯函数调用TokenChain, 匹配规则可见{@link TokenFactory.PureCallRuleChain}
+     * 不匹配调用方法的实例, 且必须是链式调用
+     * eg:
+     * -------- 正确的 ----------
+     * dfs(1,2,3).a
+     * dfs(1,2,3).arr
+     * dfs(1,2,3).invoke()
+     * <p>
+     * -------- 错误的 ----------
+     * dfs(1,2,3)
+     * a.dfs(1,2,3)
+     * self.dfs(1,2,3)
+     * self.dfs(1,2,3).invoke()
+     * <p>
+     *
+     * 对于dfs(1,2,3), 在系统执行时, 会默认调用者为this
+     */
     public static class PureCallTokenChain extends PureCallToken implements TokenChain {
 
         public PureCallTokenChain(String token, Context ctx) {
@@ -940,6 +1025,11 @@ public class JavaEvaluatorImpl implements Evaluator {
             return token.substring(0, end);
         }
 
+        /**
+         * 该方法无需考虑this.token是链式调用的结尾. 因为getValue()调用的时机决定了一定不会遇到最后的链式调用
+         * getValue()总是在处理token的最开始调用, 因此不可能存在遇到链式调用的结尾
+         * @return Value
+         */
         @Override
         public Value getValue() {
             String pureCall = getPureCall(token);
@@ -982,7 +1072,7 @@ public class JavaEvaluatorImpl implements Evaluator {
     }
 
     /**
-     * Variable类型的Token
+     * Variable类型的Token, 匹配规则详见{@link TokenFactory.VariableRule}
      */
     public static class VariableToken extends AbstractToken {
 
@@ -1045,7 +1135,6 @@ public class JavaEvaluatorImpl implements Evaluator {
         @Override
         public Value getValue(PValue pValue) {
             String vName = token.substring(0, CharacterHelper.startVNameLen(token));
-            Value pV = pValue.value;
 
             // 从pV中获取名为vName的变量值
             Value value = getVariableValue(vName, pValue);
@@ -1059,7 +1148,12 @@ public class JavaEvaluatorImpl implements Evaluator {
             }
         }
 
-        // 提取获取变量值的公共方法
+        /**
+         * 从pValue中获取变量值
+         * @param vName vName
+         * @param pValue pValue
+         * @return Value
+         */
         private Value getVariableValue(String vName, PValue pValue) {
             Value pV = pValue.value;
             Map<String, Value> memberSource = Env.takeMemberValues(pV);
@@ -1086,7 +1180,7 @@ public class JavaEvaluatorImpl implements Evaluator {
     }
 
     /**
-     * Array类型的Token
+     * Array类型的Token, 规则详见{@link TokenFactory.ArrayRule}
      */
     public static class ArrayToken extends AbstractToken {
 
@@ -1120,7 +1214,7 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         /**
          * 从token中解析维度信息
-         * @param token token 形如: arr[1][2][3], arr[1], arr[a.invoke()][1+2], [1][2] 属于完全的数组类型(为了配合隐式调用, 支持只有数组括号内容的解析), 不会包含除数组外的任何内容
+         * @param token token 形如: arr[1][2][3], arr[1], arr[a.invoke()][1+2], [1][2] 属于完全的数组类型, 不会包含除数组外的任何内容. 此外, 为了配合隐式调用, 支持只有数组括号内容的解析
          * @return 维度信息: 每一个维度的表达式: 如{1,2,3}; {1}, {a.invoke(), 1+2}, {1,2}
          */
         public List<String> getDimsStr(String token) {
@@ -1262,7 +1356,7 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @return 数组标识
          */
         private String getArrayIdentify(String token) {
-            Matcher matcher = arrayPattern.matcher(token);
+            TokenFactory.MyMatcher matcher = arrayPattern.matcher(token);
             if (! matcher.find()) {
                 throw new ComputeError("无法匹配数组, ArrayChainRule规则错误! " + token);
             }
@@ -1283,27 +1377,28 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         @Override
         public boolean isLastChain(String token) {
-            String array = super.getArrayIdentify(token);
+            boolean flag = isImplicitCall(token);
+            String array = flag ? token.substring(0, CharacterHelper.matchArrayBracketSafe(token, 0)) : super.getArrayIdentify(token); // 判断是否为隐式调用
             int end = array.length();
             return end == token.length();
         }
 
         /**
-         * 无需判断是否是链式调用结尾的情况. 可以从一下两个角度解释
+         * 无需判断是否是链式调用结尾的情况. 该结论可以从以下两个角度解释
          * 1: 变量角度:
          *      如果是链式调用结尾, 必然存在Value pV, 也就是当前链式的调用方. 含有pV的方法是getValue(Value), 不是本方法, 因此不用考虑链式结尾
          * 2: 链式结尾产生条件:
-         *      想要产生链式结尾, 必须是在链式表达式计算过程中不断迭代, 直到末尾. 然而链式迭代计算过程中, 指挥调用getValue(Value), 因此getValue()无需考虑链式结尾
+         *      想要产生链式结尾, 必须是在链式表达式计算过程中不断迭代, 直到末尾. 然而链式迭代计算过程中, 只会调用getValue(Value), 因此getValue()无需考虑链式结尾
          * @return Value
          */
         public Value getValue() {
             // 获取arrayId
             String arrayId = super.getArrayIdentify(token);
             /*
-            切忌不要直接调用super.getValue(), 否则内部处理时, 默认使用的是包含链式的token, 存在极大的安全隐患.
+            切忌不要直接调用super.getValue(), 否则存在极大的安全隐患.
 
-            ArrayToken().getValue()内部逻辑处理时, 没有考虑兼容ArrayTokenChain的处理逻辑
-            因此此处需要截取链式token, 传递arrayId给ArrayToken进行处理
+            因为super.getValue(), 也就是ArrayToken.getValue()内部处理时, 没有考虑兼容ArrayTokenChain的处理逻辑
+            因此此处需要先截取链式token, 然后传递arrayId给ArrayToken进行处理
              */
             Value value = super.getValue(arrayId);
             // 从array后开始为链式调用
@@ -1315,7 +1410,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         @Override
         public Value getValue(PValue pValue) {
             boolean flag = isImplicitCall(token);
-            String arrayId = flag ? token : super.getArrayIdentify(token); // 判断是否为隐式调用
+            String arrayId = flag ? token.substring(0, CharacterHelper.matchArrayBracketSafe(token, 0)) : super.getArrayIdentify(token); // 判断是否为隐式调用
             Value pV = pValue.value;
 
             Value value = getArrayValue(pV, arrayId); // 获取数组值
@@ -1325,7 +1420,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 return value;
             } else {
                 // 链式调用
-                String chain = flag ? token.substring(token.length() + 1) : token.substring(arrayId.length() + 1);
+                String chain = token.substring(arrayId.length() + 1);
                 TokenChain tokenChain = tf.parseToTokenChain(chain, ctx);
                 return tokenChain.getValue(new PValue(value, arrayId));
             }
@@ -1338,8 +1433,23 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @return Value
          */
         private Value getArrayValue(Value pV, String arrayId) {
-            if (! (pV instanceof ArrayReference) ) {
-                throw new ComputeError("pV不是Array类型的变量! 表达式计算结果错误! type = " + pV.type().name());
+            boolean flag = isImplicitCall(token);
+            // 如果是隐式调用, 那么pV必须是ArrayReference
+            if (flag) {
+                if (! (pV instanceof ArrayReference) ) {
+                    throw new ComputeError("pV不是Array类型的变量! 表达式计算结果错误! type = " + pV.type().name());
+                }
+            } else {
+                // 非隐式调用, 从pV中取值
+                String arrayName = arrayId.substring(0, arrayId.indexOf("["));
+                Value value = takeValueByVName(arrayName, Env.takeMemberValues(pV));
+                if (value == null) {
+                    value = takeValueByVName(arrayName, Env.takeStaticValues(pV));
+                }
+                if (value == null) {
+                    throw new ComputeError("变量" + arrayId + "未定义!");
+                }
+                pV = value;
             }
             List<Integer> dims = super.getDims(arrayId);
             return super.itrArray((ArrayReference) pV, dims, arrayId);
@@ -1548,7 +1658,7 @@ public class JavaEvaluatorImpl implements Evaluator {
              demoTest -> null 不存在函数调用
              self.dfs(1,2) -> 匹配得到: null [不是纯粹的函数调用, 因为有self作为调用者]
              dfs(1,2) -> 匹配得到: dfs(1,2)
-             dfs(1,2).test() -> dfs(1,2)
+             dfs(1,2).test() -> dfs(1,2) [只会匹配一次纯函数调用]
              */
             // @Deprecated // 该正则存在缺陷, 如invoke(1, (1 + 2) * 3). 他无法忽略函数括号内部的里层括号, 因为正则是非贪婪的. 如果将正则改为贪婪, 则他可能会匹配多组函数调用. 因此正则无法满足匹配需求, 因此废弃
             // public static final Pattern pureCallPattern = Pattern.compile("^[a-zA-Z_$][a-zA-Z0-9_$]*\\(.*?\\)");
@@ -1589,8 +1699,51 @@ public class JavaEvaluatorImpl implements Evaluator {
             // 匹配纯粹的变量
             public static final Pattern variablePattern = Pattern.compile("\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b");
 
-            // 匹配数组
-            public static final Pattern arrayPattern = Pattern.compile("^[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\[\\]]+\\])+");
+            // 匹配数组, 如arr[0], arr[b.test][c.invoke + c[0][1]]
+            // 不支持隐式调用类型识别, 如[0][1]
+            // @Deprecated
+            // public static final Pattern arrayPattern = Pattern.compile("^[a-zA-Z_$][a-zA-Z0-9_$]*(\\[[^\\[\\]]+\\])+");
+            public static final MyPattern arrayPattern = new MyPattern() {
+                @Override
+                public MyMatcher matcher(String s) {
+                    return new MyMatcher() {
+                        private String token = s;
+                        private int end = -1;
+                        @Override
+                        public boolean find() {
+                            int len = CharacterHelper.startVNameLen(token);
+                            if (len == 0) {
+                                return false;
+                            }
+                            if (len == token.length()) {
+                                return false;
+                            }
+                            end = CharacterHelper.matchArrayBracketSafe(token, len);
+                            if (end == -1) {
+                                return false;
+                            }
+                            token = token.substring(end);
+                            return true;
+                        }
+
+                        @Override
+                        public int start() {
+                            if (end == -1) {
+                                throw new IllegalStateException("No match available");
+                            }
+                            return 0;
+                        }
+
+                        @Override
+                        public int end() {
+                            if (end == -1) {
+                                throw new IllegalStateException("No match available");
+                            }
+                            return end;
+                        }
+                    };
+                }
+            };
 
             // 匹配常量(数值、字符、字符串): 该正则非常宽松: 1 + 2也能匹配
             public static final Pattern constantPattern = Pattern.compile("\\d+(\\.\\d+)?|\"([^\"\\\\]|\\\\.)*\"|\'([^\'\\\\]|\\\\.)*\'");
@@ -1604,11 +1757,11 @@ public class JavaEvaluatorImpl implements Evaluator {
             /**
              * 从start处开始匹配链式, 如果能匹配到, 返回匹配到的字符串, 同时包含start以前的字符串
              * 否则返回null
-             * @param start
-             * @param s
-             * @return
+             * @param start start
+             * @param s s
+             * @return String
              */
-            protected String parseChainByEnd(int start, String s) {
+            protected String parseChainByStart(int start, String s) {
                 if (start >= s.length()) {
                     return null;
                 }
@@ -1630,8 +1783,9 @@ public class JavaEvaluatorImpl implements Evaluator {
             }
 
             /**
-             * 匹配原理: 如果能被识别为eval rule. 那么必然存在运算符, 且运算符不属于任何别的区间, 比如arr[1 + 2]
-             * 他就不符合eval rule. 因为运算内容存在于数组内.
+             * 匹配计算表达式
+             * 如果能被识别为eval rule. 那么必然存在运算符, 且运算符不属于任何别的区间, 比如arr[1 + 2]
+             * 他就不符合eval rule. 因为运算内容存在于数组内. 而arr + 2属于eval rule. 因为运算符+号不属于任何其他规则的一部分
              * <p>
              * eg:
              * arr[1+2] x
@@ -1792,12 +1946,13 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         /**
-         * 纯函数调用链
+         * 纯函数调用链. 要求token开始必须是纯函数调用, 且后续存在链式调用
          * eg:
          * dfs(1,2).a √
          * dfs(1,2).demo() √
          * <p>
          * dfs(1,2) x
+         * a.dfs(1,2) x
          */
         public static class PureCallRuleChain extends AbstractRuleChain {
 
@@ -1906,7 +2061,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             @Override
             public String matchFromStart(String s) {
                 int len = CharacterHelper.startVNameLen(s);
-                return super.parseChainByEnd(len, s);
+                return super.parseChainByStart(len, s);
             }
 
             @Override
@@ -1934,7 +2089,7 @@ public class JavaEvaluatorImpl implements Evaluator {
 
             public boolean match(String s) {
                 // arrayPattern可以匹配arr[0][0] + 1, 因此需要做出额外判断
-                Matcher matcher = arrayPattern.matcher(s);
+                MyMatcher matcher = arrayPattern.matcher(s);
                 boolean b = matcher.find();
                 if (! b) return false;
                 int end = matcher.end();
@@ -1943,7 +2098,7 @@ public class JavaEvaluatorImpl implements Evaluator {
 
             @Override
             public String matchFromStart(String s) {
-                Matcher matcher = arrayPattern.matcher(s);
+                MyMatcher matcher = arrayPattern.matcher(s);
                 if (! matcher.find()) return null;
                 int end = matcher.end();
                 if (end >= s.length()) return s;
@@ -1996,7 +2151,7 @@ public class JavaEvaluatorImpl implements Evaluator {
              */
             @Override
             public String matchFromStart(String s) {
-                Matcher matcher = arrayPattern.matcher(s);
+                MyMatcher matcher = arrayPattern.matcher(s);
                 if (! matcher.find()) {
                     // 链式调用可能会存在如下情况
                     /*
@@ -2005,13 +2160,13 @@ public class JavaEvaluatorImpl implements Evaluator {
                         为了支持链式调用, 因此需要在ArrayRuleChain中支持相应规则
                      */
                     if (s.charAt(0) == '[') {
-                        int end = CharacterHelper.matchArrayBracket(s, 0);
+                        int end = CharacterHelper.matchArrayBracketSafe(s, 0);
                         // 纯隐链式调用, 如[1][2]
                         if (end == s.length()) {
                             return s;
                         } else if (s.charAt(end) == '.') {
                             // 隐链式存在后续的链式调用, 如 [1][2].invoke()
-                            return super.parseChainByEnd(end, s);
+                            return super.parseChainByStart(end, s);
                         } else {
                             return s.substring(0, end);
                         }
@@ -2020,7 +2175,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                         return null;
                     }
                 } else {
-                    return super.parseChainByEnd(matcher.end(), s);
+                    return super.parseChainByStart(matcher.end(), s);
                 }
             }
 
@@ -2283,7 +2438,7 @@ public class JavaEvaluatorImpl implements Evaluator {
          * 从字符的起始位置解析, 并得到对应的Token. 该方法区别于{@link #parseToToken(String, Context)}, 只需要局部满足规则
          * 则视为匹配成功
          * eg:
-         * a.demo() + 1: 从开始位置匹配, 将会被InvokeRule识别, 得到a.demo()
+         * a.demo() + 1: 从开始位置匹配, 将会被VariableRuleChain识别, 得到a.demo()
          * arr[0].b + 2: 从头开始匹配, 将会被ArrayRuleChain识别, 得到arr[0].b
          * 1 + 2 + 3: 从头开始匹配, 将会被ConstantRule识别, 得到1
          * + 2 + 3: 从头开始匹配, 将会被OperatorRule识别, 得到+
@@ -2312,7 +2467,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 throw new ComputeError("无法识别的内容! " + s);
             }
             // double check
-            Hit2 targetHit = null;
+            Hit2 targetHit;
             if (hits.size() == 1) {
                 targetHit = hits.get(0);
             } else if (hits.size() == 2) {
@@ -2367,9 +2522,9 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         /**
          * 解析TokenChain
-         * @param s
-         * @param ctx
-         * @return
+         * @param s s
+         * @param ctx ctx
+         * @return TokenChain
          */
         public TokenChain parseToTokenChain(String s, Context ctx) {
             // 处理s
