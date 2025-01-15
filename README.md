@@ -6,6 +6,10 @@
 
 
 
+![leetcode-runner-v1](README.assets/leetcode-runner-v1.png)
+
+
+
 ## 插件介绍
 
 `Leetcode-runner`是一款idea插件。旨在实现一个核心功能完备，且简洁容易上手的Leetcode刷题插件。插件支持日常刷题所需的一切功能，如**代码编写**、**代码运行/提交**、**测试案例更换**、**运行结果显示**、**题解展示**、**提交记录展示**、**代码替换**、**测试案例替换**等功能，实现脱离Web端刷leetcode

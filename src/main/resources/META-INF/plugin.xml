@@ -26,9 +26,9 @@
         <applicationService serviceImplementation="com.xhf.leetcode.plugin.setting.AppSettings"/>
 
         <!-- tool window -->
-        <toolWindow id="Leetcode Plugin" secondary="true" icon="/icons/LeetCode.png" anchor="right"
+        <toolWindow id="Leetcode Plugin" secondary="true" icon="/icons/leetcode-runner.png" anchor="right"
                     factoryClass="com.xhf.leetcode.plugin.window.LCToolWindowFactory"/>
-        <toolWindow id="Leetcode Console Plugin" secondary="true" icon="/icons/LeetCode.png" anchor="bottom"
+        <toolWindow id="Leetcode Console Plugin" secondary="true" icon="/icons/leetcode-runner.png" anchor="bottom"
                     factoryClass="com.xhf.leetcode.plugin.window.LCConsoleWindowFactory" />
 
         <!-- http request -->
@@ -37,13 +37,13 @@
 
     <actions>
         <action id="leetcode.plugin.LoginAction" class="com.xhf.leetcode.plugin.actions.loginAction"
-                text="Sign In" icon="/icons/login.png">
+                text="Sign In" icon="/icons/login.svg">
         </action>
         <action id="leetcode.plugin.DemoAction" class="com.xhf.leetcode.plugin.actions.DemoAction"
-                text="Demo Test" icon="/icons/clean.png">
+                text="Demo Test" icon="/icons/clean.svg">
         </action>
         <action id="leetcode.plugin.PickOneAction" class="com.xhf.leetcode.plugin.actions.PickOneAction"
-                text="Pick One" icon="/icons/random.png">
+                text="Pick One" icon="/icons/random.svg">
         </action>
         <action id="leetcode.plugin.TodayQuestionAction" class="com.xhf.leetcode.plugin.actions.TodayQuestionAction"
                 text="Daily Question" icon="/icons/daily.svg">
@@ -100,10 +100,10 @@
 
         <group id="leetcode.plugin.editor.group">
             <action id="leetcode.plugin.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
-                    text="Run Code" description="Run code(editor)" icon="/icons/run.png">
+                    text="Run Code" description="Run code(editor)" icon="/icons/run.svg">
             </action>
             <action id="leetcode.plugin.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
-                    text="Submit Code" description="Submit code(editor)" icon="/icons/submit.png">
+                    text="Submit Code" description="Submit code(editor)" icon="/icons/submit.svg">
             </action>
             <separator/>
             <action id="leetcode.plugin.editor.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
