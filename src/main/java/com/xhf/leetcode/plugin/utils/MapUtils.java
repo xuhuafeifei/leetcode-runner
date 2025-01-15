@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.utils;
 
+import com.sun.jdi.Value;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,5 +21,9 @@ public class MapUtils {
             map.put(a.get(i), b.get(i));
         }
         return map;
+    }
+
+    public static Map<String, Value> emptyMap() {
+        return new HashMap<>();
     }
 }

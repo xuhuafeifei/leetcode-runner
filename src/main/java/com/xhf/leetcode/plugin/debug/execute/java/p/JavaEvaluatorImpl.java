@@ -6,6 +6,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.ComputeError;
 import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.MapUtils;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.internal.Engine;
@@ -89,10 +90,6 @@ public class JavaEvaluatorImpl implements Evaluator {
             thread = ctx.getThread();
             StackFrame frame = thread.frame(0);
             _this = frame.thisObject();
-            // 获取所有变量
-            localEnv = takeLocalVariable(frame);
-            memberEnv = takeMemberValues(_this);
-            staticEnv = takeStaticValues(ctx.getLocation().declaringType());
         }
 
         /**
@@ -107,8 +104,8 @@ public class JavaEvaluatorImpl implements Evaluator {
             return DebugUtils.convert(values);
         }
 
-        public static Map<String, Value> getLocalEnv() {
-            return localEnv;
+        public static Map<String, Value> getLocalEnv() throws IncompatibleThreadStateException, AbsentInformationException {
+            return takeLocalVariable(ctx.getThread().frame(0));
         }
 
         /**
@@ -117,6 +114,9 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @return 变量池
          */
         public static Map<String, Value> takeMemberValues(Value v) {
+            if (v == null) {
+                return MapUtils.emptyMap();
+            }
             if (! (v instanceof ObjectReference)) {
                 throw new ComputeError("方法使用错误! 只有ObjectReference才会拥有成员变量! type = " + v.type());
             }
@@ -127,7 +127,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         public static Map<String, Value> getMemberEnv() {
-            return memberEnv;
+            return takeMemberValues(_this);
         }
 
         /**
@@ -136,6 +136,9 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @return 变量池
          */
         private @NotNull static Map<String, Value> takeStaticValues(ReferenceType referenceType ) {
+            if (referenceType == null) {
+                return MapUtils.emptyMap();
+            }
             // 获取所有静态变量
             List<Field> fields = referenceType.fields();
             Map<String, Value> statics = new HashMap<>();
@@ -155,11 +158,18 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @return map
          */
         private @NotNull static Map<String, Value> takeStaticValues(Value v) {
+            if (v == null) {
+                return MapUtils.emptyMap();
+            }
             if (v instanceof ObjectReference) {
                 ReferenceType referenceType = ((ObjectReference) v).referenceType();
                 return takeStaticValues(referenceType);
             }
             return new HashMap<>();
+        }
+
+        private static Map<String, Value> getStaticValues() {
+            return takeStaticValues(ctx.getLocation().declaringType());
         }
     }
 
@@ -338,7 +348,12 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @return 变量对应的Value
          */
         protected Value takeValueByVName(String vName) {
-            Value v = takeValueByVName(vName, Env.getLocalEnv());
+            TValue v = null;
+            try {
+                v = takeValueByVName(vName, Env.getLocalEnv());
+            } catch (IncompatibleThreadStateException | AbsentInformationException e) {
+                throw new ComputeError(e.getMessage());
+            }
 //            if (v != null) {
 //                return v;
 //            }
@@ -347,10 +362,31 @@ public class JavaEvaluatorImpl implements Evaluator {
 //                return v;
 //            }
 //            v = takeValueByVName(vName, Env.getStaticValues());
-            if (v == null) {
+            if (! v.contain) {
                 throw new ComputeError("变量" + vName + "未定义!");
             }
-            return v;
+            return v.value;
+        }
+
+        /**
+         * take value, 封装takeValue方法返回的数据结果
+         */
+        public static class TValue {
+            public Value value;
+            public boolean contain;
+
+            public TValue(Value v, boolean b) {
+                this.value = v;
+                contain = b;
+            }
+
+            public static TValue notFound() {
+                return new TValue(null, false);
+            }
+
+            public static TValue found(Value v) {
+                return new TValue(v, true);
+            }
         }
 
         /**
@@ -359,15 +395,15 @@ public class JavaEvaluatorImpl implements Evaluator {
          * @param dataSource 数据源
          * @return value
          */
-        protected Value takeValueByVName(String vName, Map<String, Value> dataSource) {
-            Value v = null;
+        protected TValue takeValueByVName(String vName, Map<String, Value> dataSource) {
+            Value v;
             for (Map.Entry<String, Value> next : dataSource.entrySet()) {
                 if (next.getKey().equals(vName)) {
                     v = next.getValue();
-                    break;
+                    return TValue.found(v);
                 }
             }
-            return v;
+            return TValue.notFound();
         }
 
         /**
@@ -1051,7 +1087,10 @@ public class JavaEvaluatorImpl implements Evaluator {
         }
 
         @Override
-        public Value getValue(PValue pValue) {
+        public Value getValue(@NotNull PValue pValue) {
+            if (pValue.value == null) {
+                throw new ComputeError("链式调用的前一个调用" + pValue.preName + "为null, 链式表达式错误!");
+            }
             String pureCall = getPureCall(token);
             InvokeInfo info = super.parseForInvokeInfo(pureCall, pValue);
             Value pV = pValue.value;
@@ -1095,7 +1134,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             if (token.contains(".")) {
                 String[] split = token.split("\\.");
                 // 迭代获取
-                Value v = null;
+                TValue v = null;
                 String preName = split[0];
                 for (int i = 1; i < split.length; i++) {
                     String vName = split[i];
@@ -1104,10 +1143,10 @@ public class JavaEvaluatorImpl implements Evaluator {
                     }else {
                         // md, 不支持通过.的方式获取持静态变量, 要不然太tm麻烦了
                         // 甚至我连静态变量都不想支持, 谁特么写leetcode吃饱了撑着用静态变量
-                        v = takeValueByVName(vName, Env.takeMemberValues(v));
+                        v = takeValueByVName(vName, Env.takeMemberValues(v.value));
                     }
                 }
-                return v;
+                return v.value;
             }
             // 从变量env中获取
             if ("this".equals(token)) {
@@ -1134,6 +1173,9 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         @Override
         public Value getValue(PValue pValue) {
+            if (pValue.value == null) {
+                throw new ComputeError("链式调用的前一个调用" + pValue.preName + "为null, 链式表达式错误!");
+            }
             String vName = token.substring(0, CharacterHelper.startVNameLen(token));
 
             // 从pV中获取名为vName的变量值
@@ -1157,14 +1199,14 @@ public class JavaEvaluatorImpl implements Evaluator {
         private Value getVariableValue(String vName, PValue pValue) {
             Value pV = pValue.value;
             Map<String, Value> memberSource = Env.takeMemberValues(pV);
-            Value value = takeValueByVName(vName, memberSource);
-            if (value == null) {
+            TValue value = takeValueByVName(vName, memberSource);
+            if (! value.contain) {
                 value = takeValueByVName(vName, Env.takeStaticValues(pV));
-                if (value == null) {
+                if (! value.contain) {
                     throw new ComputeError(pValue.preName + "不存在变量" + vName + "!");
                 }
             }
-            return value;
+            return value.value;
         }
 
         @Override
@@ -1409,6 +1451,9 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         @Override
         public Value getValue(PValue pValue) {
+            if (pValue.value == null) {
+                throw new ComputeError("链式调用的前一个调用" + pValue.preName + "为null, 链式表达式错误!");
+            }
             boolean flag = isImplicitCall(token);
             String arrayId = flag ? token.substring(0, CharacterHelper.matchArrayBracketSafe(token, 0)) : super.getArrayIdentify(token); // 判断是否为隐式调用
             Value pV = pValue.value;
@@ -1442,14 +1487,14 @@ public class JavaEvaluatorImpl implements Evaluator {
             } else {
                 // 非隐式调用, 从pV中取值
                 String arrayName = arrayId.substring(0, arrayId.indexOf("["));
-                Value value = takeValueByVName(arrayName, Env.takeMemberValues(pV));
-                if (value == null) {
+                TValue value = takeValueByVName(arrayName, Env.takeMemberValues(pV));
+                if (! value.contain) {
                     value = takeValueByVName(arrayName, Env.takeStaticValues(pV));
                 }
-                if (value == null) {
+                if (! value.contain) {
                     throw new ComputeError("变量" + arrayId + "未定义!");
                 }
-                pV = value;
+                pV = value.value;
             }
             List<Integer> dims = super.getDims(arrayId);
             return super.itrArray((ArrayReference) pV, dims, arrayId);

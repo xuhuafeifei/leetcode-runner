@@ -44,25 +44,27 @@ public interface Constants {
 
     String PY_SERVER_DISCONNECT = "PY_SERVER_DISCONNECT";
     String HELP_INFO =
-            "帮助文档格式: 命令名词 [命令输入形式] 命令作用\n" +
+            "帮助文档格式: 指令名词 [指令输入形式] 指令作用\n" +
             "\n" +
-            "N命令 [n | n 数字 | n 数字]  step into单步执行\n" +
+            "N指令 [n | n 数字 | n 数字]  step into单步执行\n" +
             "\n" +
-            "R命令 [r] 运行代码, 直到下一个断点\n" +
+            "R指令 [r] 运行代码, 直到下一个断点\n" +
             "\n" +
-            "P命令 [p] 打印本地变量\n" +
+            "P指令 [p | p expression] 打印本地变量, 如果p指令存在表达式, 在打印本地变量的同时计算表达式\n" +
             "\n" +
-            "B命令 [b 数字] 在指定行打上断点\n" +
+            "B指令 [b 数字] 在指定行打上断点\n" +
             "\n" +
-            "SHOWB命令 [show b | s b | sb] 显示所有断点\n" +
+            "SHOWB指令 [show b | s b | sb] 显示所有断点\n" +
             "\n" +
-            "RB命令 [remove b 数字|r b 数字|rb 数字|remove b数字|r b数字|rb数字] 移除指定行断点\n" +
+            "RB指令 [remove b 数字|r b 数字|rb 数字|remove b数字|r b数字|rb数字] 移除指定行断点\n" +
             "\n" +
-            "RBA命令 [remove all|ra|r a]移除所有断点\n" +
+            "RBA指令 [remove all|ra|r a]移除所有断点\n" +
             "\n" +
-            "W命令 [w] 查看当前所在位置\n" +
+            "W指令 [w] 查看当前所在位置\n" +
             "\n" +
-            "STEP命令 [step out | step over] 功能和idea的debug对应按钮功能一致\n"
+            "STEP指令 [step out | step over] 功能和idea的debug对应按钮功能一致\n" +
+            "\n" +
+            "WATCH指令 [watch expression] 计算expression, 同时将expression加入监视池"
             ;
 
 

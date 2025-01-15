@@ -54,12 +54,24 @@ public final class ConsoleUtils implements Disposable {
         }, clear, showDialog, message, dialogTitle, consoleDialog);
     }
 
+    public void showInfoWithoutConsole(String content, boolean clear, boolean showDialog, String message, String dialogTitle, ConsoleDialog consoleDialog) {
+        showConsole(() -> {
+            consoleView.print("> " + DateFormatUtils.format(new Date(), "yyyy/MM/dd' 'HH:mm:ss") + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
+            consoleView.print(content, ConsoleViewContentType.NORMAL_OUTPUT);
+            consoleView.print("\n", ConsoleViewContentType.NORMAL_OUTPUT);
+        }, clear, showDialog, message, dialogTitle, consoleDialog, false);
+    }
+
     /**
      * 显示info信息
      * @param content
      */
     public void showInfo(String content) {
         showInfo(content, false, false, null, null, ConsoleDialog.UNKNOWN);
+    }
+
+    public void showInfoWithoutConsole(String content) {
+        showInfoWithoutConsole(content, false, false, null, null, ConsoleDialog.UNKNOWN);
     }
 
     /**
@@ -72,9 +84,19 @@ public final class ConsoleUtils implements Disposable {
         showInfo(content, clear, false, null, null, ConsoleDialog.UNKNOWN);
     }
 
+    @Safe
+    public void showInfoWithoutConsole(String content, boolean clear) {
+        showInfoWithoutConsole(content, clear, false, null, null, ConsoleDialog.UNKNOWN);
+    }
+
     @UnSafe
     public void showInfo(String content, boolean clear, boolean showDialog) {
         showInfo(content, clear, showDialog, content, null, ConsoleDialog.INFO);
+    }
+
+    @UnSafe
+    public void showInfoWithoutConsole(String content, boolean clear, boolean showDialog) {
+        showInfoWithoutConsole(content, clear, showDialog, content, null, ConsoleDialog.INFO);
     }
 
     @UnSafe("该方法在多线程的情况下并不安全. 因为他在底层可能会弹出对话框. 而该操作会凝固线程, 导致EDT阻塞." +
@@ -87,14 +109,34 @@ public final class ConsoleUtils implements Disposable {
         },  clear, showDialog, message, dialogTitle, consoleDialog);
     }
 
+    @UnSafe("该方法在多线程的情况下并不安全. 因为他在底层可能会弹出对话框. 而该操作会凝固线程, 导致EDT阻塞." +
+            "所以在多线程的情况下, 尽可能不要使用该方法. 在本项目中, 设计多线程情况多是触发Event")
+    public void showWaringWithoutConsole(String content, boolean clear, boolean showDialog, String message, String dialogTitle, ConsoleDialog consoleDialog) {
+        showConsole(() -> {
+            consoleView.print("> " + DateFormatUtils.format(new Date(), "yyyy/MM/dd' 'HH:mm:ss") + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
+            consoleView.print(content, ConsoleViewContentType.NORMAL_OUTPUT);
+            consoleView.print("\n", ConsoleViewContentType.NORMAL_OUTPUT);
+        },  clear, showDialog, message, dialogTitle, consoleDialog, false);
+    }
+
     @Safe
     public void showWaring(String content) {
         showWaring(content, false, false, null, null, ConsoleDialog.UNKNOWN);
     }
 
+    @Safe
+    public void showWaringWithoutConsole(String content) {
+        showWaringWithoutConsole(content, false, false, null, null, ConsoleDialog.UNKNOWN);
+    }
+
     @UnSafe
     public void showWaring(String content, boolean clear, boolean showDialog) {
         showWaring(content, clear, showDialog, content, null, ConsoleDialog.WARNING);
+    }
+
+    @UnSafe
+    public void showWaringWithoutConsole(String content, boolean clear, boolean showDialog) {
+        showWaringWithoutConsole(content, clear, showDialog, content, null, ConsoleDialog.WARNING);
     }
 
     /**
@@ -108,13 +150,28 @@ public final class ConsoleUtils implements Disposable {
     }
 
     @Safe
+    public void showWaringWithoutConsole(String content, boolean clear) {
+        showWaringWithoutConsole(content, clear, false, null, null, ConsoleDialog.UNKNOWN);
+    }
+
+    @Safe
     public void showError(String content, boolean clear) {
         showError(content, clear, false, null, null, ConsoleDialog.ERROR);
+    }
+
+    @Safe
+    public void showErrorWithoutConsole(String content, boolean clear) {
+        showErrorWithoutConsole(content, clear, false, null, null, ConsoleDialog.ERROR);
     }
 
     @UnSafe
     public void showError(String content, boolean clear, boolean showDialog) {
         showError(content, clear, showDialog, content, null, ConsoleDialog.ERROR);
+    }
+
+    @UnSafe
+    public void showErrorWithoutConsole(String content, boolean clear, boolean showDialog) {
+        showErrorWithoutConsole(content, clear, showDialog, content, null, ConsoleDialog.ERROR);
     }
 
     @UnSafe("该方法在多线程的情况下并不安全. 因为他在底层可能会弹出对话框. 而该操作会凝固线程, 导致EDT阻塞." +
@@ -127,7 +184,21 @@ public final class ConsoleUtils implements Disposable {
         },  clear, showDialog, message, dialogTitle, consoleDialog);
     }
 
+    @UnSafe("该方法在多线程的情况下并不安全. 因为他在底层可能会弹出对话框. 而该操作会凝固线程, 导致EDT阻塞." +
+            "所以在多线程的情况下, 尽可能不要使用该方法. 在本项目中, 设计多线程情况多是触发Event")
+    public void showErrorWithoutConsole(String content, boolean clear, boolean showDialog, String message, String dialogTitle, ConsoleDialog consoleDialog) {
+        showConsole(() -> {
+            consoleView.print("> " + DateFormatUtils.format(new Date(), "yyyy/MM/dd' 'HH:mm:ss") + "\n", ConsoleViewContentType.LOG_ERROR_OUTPUT);
+            consoleView.print(content, ConsoleViewContentType.LOG_ERROR_OUTPUT);
+            consoleView.print("\n", ConsoleViewContentType.LOG_ERROR_OUTPUT);
+        },  clear, showDialog, message, dialogTitle, consoleDialog, false);
+    }
+
     private void showConsole(Runnable runnable, boolean clear, boolean showDialog, String message, String dialogTitle, ConsoleDialog consoleDialog) {
+        showConsole(runnable, clear, showDialog, message, dialogTitle, consoleDialog, true);
+    }
+
+    private void showConsole(Runnable runnable, boolean clear, boolean showDialog, String message, String dialogTitle, ConsoleDialog consoleDialog, boolean showConsole) {
         // avoid concurrent question
         ApplicationManager.getApplication().invokeLater(() -> {
             if (consoleView == null) {
@@ -145,12 +216,14 @@ public final class ConsoleUtils implements Disposable {
             }
             // 弹出
             // 获取并显示 ToolWindow（确保控制台窗口可见）
-            ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-            ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.ID);
-            if (toolWindow != null && !toolWindow.isVisible()) {
-                toolWindow.show();  // 显示控制台窗口
+            if (showConsole) {
+                ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
+                ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.ID);
+                if (toolWindow != null && !toolWindow.isVisible()) {
+                    toolWindow.show();  // 显示控制台窗口
+                }
+                consoleView.getComponent().setVisible(true);
             }
-            consoleView.getComponent().setVisible(true);
 
             runnable.run();
 

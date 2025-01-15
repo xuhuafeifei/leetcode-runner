@@ -127,9 +127,9 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
                 // 更新cache
                 boolean flag = ViewUtils.updateLeetcodeEditorByCurrentVFile(project, lc);
                 if (flag) {
-                    ConsoleUtils.getInstance(project).showInfo("Copy To Editor Success", false, true);
+                    ConsoleUtils.getInstance(project).showInfoWithoutConsole("Copy To Editor Success", false, true);
                 } else {
-                    ConsoleUtils.getInstance(project).showInfo("Copy To Editor Error", false, true);
+                    ConsoleUtils.getInstance(project).showInfoWithoutConsole("Copy To Editor Error", false, true);
                 }
             }
         };

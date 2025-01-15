@@ -112,10 +112,31 @@ public class JavaValueInspector {
             res = handleTreeNode(objRef, depth);
         } else if (isListNode(objRef)) {
             res = handleListNode(objRef, depth);
+        } else if (isPriorityQueue(objRef)) {
+            res = handlePriorityQueue(objRef, depth);
         } else {
             res = handleComplexObject(objRef, depth);
         }
         return res;
+    }
+
+    private String handlePriorityQueue(ObjectReference objRef, int depth) {
+        if (objRef == null) {
+            return "null";
+        }
+        ReferenceType referenceType = objRef.referenceType();
+        Value value = objRef.getValue(referenceType.fieldByName("queue"));
+        if (value == null) {
+            return null;
+        }
+        return this.inspectValue(value, depth);
+    }
+
+    private boolean isPriorityQueue(ObjectReference objRef) {
+        if (objRef == null) {
+            return false;
+        }
+        return objRef.type().name().equals("java.util.PriorityQueue");
     }
 
     private String handleListNode(ObjectReference objRef, int depth) {
@@ -270,7 +291,7 @@ public class JavaValueInspector {
     }
 
     // 在打印复杂对象时, 有些字段不需要打印
-    private final Set<String> skipWords = Set.of("hash", "next", "entrySet", "modCount", "threshold", "loadFactor", "keySet", "values");
+    private final Set<String> skipWords = Set.of("hash", "next", "entrySet", "modCount", "threshold", "loadFactor", "keySet", "values", "comparator", "serialVersionUID", "DEFAULT_INITIAL_CAPACITY");
 
     private boolean isSkipWord(String s) {
         return skipWords.contains(s);
@@ -491,6 +512,9 @@ public class JavaValueInspector {
 
     // 判断对象是否为包装类型
     public boolean isWrapperType(Value value) {
+        if (value == null) {
+            return false;
+        }
         if (value instanceof ObjectReference) {
             // 获取对象的 ReferenceType
             ObjectReference objRef = (ObjectReference) value;
@@ -503,6 +527,9 @@ public class JavaValueInspector {
     }
 
     private String handleWrapper(ObjectReference objRef) {
+        if (objRef == null) {
+            return "null";
+        }
         // 获取包装类型类的 'value' 字段
         Field valueField = objRef.referenceType().fieldByName("value");
         if (valueField != null) {
@@ -520,6 +547,9 @@ public class JavaValueInspector {
      * @return
      */
     public Value getWrapperValue(ObjectReference objRef) {
+        if (objRef == null) {
+            return null;
+        }
         // 获取包装类型类的 'value' 字段
         Field valueField = objRef.referenceType().fieldByName("value");
         if (valueField != null) {

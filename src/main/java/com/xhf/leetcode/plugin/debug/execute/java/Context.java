@@ -21,6 +21,7 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -286,6 +287,12 @@ public class Context implements ExecuteContext {
     @Deprecated // 打断线程的方式已被废弃. 打断线程存在破坏正在阻塞读取数据线程的风险. 详细查看{@link com.xhf.leetcode.plugin.debug.reader.InstSource}
     private final Set<Thread> threadSet = new HashSet<>();
 
+    private AtomicInteger sleepCount = new AtomicInteger(0);
+
+    private int waitRound = 8;
+    private int waitCount = 0;
+    private final int sleepTime = 70;
+
     /**
      * 自选等待JEventHandler通知, 如果waitFor为False或者被打断/唤醒, 则表明JEventHandler完成处理
      * JavaDebugger可以继续执行
@@ -303,10 +310,25 @@ public class Context implements ExecuteContext {
             threadSet.add(Thread.currentThread());
             try {
                 // 自旋优化
-                for (int i = 0; i < 8 && waitFor; ++i) {
-                    Thread.sleep(100);
+                for (int i = 0; i < waitRound && waitFor; ++i) {
+                    Thread.sleep(sleepTime);
+                }
+                if (! waitFor) {
+                    LogUtils.simpleDebug("停止等待...");
+                    return;
                 }
                 LogUtils.simpleDebug("睡眠...");
+                int cnt = sleepCount.incrementAndGet();
+                // 4 * 1 // 4 * 4 // 4 * 4 * 4 // 4 * 4 * 4 * 4
+                // 4 * 2(0) // 4 * 2(2) // 4 * 2(4) // 4 * 2(6)
+                // 4 * (1 << waitCount)
+                // (1 << 2) * (1 << waitCount)
+                // 1 << (2 + waitCount)
+                if (cnt >= (1 << (2 + waitCount)) ) {
+                    waitRound *= 2;
+                    waitCount += 1;
+                    LogUtils.simpleDebug("睡眠时间延长, waitCount = " + waitCount + " waitRound = " + waitRound + " waitTime = " + (waitRound * sleepTime) + "...");
+                }
                 lock.wait();
                 LogUtils.simpleDebug("JEventHandler释放锁, " + name + "执行指令...");
             } catch (InterruptedException ignored) {
