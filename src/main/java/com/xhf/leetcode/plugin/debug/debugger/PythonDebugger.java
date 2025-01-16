@@ -343,7 +343,7 @@ public class PythonDebugger extends AbstractDebugger {
             DebugManager.getInstance(project).stopDebugger();
             return;
         }
-        throw new DebugError("python服务连接失败!");
+        throw new DebugError("python服务连接失败! 错误信息可通过Console查看");
     }
 
     /**
@@ -373,7 +373,9 @@ public class PythonDebugger extends AbstractDebugger {
         env.stopDebug();
         // 打断监控线程
         for (Thread thread : threads) {
-            thread.interrupt();
+            if (thread != null) {
+                thread.interrupt();
+            }
         }
         // 如果没有启动, 直接返回
         if (!isPortAvailable("localhost", env.getPyPort())) {

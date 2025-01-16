@@ -218,7 +218,8 @@ public class PythonDebugEnv extends AbstractDebugEnv {
                 "from typing import List, Optional, Tuple, Dict, Set\n" +
                 "from collections import defaultdict, Counter, deque, namedtuple, OrderedDict\n" +
                 "from heapq import heappush, heappop, heapify\n" +
-                "from functools import lru_cache, cache\n" +
+                "from functools import *\n" +
+                "import operator\n" +
                 "from itertools import permutations, combinations, product, accumulate\n" +
                 "from bisect import bisect_left, bisect_right\n" +
                 "import math\n" +
