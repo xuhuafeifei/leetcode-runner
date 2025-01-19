@@ -33,4 +33,8 @@ public class LCEventBus {
     public void register(Object listener) {
         eventBus.register(listener);
     }
+
+    public void remove(Object listener) {
+        eventBus.unregister(listener);
+    }
 }

@@ -16,7 +16,7 @@ public class ArrayTokenTest {
 
     @Before
     public void setUp() {
-        context = new Context();
+        context = new Context(null);
     }
 
 //    @Test
@@ -72,5 +72,12 @@ public class ArrayTokenTest {
         assertEquals("a.test()", dims.get(0));
         assertEquals("b", dims.get(1));
         assertEquals("c.invoke(a,b,1+2)", dims.get(2));
+    }
+
+    @Test
+    public void test2() {
+        String a = "a,b,c";
+        String[] split = a.split(",");
+        System.out.println(split);
     }
 }

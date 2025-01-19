@@ -43,4 +43,11 @@ class Solution:
 
 if __name__ == '__main__':
     s = Solution()
-    s.totalNQueens(1)
+    try:
+        a = 1 / 0
+    except Exception as e:
+        print(e)
+    # s.totalNQueens(1)
+    print(s.__dict__)
+    for k, v in s.__dict__.items():
+        print(k, v)

@@ -15,7 +15,6 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 
 /**
@@ -94,7 +93,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
      */
     private String doWATCH(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
         String exp = inst.getParam();
-        context.getWatchPool().addFirst(exp);
+        context.addToWatchPool(exp);
         return doP(inst, context);
     }
 
@@ -128,8 +127,8 @@ public class JavaPInst extends AbstractJavaInstExecutor {
      */
     private String getWatchPool(Context context) {
         StringBuilder res = new StringBuilder();
-        Deque<String> watchPool = context.getWatchPool();
-        if (! watchPool.isEmpty()) {
+        String[] watchPool = context.getWatchPool();
+        if (watchPool.length != 0) {
             res.append(Constants.WATCH + ":\n");
             for (String watch : watchPool) {
                 res.append(computeExpression(watch, context)).append("\n");

@@ -2,9 +2,9 @@ package com.xhf.leetcode.plugin.debug.execute;
 
 import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.bus.DebugEndEvent;
+import com.xhf.leetcode.plugin.bus.DebugStartEvent;
 import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
-
-import java.util.Deque;
 
 /**
  * 执行上下文
@@ -14,8 +14,20 @@ import java.util.Deque;
 public interface ExecuteContext {
     Project getProject();
 
-    Deque<String> getWatchPool();
+    void addToWatchPool(String s);
 
+    String[] getWatchPool();
+
+    /**
+     * watch pool 移除监听
+     * @param event
+     */
     @Subscribe
     void removeWatchPoolListener(WatchPoolRemoveEvent event);
+
+    @Subscribe
+    void debugStartListener(DebugStartEvent event);
+
+    @Subscribe
+    void debugStopListener(DebugEndEvent event);
 }

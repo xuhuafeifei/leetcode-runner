@@ -63,6 +63,7 @@ public class FocusTextEditor implements FileEditor {
         ) {
             ConsoleUtils.getInstance(project).showWaring("open failed! please close all file and try again!", true, true);
             LogUtils.error("在创建code file并打开的过程中, LeetcodeEditor的{frontedQuestionId, translatedTitle, difficulty, titleSlug}参数不齐全: " + GsonUtils.toJsonStr(lc));
+            ConsoleUtils.getInstance(project).showError("在创建code file并打开的过程中, LeetcodeEditor的{frontedQuestionId, translatedTitle, difficulty, titleSlug}参数不齐全: " + GsonUtils.toJsonStr(lc), false);
             return;
         }
         JComponent contentPanel = new MarkDownEditor(project, buildMarkDownContent(lc), MarkdownContentType.QUESTION).getComponent();

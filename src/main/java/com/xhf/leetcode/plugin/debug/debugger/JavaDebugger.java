@@ -63,7 +63,7 @@ public class JavaDebugger extends AbstractDebugger {
 
 
     public JavaDebugger(Project project, JavaDebugConfig config) {
-        super(project, new Context(), config, JavaInstFactory.getInstance());
+        super(project, new Context(project), config, JavaInstFactory.getInstance());
         this.context = (Context) super.basicContext;
         this.config = config;
         this.outputHelper = new OutputHelper(project);
@@ -126,7 +126,9 @@ public class JavaDebugger extends AbstractDebugger {
             ConsoleUtils.getInstance(project).showWaring(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
             LogUtils.error(e);
         }
-        DebugManager.getInstance(project).stopDebugger();
+        if (DebugManager.getInstance(project).isDebug()) {
+            DebugManager.getInstance(project).stopDebugger();
+        }
     }
 
 

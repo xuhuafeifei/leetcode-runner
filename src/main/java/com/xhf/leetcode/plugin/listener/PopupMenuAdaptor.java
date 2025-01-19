@@ -35,19 +35,21 @@ public class PopupMenuAdaptor<T> extends MouseAdapter {
         // delete
         JMenuItem deleteItem = new JMenuItem("Delete");
         deleteItem.addActionListener(e -> {
-            int selectedIndex = variableList.getSelectedIndex();
-            ListModel<T> model = variableList.getModel();
-            T[] data = (T[]) new Object[model.getSize() - 1];
-            for (int i = 0; i < model.getSize(); i++) {
-                if (i < selectedIndex) {
-                    data[i] = model.getElementAt(i);
-                }else if (i > selectedIndex) {
-                    data[i - 1] = model.getElementAt(i);
+            int[] selectedIndices = variableList.getSelectedIndices();
+            for (int selectedIndex : selectedIndices) {
+                ListModel<T> model = variableList.getModel();
+                T[] data = (T[]) new Object[model.getSize() - 1];
+                for (int i = 0; i < model.getSize(); i++) {
+                    if (i < selectedIndex) {
+                        data[i] = model.getElementAt(i);
+                    }else if (i > selectedIndex) {
+                        data[i - 1] = model.getElementAt(i);
+                    }
                 }
+                // 通知watch pool删除对应数据, 如果删除的是watch pool内的
+                LCEventBus.getInstance().post(new WatchPoolRemoveEvent(model.getElementAt(selectedIndex).toString()));
+                variableList.setListData(data);
             }
-            // 通知watch pool删除对应数据, 如果删除的是watch pool内的
-            LCEventBus.getInstance().post(new WatchPoolRemoveEvent(model.getElementAt(selectedIndex).toString()));
-            variableList.setListData(data);
         });
         popupMenu.add(deleteItem);
         // copy

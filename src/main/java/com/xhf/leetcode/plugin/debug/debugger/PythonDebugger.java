@@ -81,7 +81,7 @@ public class PythonDebugger extends AbstractDebugger {
     private OutputHelper outputHelper;
 
     public PythonDebugger(Project project, PythonDebugConfig config) {
-        super(project, new PyContext(), config, PythonInstFactory.getInstance());
+        super(project, new PyContext(project), config, PythonInstFactory.getInstance());
         reader = config.getReader();
         output = config.getOutput();
         context = (PyContext) super.basicContext;
@@ -123,7 +123,6 @@ public class PythonDebugger extends AbstractDebugger {
 
     private void initCtx() {
         this.context.setEnv(env);
-        this.context.setProject(project);
         this.context.setPyClient(new PyClient(project));
         this.context.setReadType(config.getReadType());
     }

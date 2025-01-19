@@ -245,17 +245,30 @@ class Debugger:
             try:
                 solution_env_local = frame.f_locals
                 solution_env_global = {}
+                # 添加成员变量
+                for key, value in frame.f_globals.items():
+                    # 排除内建属性
+                    if not key.startswith('__'):
+                        solution_env_global[str(key)] = value
                 class_obj = frame.f_globals.get('Solution')  # 从全局变量中获取 Solution 类
                 if class_obj:
                     for key, value in class_obj.__dict__.items():
                         # 排除内建属性
                         if not key.startswith('__'):
                             solution_env_global[str(key)] = value
-
+                self.log.log_out("solution_env_global: " + str(solution_env_global))
+                self.log.log_out("solution_env_local: " + str(solution_env_local))
                 res = eval(param, solution_env_global, solution_env_local)
                 r.result = str(param) + ': ' + str(res)
             except Exception as e:
-                r.result = str(param) + ': ' + traceback.format_exc()
+                # 如何获取e的报错原因
+                r.result = str(param) + ': '
+                flag = False
+                for arg in e.args:
+                    r.result += arg + ","
+                    flag = True
+                if flag:
+                    r.result = r.result[:-1]
                 # r.more_info = traceback.format_exc()
             # 打印到日志
             self.log.log_out(res, "doP----------")
@@ -266,6 +279,11 @@ class Debugger:
         res = "Local variable:\n"
         # 遍历frame.f_locals, 同时将他存储到字符串中
         for key, value in frame.f_locals.items():
+            if key == 'self':
+                continue
+            # 如果是方法, 直接跳过
+            if callable(value):
+                continue
             v = f'{key}: {self.handle_value(value)}'
             res += v + '\n'
         r = ExecuteResult.success("P", res)
@@ -277,6 +295,10 @@ class Debugger:
         if class_obj:
             res += "Static variable:\n"
             for key, value in class_obj.__dict__.items():
+                if key == 'self':
+                    continue
+                if callable(value):
+                    continue
                 # 排除内建属性
                 if not key.startswith('__') and not callable(value):
                     res += f"{key}: {self.handle_value(value)}\n"
@@ -287,6 +309,10 @@ class Debugger:
         if SELF is not None:
             instance_vars = vars(SELF)  # 获取实例的属性
             for key, value in instance_vars.items():
+                if key == 'self':
+                    continue
+                if callable(value):
+                    continue
                 res += f"{key}: {self.handle_value(value)}\n"
 
         # 返回执行结果

@@ -13,7 +13,7 @@ import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
-import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
+import com.xhf.leetcode.plugin.debug.execute.AbstractExecuteContext;
 import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class Context implements ExecuteContext {
+public class Context extends AbstractExecuteContext {
     private BreakpointEvent breakpointEvent;
     private EventRequestManager erm;
     private EventSet eventSet;
@@ -54,17 +54,13 @@ public class Context implements ExecuteContext {
     private final StepRequestManager stepRequestManager = new StepRequestManager();
     private Iterator<Event> itr;
     /**
-     * 监控池, 存储被watch的表达式
-     */
-    private final Deque<String> watchPool = new LinkedList<>();
-
-    /**
      * 项目运行之初, 需要等待
      */
     private volatile boolean waitFor = true;
     private Output output;
 
-    public Context() {
+    public Context(Project project) {
+        super(project);
         LCEventBus.getInstance().register(this);
     }
 
@@ -169,30 +165,6 @@ public class Context implements ExecuteContext {
 
     public Project getProject() {
         return this.project;
-    }
-
-    @Override
-    public Deque<String> getWatchPool() {
-        return watchPool;
-    }
-
-    @Subscribe
-    @Override
-    public void removeWatchPoolListener(WatchPoolRemoveEvent event) {
-        String data = event.getData();
-        DebugUtils.simpleDebug("data = " + data, project);
-        if (StringUtils.isBlank(data)) {
-            return;
-        }
-        String[] split = data.split("=");
-        if (split.length < 2) {
-            DebugUtils.simpleDebug("java 无需删除watch pool", project);
-        }
-        split[0] = split[0].trim();
-        // match
-        List<String> arr = watchPool.stream().filter(e -> !e.startsWith(split[0])).collect(Collectors.toList());
-        watchPool.clear();
-        watchPool.addAll(arr);
     }
 
     public Location setSolutionLocation(ClassPrepareEvent event) {
@@ -411,5 +383,28 @@ public class Context implements ExecuteContext {
      */
     public boolean isInvokeMethodStart() {
         return invokeStatus == InvokeStatus.INVOKE_START;
+    }
+
+    /**
+     * 这个逻辑不能提取到抽象类, 之前脑子被驴踢了, 写到AbstractExecuteContext中了
+     * @param event event
+     */
+    @Subscribe
+    @Override
+    public void removeWatchPoolListener(WatchPoolRemoveEvent event) {
+        String data = event.getData();
+        DebugUtils.simpleDebug("data = " + data, project);
+        if (StringUtils.isBlank(data)) {
+            return;
+        }
+        String[] split = data.split("=");
+        if (split.length < 2) {
+            DebugUtils.simpleDebug("java 无需删除watch pool", project);
+        }
+        split[0] = split[0].trim();
+        // match
+        List<String> arr = watchPool.stream().filter(e -> !e.startsWith(split[0])).collect(Collectors.toList());
+        watchPool.clear();
+        watchPool.addAll(arr);
     }
 }

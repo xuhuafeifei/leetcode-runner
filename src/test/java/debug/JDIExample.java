@@ -22,7 +22,7 @@ import java.util.*;
 
 public class JDIExample {
 
-    static Context context = new Context();
+    static Context context = new Context(null);
     static StepRequest stepRequest;
     static int b = 8;
     static String methodName = "test";

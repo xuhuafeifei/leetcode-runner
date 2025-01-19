@@ -25,7 +25,7 @@ public class PythonPInst extends AbstractPythonInstExecutor {
     }
 
     private ExecuteResult doWATCH(Instruction inst, PyContext pCtx) {
-        pCtx.getWatchPool().addFirst(inst.getParam());
+        pCtx.addToWatchPool(inst.getParam());
         return doP(inst, pCtx);
     }
 
@@ -49,9 +49,9 @@ public class PythonPInst extends AbstractPythonInstExecutor {
     }
 
     private String getWatchPool(Instruction inst, PyContext pCtx) {
-        Deque<String> watchPool = pCtx.getWatchPool();
+        String[] watchPool = pCtx.getWatchPool();
         StringBuilder res = new StringBuilder();
-        if (! watchPool.isEmpty()) {
+        if (watchPool.length != 0) {
             res = new StringBuilder(Constants.WATCH + ":\n");
             for (String watch : watchPool) {
                 inst.setParam(watch);

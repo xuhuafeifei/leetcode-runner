@@ -5,13 +5,11 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
 import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
-import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
+import com.xhf.leetcode.plugin.debug.execute.AbstractExecuteContext;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,17 +17,13 @@ import java.util.stream.Collectors;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class PyContext implements ExecuteContext {
-    private Project project;
+public class PyContext extends AbstractExecuteContext {
     private PythonDebugEnv env;
     private PyClient pyClient;
     private ReadType readType;
-    /**
-     * 监控池, 存储被watch的表达式
-     */
-    private final Deque<String> watchPool = new LinkedList<>();
 
-    public PyContext() {
+    public PyContext(Project project) {
+        super(project);
         LCEventBus.getInstance().register(this);
     }
 
@@ -39,20 +33,6 @@ public class PyContext implements ExecuteContext {
 
     public PythonDebugEnv getEnv() {
         return this.env;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    @Override
-    public Project getProject() {
-        return this.project;
-    }
-
-    @Override
-    public Deque<String> getWatchPool() {
-        return watchPool;
     }
 
     public void setPyClient(PyClient pyClient) {
@@ -71,11 +51,16 @@ public class PyContext implements ExecuteContext {
         return this.readType;
     }
 
+    /**
+     * this.b watch pool
+     * this.b = xxxxx data
+     * 这段定位逻辑存在问题, 如果用户输入的表达式存在大量空格, startWith匹配则会失效
+     * @param event event
+     */
     @Subscribe
     @Override
     public void removeWatchPoolListener(WatchPoolRemoveEvent event) {
         String data = event.getData();
-
         DebugUtils.simpleDebug("data = " + data, project);
         if (StringUtils.isBlank(data)) {
             return;
