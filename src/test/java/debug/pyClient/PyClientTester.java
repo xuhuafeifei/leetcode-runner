@@ -9,7 +9,6 @@ import com.xhf.leetcode.plugin.model.HttpRequest;
 import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import io.sentry.connection.ConnectionException;
-import org.apache.http.conn.HttpHostConnectException;
 import org.junit.Test;
 
 /**
@@ -55,5 +54,11 @@ public class PyClientTester {
     public void testr2() {
         for (int i = 0; i < 10; ++i) System.out.println(i);
 
+    }
+
+    @Test
+    public void test3() {
+        String s = "{\"contentJson\"\\:\"\\\\\"[]\\\\\"\",\"expireTimestamp\"\\:-1}";
+        System.out.println(GsonUtils.toJsonStr(s));
     }
 }

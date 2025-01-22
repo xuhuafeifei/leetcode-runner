@@ -10,6 +10,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -213,10 +214,16 @@ public final class StoreService implements Disposable {
      * @return
      * @param <T>
      */
-    public <T> T getCache(String key, Class<T> clazz) {
+    public <T> T getCache(String key, @NotNull Class<T> clazz) {
         String cacheJson = getCacheJson(key);
         if (cacheJson == null) return null;
-        return GsonUtils.fromJson(cacheJson, clazz);
+        try {
+            return GsonUtils.fromJson(cacheJson, clazz);
+        } catch(Exception e){
+            LogUtils.debug("getCache发生错误! key = " + key + " clazz = " + clazz.getName());
+            LogUtils.error(e);
+            return null;
+        }
     }
 
 

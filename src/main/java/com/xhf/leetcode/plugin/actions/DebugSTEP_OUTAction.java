@@ -8,6 +8,7 @@ import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
+import com.xhf.leetcode.plugin.utils.LoginPass;
 
 /**
  * step out
@@ -16,6 +17,7 @@ import com.xhf.leetcode.plugin.utils.DebugCheck;
  * @email 2508020102@qq.com
  */
 @DebugCheck(DebugCheck.CheckType.STATUS)
+@LoginPass
 public class DebugSTEP_OUTAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {

@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.model;
 
+import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,6 +55,27 @@ public class Question {
         return 2;
     }
 
+    public static int getLineUpperOffset(Project project) {
+        int offset = -1;
+        try {
+            String content = ViewUtils.getContentOfCurrentOpenVFile(project);
+            if (content != null) {
+                String[] split = content.split("\n");
+                for (int i = 0; i < split.length; i++) {
+                    if (split[i].contains(lineStart)) {
+                        offset = i + 1;
+                        break;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        if (offset != -1) {
+            return offset;
+        }
+        return getLineUpperOffset();
+    }
+
     /**
      * 处理代码片段, 形如下方所示. 此外, 注释会随着语言的变化而变化
      * // lc-start-line
@@ -65,11 +88,12 @@ public class Question {
     public static String handleCodeSnippets(String code, String langType) {
         String commentSymbol = LangType.getCommentSymbol(langType);
         return
-                commentSymbol + "do not modify or remove anything between start-line and end-line" + "\n" +
+                commentSymbol + "do not modify or remove start-line comment and end-line comment and including this comment" + "\n" +
                 commentSymbol + lineStart + "\n" +
                 code + "\n" +
                 commentSymbol + lineEnd + "\n";
     }
+
 
     /**
      * 核心代码截取

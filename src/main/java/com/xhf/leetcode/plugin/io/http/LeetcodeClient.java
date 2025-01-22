@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.LCSubscriber;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
@@ -147,6 +148,12 @@ public class LeetcodeClient {
                 .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest);
+
+        if (httpResponse == null) {
+            LogUtils.error("httpResponse为null, 可能是网络错误");
+            ConsoleUtils.getInstance(project).showWaring("请求失败, 可能是网络错误! 请检查您是否接入网络!");
+            return false;
+        }
 
         String resp = httpResponse.getBody();
 

@@ -6,11 +6,9 @@ import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.Constants;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author feigebuge
@@ -81,17 +79,7 @@ public abstract class AbstractPythonInstExecutor implements InstExecutor {
      * @return String
      */
     protected String matchLine(String input, int offset) {
-        // 正则匹配数字的模式
-        Pattern pattern = Pattern.compile("line\\s*(\\d+)");
-        Matcher matcher = pattern.matcher(input);
-
-        if (matcher.find()) {
-            String lineNumber = matcher.group(1);
-            int number = Integer.parseInt(lineNumber) + offset;
-            input = input.replace(lineNumber, String.valueOf(number));
-        }
-        // 追加最后一段未匹配的内容
-        return input;
+        return DebugUtils.matchLine(input, offset);
     }
 
     protected void correctInst(Instruction inst, PyContext pCtx) {

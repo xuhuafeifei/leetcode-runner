@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
+import com.xhf.leetcode.plugin.utils.LoginPass;
 
 /**
  * next
@@ -13,6 +14,7 @@ import com.xhf.leetcode.plugin.utils.DebugCheck;
  * @email 2508020102@qq.com
  */
 @DebugCheck(DebugCheck.CheckType.STATUS)
+@LoginPass
 public class DebugStopAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {

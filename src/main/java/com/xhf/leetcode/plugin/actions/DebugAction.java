@@ -14,6 +14,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.LoginPass;
 
 import javax.swing.*;
 
@@ -24,6 +25,7 @@ import javax.swing.*;
  * @email 2508020102@qq.com
  */
 @DebugCheck
+@LoginPass
 public class DebugAction extends AbstractAction {
     @Override
     void doActionPerformed(Project project, AnActionEvent e) {

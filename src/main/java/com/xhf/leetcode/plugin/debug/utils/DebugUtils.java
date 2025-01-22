@@ -43,6 +43,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author feigebuge
@@ -431,5 +433,37 @@ public class DebugUtils {
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw);
         return sw.toString();
+    }
+
+    /**
+     * 匹配与更换信息
+     * 该方法匹配形如 'breakpoint at line 数字' 的内容. 并且在'数字'累加offset
+     * 请注意, 该方法只能匹配单行数据, 也就是说input不能包含换行符, 且必须是 line 数字 这样的形式
+     *
+     * @param input input
+     * @param offset offset
+     * @return String
+     */
+    public static String matchLine(String input, int offset) {
+        // 正则匹配数字的模式
+        Pattern pattern = Pattern.compile("[l|L]ine\\s*(\\d+)");
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            String lineNumber = matcher.group(1);
+            int number = Integer.parseInt(lineNumber) + offset;
+            input = input.replace(lineNumber, String.valueOf(number));
+        }
+        // 追加最后一段未匹配的内容
+        return input;
+    }
+
+    public static String matchLines(String input, int offset) {
+        String[] split = input.split("\n");
+        StringBuilder sb = new StringBuilder();
+        for (String s : split) {
+            sb.append(matchLine(s, offset)).append("\n");
+        }
+        return sb.toString();
     }
 }

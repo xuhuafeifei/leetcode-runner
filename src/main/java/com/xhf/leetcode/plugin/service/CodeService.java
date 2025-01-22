@@ -16,6 +16,7 @@ import com.xhf.leetcode.plugin.comp.TestCaseDialog;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.PythonCodeAnalyzer;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
@@ -381,7 +382,7 @@ public class CodeService {
             public void run(@NotNull ProgressIndicator indicator) {
                 RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(runCode);
                 // show it
-                AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(runCode.getDataInput(), rcr);
+                AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(runCode.getDataInput(), rcr, project);
                 boolean correctAnswer = rcrb.isCorrectAnswer();
                 if (correctAnswer) {
                     ConsoleUtils.getInstance(project).showInfo(rcrb.build(), true, true, "Congratulations!", "Run Code Result", ConsoleDialog.INFO);
@@ -420,7 +421,7 @@ public class CodeService {
             public void run(@NotNull ProgressIndicator indicator) {
                 SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(runCode);
                 // show it
-                AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr);
+                AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr, project);
                 boolean correctAnswer = scrb.isCorrectAnswer();
                 if (correctAnswer) {
                     ConsoleUtils.getInstance(project).showInfo("运行成功", true, true, "Congratulations!", "Submit Code Result", ConsoleDialog.INFO);
@@ -545,14 +546,16 @@ public class CodeService {
      * @param <T>
      */
     private abstract static class AbstractResultBuilder<T extends BaseCodeResult> {
+        private final Project project;
         protected T cr; // code result
         protected final StringBuilder sb = new StringBuilder();
         protected final String splitter = "--------------";
         private final String codeTypeSplitter = "===============";
         private final Pattern pattern = Pattern.compile("Line (\\d+):");
 
-        public AbstractResultBuilder (T cr) {
+        public AbstractResultBuilder (T cr, Project project) {
             this.cr = cr;
+            this.project = project;
         }
 
         public String build() {
@@ -610,13 +613,13 @@ public class CodeService {
                     // run error
                     if ("Runtime Error".equals(cr.getStatusMsg())) {
                         sb.append("❌ Runtime Error...").append("\n");
-                        sb.append(cr.getFullRuntimeError()).append("\n");
+                        sb.append(DebugUtils.matchLines(cr.getFullRuntimeError(), Question.getLineUpperOffset(project))).append("\n");
                     }else if ("Compile Error".equals(cr.getStatusMsg())) {
                         sb.append("❌ Compile Error...").append("\n");
-                        sb.append(cr.getFullCompileError()).append("\n");
+                        sb.append(DebugUtils.matchLines(cr.getFullCompileError(), Question.getLineUpperOffset(project))).append("\n");
                     }else if ("Time Limit Exceeded".equals(cr.getStatusMsg())) {
                         sb.append("❌ Time Limit Exceeded...").append("\n");
-                        sb.append(cr.getFullCompileError()).append("\n");
+                        sb.append(DebugUtils.matchLines(cr.getFullCompileError(), Question.getLineUpperOffset(project))).append("\n");
                     }else {
                         throw new RuntimeException("unknown leetcode error...");
                     }
@@ -644,7 +647,7 @@ public class CodeService {
                 String lineNumberStr = matcher.group(1);
                 int lineNumber = Integer.parseInt(lineNumberStr);
                 // 对行号进行操作
-                int newLineNumber = lineNumber + Question.getLineUpperOffset();  // 示例：将行号加10
+                int newLineNumber = Question.getLineUpperOffset(project);  // 示例：将行号加10
                 return error.replaceFirst("Line " + lineNumberStr + ":", "Line " + newLineNumber + ":");
             } else {
                 return error;
@@ -712,8 +715,8 @@ public class CodeService {
      * @param cr RunCode结果, 来自于leetcode platform
      * @return 返回builder, 用于build创建string, 输出到LCConsole
      */
-    private AbstractResultBuilder<RunCodeResult> createRunCodeResultBuilder(String dataInput, RunCodeResult cr) {
-        return new AbstractResultBuilder<>(cr) {
+    private AbstractResultBuilder<RunCodeResult> createRunCodeResultBuilder(String dataInput, RunCodeResult cr, Project project) {
+        return new AbstractResultBuilder<>(cr, project) {
             @Override
             protected void createBody() {
                 String totalTestcases = cr.getTotalTestcases();
@@ -782,8 +785,8 @@ public class CodeService {
      * @param scr SubmitCodeResult, 来自于leetcode platform
      * @return 返回builder, 用于build创建string, 输出到LCConsole
      */
-    private AbstractResultBuilder<SubmitCodeResult> createSubmitCodeResultBuilder(SubmitCodeResult scr) {
-        return new AbstractResultBuilder<>(scr) {
+    private AbstractResultBuilder<SubmitCodeResult> createSubmitCodeResultBuilder(SubmitCodeResult scr, Project project) {
+        return new AbstractResultBuilder<>(scr, project) {
             @Override
             protected void createBody() {
                 boolean correctAnswer = isCorrectAnswer();
