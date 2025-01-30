@@ -15,6 +15,15 @@ import java.util.Queue;
 public class TreeNodeConvertor extends AbstractVariableConvertor {
 
     @Override
+    protected String doCpp(String testcase, String variableName) {
+        String code = FileUtils.readContentFromFile(getClass().getResource("/debug/cpp/TreeNodeConvertor.template"));
+        code = code.replace("{{testcase}}", testcase)
+                .replace("{{variableName}}", variableName)
+                .replace("{{testcaseVName}}", RandomUtils.nextString(10));
+        return addTab(code);
+    }
+
+    @Override
     protected String doPython(String testcase, String variableName) {
         String code = FileUtils.readContentFromFile(getClass().getResource("/debug/python/TreeNodeConvertor.template"));
         code = code.replace("{{testcase}}", testcase)

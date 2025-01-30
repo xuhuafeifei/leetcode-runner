@@ -1,0 +1,5 @@
+int main() {
+    Solution solution;
+    {{callCode}}
+    return 0;
+}

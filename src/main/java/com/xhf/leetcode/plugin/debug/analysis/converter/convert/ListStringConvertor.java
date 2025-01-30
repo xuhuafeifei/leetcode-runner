@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 
+import com.xhf.leetcode.plugin.exception.DebugError;
+
 /**
  * {@link ParamType#LIST_STRING}
  * @author feigebuge
@@ -20,6 +22,11 @@ public class ListStringConvertor extends AbstractVariableConvertor {
                 " = new ArrayList<>(Arrays.asList(new String[]" +
                 modifiedTestcase +
                 "));\n";
+    }
+
+    @Override
+    protected String doCpp(String testcase, String variableName) {
+        throw new DebugError("c++不支持LIST_STRING类型的测试案例转换!");
     }
 
     @Override

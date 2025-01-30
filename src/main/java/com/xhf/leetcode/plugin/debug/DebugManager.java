@@ -55,6 +55,10 @@ public final class DebugManager implements Disposable {
             PythonDebugger pythonDebugger = buildPythonDebugger();
             debuggers.put(clazz, pythonDebugger);
             currentDebugger = pythonDebugger;
+        } else if (clazz == CPPDebugger.class) {
+            CPPDebugger cppDebugger =  buildCppDebugger();
+            debuggers.put(clazz, cppDebugger);
+            currentDebugger = cppDebugger;
         }
         return currentDebugger;
     }
@@ -84,6 +88,16 @@ public final class DebugManager implements Disposable {
         }
     }
 
+    private CPPDebugger buildCppDebugger() {
+        CppDebugConfig config = null;
+        try {
+            config = new CppDebugConfig.Builder(project).autoBuild().build();
+        } catch (Exception ex) {
+            LogUtils.error(ex);
+            throw new DebugError("Java环境配置创建异常!" + ex.toString(), ex);
+        }
+        return new CPPDebugger(project, config);
+    }
 
     private PythonDebugger buildPythonDebugger() {
         PythonDebugConfig config = null;

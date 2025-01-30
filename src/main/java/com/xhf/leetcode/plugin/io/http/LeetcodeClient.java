@@ -10,7 +10,6 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.LCSubscriber;
-import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
@@ -147,13 +146,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
-
-        if (httpResponse == null) {
-            LogUtils.error("httpResponse为null, 可能是网络错误");
-            ConsoleUtils.getInstance(project).showWaring("请求失败, 可能是网络错误! 请检查您是否接入网络!");
-            return false;
-        }
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
 
@@ -178,7 +171,7 @@ public class LeetcodeClient {
                 .addJsonBody("username", username)
                 .addJsonBody("password", password)
                 .build();
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
         return httpResponse.getStatusCode() == 200 ? Boolean.TRUE : Boolean.FALSE;
     }
 
@@ -258,7 +251,7 @@ public class LeetcodeClient {
                     .addBasicHeader()
                     .build();
 
-            HttpResponse httpResponse = httpClient.executePost(httpRequest);
+            HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
             String resp = httpResponse.getBody();
 
             // parse json to array
@@ -315,7 +308,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
 
@@ -354,7 +347,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        return httpClient.executePost(httpRequest).getBody();
+        return httpClient.executePost(httpRequest, project).getBody();
     }
 
     /**
@@ -395,7 +388,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
 
@@ -446,7 +439,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
 
@@ -480,7 +473,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
 
@@ -503,11 +496,11 @@ public class LeetcodeClient {
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url).setContentType("application/json").build();
 
-        HttpResponse httpResponse = httpClient.executeGet(httpRequest);
+        HttpResponse httpResponse = httpClient.executeGet(httpRequest, project);
 
         // check data
         while (! checkLeetcodeReady(httpResponse)) {
-            httpResponse = httpClient.executeGet(httpRequest);
+            httpResponse = httpClient.executeGet(httpRequest, project);
         }
 
         return httpResponse.getBody();
@@ -546,7 +539,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
 
@@ -578,7 +571,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
 
@@ -604,7 +597,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
 
@@ -629,7 +622,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
 
@@ -652,7 +645,7 @@ public class LeetcodeClient {
                 .addBasicHeader()
                 .build();
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest);
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();

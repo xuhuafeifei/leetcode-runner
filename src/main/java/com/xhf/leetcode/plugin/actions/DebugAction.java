@@ -4,6 +4,7 @@ import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.DebugManager;
+import com.xhf.leetcode.plugin.debug.debugger.CPPDebugger;
 import com.xhf.leetcode.plugin.debug.debugger.Debugger;
 import com.xhf.leetcode.plugin.debug.debugger.JavaDebugger;
 import com.xhf.leetcode.plugin.debug.debugger.PythonDebugger;
@@ -45,8 +46,23 @@ public class DebugAction extends AbstractAction {
             case PYTHON3:
                 doPythonDebug(project, langType);
                 break;
+            case CPP:
+                doCPPDebug(project, langType);
+                break;
             default:
                 ConsoleUtils.getInstance(project).showWaring("当前" + langType.getLangType() + "语言类型不支持调试", false, true);
+        }
+    }
+
+    private void doCPPDebug(Project project, LangType langType) {
+        if (! doCheck(project, langType)) {
+            return;
+        }
+        Debugger debugger = DebugManager.getInstance(project).createDebugger(CPPDebugger.class);
+        try {
+            debugger.start();
+        } catch (Exception e) {
+            DebugUtils.simpleDebug("Debug Failed! " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
         }
     }
 

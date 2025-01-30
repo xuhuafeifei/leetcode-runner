@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.io.http.utils;
 
+import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.HttpRequest;
 import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -18,6 +20,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -64,7 +67,7 @@ public class HttpClient {
      * @param httpRequest 封装的请求
      * @return 响应体字符串
      */
-    public HttpResponse executeGet(HttpRequest httpRequest) {
+    public HttpResponse executeGet(@NotNull HttpRequest httpRequest) {
         HttpGet request = new HttpGet(httpRequest.getUrl());
 
         HttpResponse httpResponse = new HttpResponse(-1);
@@ -88,6 +91,16 @@ public class HttpClient {
         return httpResponse;
     }
 
+    public HttpResponse executeGet(@NotNull HttpRequest httpRequest, @NotNull Project project) {
+        HttpResponse httpResponse = executeGet(httpRequest);
+        if (httpResponse == null) {
+            LogUtils.error("httpResponse为null, 可能是网络错误. url = " + httpRequest.getUrl());
+            ConsoleUtils.getInstance(project).showWaring("请求失败, 可能是网络错误! 请检查您是否接入网络!");
+            throw new RuntimeException("网络异常或请求url有误!");
+        }
+        return httpResponse;
+    }
+
     /**
      * 添加请求头
      * @param request
@@ -98,13 +111,23 @@ public class HttpClient {
         }
     }
 
+    public HttpResponse executePost(@NotNull HttpRequest httpRequest, @NotNull Project project) {
+        HttpResponse httpResponse = executePost(httpRequest);
+        if (httpResponse == null) {
+            LogUtils.error("httpResponse为null, 可能是网络错误. url = " + httpRequest.getUrl());
+            ConsoleUtils.getInstance(project).showWaring("请求失败, 可能是网络错误! 请检查您是否接入网络!", false, true);
+            throw new RuntimeException("网络异常或请求url有误!");
+        }
+        return httpResponse;
+    }
+
     /**
      * 发送POST请求
      *
      * @param httpRequest 封装的请求
      * @return 响应体字符串
      */
-    public HttpResponse executePost(HttpRequest httpRequest) {
+    public HttpResponse executePost(@NotNull HttpRequest httpRequest) {
         HttpPost request = new HttpPost(httpRequest.getUrl());
         Map<String, String> headers = httpRequest.getHeader();
         String body = httpRequest.getBody();

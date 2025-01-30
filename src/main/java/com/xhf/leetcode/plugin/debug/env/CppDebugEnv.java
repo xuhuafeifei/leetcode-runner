@@ -1,0 +1,242 @@
+package com.xhf.leetcode.plugin.debug.env;
+
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.TextBrowseFolderListener;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextField;
+import com.intellij.util.ui.FormBuilder;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.CppCodeAnalyzer;
+import com.xhf.leetcode.plugin.debug.analysis.converter.CppTestcaseConvertor;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.DebugError;
+import com.xhf.leetcode.plugin.io.file.StoreService;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
+import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
+
+import javax.swing.*;
+
+import static javax.swing.JOptionPane.OK_OPTION;
+
+/**
+ * 启动cpp环境的debug
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
+public class CppDebugEnv extends AbstractDebugEnv {
+    /**
+     * gdb
+     */
+    private String GDB = "";
+    /**
+     * g++
+     */
+    private String GPP = "";
+    /**
+     * MinGW的目录
+     */
+    private String MINGW_HOME = "";
+    /**
+     * solution cpp path
+     */
+    private String solutionCppPath;
+    /**
+     * 创建的代码和用户编写的代码的偏移量
+     */
+    private int offset;
+
+    public CppDebugEnv(Project project) {
+        super(project);
+    }
+
+    @Override
+    protected void initFilePath() {
+        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug").append("cpp").build();
+    }
+
+    @Override
+    public boolean prepare() throws DebugError {
+        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyFile() && buildFile();
+    }
+
+    @Override
+    protected boolean copyFile() {
+        return copyFileHelper("/debug/cpp/leetcode.h");
+    }
+
+    @Override
+    protected boolean buildToolPrepare() throws DebugError {
+        boolean flag = StoreService.getInstance(project).contains("MINGW_HOME");
+
+        TextFieldWithBrowseButton myFileBrowserBtn = new TextFieldWithBrowseButton();
+        myFileBrowserBtn.addBrowseFolderListener(
+                new TextBrowseFolderListener(
+                        FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
+                ) {
+                });
+
+        // 携带帮助文档的按钮
+        String HELP_CONTENT = "<p><strong>MinGW</strong>是一个用于 <strong>Windows</strong> 平台的开发工具集，其中包含如<strong>g++</strong>、<strong>gcc</strong>、<strong>gdb</strong>等<strong>debug</strong>使用的核心工具</p>\n" +
+                "<p>而leetcode-runner的c++ debug运行依赖于<strong>MinGW</strong>提供的工具, 因此需要使用者单独下载MinGW</p>\n" +
+                "<p>另外, 建议使用和项目适配的MinGW, 具体下载链接您可以通过点击<code>没有MinGW?</code>按钮获取</p>" +
+                "<p>如果使用其他版本的MinGW, 可能会出现意料之外的异常</p>"
+                ;
+        JPanel targetComponent = null;
+        targetComponent = InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(HELP_CONTENT).getTargetComponent();
+
+        String javaPath;
+        if (flag) {
+            javaPath = StoreService.getInstance(project).getCache("MINGW_HOME", String.class);
+            myFileBrowserBtn.setText(javaPath);
+        }
+
+        int i = JOptionPane.showOptionDialog(
+                null,
+                targetComponent,
+                "选择MinGW目录",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                new Object[]{"确定", "取消", "没有MinGW?"},
+                "确定"
+        );
+        if (i == 2) {
+            // 给出下载链接
+            JOptionPane.showOptionDialog(
+                    null,
+                    FormBuilder.createFormBuilder()
+                            .addLabeledComponent(new JBLabel("Github下载链接: "), new JBTextField("https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-win32-seh-ucrt-rt_v12-rev1.7z"), 1, false)
+                            .addLabeledComponent(new JBLabel("Fgbg提供的链接: "), new JBTextField("https://pan.baidu.com/s/15aK7K5AIkMoMwxdV4jCNlA?pwd=1jxa"), 1, false)
+                            .getPanel()
+                    ,
+                    "MinGW的两种下载方式",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    new Object[]{"确定", "取消"},
+                    "确定"
+            );
+        }
+        if (i != OK_OPTION) {
+            return false;
+        }
+        this.MINGW_HOME = myFileBrowserBtn.getText();
+
+        this.GPP = new FileUtils.PathBuilder(this.MINGW_HOME).append("bin").append("g++.exe").build();
+        this.GDB = new FileUtils.PathBuilder(this.MINGW_HOME).append("bin").append("gdb.exe").build();
+
+        if (!FileUtils.fileExists(GPP)) {
+            throw new DebugError("无法找到g++.exe, g++路径错误 = " + GPP);
+        }
+        if (!FileUtils.fileExists(GDB)) {
+            throw new DebugError("无法找到gdb.exe, gdb路径错误 = " + GDB);
+        }
+        // 存储正确的javaPath
+        StoreService.getInstance(project).addCache("MINGW_HOME", MINGW_HOME);
+        return true;
+    }
+
+    /**
+     * cpp的debug, 不再采用Main, Solution独立的编写方式, 不然引用太操蛋了.
+     * 直接将main函数写入solution.cpp内
+     * @return true
+     * @throws DebugError error
+     */
+    @Override
+    protected boolean createMainFile() throws DebugError {
+        return true;
+    }
+
+    @Override
+    protected boolean createSolutionFile() throws DebugError {
+        // 获取路径
+        String solutionPath = new FileUtils.PathBuilder(filePath).append("solution.cpp").build();
+        this.solutionCppPath = solutionPath;
+        String solutionContent = getSolutionContent();
+        // 获取main函数
+        solutionContent += "\n" + getMainFunction();
+        // 写文件
+        StoreService.getInstance(project).writeFile(solutionPath, solutionContent);
+        return true;
+    }
+
+    private String getMainFunction() {
+        // 读取Main.template
+        String mainContent = FileUtils.readContentFromFile(getClass().getResource("/debug/cpp/Main.template"));
+        // 获取callCode
+        mainContent = mainContent.replace("{{callCode}}", getCallCode());
+        // 存储文件
+        StoreService.getInstance(project).writeFile(this.solutionCppPath, mainContent);
+        return mainContent;
+    }
+
+    private CharSequence getCallCode() {
+        // 分析得到代码片段
+        CppCodeAnalyzer analyzer = new CppCodeAnalyzer(project);
+        AnalysisResult result = analyzer.autoAnalyze();
+        this.methodName = result.getMethodName();
+        CppTestcaseConvertor convertor = new CppTestcaseConvertor("solution", result, project);
+        // 得到调用代码
+        return convertor.autoConvert();
+    }
+
+    private String getSolutionContent() {
+        String content = ViewUtils.getContentOfCurrentOpenVFile(project);
+        if (content == null) {
+            throw new DebugError("当前打开文件为空");
+        }
+        String include = "#include \"leetcode.h\"";
+        // 目前不需要增加偏移量
+        this.offset = 0;
+        content = include + content;
+        return content;
+    }
+
+    private boolean buildFile() {
+        // 通过java编译mainJavaPath下的Java类
+        try {
+            // 获取系统javac路径
+            String cdCmd = "cd " + this.filePath;
+            String cmd = GPP + " -g " + this.solutionCppPath + " solution.exe";
+
+            String combinedCmd = " cmd /c " + cdCmd + " & " + cmd;
+            
+            LogUtils.simpleDebug("编译combinedCmd = " + combinedCmd);
+            Process exec = Runtime.getRuntime().exec(cmd);
+            DebugUtils.printProcess(exec, false, project);
+
+            int i = exec.exitValue();
+            if (i != 0) {
+                throw new DebugError("编译文件异常, 详细信息可查看Console");
+            }
+            return true;
+        } catch (Exception e) {
+            throw new DebugError(e.getMessage(), e);
+        }
+    }
+
+    public String getGDB() {
+        return GDB;
+    }
+
+    public String getGPP() {
+        return GPP;
+    }
+
+    public String getMINGW_HOME() {
+        return MINGW_HOME;
+    }
+
+    public String getSolutionCppPath() {
+        return solutionCppPath;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+}

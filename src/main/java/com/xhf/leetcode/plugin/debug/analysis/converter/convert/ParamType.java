@@ -24,14 +24,14 @@ public enum ParamType {
     DOUBLE("double", new String[]{"double"}, null),
     BOOLEAN("boolean", new String[]{"boolean", "bool"}, null),
     CHAR("char", new String[]{"char"}, null),
-    STRING("String", new String[]{"String", "str"}, new StringConvertor()),
-    INT_ARRAY("int_array", new String[]{"int[]", "List[int]"}, new IntArrayConvertor()),
-    INT_MATRIX("int_matrix", new String[]{"int[][]", "List[List[int]]"}, new IntMatrixConvertor()),
-    String_ARRAY("String_array", new String[]{"String[]", "List[str]"}, new StringArrayConvertor()),
-    String_MATRIX("String_matrix", new String[]{"String[][]", "List[List[str]]"}, new StringMatrixConvertor()),
+    STRING("String", new String[]{"String", "str", "string"}, new StringConvertor()),
+    INT_ARRAY("int_array", new String[]{"int[]", "List[int]", "vector<int>"}, new IntArrayConvertor()),
+    INT_MATRIX("int_matrix", new String[]{"int[][]", "List[List[int]]", "vector<vector<int>>"}, new IntMatrixConvertor()),
+    String_ARRAY("String_array", new String[]{"String[]", "List[str]", "vector<string>"}, new StringArrayConvertor()),
+    String_MATRIX("String_matrix", new String[]{"String[][]", "List[List[str]]", "vector<vector<string>>"}, new StringMatrixConvertor()),
     LIST_STRING("List_String", new String[]{"List<String>"}, new ListStringConvertor()),
-    TREE_NODE("TreeNode", new String[]{"TreeNode", "Optional[TreeNode]"}, new TreeNodeConvertor()),
-    LIST_NODE("List_Node", new String[]{"ListNode", "Optional[ListNode]"}, new ListNodeConvertor());
+    TREE_NODE("TreeNode", new String[]{"TreeNode", "TreeNode*", "Optional[TreeNode]"}, new TreeNodeConvertor()),
+    LIST_NODE("List_Node", new String[]{"ListNode", "ListNode*", "Optional[ListNode]"}, new ListNodeConvertor());
 
     /**
      * 不同变量的类型.所有语言的类型都通过type进行标识

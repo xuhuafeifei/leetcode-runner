@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.model;
 
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
+import com.xhf.leetcode.plugin.utils.UnSafe;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -134,5 +135,15 @@ public class HttpRequest {
             return httpRequest;
         }
 
+    }
+
+    @UnSafe("body内部存在用户的登录凭证信息, 调用此方法时需小心")
+    public String toStringUnsafe() {
+        return "HttpRequest{" +
+                "url='" + url + '\'' +
+                ", body='" + body + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", Header=" + Header +
+                '}';
     }
 }

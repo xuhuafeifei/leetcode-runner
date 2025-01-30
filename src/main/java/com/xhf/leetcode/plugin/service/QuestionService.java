@@ -16,6 +16,7 @@ import com.xhf.leetcode.plugin.model.GraphqlReqBody;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
+import com.xhf.leetcode.plugin.utils.LangType;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -152,6 +153,8 @@ public class QuestionService {
     private void parseRespForFillingQuestion(Question question, String resp) {
         // get a lang type
         String langType = AppSettings.getInstance().getLangType();
+        LangType lt = LangType.getType(langType);
+        assert lt != null;
 
         // parse json to array
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
@@ -165,7 +168,10 @@ public class QuestionService {
 
         for (JsonElement item : questionJsonObj.getAsJsonArray("codeSnippets")) {
             JsonObject obj = item.getAsJsonObject();
-            if (GsonUtils.fromJson(obj.get("lang"), String.class).equalsIgnoreCase(langType)) {
+            String lang = GsonUtils.fromJson(obj.get("lang"), String.class);
+            if (lt.has(lang)) {
+//            }
+//            if (.equalsIgnoreCase(langType)) {
                 codeSnippets = Question.handleCodeSnippets(obj.get("code").getAsString(), langType);
                 break;
             }

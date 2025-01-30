@@ -11,6 +11,15 @@ import java.util.Arrays;
  */
 public class ListNodeConvertor extends AbstractVariableConvertor {
     @Override
+    protected String doCpp(String testcase, String variableName) {
+        String code = FileUtils.readContentFromFile(getClass().getResource("/debug/cpp/ListNodeConvertor.template"));
+        code = code.replace("{{testcase}}", testcase)
+                   .replace("{{variableName}}", variableName)
+                   .replace("{{testcaseVName}}", RandomUtils.nextString(10));
+        return code;
+    }
+
+    @Override
     protected String doPython(String testcase, String variableName) {
         String code = FileUtils.readContentFromFile(getClass().getResource("/debug/python/ListNodeConvertor.template"));
         code = code.replace("{{testcase}}", testcase)

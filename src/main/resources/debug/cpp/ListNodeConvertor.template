@@ -1,0 +1,26 @@
+string {{testcaseVName}} = "{{testcase}}";
+// 去除字符串两端的空格
+{{testcaseVName}} = trim({{testcaseVName}});
+
+ListNode* {{variableName}} = nullptr;
+if ({{testcaseVName}} != "[]") {
+    // 去掉字符串中的方括号
+    {{testcaseVName}} = remove_char({{testcaseVName}}, '[');
+    {{testcaseVName}} = remove_char({{testcaseVName}}, ']');
+
+    // 将字符串按逗号分割
+    vector<int> split;
+    stringstream ss({{testcaseVName}});
+    string item;
+    while (getline(ss, item, ',')) {
+        split.push_back(stoi(item));
+    }
+
+    // 创建链表
+    {{variableName}} = new ListNode(split[0]);
+    ListNode* cp = {{variableName}};
+    for (size_t i = 1; i < split.size(); ++i) {
+        cp->next = new ListNode(split[i]);
+        cp = cp->next;
+    }
+}

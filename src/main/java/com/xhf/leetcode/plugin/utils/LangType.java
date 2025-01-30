@@ -7,24 +7,27 @@ import org.apache.commons.lang.StringUtils;
  * @email 2508020102@qq.com
  */
 public enum LangType {
-    JAVA("java", ".java", "//"),
+    JAVA("java", ".java", "//", new String[]{"java", "Java"}),
 //    PYTHON("python", ".py", "#"),
-    CPP("c++", ".cpp", "//"),
-    JAVASCRIPT("javascript", ".js", "//"),
-    C("c", ".c", "//"),
-    PYTHON3("python3", ".py", "#"),
-    GO("go", ".go", "//"),
+    CPP("cpp", ".cpp", "//", new String[]{"cpp", "c++", "C++", "Cpp", "CPP"}),
+    JAVASCRIPT("javascript", ".js", "//", new String[]{"js"}),
+    C("c", ".c", "//", new String[]{"c", "C"}),
+    PYTHON3("python3", ".py", "#", new String[]{"py", "python", "Python", "Python3", "python3"}),
+    GO("go", ".go", "//", new String[]{"go", "Go", "go", "GO"}),
     ;
 
-    private LangType(String langType, String suffix, String commentSymbol) {
+
+    private LangType(String langType, String suffix, String commentSymbol, String[] rec) {
         this.langType = langType;
         this.suffix = suffix;
         this.commentSymbol = commentSymbol;
+        this.rec = rec;
     }
 
-    private String langType;
-    private String suffix;
-    private String commentSymbol;
+    private final String langType;
+    private final String suffix;
+    private final String commentSymbol;
+    private final String[] rec;
 
     public static String getAllLangType() {
         LangType[] values = LangType.values();
@@ -101,5 +104,19 @@ public enum LangType {
             }
         }
         return null;
+    }
+
+    /**
+     * langType是否是当前LangType
+     * @param lang langType
+     * @return boolean
+     */
+    public boolean has(String lang) {
+        for (String _rec : this.rec) {
+            if (_rec.equals(lang)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

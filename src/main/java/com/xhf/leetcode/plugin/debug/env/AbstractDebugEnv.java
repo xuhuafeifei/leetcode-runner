@@ -28,6 +28,13 @@ import java.util.jar.JarFile;
 import static javax.swing.JOptionPane.OK_OPTION;
 
 /**
+ * DebugEnv父类
+ * 1. 在构造函数中初始化debug的中间文件存储路径——filePath, 允许子类通过initFilePath重写filePath路径
+ * 2. DebugManager对外暴露isDebug接口, 使其拥有判断debug是否启动的能力
+ * 3. 提供测试案例获取的能力, 也就是程序输入
+ * 4. 提供stop, end接口
+ * 5. 提供文件拷贝能力
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
@@ -110,7 +117,6 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         LCEventBus.getInstance().post(new DebugStartEvent());
     }
 
-    // 拷贝py文件. 可以选择不实现, 毕竟有可能没有copy的需求
     protected boolean copyFile() {
         return true;
     }

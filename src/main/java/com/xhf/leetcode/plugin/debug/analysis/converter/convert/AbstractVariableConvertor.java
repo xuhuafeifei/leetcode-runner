@@ -7,7 +7,7 @@ import com.xhf.leetcode.plugin.utils.LangType;
 import java.util.Objects;
 
 /**
- * 抽线变量转换器, 允许将测试案例转换为对应语言的代码
+ * 抽象变量转换器, 允许将测试案例转换为对应语言的代码
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -23,10 +23,14 @@ public abstract class AbstractVariableConvertor implements VariableConvertor{
                 return doJava(testcase, variableName);
             case PYTHON3:
                 return doPython(testcase, variableName);
+            case CPP:
+                return doCpp(testcase, variableName);
             default:
                 throw new DebugError("目前不支持 " + langType.getLangType() + " 语言的debug");
         }
     }
+
+    protected abstract String doCpp(String testcase, String variableName);
 
     protected abstract String doPython(String testcase, String variableName);
 

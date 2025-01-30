@@ -621,7 +621,8 @@ public class CodeService {
                         sb.append("❌ Time Limit Exceeded...").append("\n");
                         sb.append(DebugUtils.matchLines(cr.getFullCompileError(), Question.getLineUpperOffset(project))).append("\n");
                     }else {
-                        throw new RuntimeException("unknown leetcode error...");
+                        // throw new RuntimeException("unknown leetcode error...");
+                        sb.append("❌ " + cr.getStatusMsg()).append("\n");
                     }
                 }
             }
