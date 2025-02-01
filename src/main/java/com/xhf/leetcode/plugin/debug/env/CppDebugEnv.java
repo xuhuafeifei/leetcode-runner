@@ -49,6 +49,22 @@ public class CppDebugEnv extends AbstractDebugEnv {
      * 创建的代码和用户编写的代码的偏移量
      */
     private int offset;
+    /**
+     * 端口
+     */
+    private int port;
+    /**
+     * ServerMain的路径
+     */
+    private String serverMainPath;
+    /**
+     * solution.exe的路径
+     */
+    private String solutionExePath;
+    /**
+     * ServerMain.exe的路径
+     */
+    private String serverMainExePath;
 
     public CppDebugEnv(Project project) {
         super(project);
@@ -66,7 +82,17 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     @Override
     protected boolean copyFile() {
-        return copyFileHelper("/debug/cpp/leetcode.h");
+        // return copyFileHelper("/debug/cpp/leetcode.h");
+        return
+                copyFileExcept("/debug/cpp",
+                        new String[]{
+                                "test.cmd",
+                                "ListNodeConvertor.template",
+                                "TreeNodeConvertor.template",
+                                "ServerMain.template",
+                                "Main.template"
+                        }
+                );
     }
 
     @Override
@@ -144,11 +170,25 @@ public class CppDebugEnv extends AbstractDebugEnv {
     /**
      * cpp的debug, 不再采用Main, Solution独立的编写方式, 不然引用太操蛋了.
      * 直接将main函数写入solution.cpp内
+     * <p>
+     * 此处创建的是ServerMain.cpp, 用于启动cpp的debug服务
      * @return true
      * @throws DebugError error
      */
     @Override
     protected boolean createMainFile() throws DebugError {
+        String solutionExePath = new FileUtils.PathBuilder(filePath).append("solution.exe").build();
+        String serverMain = FileUtils.readContentFromFile(getClass().getResource("/debug/cpp/ServerMain.template"));
+        // ({{gdb_path}}, {{solution_exe_path}}, R"(--interpreter=mi2)", log);
+        this.port = DebugUtils.findAvailablePort();
+        serverMain = serverMain
+                .replace("{{gdb_path}}", "\"" + new FileUtils.PathBuilder(this.GDB).buildWithEscape() + "\"")
+                .replace("{{solution_exe_path}}", "\"" + new FileUtils.PathBuilder(solutionExePath).buildWithEscape() + "\"")
+                .replace("{{port}}", String.valueOf(this.port))
+        ;
+        // 写文件
+        this.serverMainPath = new FileUtils.PathBuilder(filePath).append("ServerMain.cpp").build();
+        StoreService.getInstance(project).writeFile(this.serverMainPath, serverMain);
         return true;
     }
 
@@ -198,22 +238,24 @@ public class CppDebugEnv extends AbstractDebugEnv {
     }
 
     private boolean buildFile() {
-        // 通过java编译mainJavaPath下的Java类
         try {
-            // 获取系统javac路径
             String cdCmd = "cd " + this.filePath;
-            String cmd = GPP + " -g " + this.solutionCppPath + " solution.exe";
+            String cmd = GPP + " -g " + this.solutionCppPath + " -o solution.exe";
+            String cmd2 = GPP + " -g " + this.serverMainPath + " -lws2_32 -o ServerMain.exe";
 
-            String combinedCmd = " cmd /c " + cdCmd + " & " + cmd;
-            
+            String combinedCmd = " cmd /c " + cdCmd + " & " + cmd + " & " + cmd2;
+
             LogUtils.simpleDebug("编译combinedCmd = " + combinedCmd);
-            Process exec = Runtime.getRuntime().exec(cmd);
+            Process exec = Runtime.getRuntime().exec(combinedCmd);
+
             DebugUtils.printProcess(exec, false, project);
 
             int i = exec.exitValue();
             if (i != 0) {
                 throw new DebugError("编译文件异常, 详细信息可查看Console");
             }
+            this.solutionExePath = new FileUtils.PathBuilder(filePath).append("solution.exe").build();
+            this.serverMainExePath = new FileUtils.PathBuilder(filePath).append("ServerMain.exe").build();
             return true;
         } catch (Exception e) {
             throw new DebugError(e.getMessage(), e);
@@ -236,7 +278,23 @@ public class CppDebugEnv extends AbstractDebugEnv {
         return solutionCppPath;
     }
 
+    public int getPort() {
+        return this.port;
+    }
+
     public int getOffset() {
         return offset;
+    }
+
+    public String getServerMainPath() {
+        return serverMainPath;
+    }
+
+    public String getSolutionExePath() {
+        return solutionExePath;
+    }
+
+    public String getServerMainExePath() {
+        return serverMainExePath;
     }
 }

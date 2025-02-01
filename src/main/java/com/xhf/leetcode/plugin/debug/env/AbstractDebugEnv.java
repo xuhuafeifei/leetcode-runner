@@ -131,7 +131,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
     }
 
     /**
-     * @param resourcePath 资源路径
+     * @param resourcePath 资源路径 [别在屁股后面加/]
      * @param exceptFileName 需要排除的文件名
      */
     protected boolean copyFileExcept(String resourcePath, String[] exceptFileName) {
@@ -243,4 +243,5 @@ public abstract class AbstractDebugEnv implements DebugEnv {
     protected abstract boolean createMainFile() throws DebugError;
 
     protected abstract boolean createSolutionFile() throws DebugError;
+
 }

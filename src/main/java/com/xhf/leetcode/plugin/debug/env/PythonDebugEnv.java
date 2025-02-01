@@ -84,7 +84,6 @@ public class PythonDebugEnv extends AbstractDebugEnv {
 //                copyFileHelper("/debug/python/server.py") &&
 //                copyFileHelper("/debug/python/ListNode.py") &&
 //                copyFileHelper("/debug/python/TreeNode.py")
-                // 别在屁股后面加/
                 copyFileExcept("/debug/python",
                         new String[]{
                                 "ListNodeConvertor.template",

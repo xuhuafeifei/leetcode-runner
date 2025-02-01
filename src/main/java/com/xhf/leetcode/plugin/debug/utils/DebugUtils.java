@@ -39,6 +39,7 @@ import org.apache.commons.lang.StringUtils;
 import java.awt.*;
 import java.io.*;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +74,11 @@ public class DebugUtils {
                         return;
                     }
                     LogUtils.simpleDebug("cmd error result = " + errorMessage);
-                    ConsoleUtils.getInstance(project).showError(errorMessage, false);
+                    if (project != null) {
+                        ConsoleUtils.getInstance(project).showError(errorMessage, false);
+                    } else {
+                        LogUtils.simpleDebug("Project为NULL, 当前为测试模式");
+                    }
                 } catch (Exception e) {
                     LogUtils.error(e);
                 }
@@ -83,7 +88,11 @@ public class DebugUtils {
                 LogUtils.simpleDebug("result = " + getOutputMessage(process));
                 String errorMessage = getErrorMessage(process);
                 LogUtils.simpleDebug("error result = " + errorMessage);
-                ConsoleUtils.getInstance(project).showError(errorMessage, false);
+                if (project != null) {
+                    ConsoleUtils.getInstance(project).showError(errorMessage, false);
+                } else {
+                    LogUtils.simpleDebug("Project为NULL, 当前为测试模式");
+                }
             } catch (Exception e) {
                 LogUtils.error(e);
             }
@@ -465,5 +474,15 @@ public class DebugUtils {
             sb.append(matchLine(s, offset)).append("\n");
         }
         return sb.toString();
+    }
+
+    public static boolean isPortAvailable(String host, int port) {
+        try (Socket ignored = new Socket(host, port)) {
+            // 如果能够成功建立连接，说明端口已经启动
+            return true;
+        } catch (IOException e) {
+            // 如果抛出异常，说明端口未启动或不可访问
+            return false;
+        }
     }
 }

@@ -1,0 +1,16 @@
+#include "CppDebugServer.h"
+#include "StdGdbController.h"
+#include "InstSource.h"
+#include "WebGdbController.h"
+
+int main() {
+    LogHelper log;
+    DebugServer server(log, {{port}});
+    std::thread cpp_web_server([&server]() {
+        server.start();
+    });
+
+    auto gdb = WebGdbController({{gdb_path}}, {{solution_exe_path}}, "--interpreter=mi2", log);
+    gdb.start_gdb();
+    cpp_web_server.join();
+}

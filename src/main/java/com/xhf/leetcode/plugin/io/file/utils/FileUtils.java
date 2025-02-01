@@ -201,6 +201,55 @@ public class FileUtils {
         return path.replaceAll("\\\\", "/");
     }
 
+    public static class BackslashEscape {
+        /**
+         * 检测字符串中是否存在未转义的反斜杠，并进行转义。
+         *
+         * @param input 输入的字符串
+         * @return 转义后的字符串
+         */
+        public static String escapeBackslash(String input) {
+            // 用于存储结果的 StringBuilder
+            StringBuilder result = new StringBuilder();
+
+            // 遍历字符串的每个字符
+            for (int i = 0; i < input.length(); i++) {
+                char currentChar = input.charAt(i);
+
+                // 如果当前字符是反斜杠
+                if (currentChar == '\\') {
+                    // 检查下一个字符是否是反斜杠或转义字符
+                    if (i + 1 < input.length()) {
+                        char nextChar = input.charAt(i + 1);
+
+                        // 如果下一个字符不是反斜杠或转义字符，则转义当前反斜杠
+                        if (nextChar != '\\' && !isEscapeCharacter(nextChar)) {
+                            result.append('\\'); // 添加一个额外的反斜杠
+                        }
+                    } else {
+                        // 如果反斜杠是最后一个字符，则转义它
+                        result.append('\\');
+                    }
+                }
+
+                // 添加当前字符到结果中
+                result.append(currentChar);
+            }
+
+            return result.toString();
+        }
+
+        /**
+         * 判断字符是否是转义字符（如 \n, \t, \r 等）。
+         *
+         * @param c 需要判断的字符
+         * @return 如果是转义字符，返回 true；否则返回 false
+         */
+        private static boolean isEscapeCharacter(char c) {
+            return c == 'n' || c == 't' || c == 'r' || c == 'b' || c == 'f' || c == '\'' || c == '\"' || c == '\\';
+        }
+    }
+
     /**
      * judge whether the content is a file path or not
      * @param content
@@ -293,6 +342,16 @@ public class FileUtils {
         public String buildUnUnify() {
             String path = sb.toString();
             return FileUtils.unUnifyPath(path);
+        }
+
+        /**
+         * 转义
+         * @param path str
+         * @return 转义后的字符串
+         */
+        public String buildWithEscape() {
+            String path = sb.toString();
+            return BackslashEscape.escapeBackslash(path);
         }
     }
 }

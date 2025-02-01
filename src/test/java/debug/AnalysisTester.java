@@ -3,6 +3,8 @@ package debug;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
 import com.xhf.leetcode.plugin.debug.analysis.converter.JavaTestcaseConvertor;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.utils.GsonUtils;
 import org.junit.Test;
 
 /**
@@ -49,5 +51,21 @@ public class AnalysisTester {
                 "    }\n" +
                 "}");
         AnalysisResult result4 = jca.analyze("public void abab()");
+    }
+
+    @Test
+    public void test27() {
+        String s = "{\n" +
+                "    \"add_line\": 0,\n" +
+                "    \"class_name\": \"\",\n" +
+                "    \"context\": \"\",\n" +
+                "    \"has_result\": false,\n" +
+                "    \"method_name\": \"\",\n" +
+                "    \"msg\": \"\",\n" +
+                "    \"result\": \"\",\n" +
+                "    \"success\": false\n" +
+                "}";
+        var a = GsonUtils.fromJson(s, ExecuteResult.class);
+        System.out.println(a);
     }
 }

@@ -26,8 +26,6 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -353,13 +351,7 @@ public class PythonDebugger extends AbstractDebugger {
      * @return 如果端口已经启动，返回 true；否则返回 false
      */
     public static boolean isPortAvailable(String host, int port) {
-        try (Socket ignored = new Socket(host, port)) {
-            // 如果能够成功建立连接，说明端口已经启动
-            return true;
-        } catch (IOException e) {
-            // 如果抛出异常，说明端口未启动或不可访问
-            return false;
-        }
+        return DebugUtils.isPortAvailable(host, port);
     }
 
     @Override

@@ -49,9 +49,13 @@ public class ExecuteResult {
     /**
      * 上下文对象
      */
-    private ExecuteContext context;
+    private transient ExecuteContext context;
     @SerializedName("class_name")
     private String className;
+
+    public ExecuteResult() {
+
+    }
 
     public boolean isSuccess() {
         return success;

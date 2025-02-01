@@ -1,7 +1,7 @@
 //
 // Created by 25080 on 2025/1/29.
 //
-
+#pragma once
 #ifndef LEETCODE_H
 #define LEETCODE_H
 
@@ -16,6 +16,26 @@
 #include <queue>
 
 using namespace std;
+
+bool starts_with(const std::string& str, const std::string& prefix) {
+    if (prefix.size() > str.size()) return false;
+    return std::equal(prefix.begin(), prefix.end(), str.begin());
+}
+
+bool ends_with(const std::string& str, const std::string& suffix) {
+    if (suffix.size() > str.size()) return false;
+    return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
+}
+
+std::vector<std::string> split(const std::string &s, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
 
 // 去除字符串前的空白字符
 string ltrim(const string& s) {
