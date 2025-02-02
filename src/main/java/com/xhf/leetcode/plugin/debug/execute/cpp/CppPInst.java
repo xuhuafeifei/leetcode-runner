@@ -68,7 +68,8 @@ public class CppPInst extends AbstractCppInstExecutor {
             res = new StringBuilder(Constants.WATCH + ":\n");
             for (String watch : watchPool) {
                 inst.setParam(watch);
-                res.append(super.doExecute(inst, pCtx).getResult()).append("\n");
+                // res.append(super.doExecute(inst, pCtx).getResult()).append("\n");
+                // todo:
             }
             return res.toString();
         }
