@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.debug.execute.cpp.gdb;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 解析gdb-mi的输出
@@ -26,14 +27,20 @@ public class GdbParser {
      */
     public String preHandle(String basic) {
         String input = basic;
+        if (StringUtils.isBlank(input)) {
+            return input;
+        }
         input = input.trim();
+        String prefix = "";
         if (input.startsWith("^") || input.startsWith("*") || input.startsWith("=")) {
             // 去掉前缀（如 ^done, *stopped, =thread-group-added）
-            input = input.substring(input.indexOf(',') + 1).trim();
+            int endIndex = input.indexOf(',');
+            prefix = input.substring(0, endIndex + 1);
+            input = input.substring(endIndex + 1).trim();
         }
         char c = input.charAt(0);
         if (c != '{') {
-            return "{" + input + "}";
+            return prefix + "{" + input + "}";
         } else {
             return basic;
         }
@@ -136,6 +143,14 @@ public class GdbParser {
                 i = end - 1;
             } else if (arr[i] == ',') {
                 doAdd(sb, ele);
+            } else if (arr[i] == '\"') {
+                // 去除""内部的所有信息,包括匹配的另一个"
+                int j = i + 1;
+                while (j < arr.length && arr[j] != '"') {
+                    ++j;
+                }
+                for (int k = i; k <= j; k++) {sb.append(arr[k]);}
+                i = j;
             } else {
                 sb.append(arr[i]);
             }

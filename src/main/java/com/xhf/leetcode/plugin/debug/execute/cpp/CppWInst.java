@@ -21,12 +21,23 @@ public class CppWInst extends AbstractCppInstExecutor {
             GdbElement gdbElement =  this.gdbParser.parse(cppGdbInfo.getResultRecord());
             GdbArray arr = gdbElement.getAsGdbObject().get("stack").getAsGdbArray();
             var frame0 = arr.get(0).getAsGdbObject();
-            DebugUtils.fillExecuteResultByLocation(r,
-                    frame0.get("fullname").getAsGdbPrimitive().getAsString(),
-                    frame0.get("func").getAsGdbPrimitive().getAsString(),
-                    frame0.get("line").getAsGdbPrimitive().getAsNumber().intValue()
-            );
+            String fileName = subFileName(frame0.get("frame").getAsGdbObject().get("fullname").getAsGdbPrimitive().getAsString());
+            String methodName = frame0.get("frame").getAsGdbObject().get("func").getAsGdbPrimitive().getAsString();
+            int lineNumber = Integer.parseInt(frame0.get("frame").getAsGdbObject().get("line").getAsGdbPrimitive().getAsString());
+            // 设置行信息
+            DebugUtils.fillExecuteResultByLocation(r, fileName, methodName, lineNumber);
+            r.setResult("at " + fileName + " " + lineNumber);
         }
+    }
+
+    /**
+     * 截取文件名字
+     * @param fullname 全路径名
+     * @return str
+     */
+    private String subFileName(String fullname) {
+        String[] split = fullname.split("\\\\");
+        return split[split.length - 1];
     }
 
     @Override

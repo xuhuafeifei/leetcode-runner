@@ -121,6 +121,8 @@ protected:
     static string extract_text(const string &basicString);
 
     string extract_error(string line);
+
+    std::string extract_console_stream_output(std::string line);
 };
 
 GdbController::GdbController(std::string gdb_path, std::string exe_path, std::string gdb_param, LogHelper& log):
@@ -260,6 +262,8 @@ ExecuteResult GdbController::parse_gdb_output(const std::string& gdb_result, con
             if (starts_with(line, "^done")) {
                 cpp_gdb_info.status = "done";
                 // 解析更多详细信息...
+                result.has_result = true;
+                result.result = "done";
             } else if (starts_with(line, "^running")) {
                 cpp_gdb_info.status = "running";
             } else if (starts_with(line, "^error")) {
@@ -280,7 +284,7 @@ ExecuteResult GdbController::parse_gdb_output(const std::string& gdb_result, con
             }
         } else if (starts_with(line, "~")) { // 普通文本输出
             result.has_result = true;
-            result.result += extract_text(line); // 自定义函数提取文本
+            result.result += extract_console_stream_output(line); // 自定义函数提取文本
         } else if (starts_with(line, "&")) {
             cpp_gdb_info.log_output += extract_text(line);
         }
@@ -291,6 +295,12 @@ ExecuteResult GdbController::parse_gdb_output(const std::string& gdb_result, con
     return result;
 }
 
+std::string GdbController::extract_console_stream_output(std::string line) {
+    auto s = line.substr(1);
+    if (s[0] == '\"') s = s.substr(1, s.length() - 2);
+    return s;
+}
+
 std::string GdbController::extract_error(std::string line) {
     auto s = line.substr(11);
     if (s[0] == '\"') s = s.substr(1, s.length() - 2);
@@ -298,7 +308,7 @@ std::string GdbController::extract_error(std::string line) {
 }
 
 string GdbController::extract_text(const string &basicString) {
-    auto s = basicString.substr(1);
+    auto s = basicString;
     if (s[0] == '\"') s = s.substr(1, s.length() - 2);
     return s;
 }

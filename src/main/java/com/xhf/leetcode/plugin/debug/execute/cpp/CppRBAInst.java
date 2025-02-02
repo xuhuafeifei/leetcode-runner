@@ -10,6 +10,6 @@ import org.jetbrains.annotations.NotNull;
 public class CppRBAInst extends AbstractCppInstExecutor {
     @Override
     protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
-        return "-delete-list";
+        return "-break-delete";
     }
 }

@@ -2,9 +2,12 @@ package com.xhf.leetcode.plugin.debug.execute.cpp;
 
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.CppGdbInfo;
+import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbObject;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.Constants;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -34,12 +37,22 @@ public class CppPInst extends AbstractCppInstExecutor {
     }
 
     private ExecuteResult doP(Instruction inst, CppContext pCtx) {
+        String exp = inst.getParam();
         String res = "";
+        // 计算表达式
+        if (StringUtils.isNotBlank(exp)) {
+            res = doCompute(exp, inst, pCtx);
+        }
+        // 检查监视池
+        res += Constants.LOCAL_VARIABLE + ":\n";
         res += getWatchPool(inst, pCtx);
 
-        String gdbCommand = "-stack-list-variables  --all-values";
-        ExecuteResult r = super.doExecute(inst, pCtx, gdbCommand);
+        ExecuteResult r = super.doExecute(inst, pCtx, "info locals");
 
+        res += r.getResult();
+        return ExecuteResult.success(inst.getOperation(), res);
+
+//        String gdbCommand = "-stack-list-variables  --all-values";
 //        CppGdbInfo cppGdbInfo = super.getCppGdbInfo(r);
 //        // 没有错误
 //        if (handleError(r, cppGdbInfo)) {
@@ -57,7 +70,31 @@ public class CppPInst extends AbstractCppInstExecutor {
 //            }
 //            r.setResult(sb.toString());
 //        }
-        return r;
+//        return r;
+    }
+
+    /**
+     * 表达式计算
+     * @param exp 需要计算的表达式
+     * @param inst inst
+     * @param pCtx pCtx
+     * @return ans
+     */
+    private String doCompute(String exp, Instruction inst, CppContext pCtx) {
+        ExecuteResult computeR = super.doExecute(inst, pCtx, "-data-evaluate-expression " + exp);
+        CppGdbInfo cppGdbInfo = super.getCppGdbInfo(computeR);
+        GdbObject obj = this.gdbParser.parse(this.gdbParser.preHandle(cppGdbInfo.getResultRecord())).getAsGdbObject();
+
+        String res = "";
+        if (super.isGdbError(cppGdbInfo)) {
+            res += exp + " = " + obj.get("msg").getAsGdbPrimitive().getAsString();
+        } else {
+            res += exp + " = " + obj.get("value").getAsGdbPrimitive().getAsString();
+        }
+        if (res.charAt(res.length() - 1) != '\n') {
+            res += '\n';
+        }
+        return res;
     }
 
     private String getWatchPool(Instruction inst, CppContext pCtx) {
@@ -67,7 +104,7 @@ public class CppPInst extends AbstractCppInstExecutor {
             res = new StringBuilder(Constants.WATCH + ":\n");
             for (String watch : watchPool) {
                 inst.setParam(watch);
-                res.append(super.doExecute(inst, pCtx, "p " + watch).getResult()).append("\n");
+                res.append(doCompute(watch, inst, pCtx));
             }
             return res.toString();
         }

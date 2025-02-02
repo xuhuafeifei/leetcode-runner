@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.xhf.leetcode.plugin.debug.execute.cpp.KillPortProcess.killProcess;
 import static com.xhf.leetcode.plugin.io.file.utils.FileUtils.BackslashEscape.escapeBackslash;
 
 /**
@@ -166,5 +167,10 @@ public class CPPTest {
 //        GdbElement r2 = gdbParser.parse(b);
 
 //        System.out.println(r2);
+    }
+
+    @Test
+    public void test11() {
+        killProcess(63254);
     }
 }

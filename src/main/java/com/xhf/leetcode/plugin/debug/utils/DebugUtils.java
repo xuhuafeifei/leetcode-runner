@@ -33,6 +33,8 @@ import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang.StringUtils;
@@ -290,8 +292,16 @@ public class DebugUtils {
     private static final Map<Integer, RangeHighlighter> highlighterMap = new HashMap<>();
 
     public static void highlightLineWithCheck(int lineNumber, String curClassName, Project project) {
+        // 如果是cpp debug, 特判一下
+        String langType = AppSettings.getInstance().getLangType();
+        if (LangType.CPP.getLangType().equals(langType)) {
+            if (! curClassName.endsWith("solution.cpp")) {
+                DebugUtils.removeHighlightLine(project);
+                return;
+            }
+        }
         // 如果当前执行的类不是Solution, 则不进行高亮
-        if (! "Solution".equals(curClassName)) {
+        else if (! "Solution".equals(curClassName)) {
             DebugUtils.removeHighlightLine(project);
             return;
         }

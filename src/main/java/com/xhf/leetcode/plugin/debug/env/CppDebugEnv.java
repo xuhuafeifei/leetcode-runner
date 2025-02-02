@@ -90,7 +90,23 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     @Override
     public boolean prepare() throws DebugError {
-        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyFile() && buildFile();
+        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyFile() && closeExe() && buildFile();
+    }
+
+    /**
+     * 强制关闭exe, 该方法不论是否执行成功, 都不会返回false
+     * @return boolean
+     */
+    private boolean closeExe() {
+        this.solutionExePath = new FileUtils.PathBuilder(filePath).append("solution.exe").build();
+        this.serverMainExePath = new FileUtils.PathBuilder(filePath).append("ServerMain.exe").build();
+
+        try {
+            FileUtils.deleteFile(this.serverMainExePath);
+        } catch (Exception ignored) {
+            LogUtils.warn("删除solution.exe失败: " + this.solutionExePath);
+        }
+        return true;
     }
 
     @Override
@@ -215,8 +231,8 @@ public class CppDebugEnv extends AbstractDebugEnv {
                 .replace("{{gdb_path}}", "\"" + new FileUtils.PathBuilder(this.GDB).buildWithEscape() + "\"")
                 .replace("{{solution_exe_path}}", "\"" + new FileUtils.PathBuilder(solutionExePath).buildWithEscape() + "\"")
                 .replace("{{port}}", String.valueOf(this.port))
-                .replace("{{std_log_path}}", "\"" + this.stdLogPath + "\"")
-                .replace("{{std_err_path}}", "\"" + this.stdErrPath + "\"")
+                .replace("{{std_log_path}}", "\"" + new FileUtils.PathBuilder(this.stdLogPath).buildWithEscape() + "\"")
+                .replace("{{std_err_path}}", "\"" + new FileUtils.PathBuilder(this.stdErrPath).buildWithEscape() + "\"")
         ;
         // 写文件
         this.serverMainPath = new FileUtils.PathBuilder(filePath).append("ServerMain.cpp").build();
@@ -325,8 +341,6 @@ public class CppDebugEnv extends AbstractDebugEnv {
             if (i != 0) {
                 throw new DebugError("编译文件异常, 详细信息可查看Console");
             }
-            this.solutionExePath = new FileUtils.PathBuilder(filePath).append("solution.exe").build();
-            this.serverMainExePath = new FileUtils.PathBuilder(filePath).append("ServerMain.exe").build();
             return true;
         } catch (Exception e) {
             throw new DebugError(e.getMessage(), e);

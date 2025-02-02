@@ -108,15 +108,7 @@ public class CPPDebugger extends AbstractDebugger {
             GdbParser instance = GdbParser.getInstance();
             String handleMsg = instance.preHandle(msg);
             GdbElement ele = instance.parse(handleMsg);
-            if (ele.getAsGdbObject().get("msg").equals("No registers.")) {
-                // 发送终止命令, 并关停debug
-                new AbstractCppInstExecutor() {
-                    @Override
-                    protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
-                        return "quit";
-                    }
-                }.execute(Instruction.success(this.readType, Operation.R, ""), context);
-
+            if (ele.getAsGdbObject().get("msg").getAsGdbPrimitive().getAsString().equals("No registers.")) {
                 DebugManager.getInstance(project).stopDebugger();
             }
         }
@@ -172,7 +164,48 @@ public class CPPDebugger extends AbstractDebugger {
 
     @Override
     public void stop() {
+        // 已经停止了, 无需再次停止
+        if (!DebugManager.getInstance(project).isDebug()) {
+            return;
+        }
+        // 发送终止命令, 并关停debug
+        new AbstractCppInstExecutor() {
+            @Override
+            protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
+                return "quit";
+            }
+        }.execute(Instruction.success(this.readType, Operation.R, ""), context);
 
+        DebugUtils.simpleDebug("CppDebugger即将停止!", project);
+        env.stopDebug();
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ignored) {
+        }
+
+        // 如果没有启动, 直接返回
+        if (!DebugUtils.isPortAvailable2("localhost", env.getPort())) {
+            DebugUtils.simpleDebug("cpp服务关闭成功, CppDebugger停止", project);
+            return;
+        }
+
+        // 3次循环, 检测python服务是否已经关闭
+        for (int i = 0; i < 3; i++) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
+            if (!DebugUtils.isPortAvailable2("localhost", env.getPort())) {
+                DebugUtils.simpleDebug("cpp服务关闭成功, CppDebugger停止", project);
+                return;
+            }
+        }
+        exec.destroy();
+        if (exec.isAlive()) {
+            KillPortProcess.killProcess(env.getPort());
+        }
+        DebugUtils.simpleDebug("cpp服务强制关闭! CppDebugger停止", project, false);
     }
 
     @Override

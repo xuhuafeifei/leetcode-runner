@@ -31,6 +31,8 @@ public abstract class AbstractCppInstExecutor implements InstExecutor {
         // 前置处理inst
         doPre(inst, pCtx);
         ExecuteResult r = doExecute(inst, pCtx, getGdbCommand(inst, pCtx));
+        r.setMoreInfo(r.getMoreInfo() == null ? "" : r.getMoreInfo().replace("\\n", "\n"));
+        r.setResult(r.getResult() == null ? "" : r.getResult().replace("\\n", "\n"));
         r.setOperation(inst.getOperation());
         // 后置处理result
         doAfter(r, pCtx);
@@ -64,12 +66,16 @@ public abstract class AbstractCppInstExecutor implements InstExecutor {
      * @return boolean true表示gdb执行发生错误
      */
     protected boolean handleError(ExecuteResult r, CppGdbInfo cppGdbInfo) {
-        if (cppGdbInfo.getStatus().equals("error")) {
+        if (isGdbError(cppGdbInfo)) {
             r.setSuccess(false);
             r.setHasResult(false);
             r.setMsg(cppGdbInfo.getResultRecord());
             return true;
         }
         return false;
+    }
+
+    protected boolean isGdbError(CppGdbInfo cppGdbInfo) {
+        return "error".equals(cppGdbInfo.getStatus());
     }
 }
