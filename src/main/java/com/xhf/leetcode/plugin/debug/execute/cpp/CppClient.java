@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.debug.execute.cpp;
 
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.DebugManager;
-import com.xhf.leetcode.plugin.debug.debugger.CPPDebugger;
 import com.xhf.leetcode.plugin.debug.env.CppDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
@@ -24,7 +23,7 @@ public class CppClient {
     private final int cppPort;
     private final String url;
     public CppClient(Project project) {
-        var debugger = DebugManager.getInstance(project).getDebugger(CPPDebugger.class);
+        var debugger = DebugManager.getInstance(project).getCurrentDebugger();
         this.cppPort = ((CppDebugEnv) debugger.getEnv()).getPort();
         this.url = "http://localhost:" + cppPort;
         this.instance = HttpClient.getInstance();

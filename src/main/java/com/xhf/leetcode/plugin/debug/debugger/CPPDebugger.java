@@ -5,7 +5,10 @@ import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.CppDebugEnv;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
+import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.cpp.*;
+import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbElement;
+import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbParser;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
@@ -97,6 +100,28 @@ public class CPPDebugger extends AbstractDebugger {
         }
     }
 
+    @Override
+    protected void doAfterExecuteInstruction(ExecuteResult r) {
+        // 判断是否是w指令, 且是否执行成功, 如果失败, 则说明程序停止, 需要退出
+        if (! r.isSuccess() && r.getOperation() == Operation.W) {
+            String msg = r.getMsg();
+            GdbParser instance = GdbParser.getInstance();
+            String handleMsg = instance.preHandle(msg);
+            GdbElement ele = instance.parse(handleMsg);
+            if (ele.getAsGdbObject().get("msg").equals("No registers.")) {
+                // 发送终止命令, 并关停debug
+                new AbstractCppInstExecutor() {
+                    @Override
+                    protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
+                        return "quit";
+                    }
+                }.execute(Instruction.success(this.readType, Operation.R, ""), context);
+
+                DebugManager.getInstance(project).stopDebugger();
+            }
+        }
+    }
+
     private void initBreakpoint() {
         // ui读取模式下, 初始化断点
         if (AppSettings.getInstance().isUIReader()) {
@@ -117,6 +142,7 @@ public class CPPDebugger extends AbstractDebugger {
     private void initCtx() {
         this.context.setEnv(env);
         this.context.setCppClient(new CppClient(project));
+        this.context.setReadType(this.readType);
     }
 
     private void startCppService() {
@@ -151,6 +177,6 @@ public class CPPDebugger extends AbstractDebugger {
 
     @Override
     public DebugEnv getEnv() {
-        return null;
+        return this.env;
     }
 }

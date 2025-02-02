@@ -24,7 +24,7 @@ public class PyClient {
     private final int pyPort;
     private final String url;
     public PyClient(Project project) {
-        PythonDebugger debugger = DebugManager.getInstance(project).getDebugger(PythonDebugger.class);
+        PythonDebugger debugger = (PythonDebugger) DebugManager.getInstance(project).getCurrentDebugger();
         this.pyPort = ((PythonDebugEnv) debugger.getEnv()).getPyPort();
         this.url = "http://localhost:" + pyPort + "/process";
         this.instance = HttpClient.getInstance();

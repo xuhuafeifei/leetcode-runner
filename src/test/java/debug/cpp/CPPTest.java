@@ -131,6 +131,12 @@ public class CPPTest {
 
         System.out.println("解析结果 2:");
         System.out.println(result2);
+
+        String input3 = "*stopped,reason=\"breakpoint-hit\",thread-id=\"1\",frame={level=\"0\",addr=\"0x00007ff6a3a119b3\",func=\"main\",file=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",fullname=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",line=\"66\",arch=\"i386:x86-64\"}";
+        String s = gdbParser.preHandle(input3);
+        GdbElement parse = gdbParser.parse(s);
+
+        System.out.println(parse);
     }
 
     @Test

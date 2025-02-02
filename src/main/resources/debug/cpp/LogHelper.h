@@ -15,20 +15,30 @@ private:
         out.flush();
     }
 public:
-    LogHelper() {
-
+    LogHelper() = default;
+    LogHelper(std::string std_out_path, std::string std_err_path) {
+        // 打开文件
+        this->std_out_path = std_out_path;
+        this->std_err_path = std_err_path;
     }
     void log_stdout(const std::string& msg) {
-        log(std::cout, msg);
+        std::ofstream outFile(this->std_out_path, std::ios::app | std::ios::out | std::ios::ate);
+        log(outFile, msg);
     }
 
     void log_stderr(const std::string& msg) {
+        std::ofstream outFile(this->std_err_path, std::ios::app | std::ios::out | std::ios::ate);
         log(std::cerr, msg);
     }
 
     void log_info(const std::string& msg) {
-        log(std::cout, msg);
+        std::ofstream outFile(this->std_out_path, std::ios::app | std::ios::out | std::ios::ate);
+        log(outFile, msg);
     }
+
+private:
+    std::string std_out_path;
+    std::string std_err_path;
 };
 
 #endif //CPP_LOGHELPER_H

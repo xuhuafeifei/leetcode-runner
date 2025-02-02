@@ -31,7 +31,6 @@ public class CppPInst extends AbstractCppInstExecutor {
     private ExecuteResult doWATCH(Instruction inst, CppContext pCtx) {
         pCtx.addToWatchPool(inst.getParam());
         return doP(inst, pCtx);
-
     }
 
     private ExecuteResult doP(Instruction inst, CppContext pCtx) {
@@ -68,8 +67,7 @@ public class CppPInst extends AbstractCppInstExecutor {
             res = new StringBuilder(Constants.WATCH + ":\n");
             for (String watch : watchPool) {
                 inst.setParam(watch);
-                // res.append(super.doExecute(inst, pCtx).getResult()).append("\n");
-                // todo:
+                res.append(super.doExecute(inst, pCtx, "p " + watch).getResult()).append("\n");
             }
             return res.toString();
         }

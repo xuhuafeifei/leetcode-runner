@@ -4,8 +4,10 @@
 #include "WebGdbController.h"
 
 int main() {
-    LogHelper log;
-    DebugServer server(log, {{port}});
+    LogHelper log({{std_log_path}}, {{std_err_path}});
+    int port = {{port}};
+    DebugServer server(log, port);
+    log.log_info("server will start on port = " + port);
     std::thread cpp_web_server([&server]() {
         server.start();
     });

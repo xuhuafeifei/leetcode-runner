@@ -101,6 +101,8 @@ public abstract class AbstractDebugger implements Debugger{
             return new ProcessResult(false, true, false, inst, null);
         }
 
+        doAfterExecuteInstruction(r);
+
         // 执行结果为null
         if (r == null) {
             return new ProcessResult(false, false, false, inst, null);
@@ -113,6 +115,13 @@ public abstract class AbstractDebugger implements Debugger{
             LogUtils.simpleDebug(r.getMsg());
         }
         return new ProcessResult(true, false, false, inst, r);
+    }
+
+    /**
+     * 允许子类在执行完指令后做出额外操作
+     */
+    protected void doAfterExecuteInstruction(ExecuteResult r) {
+
     }
 
     /**

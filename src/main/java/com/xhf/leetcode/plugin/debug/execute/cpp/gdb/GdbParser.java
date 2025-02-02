@@ -20,6 +20,25 @@ public class GdbParser {
         return INSTANCE;
     }
 
+    /**
+     * 预处理GDB的输出, 如果GDB的输出是a=b,c=d这样连续的键值对, 而没有使用{}或[]等符号, 那么最终解析得不到正确的结果
+     * @return s
+     */
+    public String preHandle(String basic) {
+        String input = basic;
+        input = input.trim();
+        if (input.startsWith("^") || input.startsWith("*") || input.startsWith("=")) {
+            // 去掉前缀（如 ^done, *stopped, =thread-group-added）
+            input = input.substring(input.indexOf(',') + 1).trim();
+        }
+        char c = input.charAt(0);
+        if (c != '{') {
+            return "{" + input + "}";
+        } else {
+            return basic;
+        }
+    }
+
     public GdbElement parse(String input) {
         if (input.startsWith("^")) {
             return parseResultClass(input);

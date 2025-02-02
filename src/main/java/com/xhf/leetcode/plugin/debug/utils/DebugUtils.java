@@ -511,7 +511,7 @@ public class DebugUtils {
         try (ServerSocket socket = new ServerSocket(port)) {
             return false;
         } catch (IOException e) {
-            return false;
+            return true;
         }
     }
 }

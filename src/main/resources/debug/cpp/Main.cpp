@@ -7,8 +7,10 @@
 #include "WebGdbController.h"
 
 int main() {
-    LogHelper log;
-    DebugServer server(log, 8080);
+    LogHelper log("E:\\java_code\\lc-test\\cache\\debug\\cpp\\log\\std_info.log", "E:\\java_code\\lc-test\\cache\\debug\\cpp\\log\\std_err.log");
+    int port = 8080;
+    DebugServer server(log, port);
+    log.log_info("server will start on port = " + port);
     std::thread cpp_web_server([&server]() {
         server.start();
     });

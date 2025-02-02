@@ -31,6 +31,7 @@ public abstract class AbstractCppInstExecutor implements InstExecutor {
         // 前置处理inst
         doPre(inst, pCtx);
         ExecuteResult r = doExecute(inst, pCtx, getGdbCommand(inst, pCtx));
+        r.setOperation(inst.getOperation());
         // 后置处理result
         doAfter(r, pCtx);
         return r;
@@ -48,7 +49,7 @@ public abstract class AbstractCppInstExecutor implements InstExecutor {
 
     protected ExecuteResult doExecute(Instruction inst, CppContext pCtx, String gdbCommand) {
         CppClient cppClient = pCtx.getCppClient();
-        return cppClient.postRequest(inst.getParam(), gdbCommand);
+        return cppClient.postRequest(inst.getOperation().getName(), gdbCommand);
     }
 
     protected CppGdbInfo getCppGdbInfo(ExecuteResult r) {

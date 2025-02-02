@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
 import com.xhf.leetcode.plugin.debug.env.CppDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.AbstractExecuteContext;
+import com.xhf.leetcode.plugin.debug.reader.ReadType;
 
 /**
  * @author feigebuge
@@ -12,6 +13,7 @@ import com.xhf.leetcode.plugin.debug.execute.AbstractExecuteContext;
 public class CppContext extends AbstractExecuteContext {
     private CppDebugEnv env;
     private CppClient cppClient;
+    private ReadType readType;
 
     public CppContext(Project project) {
         super(project);
@@ -36,5 +38,13 @@ public class CppContext extends AbstractExecuteContext {
 
     public void setCppClient(CppClient cppClient) {
         this.cppClient = cppClient;
+    }
+
+    public void setReadType(ReadType readType) {
+        this.readType = readType;
+    }
+
+    public ReadType getReadType() {
+        return this.readType;
     }
 }

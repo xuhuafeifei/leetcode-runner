@@ -1,11 +1,12 @@
 package com.xhf.leetcode.plugin.debug.env;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
-import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
@@ -20,8 +21,10 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.io.IOException;
 
 import static javax.swing.JOptionPane.OK_OPTION;
 
@@ -67,6 +70,14 @@ public class CppDebugEnv extends AbstractDebugEnv {
      * ServerMain.exe的路径
      */
     private String serverMainExePath;
+    /**
+     * 存储debug服务的std err
+     */
+    private String stdErrPath;
+    /**
+     * 存储debug服务的std log
+     */
+    private String stdLogPath;
 
     public CppDebugEnv(Project project) {
         super(project);
@@ -184,10 +195,28 @@ public class CppDebugEnv extends AbstractDebugEnv {
         String serverMain = FileUtils.readContentFromFile(getClass().getResource("/debug/cpp/ServerMain.template"));
         // ({{gdb_path}}, {{solution_exe_path}}, R"(--interpreter=mi2)", log);
         this.port = DebugUtils.findAvailablePort();
+        this.stdLogPath = new FileUtils.PathBuilder(filePath).append("cppLog").append("std_log.log").build();
+        this.stdErrPath = new FileUtils.PathBuilder(filePath).append("cppLog").append("std_log.log").build();
+
+        LogUtils.simpleDebug("stdLogPath = " + this.stdLogPath);
+        LogUtils.simpleDebug("stdErrPath = " + this.stdErrPath);
+
+        // 清空文件
+        try {
+            FileUtils.createAndWriteFile(this.stdLogPath, "");
+            FileUtils.createAndWriteFile(this.stdErrPath, "");
+        } catch (IOException e) {
+            LogUtils.error(e);
+            throw new DebugError("python日志文件创建错误!" + e.toString());
+        }
+
+        LogUtils.info("cpp port = " + this.port);
         serverMain = serverMain
                 .replace("{{gdb_path}}", "\"" + new FileUtils.PathBuilder(this.GDB).buildWithEscape() + "\"")
                 .replace("{{solution_exe_path}}", "\"" + new FileUtils.PathBuilder(solutionExePath).buildWithEscape() + "\"")
                 .replace("{{port}}", String.valueOf(this.port))
+                .replace("{{std_log_path}}", "\"" + this.stdLogPath + "\"")
+                .replace("{{std_err_path}}", "\"" + this.stdErrPath + "\"")
         ;
         // 写文件
         this.serverMainPath = new FileUtils.PathBuilder(filePath).append("ServerMain.cpp").build();
@@ -240,6 +269,36 @@ public class CppDebugEnv extends AbstractDebugEnv {
         return content;
     }
 
+    public class MyTask extends Task.WithResult<Integer, Exception> {
+
+        private final String combinedCmd;
+        private Process process;
+
+        public MyTask(Project project, String combineCmd) {
+            super(project, "debug服务编译中, 需要一点时间, 这个时候, 您可以打开手机, 原生, 启动!", true);
+            this.combinedCmd = combineCmd;
+        }
+
+        @Override
+        protected Integer compute(@NotNull ProgressIndicator indicator) throws Exception {
+            LogUtils.simpleDebug("编译combinedCmd = " + combinedCmd);
+            process = Runtime.getRuntime().exec(combinedCmd);
+            process.waitFor();
+
+            return process.exitValue();
+        }
+
+        @Override
+        public void onCancel() {
+            if (process != null && process.isAlive()) {
+                process.destroy(); // 尝试正常终止进程
+                // 如果需要强制终止，可以使用 destroyForcibly()
+                // process.destroyForcibly();
+                System.out.println("用户取消了任务，进程已终止");
+            }
+        }
+    }
+
     private boolean buildFile() {
         try {
             String cdCmd = "cd " + this.filePath;
@@ -248,18 +307,20 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
             String combinedCmd = " cmd /c " + cdCmd + " & " + cmd + " & " + cmd2;
 
-            Integer i = ProgressManager.getInstance().runProcessWithProgressSynchronously(
-                    (ThrowableComputable<Integer, Exception>) () -> {
-                        LogUtils.simpleDebug("编译combinedCmd = " + combinedCmd);
-                        Process exec = Runtime.getRuntime().exec(combinedCmd);
+            Integer i = ProgressManager.getInstance().run(new MyTask(project, combinedCmd));
 
-                        DebugUtils.printProcess(exec, false, project);
-                        return exec.exitValue();
-                    },
-                    "debug服务编译中, 需要一点时间, 这个时候, 您可以打开手机, 原生, 启动!",
-                    true,
-                    project
-            );
+//            Integer i = ProgressManager.getInstance().runProcessWithProgressSynchronously(
+//                    (ThrowableComputable<Integer, Exception>) () -> {
+//                        LogUtils.simpleDebug("编译combinedCmd = " + combinedCmd);
+//                        Process exec = Runtime.getRuntime().exec(combinedCmd);
+//
+//                        DebugUtils.printProcess(exec, false, project);
+//                        return exec.exitValue();
+//                    },
+//                    "debug服务编译中, 需要一点时间, 这个时候, 您可以打开手机, 原生, 启动!",
+//                    true,
+//                    project
+//            );
 
             if (i != 0) {
                 throw new DebugError("编译文件异常, 详细信息可查看Console");
