@@ -223,7 +223,7 @@ public class FileUtils {
                         char nextChar = input.charAt(i + 1);
 
                         // 如果下一个字符不是反斜杠或转义字符，则转义当前反斜杠
-                        if (nextChar != '\\' && !isEscapeCharacter(nextChar)) {
+                        if (nextChar != '\\') {
                             result.append('\\'); // 添加一个额外的反斜杠
                         }
                     } else {
@@ -346,7 +346,6 @@ public class FileUtils {
 
         /**
          * 转义
-         * @param path str
          * @return 转义后的字符串
          */
         public String buildWithEscape() {

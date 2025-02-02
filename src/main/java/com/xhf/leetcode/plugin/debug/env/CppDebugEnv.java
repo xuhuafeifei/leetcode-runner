@@ -1,9 +1,11 @@
 package com.xhf.leetcode.plugin.debug.env;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
@@ -90,7 +92,8 @@ public class CppDebugEnv extends AbstractDebugEnv {
                                 "ListNodeConvertor.template",
                                 "TreeNodeConvertor.template",
                                 "ServerMain.template",
-                                "Main.template"
+                                "Main.template",
+                                "Main.cpp"
                         }
                 );
     }
@@ -245,12 +248,19 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
             String combinedCmd = " cmd /c " + cdCmd + " & " + cmd + " & " + cmd2;
 
-            LogUtils.simpleDebug("编译combinedCmd = " + combinedCmd);
-            Process exec = Runtime.getRuntime().exec(combinedCmd);
+            Integer i = ProgressManager.getInstance().runProcessWithProgressSynchronously(
+                    (ThrowableComputable<Integer, Exception>) () -> {
+                        LogUtils.simpleDebug("编译combinedCmd = " + combinedCmd);
+                        Process exec = Runtime.getRuntime().exec(combinedCmd);
 
-            DebugUtils.printProcess(exec, false, project);
+                        DebugUtils.printProcess(exec, false, project);
+                        return exec.exitValue();
+                    },
+                    "debug服务编译中, 需要一点时间, 这个时候, 您可以打开手机, 原生, 启动!",
+                    true,
+                    project
+            );
 
-            int i = exec.exitValue();
             if (i != 0) {
                 throw new DebugError("编译文件异常, 详细信息可查看Console");
             }
@@ -296,5 +306,9 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     public String getServerMainExePath() {
         return serverMainExePath;
+    }
+
+    public String getMethodName() {
+        return this.methodName;
     }
 }

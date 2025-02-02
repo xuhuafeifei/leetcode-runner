@@ -19,8 +19,7 @@ public enum ReadType {
     /**
      * ui输入
      */
-    UI_IN("ui_in", UIReader.class, "UI读取指令")
-    ;
+    UI_IN("ui_in", UIReader.class, "UI读取指令");
     private final Class<? extends InstReader> reader;
     private String type;
     private String name;

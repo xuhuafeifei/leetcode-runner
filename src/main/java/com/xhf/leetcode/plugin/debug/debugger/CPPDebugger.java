@@ -2,14 +2,19 @@ package com.xhf.leetcode.plugin.debug.debugger;
 
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.DebugManager;
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.CppDebugEnv;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
-import com.xhf.leetcode.plugin.debug.execute.cpp.CppContext;
-import com.xhf.leetcode.plugin.debug.execute.cpp.CppInstFactory;
+import com.xhf.leetcode.plugin.debug.execute.cpp.*;
+import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.output.OutputType;
+import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author feigebuge
@@ -19,6 +24,8 @@ public class CPPDebugger extends AbstractDebugger {
 
     private final CppContext context;
     private final CppDebugConfig config;
+    private final ReadType readType;
+    private final OutputType outputType;
     private CppDebugEnv env;
     private Process exec;
 
@@ -26,6 +33,8 @@ public class CPPDebugger extends AbstractDebugger {
         super(project, new CppContext(project), config, CppInstFactory.getInstance());
         this.context = (CppContext) super.basicContext;
         this.config = config;
+        this.readType = config.getReadType();
+        this.outputType = config.getOutputType();
         // this.outputHelper = new OutputHelper(project);
     }
 
@@ -62,11 +71,52 @@ public class CPPDebugger extends AbstractDebugger {
     }
 
     private void executeCppDebugRemotely() {
-        
+        initBreakpoint();
+        doRun();
+    }
+
+    private void doRun() {
+        // 初始化运行指令
+        new AbstractCppInstExecutor() {
+            @Override
+            protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
+                return "-exec-run";
+            }
+        }.execute(Instruction.success(this.readType, Operation.R, ""), context);
+
+        while (DebugManager.getInstance(project).isDebug()) {
+            ProcessResult pR = processDebugCommand();
+            if (pR.isContinue) {
+                continue;
+            } else if (pR.isReturn) {
+                return;
+            }
+            if (!pR.isSuccess) {
+                throw new DebugError("未知异常! debug 指令执行错误!");
+            }
+        }
+    }
+
+    private void initBreakpoint() {
+        // ui读取模式下, 初始化断点
+        if (AppSettings.getInstance().isUIReader()) {
+            uiBreakpointInit();
+        }else {
+            commandBreakpointInit();
+        }
+    }
+
+    private void commandBreakpointInit() {
+        new CppBInst().execute(Instruction.success(ReadType.COMMAND_IN, Operation.B, env.getMethodName()), context);
+    }
+
+    private void uiBreakpointInit() {
+        // todo:
     }
 
     private void initCtx() {
-
+        this.context.setEnv(env);
+        this.context.setCppClient(new CppClient(project));
     }
 
     private void startCppService() {
@@ -74,8 +124,7 @@ public class CPPDebugger extends AbstractDebugger {
         DebugUtils.simpleDebug("启动cpp服务: " + serverMainExePath, project);
 
         try {
-            String cmd = env.getServerMainExePath();
-            this.exec = Runtime.getRuntime().exec(cmd);
+            this.exec = Runtime.getRuntime().exec(serverMainExePath);
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
             throw new DebugError(e.toString(), e);
@@ -87,16 +136,10 @@ public class CPPDebugger extends AbstractDebugger {
                 Thread.sleep(500);
             } catch (InterruptedException ignored) {
             }
-            if (DebugUtils.isPortAvailable("localhost", env.getPort())) {
+            if (DebugUtils.isPortAvailable2("localhost", env.getPort())) {
                 DebugUtils.simpleDebug("cpp服务连接成功", project, false);
                 return;
             }
-        }
-        int i = this.exec.exitValue();
-        // 如果正常退出, 表示断点服务跑完了
-        if (i == 0) {
-            DebugManager.getInstance(project).stopDebugger();
-            return;
         }
         throw new DebugError("cpp服务连接失败! 错误信息可通过Console查看");
     }

@@ -12,7 +12,7 @@ public enum LangType {
     CPP("cpp", ".cpp", "//", new String[]{"cpp", "c++", "C++", "Cpp", "CPP"}),
     JAVASCRIPT("javascript", ".js", "//", new String[]{"js"}),
     C("c", ".c", "//", new String[]{"c", "C"}),
-    PYTHON3("python3", ".py", "#", new String[]{"py", "python", "Python", "Python3", "python3"}),
+    PYTHON3("python3", ".py", "#", new String[]{"py", "Python3", "python3"}), // rec内容别加'python', 否则后续代码解析会报错
     GO("go", ".go", "//", new String[]{"go", "Go", "go", "GO"}),
     ;
 

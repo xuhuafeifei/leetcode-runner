@@ -28,6 +28,7 @@ import com.sun.jdi.Location;
 import com.sun.jdi.Value;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbElement;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.exception.DebugError;
@@ -390,6 +391,12 @@ public class DebugUtils {
         r.setClassName(className);
     }
 
+    public static void fillExecuteResultByGdbElement(ExecuteResult r, GdbElement className, GdbElement methodName, GdbElement lineNumber) {
+        r.setAddLine(lineNumber.getAsGdbPrimitive().getAsNumber().intValue());
+        r.setMethodName(methodName.getAsGdbPrimitive().toString());
+        r.setClassName(className.getAsGdbPrimitive().getAsString());
+    }
+
     public static String buildCurrentLineInfoByLocation(ExecuteResult r) {
         return buildCurrentLineInfo(r.getClassName(), r.getMethodName(), r.getAddLine());
     }
@@ -434,7 +441,14 @@ public class DebugUtils {
     }
     public static String removeQuotes(String str) {
         // 除去的是字符串两端的双引号
-        return str.replaceAll("^\"|\"$", "");
+        if (str.startsWith("\"")) {
+            str = str.substring(1);
+        }
+        if (str.endsWith("\"")) {
+            str = str.substring(0, str.length() - 1);
+        }
+        // return str.replaceAll("^\"|\"$", "");
+        return str;
     }
 
     public static String getStackTraceAsString(Throwable throwable) {
@@ -482,6 +496,21 @@ public class DebugUtils {
             return true;
         } catch (IOException e) {
             // 如果抛出异常，说明端口未启动或不可访问
+            return false;
+        }
+    }
+
+    /**
+     * 换了一种判断方式, 如果Java创建ServerSocket失败, 认为端口可用
+     * C++的debug场景下, C++服务只支持HTTP, 不支持Socket, 所以这里不采用链接的方式判断
+     * @param host host
+     * @param port port
+     * @return boolean
+     */
+    public static boolean isPortAvailable2(String host, int port) {
+        try (ServerSocket socket = new ServerSocket(port)) {
+            return false;
+        } catch (IOException e) {
             return false;
         }
     }

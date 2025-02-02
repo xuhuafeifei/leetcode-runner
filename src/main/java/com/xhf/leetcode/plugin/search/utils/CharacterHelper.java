@@ -188,6 +188,7 @@ public class CharacterHelper {
 		return j;
 	}
 
+
 	public static int matchBracket(String s, int start) {
 		return matchBracket(s.toCharArray(), start);
 	}
@@ -312,7 +313,8 @@ public class CharacterHelper {
 	}
 
 	public static void main(String[] args) {
-		System.out.println(getChainCnt("test.a.b().arr[0] + 1", 4));
+		// System.out.println(getChainCnt("test.a.b().arr[0] + 1", 4));
+		System.out.println(matchBracket("{},{}", 0));
 	}
 
 	/**

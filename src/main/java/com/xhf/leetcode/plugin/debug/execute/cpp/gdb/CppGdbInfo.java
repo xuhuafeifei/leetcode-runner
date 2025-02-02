@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.debug.execute.cpp;
+package com.xhf.leetcode.plugin.debug.execute.cpp.gdb;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -15,6 +15,8 @@ public class CppGdbInfo {
     private String status;
     @SerializedName("log_output")
     private String logOutput;
+    @SerializedName("result_record")
+    private String resultRecord;
 
     public String getStoppedReason() {
         return stoppedReason;
@@ -47,4 +49,13 @@ public class CppGdbInfo {
     public void setLogOutput(String logOutput) {
         this.logOutput = logOutput;
     }
+
+    public String getResultRecord() {
+        return resultRecord;
+    }
+
+    public void setResultRecord(String resultRecord) {
+        this.resultRecord = resultRecord;
+    }
+
 }
