@@ -3,7 +3,7 @@ package com.xhf.leetcode.plugin.debug.execute.cpp.gdb;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 解析gdb-mi的输出

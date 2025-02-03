@@ -18,7 +18,7 @@ import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;

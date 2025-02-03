@@ -15,7 +15,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.UnSafe;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.swing.*;
 import java.io.IOException;

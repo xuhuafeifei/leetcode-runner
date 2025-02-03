@@ -37,7 +37,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.io.*;
@@ -534,5 +534,15 @@ public class DebugUtils {
         String trim = exp.trim();
         String s = removeQuotes(trim);
         return "\"" + s + "\"";
+    }
+
+    public static Process buildProcess(String combinedCmd) throws IOException {
+        ProcessBuilder builder = new ProcessBuilder(combinedCmd);
+        return builder.start();
+    }
+
+    public static Process buildProcess(String... cmd) throws IOException {
+        ProcessBuilder builder = new ProcessBuilder(cmd);
+        return builder.start();
     }
 }

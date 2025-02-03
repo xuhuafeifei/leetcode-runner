@@ -1,7 +1,7 @@
 package search.dict;
 
 import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

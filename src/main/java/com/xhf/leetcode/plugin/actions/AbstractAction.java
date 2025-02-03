@@ -12,7 +12,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LoginPass;
 import com.xhf.leetcode.plugin.utils.SettingPass;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**

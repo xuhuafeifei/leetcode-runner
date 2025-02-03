@@ -58,7 +58,7 @@ public class CPPTest {
     public void test3() throws Exception {
         String cmd = "E:\\mingw-2\\mingw64\\bin\\g++.exe -g E:\\java_code\\lc-test\\cache\\debug\\cpp\\ServerMain.cpp -lws2_32 -lwsock32 -o ServerMain.exe";
 
-        var exec = Runtime.getRuntime().exec(cmd);
+        var exec = DebugUtils.buildProcess(cmd);
         DebugUtils.printProcess(exec, false, null);
     }
 

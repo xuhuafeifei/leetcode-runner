@@ -17,7 +17,7 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

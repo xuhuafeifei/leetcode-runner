@@ -16,7 +16,7 @@ import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.window.filter.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryParser.ParseException;
 
 import javax.swing.*;

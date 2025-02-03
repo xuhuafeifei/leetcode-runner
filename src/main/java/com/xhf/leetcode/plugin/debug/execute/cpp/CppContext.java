@@ -6,7 +6,7 @@ import com.xhf.leetcode.plugin.debug.env.CppDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.AbstractExecuteContext;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;

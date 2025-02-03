@@ -9,7 +9,7 @@ import com.intellij.ui.components.JBTabbedPane;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.utils.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

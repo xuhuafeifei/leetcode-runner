@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.debug.execute.cpp;
 
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.UnSafe;
 
@@ -13,7 +14,7 @@ public class KillPortProcess {
         try {
             // 执行 netstat 命令找到占用端口的PID
             String cmd = " netstat -aon | findstr :" + port;
-            Process process = Runtime.getRuntime().exec(new String[] {"cmd.exe", "/c", cmd});
+            Process process = DebugUtils.buildProcess("cmd.exe", "/c", cmd);
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "GBK"));
             String line;
             String pid = null;
@@ -30,7 +31,7 @@ public class KillPortProcess {
             if (pid != null && !pid.isEmpty()) {
                 // 使用 taskkill 命令根据PID杀死进程
                 String killProcessCommand = "taskkill /PID " + pid + " /F";
-                Process killProcess = Runtime.getRuntime().exec(killProcessCommand);
+                Process killProcess = DebugUtils.buildProcess(killProcessCommand);
                 BufferedReader killReader = new BufferedReader(new InputStreamReader(killProcess.getInputStream(), "GBK"));
                 String killOutput;
                 while ((killOutput = killReader.readLine()) != null) {

@@ -315,7 +315,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
              */
             new Thread(() -> {
                 try {
-                    process = Runtime.getRuntime().exec(combinedCmd);
+                    process = DebugUtils.buildProcess("cmd.exe", "/c", combinedCmd);
                     DebugUtils.printProcess(process, true, super.myProject);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -348,12 +348,11 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     private boolean buildFile() {
         try {
-            String cdCmd = "cd " + this.filePath;
             // 指定生成exe文件的绝对路径, 否则会出现一堆奇葩错误, md
             String cmd = GPP + " -g " + this.solutionCppPath + " -o " + this.solutionExePath;
             String cmd2 = GPP + " -g " + this.serverMainPath + " -lws2_32 -o " + this.serverMainExePath;
 
-            String combinedCmd = " cmd /c " + cdCmd + " & " + cmd + " & " + cmd2;
+            String combinedCmd = cmd + " & " + cmd2;
 
             Integer i = ProgressManager.getInstance().run(new MyTask(project, combinedCmd));
 

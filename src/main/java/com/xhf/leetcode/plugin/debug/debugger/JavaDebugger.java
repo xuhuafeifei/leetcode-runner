@@ -319,7 +319,7 @@ public class JavaDebugger extends AbstractDebugger {
         LogUtils.simpleDebug(combinedCmd);
 
         try {
-            Process exec = Runtime.getRuntime().exec(combinedCmd);
+            Process exec = DebugUtils.buildProcess(combinedCmd);
             getRunInfo(exec);
         } catch(InterruptedException ignored) {
         } catch (Exception e) {

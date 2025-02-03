@@ -17,7 +17,7 @@ import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 

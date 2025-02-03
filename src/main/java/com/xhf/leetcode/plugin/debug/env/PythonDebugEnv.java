@@ -125,7 +125,8 @@ public class PythonDebugEnv extends AbstractDebugEnv {
         if (i != OK_OPTION) {
             return false;
         }
-        python = myFileBrowserBtn.getText();
+        String pythonPath = myFileBrowserBtn.getText();
+        python = new FileUtils.PathBuilder(pythonPath).append("python.exe").build();
 
         if (!FileUtils.fileExists(python)) {
             throw new DebugError("python解释器路径错误 = " + python);

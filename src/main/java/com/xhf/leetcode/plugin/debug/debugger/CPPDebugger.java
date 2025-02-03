@@ -184,7 +184,7 @@ public class CPPDebugger extends AbstractDebugger {
         DebugUtils.simpleDebug("启动cpp服务: " + serverMainExePath, project);
 
         try {
-            this.exec = Runtime.getRuntime().exec(serverMainExePath);
+            this.exec = DebugUtils.buildProcess(serverMainExePath);
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
             throw new DebugError("cpp服务启动失败! " + e.getCause() + "\n执行指令 = " + serverMainExePath);

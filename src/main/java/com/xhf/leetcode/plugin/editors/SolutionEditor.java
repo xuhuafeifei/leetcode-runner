@@ -18,7 +18,7 @@ import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.MarkdownContentType;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

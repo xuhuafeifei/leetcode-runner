@@ -5,7 +5,7 @@ import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.Constants;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Deque;
 

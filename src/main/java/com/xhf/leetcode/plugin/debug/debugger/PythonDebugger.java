@@ -317,7 +317,7 @@ public class PythonDebugger extends AbstractDebugger {
         DebugUtils.simpleDebug("启动python服务: " + cmd, project);
 
         try {
-            this.exec = Runtime.getRuntime().exec(cmd);
+            this.exec = DebugUtils.buildProcess(cmd);
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
             throw new DebugError(e.toString(), e);

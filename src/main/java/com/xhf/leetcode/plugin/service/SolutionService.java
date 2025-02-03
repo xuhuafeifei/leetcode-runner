@@ -12,7 +12,7 @@ import com.xhf.leetcode.plugin.model.Solution;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;

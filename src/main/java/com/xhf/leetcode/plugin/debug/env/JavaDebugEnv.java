@@ -139,7 +139,7 @@ public class JavaDebugEnv extends AbstractDebugEnv {
             String combinedCmd = " cmd /c " + cdCmd + " & " + cmd;
 
             LogUtils.simpleDebug("编译cmd = " + combinedCmd);
-            Process exec = Runtime.getRuntime().exec(combinedCmd);
+            Process exec = DebugUtils.buildProcess("cmd.exe", "/c", cdCmd + " & " + cmd);
             DebugUtils.printProcess(exec, false, project);
 
             int i = exec.exitValue();

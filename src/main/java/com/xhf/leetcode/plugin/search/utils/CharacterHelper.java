@@ -6,7 +6,7 @@ package com.xhf.leetcode.plugin.search.utils;
 import com.xhf.leetcode.plugin.exception.ComputeError;
 import com.xhf.leetcode.plugin.utils.Safe;
 import com.xhf.leetcode.plugin.utils.UnSafe;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Stack;
 import java.util.regex.Matcher;

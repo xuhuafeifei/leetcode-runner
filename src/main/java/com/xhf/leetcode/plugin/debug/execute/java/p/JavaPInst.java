@@ -12,7 +12,7 @@ import com.xhf.leetcode.plugin.exception.ComputeError;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

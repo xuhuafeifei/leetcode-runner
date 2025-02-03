@@ -10,7 +10,7 @@ import com.xhf.leetcode.plugin.utils.MapUtils;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.internal.Engine;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -366,6 +366,10 @@ public class JavaEvaluatorImpl implements Evaluator {
                 throw new ComputeError("变量" + vName + "未定义!");
             }
             return v.value;
+        }
+
+        protected boolean isObject(Type type) {
+            return "java.lang.Object".equals(type.name());
         }
 
         /**
@@ -903,6 +907,14 @@ public class JavaEvaluatorImpl implements Evaluator {
             if (! checkConsist(v, type)) {
                 if (checkWrapperAndPrimitive(v, type)) {
                     return handleWrapperAndPrimitive(v, type);
+                } if (super.isObject(type)) {
+                    if (v instanceof PrimitiveValue) {
+                        return super.PrimitiveValueToWrapperObjReference(v);
+                    } else if (v instanceof ObjectReference) {
+                        return v;
+                    } else {
+                        throw new ComputeError("变量类型错误, 变量类型和入参类型不匹配!\n 变量" + vName + "类型为" + v.type().name() + ", 入参类型为" + type.name());
+                    }
                 } else {
                     // 报错
                     throw new ComputeError("变量类型错误, 变量类型和入参类型不匹配!\n 变量" + vName + "类型为" + v.type().name() + ", 入参类型为" + type.name());
@@ -2204,6 +2216,9 @@ public class JavaEvaluatorImpl implements Evaluator {
                         整体会被PureRuleChain识别, 在迭代计算时, 会产生[0][1]这样的隐链式调用表达式
                         为了支持链式调用, 因此需要在ArrayRuleChain中支持相应规则
                      */
+                    if (StringUtils.isBlank(s)) {
+                        return null;
+                    }
                     if (s.charAt(0) == '[') {
                         int end = CharacterHelper.matchArrayBracketSafe(s, 0);
                         // 纯隐链式调用, 如[1][2]

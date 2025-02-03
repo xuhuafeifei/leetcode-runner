@@ -13,7 +13,7 @@ import com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.utils.*;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

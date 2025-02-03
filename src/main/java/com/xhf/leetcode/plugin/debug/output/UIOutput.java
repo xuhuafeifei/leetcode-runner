@@ -13,7 +13,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * UIOutput, 负责在UI界面输出信息. 该类主要负责处理通过UI进行debug调试的输出显示

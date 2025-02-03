@@ -2,7 +2,7 @@ package com.xhf.leetcode.plugin.search.lucence;
 
 import com.xhf.leetcode.plugin.search.Segmentation;
 import com.xhf.leetcode.plugin.search.Token;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 

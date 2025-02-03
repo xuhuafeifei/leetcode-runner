@@ -5,7 +5,6 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.wm.impl.IdeFrameImpl;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
@@ -115,16 +114,25 @@ public final class LoginService {
         }
 
         protected void start() throws Exception {
-            Window activeFrame = IdeFrameImpl.getActiveFrame();
-            if (activeFrame == null) {
-                return;
-            }
-            Rectangle bounds = activeFrame.getGraphicsConfiguration().getBounds();
-            final JFrame frame = new IdeFrameImpl();
+            final JFrame frame = new JFrame();
             frame.setTitle(getFrameTitle());
             frame.setAlwaysOnTop(true);
             frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-            frame.setBounds(bounds.width / 4, bounds.height / 4, bounds.width / 2, bounds.height / 2);
+            // 设置在正中心
+
+            // 获取屏幕尺寸
+            java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+
+            // 计算frame应该出现的位置
+            int x = (screenSize.width - frame.getWidth()) / 4;
+            int y = (screenSize.height - frame.getHeight()) / 4;
+
+            // 设置frame的位置
+            frame.setLocation(x, y);
+            frame.setSize(screenSize.width / 2, screenSize.height / 2);
+
+            // frame.setBounds(bounds.width / 4, bounds.height / 4, bounds.width / 2, bounds.height / 2);
+
             frame.setLayout(new BorderLayout());
 
             loadComponent(frame);
@@ -167,7 +175,7 @@ public final class LoginService {
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
 
-            JScrollPane scrollPane = new JScrollPane(textArea);
+            var scrollPane = new JBScrollPane(textArea);
             contentPane.add(scrollPane, BorderLayout.CENTER);
 
             // Initialize buttons
@@ -298,7 +306,10 @@ public final class LoginService {
                                 // store cookies
                                 LeetcodeClient.getInstance(project).setCookies(cookieList);
                                 loginSuccessAfter(project);
-                                frame.dispose();
+                                new Thread(() -> {
+                                    frame.setVisible(false);
+                                    frame.dispose();
+                                }).start();
                             } else {
                                 cookieList.clear();
                             }
