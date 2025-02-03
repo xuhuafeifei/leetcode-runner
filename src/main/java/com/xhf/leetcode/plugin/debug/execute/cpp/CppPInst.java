@@ -5,6 +5,7 @@ import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.CppGdbInfo;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbObject;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.Constants;
 import org.apache.commons.lang.StringUtils;
@@ -81,15 +82,17 @@ public class CppPInst extends AbstractCppInstExecutor {
      * @return ans
      */
     private String doCompute(String exp, Instruction inst, CppContext pCtx) {
-        ExecuteResult computeR = super.doExecute(inst, pCtx, "-data-evaluate-expression " + exp);
+        // exp 需要添加双引号
+        ExecuteResult computeR = super.doExecute(inst, pCtx, "-data-evaluate-expression " + DebugUtils.addQuotes(exp));
         CppGdbInfo cppGdbInfo = super.getCppGdbInfo(computeR);
         GdbObject obj = this.gdbParser.parse(this.gdbParser.preHandle(cppGdbInfo.getResultRecord())).getAsGdbObject();
 
         String res = "";
+
         if (super.isGdbError(cppGdbInfo)) {
-            res += exp + " = " + obj.get("msg").getAsGdbPrimitive().getAsString();
+            res += exp + " = " + obj.get("msg").getAsGdbPrimitive().getAsString().replace("\\", "");
         } else {
-            res += exp + " = " + obj.get("value").getAsGdbPrimitive().getAsString();
+            res += exp + " = " + obj.get("value").getAsGdbPrimitive().getAsString().replace("\\", "");
         }
         if (res.charAt(res.length() - 1) != '\n') {
             res += '\n';

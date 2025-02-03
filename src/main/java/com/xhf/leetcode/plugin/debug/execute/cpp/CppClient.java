@@ -11,22 +11,19 @@ import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 
 /**
- * python client, 负责于启动debug的python服务交互
+ * cpp client, 负责于启动debug的python服务交互
  * <p>
- * 该类只允许在Python Debug过程中使用
+ * 该类只允许在Cpp Debug过程中使用
  *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class CppClient {
-    private final HttpClient instance;
-    private final int cppPort;
     private final String url;
     public CppClient(Project project) {
         var debugger = DebugManager.getInstance(project).getCurrentDebugger();
-        this.cppPort = ((CppDebugEnv) debugger.getEnv()).getPort();
+        int cppPort = ((CppDebugEnv) debugger.getEnv()).getPort();
         this.url = "http://localhost:" + cppPort;
-        this.instance = HttpClient.getInstance();
     }
 
     public ExecuteResult postRequest(Instruction inst) {
@@ -38,7 +35,7 @@ public class CppClient {
 
     public ExecuteResult postRequest(String operation, String gdbCommand) {
         HttpClient instance = HttpClient.getInstance();
-        HttpResponse httpResponse = instance.executePost(new HttpRequest.RequestBuilder("http://localhost:" + cppPort)
+        HttpResponse httpResponse = instance.executePost(new HttpRequest.RequestBuilder(this.url)
                 .addJsonBody("operation", operation)
                 .addJsonBody("gdbCommand", gdbCommand) // gson默认不会序列化为null字段
                 .buildByJsonBody()

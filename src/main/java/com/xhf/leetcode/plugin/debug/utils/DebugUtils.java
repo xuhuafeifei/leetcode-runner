@@ -524,4 +524,15 @@ public class DebugUtils {
             return true;
         }
     }
+
+    /**
+     * 如果exp没有双引号, 增加双引号, 否则不增加
+     * @param exp exp
+     * @return string
+     */
+    public static String addQuotes(String exp) {
+        String trim = exp.trim();
+        String s = removeQuotes(trim);
+        return "\"" + s + "\"";
+    }
 }

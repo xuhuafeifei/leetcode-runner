@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * gdb array, 存储GDB-MI输出的数组
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

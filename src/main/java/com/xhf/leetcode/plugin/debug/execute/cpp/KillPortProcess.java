@@ -1,12 +1,14 @@
 package com.xhf.leetcode.plugin.debug.execute.cpp;
 
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.UnSafe;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class KillPortProcess {
 
+    @UnSafe("当前方法会强制杀死占用port的端口, 如果指定的是系统端口, 可能会导致操作系统的瘫痪")
     public static void killProcess(int port) {
         try {
             // 执行 netstat 命令找到占用端口的PID

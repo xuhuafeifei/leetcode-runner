@@ -74,5 +74,6 @@ void DebugServer::start() {
     svr.listen("localhost", this->port);
 
     watch_thread.join();
+    log.log_info("WebGdbServer stopped...");
 }
 #endif //CPP_CPPDEBUGSERVER_H

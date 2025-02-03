@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * 解析gdb-mi的输出
- * 学习模仿gson的解析数据结构, 采用递归的方式返回解析数据
+ * 学习模仿{@link com.google.gson.Gson}的解析数据结构, 采用递归的方式返回解析数据
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -68,7 +68,7 @@ public class GdbParser {
             // 解析对象
             return parseGdbObject(input);
         } else {
-            // 解析键值对
+            // 解析基本数据类型
             return parseGdbPrimitive(input);
         }
     }

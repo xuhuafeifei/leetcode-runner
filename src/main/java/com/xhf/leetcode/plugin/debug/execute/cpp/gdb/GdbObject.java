@@ -4,6 +4,8 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.intellij.openapi.externalSystem.service.execution.NotSupportedException;
 
 /**
+ * gdb object, 存储GDB-MI输出的对象, 可以通过key-value的形式获取
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

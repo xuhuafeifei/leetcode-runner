@@ -17,7 +17,7 @@ public class CppWInst extends AbstractCppInstExecutor {
     protected void doAfter(ExecuteResult r, CppContext pCtx) {
         CppGdbInfo cppGdbInfo = super.getCppGdbInfo(r);
         // gdb执行没有错误
-        if (! super.handleError(r, cppGdbInfo)) {
+        if (super.handleError(r, cppGdbInfo)) {
             GdbElement gdbElement =  this.gdbParser.parse(cppGdbInfo.getResultRecord());
             GdbArray arr = gdbElement.getAsGdbObject().get("stack").getAsGdbArray();
             var frame0 = arr.get(0).getAsGdbObject();

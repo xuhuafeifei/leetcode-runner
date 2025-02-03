@@ -31,6 +31,7 @@ public abstract class AbstractCppInstExecutor implements InstExecutor {
         // 前置处理inst
         doPre(inst, pCtx);
         ExecuteResult r = doExecute(inst, pCtx, getGdbCommand(inst, pCtx));
+        // 恢复被转义的\n, 在cpp server端, 处理json数据时, 会将\n转义为\\n, 所以需要恢复
         r.setMoreInfo(r.getMoreInfo() == null ? "" : r.getMoreInfo().replace("\\n", "\n"));
         r.setResult(r.getResult() == null ? "" : r.getResult().replace("\\n", "\n"));
         r.setOperation(inst.getOperation());
@@ -49,6 +50,13 @@ public abstract class AbstractCppInstExecutor implements InstExecutor {
 
     protected abstract String getGdbCommand(@NotNull Instruction inst, CppContext pCtx);
 
+    /**
+     * 执行逻辑, 发送指令给GDB服务
+     * @param inst inst
+     * @param pCtx pCtx
+     * @param gdbCommand gdbCommand
+     * @return ExecuteResult
+     */
     protected ExecuteResult doExecute(Instruction inst, CppContext pCtx, String gdbCommand) {
         CppClient cppClient = pCtx.getCppClient();
         return cppClient.postRequest(inst.getOperation().getName(), gdbCommand);
@@ -70,9 +78,9 @@ public abstract class AbstractCppInstExecutor implements InstExecutor {
             r.setSuccess(false);
             r.setHasResult(false);
             r.setMsg(cppGdbInfo.getResultRecord());
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     protected boolean isGdbError(CppGdbInfo cppGdbInfo) {

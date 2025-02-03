@@ -23,7 +23,7 @@ public class CppSHOWBInst extends AbstractCppInstExecutor {
     protected void doAfter(ExecuteResult r, CppContext pCtx) {
         var cppGdbInfo = super.getCppGdbInfo(r);
         // gdb执行没有错误
-        if (! super.handleError(r, cppGdbInfo)) {
+        if (super.handleError(r, cppGdbInfo)) {
             GdbElement gdbElement =  this.gdbParser.parse(cppGdbInfo.getResultRecord());
             GdbArray body = gdbElement.getAsGdbObject().get("BreakpointTable").getAsGdbObject().get("body").getAsGdbArray();
             StringBuilder sb = new StringBuilder();

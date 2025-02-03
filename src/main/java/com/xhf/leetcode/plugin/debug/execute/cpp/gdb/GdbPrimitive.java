@@ -3,6 +3,8 @@ package com.xhf.leetcode.plugin.debug.execute.cpp.gdb;
 import com.intellij.openapi.externalSystem.service.execution.NotSupportedException;
 
 /**
+ * 用于存储GDB-MI输出的基本类型, 目前使用最多的是String
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

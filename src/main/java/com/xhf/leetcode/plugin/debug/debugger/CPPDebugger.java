@@ -90,12 +90,14 @@ public class CPPDebugger extends AbstractDebugger {
 
     private void doRun() {
         // 初始化运行指令
-        new AbstractCppInstExecutor() {
+        ExecuteResult r = new AbstractCppInstExecutor() {
             @Override
             protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
                 return "-exec-run";
             }
         }.execute(Instruction.success(this.readType, Operation.R, ""), context);
+
+        doAfterExecuteInstruction(r);
 
         while (DebugManager.getInstance(project).isDebug()) {
             ProcessResult pR = processDebugCommand();
@@ -117,9 +119,10 @@ public class CPPDebugger extends AbstractDebugger {
             GdbParser instance = GdbParser.getInstance();
             CppGdbInfo cppGdbInfo = GsonUtils.fromJson(r.getMoreInfo(), CppGdbInfo.class);
             if (!"error".equals(cppGdbInfo.getStatus())) {
+                // 执行正确
                 GdbElement ele = instance.parse(instance.preHandle(cppGdbInfo.getStoppedReason()));
                 String reason = ele.getAsGdbObject().get("reason").getAsGdbPrimitive().getAsString();
-                // 执行正确
+                // 不是因为breakpoint终止, 那么就是GDB完成运行或者出现异常, 需要停止debug
                 if (! "breakpoint-hit".equals(reason)) {
                     DebugManager.getInstance(project).stopDebugger();
                 }
@@ -184,7 +187,7 @@ public class CPPDebugger extends AbstractDebugger {
             this.exec = Runtime.getRuntime().exec(serverMainExePath);
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
-            throw new DebugError(e.toString(), e);
+            throw new DebugError("cpp服务启动失败! " + e.getCause() + "\n执行指令 = " + serverMainExePath);
         }
 
         // 五次检测连接(3s还连接不上, 挂了)
@@ -208,12 +211,15 @@ public class CPPDebugger extends AbstractDebugger {
             return;
         }
         // 发送终止命令, 并关停debug
-        new AbstractCppInstExecutor() {
-            @Override
-            protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
-                return "quit";
-            }
-        }.execute(Instruction.success(this.readType, Operation.R, ""), context);
+        CppClient cppClient = this.context.getCppClient();
+        if (cppClient != null) {
+            new AbstractCppInstExecutor() {
+                @Override
+                protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
+                    return "quit";
+                }
+            }.execute(Instruction.success(this.readType, Operation.R, ""), context);
+        }
 
         DebugUtils.simpleDebug("CppDebugger即将停止!", project);
         env.stopDebug();

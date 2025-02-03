@@ -5,9 +5,10 @@
 
 int main() {
     LogHelper log({{std_log_path}}, {{std_err_path}});
+    log.log_info("welcome to feigebuge's cpp server! please enjoy the coding pleasure!");
     int port = {{port}};
     DebugServer server(log, port);
-    log.log_info("server will start on port = " + port);
+    log.log_info("server will start on port = " + std::to_string(port));
     std::thread cpp_web_server([&server]() {
         server.start();
     });
@@ -15,4 +16,5 @@ int main() {
     auto gdb = WebGdbController({{gdb_path}}, {{solution_exe_path}}, "--interpreter=mi2", log);
     gdb.start_gdb();
     cpp_web_server.join();
+    log.log_info("server stopped... debug finish...");
 }

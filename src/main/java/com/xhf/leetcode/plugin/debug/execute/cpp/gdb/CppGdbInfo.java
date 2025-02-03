@@ -3,6 +3,8 @@ package com.xhf.leetcode.plugin.debug.execute.cpp.gdb;
 import com.google.gson.annotations.SerializedName;
 
 /**
+ * 用于存储GDB输出的内容, 存储GDB-MI模式下不同类型的输出
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

@@ -83,7 +83,11 @@ public final class DebugManager implements Disposable {
 
     public void stopDebugger() {
         if (currentDebugger != null) {
-            currentDebugger.stop();
+            try {
+                currentDebugger.stop();
+            } catch (Exception e) {
+                LogUtils.warn("debugger关闭出现异常! cause = " + e.getMessage());
+            }
             currentDebugger = null;
         }
     }

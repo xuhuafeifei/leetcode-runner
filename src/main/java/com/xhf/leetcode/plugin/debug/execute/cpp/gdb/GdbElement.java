@@ -1,6 +1,9 @@
 package com.xhf.leetcode.plugin.debug.execute.cpp.gdb;
 
 /**
+ * GDB Element, 是所有GDB-MI输出元素的基类.
+ * 该类模仿{@link com.google.gson.JsonElement}的设计方式, 它可以是{@link GdbArray}, 也可以是{@link GdbObject}, 也可以是{@link GdbPrimitive}
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
