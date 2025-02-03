@@ -34,16 +34,16 @@ public class CppSHOWBInst extends AbstractCppInstExecutor {
                 List<String[]> points = new ArrayList<>();
                 for (GdbElement element : body) {
                     GdbElement breakpoint = element.getAsGdbObject().get("bkpt");
-                    String[] point = new String[3];
+                    String[] point = new String[2];
                     point[0] = breakpoint.getAsGdbObject().get("type").getAsGdbPrimitive().getAsString();
-                    point[1] = breakpoint.getAsGdbObject().get("func").getAsGdbPrimitive().getAsString();
-                    point[2] = breakpoint.getAsGdbObject().get("line").getAsGdbPrimitive().getAsString();
+                    // point[1] = breakpoint.getAsGdbObject().get("func").getAsGdbPrimitive().getAsString();
+                    point[1] = breakpoint.getAsGdbObject().get("line").getAsGdbPrimitive().getAsString();
                     points.add(point);
                 }
                 // sort
-                points.sort((o1, o2) -> CharSequence.compare(o1[2], o2[2]));
+                points.sort((o1, o2) -> CharSequence.compare(o1[1], o2[1]));
                 for (String[] point : points) {
-                    sb.append(point[0]).append(" ").append(point[1]).append(" ").append(point[2]).append("\n");
+                    sb.append(point[0]).append(" ").append(point[1]).append("\n");
                 }
             }
             r.setResult(sb.toString());

@@ -5,6 +5,8 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -264,6 +266,15 @@ public class FileUtils {
     public static void deleteFile(String path) {
         File file = new File(path);
         file.deleteOnExit();
+    }
+
+    /**
+     * 会抛出异常, 如果文件无法删除
+     * @param path path
+     * @throws IOException exp
+     */
+    public static void removeFile(String path) throws IOException {
+        Files.delete(Paths.get(path));
     }
 
 

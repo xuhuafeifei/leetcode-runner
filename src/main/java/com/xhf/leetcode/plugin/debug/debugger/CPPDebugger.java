@@ -1,23 +1,33 @@
 package com.xhf.leetcode.plugin.debug.debugger;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.xdebugger.XSourcePosition;
+import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.CppDebugEnv;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.cpp.*;
+import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.CppGdbInfo;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbElement;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbParser;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
+import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author feigebuge
@@ -102,14 +112,24 @@ public class CPPDebugger extends AbstractDebugger {
 
     @Override
     protected void doAfterExecuteInstruction(ExecuteResult r) {
-        // 判断是否是w指令, 且是否执行成功, 如果失败, 则说明程序停止, 需要退出
-        if (! r.isSuccess() && r.getOperation() == Operation.W) {
-            String msg = r.getMsg();
+        // 判断是否为r指令, 同时判断是否stop
+        if (r.getOperation() == Operation.R) {
             GdbParser instance = GdbParser.getInstance();
-            String handleMsg = instance.preHandle(msg);
-            GdbElement ele = instance.parse(handleMsg);
-            if (ele.getAsGdbObject().get("msg").getAsGdbPrimitive().getAsString().equals("No registers.")) {
-                DebugManager.getInstance(project).stopDebugger();
+            CppGdbInfo cppGdbInfo = GsonUtils.fromJson(r.getMoreInfo(), CppGdbInfo.class);
+            if (!"error".equals(cppGdbInfo.getStatus())) {
+                GdbElement ele = instance.parse(instance.preHandle(cppGdbInfo.getStoppedReason()));
+                String reason = ele.getAsGdbObject().get("reason").getAsGdbPrimitive().getAsString();
+                // 执行正确
+                if (! "breakpoint-hit".equals(reason)) {
+                    DebugManager.getInstance(project).stopDebugger();
+                }
+            } else {
+                // 执行错误
+                GdbElement ele = instance.parse(instance.preHandle(cppGdbInfo.getResultRecord()));
+                String msg = ele.getAsGdbObject().get("msg").getAsGdbPrimitive().getAsString();
+                if ("The program is not being run.".equals(msg)) {
+                    DebugManager.getInstance(project).stopDebugger();
+                }
             }
         }
     }
@@ -128,7 +148,26 @@ public class CPPDebugger extends AbstractDebugger {
     }
 
     private void uiBreakpointInit() {
-        // todo:
+        // todo: 没测试, 而且懒得测试. idea不支持cpp, CLion才支持, 不想近一步测试, 就这吧. 反正cmd模式跑得通
+        // 获取所有断点
+        List<XBreakpoint<?>> allBreakpoint = DebugUtils.getAllBreakpoint(project);
+        for (XBreakpoint<?> breakpoint : allBreakpoint) {
+            XSourcePosition position = breakpoint.getSourcePosition();
+            if (position == null) {
+                continue;
+            }
+            VirtualFile file = Objects.requireNonNull(position).getFile();
+            // 如果file和当前打开的vile一致, 设置断点信息
+            if (file.equals(ViewUtils.getCurrentOpenVirtualFile(project))) {
+                Instruction instruction = DebugUtils.buildBInst(position);
+                // 设置断点
+                new CppBInst().execute(instruction, context);
+            }
+        }
+        // 遇到断点后, 高亮显示
+        InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, null));
+        // 遇到断点后, 打印变量
+        InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, null));
     }
 
     private void initCtx() {
@@ -190,7 +229,7 @@ public class CPPDebugger extends AbstractDebugger {
             return;
         }
 
-        // 3次循环, 检测python服务是否已经关闭
+        // 3次循环, 检测cpp服务是否已经关闭
         for (int i = 0; i < 3; i++) {
             try {
                 Thread.sleep(1000);

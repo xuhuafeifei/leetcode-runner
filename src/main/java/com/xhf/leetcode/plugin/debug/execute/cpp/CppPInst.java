@@ -44,9 +44,9 @@ public class CppPInst extends AbstractCppInstExecutor {
             res = doCompute(exp, inst, pCtx);
         }
         // 检查监视池
-        res += Constants.LOCAL_VARIABLE + ":\n";
         res += getWatchPool(inst, pCtx);
 
+        res += Constants.LOCAL_VARIABLE + ":\n";
         ExecuteResult r = super.doExecute(inst, pCtx, "info locals");
 
         res += r.getResult();

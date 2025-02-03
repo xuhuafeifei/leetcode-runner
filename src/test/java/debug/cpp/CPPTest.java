@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.xhf.leetcode.plugin.debug.execute.cpp.KillPortProcess.killProcess;
 import static com.xhf.leetcode.plugin.io.file.utils.FileUtils.BackslashEscape.escapeBackslash;
 
 /**
@@ -171,6 +170,15 @@ public class CPPTest {
 
     @Test
     public void test11() {
-        killProcess(63254);
+        // 这个测试方法别打开, 否则很可能把一些重要的线程杀死, 这个端口仅仅用于测试杀死cpp服务
+        // killProcess(63254);
     }
+
+    @Test
+    public void test12() {
+        String a = "^done,{a=\"123\",b=\"456\",c=\"{addr=\"0x00007ff7d08c757c\"}\"}";
+        GdbElement parse = gdbParser.parse(a);
+        System.out.println(parse);
+    }
+
 }

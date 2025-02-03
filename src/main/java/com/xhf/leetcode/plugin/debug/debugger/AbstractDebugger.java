@@ -8,10 +8,12 @@ import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.InstructionFactory;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.Output;
+import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
 /**
@@ -37,19 +39,25 @@ public abstract class AbstractDebugger implements Debugger{
 
     @Override
     public void doFailed(Instruction inst) {
+        String outputTypeName = AppSettings.getInstance().getOutputTypeName();
+        OutputType outputType = OutputType.getByName(outputTypeName);
+        if (outputType == null) {
+            outputType = OutputType.UI_OUT;
+        }
         ReadType readType = inst.getReadType();
-        switch (readType) {
-            case COMMAND_IN:
-            case STD_IN:
-                DebugUtils.simpleDebug("命令错误", this.project);
+        // output决定输出形式
+        switch (outputType) {
+            case CONSOLE_OUT:
+            case STD_OUT:
+                DebugUtils.simpleDebug(readType.getType() + "命令错误", this.project);
                 break;
-            case UI_IN:
-                ConsoleUtils.getInstance(project).showWaring("UI指令错误", false, true);
-                LogUtils.warn("UI指令错误 inst = " + inst);
+            case UI_OUT:
+                ConsoleUtils.getInstance(project).showWaring(readType.getType() + "指令错误", false, true);
+                LogUtils.warn(readType.getType() + "指令错误 inst = " + inst);
                 break;
             default:
-                ConsoleUtils.getInstance(project).showWaring("readType未知错误: " + readType.getType(), false, true);
-                LogUtils.warn("readType未知错误: " + readType.getType());
+                ConsoleUtils.getInstance(project).showWaring("outputType未知错误: " + outputType.getType(), false, true);
+                LogUtils.warn("outputType未知错误: " + outputType.getType());
                 break;
         }
     }
@@ -72,7 +80,12 @@ public abstract class AbstractDebugger implements Debugger{
             return new ProcessResult(true, true, false, null, null);
         }
         // 允许子类在读取instruction后执行一些操作
-        doAfterReadInstruction(inst);
+        try {
+            doAfterReadInstruction(inst);
+        } catch (Exception e) {
+            LogUtils.warn("error happens in doAfterReadInstruction! current class is " + this.getClass().getName());
+        }
+
         // debug
         LogUtils.simpleDebug(inst.toString());
 
@@ -101,7 +114,11 @@ public abstract class AbstractDebugger implements Debugger{
             return new ProcessResult(false, true, false, inst, null);
         }
 
-        doAfterExecuteInstruction(r);
+        try {
+            doAfterExecuteInstruction(r);
+        } catch (Exception e) {
+            LogUtils.warn("error happens in doAfterExecuteInstruction! current class is " + this.getClass().getName());
+        }
 
         // 执行结果为null
         if (r == null) {

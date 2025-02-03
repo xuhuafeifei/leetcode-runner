@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.debug.env;
 
+import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -102,9 +103,9 @@ public class CppDebugEnv extends AbstractDebugEnv {
         this.serverMainExePath = new FileUtils.PathBuilder(filePath).append("ServerMain.exe").build();
 
         try {
-            FileUtils.deleteFile(this.serverMainExePath);
+            FileUtils.removeFile(this.serverMainExePath);
         } catch (Exception ignored) {
-            LogUtils.warn("删除solution.exe失败: " + this.solutionExePath);
+            DebugUtils.simpleDebug("删除solution.exe失败: " + this.solutionExePath + " cause = " + ignored.getCause(), project, ConsoleViewContentType.ERROR_OUTPUT);
         }
         return true;
     }
@@ -339,7 +340,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
 //            );
 
             if (i != 0) {
-                throw new DebugError("编译文件异常, 详细信息可查看Console");
+                throw new DebugError("编译文件异常, 详细信息可查看Console, 如果在控制台发现ServerMain.exe无法被删除, 请您手动删除他\nServerMain.exe路径=" + this.serverMainExePath);
             }
             return true;
         } catch (Exception e) {

@@ -263,7 +263,9 @@ ExecuteResult GdbController::parse_gdb_output(const std::string& gdb_result, con
                 cpp_gdb_info.status = "done";
                 // 解析更多详细信息...
                 result.has_result = true;
-                result.result = "done";
+                if (result.result.empty()) {
+                    result.result = "done";
+                }
             } else if (starts_with(line, "^running")) {
                 cpp_gdb_info.status = "running";
             } else if (starts_with(line, "^error")) {

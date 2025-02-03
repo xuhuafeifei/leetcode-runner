@@ -11,6 +11,6 @@ public class CppRBInst extends AbstractCppInstExecutor {
 
     @Override
     protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
-        return "-break-delete " + inst.getParam();
+        return "-break-delete solution.cpp" + inst.getParam();
     }
 }

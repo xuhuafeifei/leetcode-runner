@@ -5,6 +5,11 @@ import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
 import com.xhf.leetcode.plugin.debug.env.CppDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.AbstractExecuteContext;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author feigebuge
@@ -21,7 +26,20 @@ public class CppContext extends AbstractExecuteContext {
 
     @Override
     public void removeWatchPoolListener(WatchPoolRemoveEvent event) {
-
+        String data = event.getData();
+        DebugUtils.simpleDebug("data = " + data, project);
+        if (StringUtils.isBlank(data)) {
+            return;
+        }
+        String[] split = data.split("=");
+        if (split.length < 2) {
+            DebugUtils.simpleDebug("cpp 无需删除watch pool", project);
+        }
+        split[0] = split[0].trim();
+        // match
+        List<String> arr = watchPool.stream().filter(e -> !e.startsWith(split[0])).collect(Collectors.toList());
+        watchPool.clear();
+        watchPool.addAll(arr);
     }
 
     public CppDebugEnv getEnv() {
