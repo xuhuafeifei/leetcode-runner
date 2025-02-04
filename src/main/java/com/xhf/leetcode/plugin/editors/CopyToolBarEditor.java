@@ -5,9 +5,11 @@ import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.SplitEditorToolbar;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
@@ -46,5 +48,10 @@ public abstract class CopyToolBarEditor implements FileEditor {
     @Override
     public void setState(@NotNull FileEditorState state) {
 
+    }
+
+    @Override
+    public @Nullable FileEditorLocation getCurrentLocation() {
+        return FileEditor.super.getCurrentLocation();
     }
 }

@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.editors;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.SplitEditorToolbar;
 import com.intellij.openapi.project.Project;
@@ -207,5 +208,10 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
     @Override
     public <T> void putUserData(@NotNull Key<T> key, @Nullable T value) {
 
+    }
+
+    @Override
+    public @Nullable FileEditorLocation getCurrentLocation() {
+        return super.getCurrentLocation();
     }
 }

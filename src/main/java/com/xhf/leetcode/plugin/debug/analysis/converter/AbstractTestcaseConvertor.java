@@ -42,38 +42,6 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
     }
 
     /**
-     * 处理多轮solution方法调用的testcases
-     *
-     * @param testcases 测试案例
-     * @return 转换后的代码
-     */
-    @Deprecated
-    @Override
-    public String convert(String testcases) {
-        testcases = testcases.trim();
-        String[] split = testcases.split("\r?\n");
-        StringBuilder sb = new StringBuilder();
-
-        // 获取参数个数
-        int paramSize = result.getParameterTypes().length;
-        // 测试样例的数量存在问题
-        if (split.length % paramSize != 0) {
-            throw new RuntimeException("测试样例数量有误, 请检查");
-        }
-        int round = split.length / paramSize;
-        // 处理多轮调用
-        for (int i = 0; i < round; ++i) {
-            // copy 每一轮所需要的测试样例
-            String[] sub = new String[paramSize];
-            System.arraycopy(split, i * paramSize, sub, 0, paramSize);
-            String res = convert(sub);
-            sb.append(res);
-        }
-        return sb.toString();
-
-    }
-
-    /**
      * 只负责处理一轮solution方法调用的testcases
      * 比如solution.twoSum(int, int). testcases只能有两个测试案例. 处理完成后, 则为一轮
      *

@@ -14,15 +14,6 @@ public interface TestcaseConvertor {
     public String autoConvert() throws DebugError;
 
     /**
-     * 处理多轮solution方法调用的testcases
-     *
-     * @param testcases 测试案例
-     * @return 转换后的代码
-     */
-    @Deprecated // 不支持多轮处理, 要不然debug看不清输入了
-    public String convert(String testcases);
-
-    /**
      * 只负责处理一轮solution方法调用的testcases
      * 比如solution.twoSum(int, int). testcases只能有两个测试案例. 处理完成后, 则为一轮
      *
