@@ -2,6 +2,7 @@ package debug.cpp;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.CppCodeAnalyzer;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.CppGdbInfo;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbElement;
@@ -174,6 +175,7 @@ public class CPPTest {
         // killProcess(63254);
     }
 
+
     @Test
     public void test12() {
         String a = "^done,{a=\"123\",b=\"456\",c=\"{addr=\"0x00007ff7d08c757c\"}\"}";
@@ -181,4 +183,30 @@ public class CPPTest {
         System.out.println(parse);
     }
 
+    @Test
+    public void test13() {
+        Matcher matcher1 = CppCodeAnalyzer.pattern.matcher("vector<int> a(vector<int>& a)");
+        boolean flag = matcher1.find();
+        assert flag;
+        assert matcher1.group(1).equals("a");
+        assert matcher1.group(2).equals("vector<int>& a");
+
+        Matcher matcher2 = CppCodeAnalyzer.pattern.matcher("int lengthOfLongestSubstring(string s)");
+        boolean flag1 = matcher2.find();
+        assert flag1;
+        assert matcher2.group(1).equals("lengthOfLongestSubstring");
+        assert matcher2.group(2).equals("string s");
+
+        Matcher matcher3 = CppCodeAnalyzer.pattern.matcher("int minFallingPathSum(vector<vector<int>>& matrix)");
+        boolean flag2 = matcher3.find();
+        assert flag2;
+        assert matcher3.group(1).equals("minFallingPathSum");
+        assert matcher3.group(2).equals("vector<vector<int>>& matrix");
+
+        Matcher matcher = CppCodeAnalyzer.pattern.matcher("bool isSubPath(ListNode* head, TreeNode* root)");
+        boolean flag3 = matcher.find();
+        assert flag3;
+        assert matcher.group(1).equals("isSubPath");
+        assert matcher.group(2).equals("ListNode* head, TreeNode* root");
+    }
 }
