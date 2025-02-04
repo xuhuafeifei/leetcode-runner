@@ -266,8 +266,12 @@ public class MarkDownEditor implements FileEditor {
 
     }
 
+    /**
+     * 兼容不同版本, 早期版本super没有实现该方法
+     * @return null
+     */
     @Override
     public @Nullable FileEditorLocation getCurrentLocation() {
-        return FileEditor.super.getCurrentLocation();
+        return null;
     }
 }
