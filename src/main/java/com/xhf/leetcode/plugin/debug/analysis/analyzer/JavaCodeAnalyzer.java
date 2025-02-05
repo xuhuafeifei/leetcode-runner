@@ -29,8 +29,8 @@ public class JavaCodeAnalyzer extends AbstractCodeAnalyzer{
     /*
         (\w+) 捕获组, 匹配字母数字下划线
      */
-    private static final String methodPattern = "public\\s+.*\\s+(\\w+)\\s*\\(([^)]*)\\)";
-    private static final Pattern pattern  = Pattern.compile(methodPattern);
+    public static final String methodPattern = "public\\s+.*\\s+(\\w+)\\s*\\(([^)]*)\\)";
+    public static final Pattern pattern  = Pattern.compile(methodPattern);
 
     public AnalysisResult analyze(String code) {
         LogUtils.simpleDebug(code);

@@ -3,6 +3,7 @@ package debug.cpp;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.CppCodeAnalyzer;
+import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.CppGdbInfo;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbElement;
@@ -208,5 +209,14 @@ public class CPPTest {
         assert flag3;
         assert matcher.group(1).equals("isSubPath");
         assert matcher.group(2).equals("ListNode* head, TreeNode* root");
+    }
+
+    @Test
+    public void test14() {
+        Matcher matcher = JavaCodeAnalyzer.pattern.matcher("public int[] demo(int[] a, int[] b)");
+        boolean flag = matcher.find();
+        assert flag;
+        assert matcher.group(1).equals("demo");
+        assert matcher.group(2).equals("int[] a, int[] b");
     }
 }
