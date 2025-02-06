@@ -1,76 +1,76 @@
 <idea-plugin>
     <id>com.xhf.leetcode-runner</id>
     <name>Leetcode-Runner</name>
-    <version>3.5.4</version>
+    <version>3.5.5</version>
     <vendor email="2508020102@qq.com" url="https://github.com/xuhuafeifei/leetcode-runner">feigebuge</vendor>
 
     <description><![CDATA[
-        <h1>介绍</h1>
+        <h1>Introducing:</h1>
         <p><img src="https://github.com/xuhuafeifei/leetcode-runner/blob/master/README.assets/leetcode-runner-v1.png?raw=true"
             style="zoom: 25%;" /></p>
         <p>
-          <code>Leetcode-runner</code>是一款idea插件。旨在实现一个核心功能完备，且简洁容易上手的Leetcode刷题插件。插件支持日常刷题所需的一切功能，如<strong>代码编写</strong>、<strong>代码运行/提交</strong>、<strong>测试案例更换</strong>、<strong>运行结果显示</strong>、<strong>题解展示</strong>、<strong>提交记录展示</strong>、<strong>代码替换</strong>、<strong>测试案例替换</strong>等功能，实现脱离Web端刷leetcode
+          <code>Leetcode-runner</code>is a plugin of idea. Aimed at achieving a fully functional core, and easy-to-use plugin. The Leetcode-Runner support everything in daily work, such as <strong>coding</strong>, <strong>run/submit</strong>, <strong>testcase change</strong>, <strong>running result display</strong>, <strong>question solution display</strong>, <strong>submission display</strong>, <strong>coding replace</strong>、<strong>testcase replace</strong> and etc. allow user solove leetcode question without website.
         </p>
         <p>&nbsp;</p>
-        <p>此外，插件项目还提供另外两个极为强大的功能。分别是<strong>大批量题目快速检索</strong>，<strong>核心代码断点调试</strong></p>
+        <p>Additionally, the plugin provides tow extremely powerful features: <strong>bulk question fast search</strong> and <strong>core code breakpoint debugging</strong></p>
         <p>&nbsp;</p>
-        <p>本项目拥有详细的使用文档和开发文档，代码有着详细的注释且符合Java行业通用的开发规范</p>
+        <p>Leetcode-Runner provides detailed user and developer documentation. The code is well commented and adheres to standard Java development practices</p>
         <p>&nbsp;</p>
-        <h1>仓库地址</h1>
+        <h1>github repository link: </h1>
         <p><a href='https://github.com/xuhuafeifei/leetcode-runner' target='_blank'
             class='url'>https://github.com/xuhuafeifei/leetcode-runner</a></p>
-        <p>TIP: 如果图片加载失败，可以点击仓库地址，进入github查看README</p>
+        <p>TIP: if images load failed, you can click the github link and see README.md</p>
         <p>&nbsp;</p>
         <p>&nbsp;</p>
-        <h1>快速开始</h1>
-        <h2>1. 加载插件</h2>
-        <p>插件项目启动后，会出现两块工具栏</p>
+        <h1>Quick Start:</h1>
+        <h2>1. Loading plugin</h2>
+        <p>After plugin start, there will be two tool window.</p>
         <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113105329839.png"
             style="zoom: 25%;" /></p>
         <p>&nbsp;</p>
-        <p>如果没有出现，可以通过<code>View -&gt; Tool Windows -&gt; Leetcode Console Plugin / Leetcode Plugin</code> 打开工具窗口</p>
+        <p>If not, you can display it by choosing <code>View -&gt; Tool Windows -&gt; Leetcode Console Plugin / Leetcode Plugin</code> to open it.</p>
         <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113105416823.png"
             alt="image-20250113105416823" style="zoom: 25%;" /></p>
         <p>&nbsp;</p>
-        <h2>2. 插件初始化</h2>
+        <h2>2. Plugin init</h2>
         <p>&nbsp;</p>
         <ol>
           <li>
-            <p>打开设置栏</p>
+            <p>Open plugin setting</p>
             <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110304269.png"
                 alt="image-20250113110304269" style="zoom: 50%;" /></p>
           </li>
           <li>
-            <p>选择lang type和store path</p>
+            <p>Choose lang type and store path</p>
             <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110352483.png"
                 alt="image-20250113110352483" style="zoom: 33%;" /></p>
             <blockquote>
-              <p>lang type: 指定当前用何种语言解决问题</p>
-              <p>store path: 指定code文件创建的目录</p>
+              <p>lang type: specify the language to use for solving problems.</p>
+              <p>store path: specify the path to create and store code file</p>
             </blockquote>
             <blockquote>
-              <p>tip: 有关各种设置的介绍，可以通过最右侧的问号图标得到解答 </p>
+              <p>Tip: about more setting's introducing, you can get it from the right icon.</p>
               <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110457351.png"
                   alt="image-20250113110457351" style="zoom:50%;" /> </p>
             </blockquote>
           </li>
           <li>
-            <p>点击登录按钮，进行登录操作</p>
+            <p>Click login button</p>
             <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110529723.png"
                 alt="image-20250113110529723" style="zoom:33%;" /></p>
           </li>
           <li>
-            <p>正常情况下，插件会模拟浏览器，出现leetcode官网登录界面，具体如下</p>
+            <p>In normal case, the plugin will simulate browser and display the LeetCode login page as follows :</p>
             <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20241128123239830.png"
                 alt="image-20241128123239830" style="zoom:33%;" /></p>
-            <p>如果登录成功，则会加载数据内容，并在右侧的工具栏中出现问题内容</p>
+            <p>If login success, the plugin will load data and show question on the right panel</p>
             <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110714192.png"
                 alt="image-20250113110714192" style="zoom: 50%;" /></p>
           </li>
 
         </ol>
         <blockquote>
-          <p>tip: 第一次登录需要加载所有题目，这可能会耗费3-5s左右的时间，在此期间会在后台加载数据，并锁定部分功能。这是正常行为</p>
+          <p>Tip: if you login in the first time, it may cast a few second to load questions. During this time, plugin will lock some function, which is normal behavior.</p>
         </blockquote>
     ]]></description>
 
