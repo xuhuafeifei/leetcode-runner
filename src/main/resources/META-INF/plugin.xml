@@ -1,15 +1,13 @@
 <idea-plugin>
     <id>com.xhf.leetcode-runner</id>
     <name>Leetcode-Runner</name>
-    <version>3.5.7</version>
+    <version>3.5.8</version>
     <vendor email="2508020102@qq.com" url="https://github.com/xuhuafeifei/leetcode-runner">feigebuge</vendor>
 
     <description><![CDATA[
         <h1>Introducing:</h1>
-        <p><img src="https://github.com/xuhuafeifei/leetcode-runner/blob/master/README.assets/leetcode-runner-v1.png?raw=true"
-            style="zoom: 25%;" /></p>
         <p>
-          <code>Leetcode-runner</code>is a plugin of idea. Aimed at achieving a fully functional core, and easy-to-use plugin. The Leetcode-Runner support everything in daily work, such as <strong>coding</strong>, <strong>run/submit</strong>, <strong>testcase change</strong>, <strong>running result display</strong>, <strong>question solution display</strong>, <strong>submission display</strong>, <strong>coding replace</strong>、<strong>testcase replace</strong> and etc. allow user solove leetcode question without website.
+          <code>Leetcode-runner</code> is a plugin of idea. Aimed at achieving a fully functional core, and easy-to-use plugin. The Leetcode-Runner support everything in daily work, such as <strong>coding</strong>, <strong>run/submit</strong>, <strong>testcase change</strong>, <strong>running result display</strong>, <strong>question solution display</strong>, <strong>submission display</strong>, <strong>coding replace</strong>、<strong>testcase replace</strong> and etc. allow user solove leetcode question without website.
         </p>
         <p>&nbsp;</p>
         <p>Additionally, the plugin provides tow extremely powerful features: <strong>bulk question fast search</strong> and <strong>core code breakpoint debugging</strong></p>
@@ -25,53 +23,35 @@
         <h1>Quick Start:</h1>
         <h2>1. Loading plugin</h2>
         <p>After plugin start, there will be two tool window.</p>
-        <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113105329839.png"
-            style="zoom: 25%;" /></p>
         <p>&nbsp;</p>
         <p>If not, you can display it by choosing <code>View -&gt; Tool Windows -&gt; Leetcode Console Plugin / Leetcode Plugin</code> to open it.</p>
-        <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113105416823.png"
-            alt="image-20250113105416823" style="zoom: 25%;" /></p>
         <p>&nbsp;</p>
         <h2>2. Plugin init</h2>
         <p>&nbsp;</p>
         <ol>
           <li>
             <p>Open plugin setting</p>
-            <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110304269.png"
-                alt="image-20250113110304269" style="zoom: 50%;" /></p>
           </li>
           <li>
             <p>Choose lang type and store path</p>
-            <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110352483.png"
-                alt="image-20250113110352483" style="zoom: 33%;" /></p>
             <blockquote>
               <p>lang type: specify the language to use for solving problems.</p>
               <p>store path: specify the path to create and store code file</p>
             </blockquote>
             <blockquote>
               <p>Tip: about more setting's introducing, you can get it from the right icon.</p>
-              <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110457351.png"
-                  alt="image-20250113110457351" style="zoom:50%;" /> </p>
             </blockquote>
           </li>
           <li>
             <p>Click login button</p>
-            <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110529723.png"
-                alt="image-20250113110529723" style="zoom:33%;" /></p>
           </li>
           <li>
-            <p>In normal case, the plugin will simulate browser and display the LeetCode login page as follows :</p>
-            <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20241128123239830.png"
-                alt="image-20241128123239830" style="zoom:33%;" /></p>
+            <p>In normal case, the plugin will simulate browser and display the LeetCode login page</p>
             <p>If login success, the plugin will load data and show question on the right panel</p>
-            <p><img src="https://github.com/xuhuafeifei/leetcode-runner/raw/master/README.assets/image-20250113110714192.png"
-                alt="image-20250113110714192" style="zoom: 50%;" /></p>
           </li>
 
         </ol>
-        <blockquote>
-          <p>Tip: if you login in the first time, it may cast a few second to load questions. During this time, plugin will lock some function, which is normal behavior.</p>
-        </blockquote>
+         <p>Tip: if you are logging in for the first time, it may cast a few second to load questions. During this time, plugin will lock some function, which is normal behavior.</p>
     ]]></description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
