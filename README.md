@@ -368,3 +368,57 @@ debug模块是leetcode-runner提供的一个较为强大的功能。该功能允
 点击reload question，重新查询题目
 
 ![image-20250113132633574](README.assets/image-20250113132633574.png)
+
+
+
+
+
+### 3. Cpp debug 文件编译错误
+
+![image-20250207155101682](README.assets/image-20250207155101682.png)
+
+该问题在**v3.5.0**增加cpp debug功能时引入，其产生原因是c++debug server没有正常退出，导致**ServerMain.exe**，**solution.exe**所在进程并未被正常销毁
+
+
+
+作者目前也在尝试着解决这个问题，但并未提供一个安全的解决方案
+
+
+
+此时需要用户手动杀死相关进程，关于solution.exe，ServerMain.exe所在路径会在console中显示，具体如下
+
+
+
+![image-20250207155525616](README.assets/image-20250207155525616.png)
+
+
+
+进入console显示的目录，尝试删除文件，发现删除失败
+
+
+
+![image-20250207155850859](README.assets/image-20250207155850859.png)
+
+
+
+这是因为ServerMain.exe被C++进程持有，需要先杀死对应进程，才能删除文件
+
+
+
+**杀死占有.exe的进程**
+
+- 方案一：
+
+![image-20250207182324903](README.assets/image-20250207182324903.png)
+
+在终端输入`tasklist | findstr ServerMain.exe`，得到的第二个输出就是ServerMain.exe启动程序占用的端口
+
+然后通过`taskkill /F /PID {端口}`杀死进程，即可终止占用ServerMain.exe的程序
+
+此时可以删除ServerMain.exe
+
+
+
+- 方案二：
+
+重启电脑，通过重启强制杀死所有的程序，此版可以删除ServerMain.exe

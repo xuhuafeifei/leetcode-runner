@@ -364,7 +364,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
             if (i != 0) {
                 throw new DebugError("编译文件异常, 详细信息可查看Console, 如果在控制台发现ServerMain.exe, solution.exe相关异常\n 请您手动删除ServerMain.exe和Solution.exe\n" +
-                        "solution.exe = " + this.solutionExePath+
+                        "solution.exe = " + this.solutionExePath + "\n" +
                         "ServerMain.exe = " + this.serverMainExePath
                 );
             }
