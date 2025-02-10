@@ -231,9 +231,7 @@ public class CPPDebugger extends AbstractDebugger {
 
         // 如果没有启动, 直接返回
         if (!DebugUtils.isPortAvailable2("localhost", env.getPort())) {
-            // double check[可能出现如下情况, server还没启动, 就已经调用stop]
-            destroy();
-            // DebugUtils.simpleDebug("cpp服务关闭成功, CppDebugger停止", project);
+            DebugUtils.simpleDebug("cpp服务关闭成功, CppDebugger停止", project);
             return;
         }
 
@@ -244,19 +242,12 @@ public class CPPDebugger extends AbstractDebugger {
             } catch (InterruptedException ignored) {
             }
             if (!DebugUtils.isPortAvailable2("localhost", env.getPort())) {
-                // double check
-                destroy();
-                // DebugUtils.simpleDebug("cpp服务关闭成功, CppDebugger停止", project);
+                DebugUtils.simpleDebug("cpp服务关闭成功, CppDebugger停止", project);
                 return;
             }
         }
-        destroy();
-    }
-
-    public void destroy() {
         exec.destroy();
         if (exec.isAlive()) {
-            exec.destroyForcibly();
             KillPortProcess.killProcess(env.getPort());
         }
         DebugUtils.simpleDebug("cpp服务强制关闭! CppDebugger停止", project, false);

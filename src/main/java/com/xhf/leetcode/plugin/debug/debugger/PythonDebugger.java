@@ -370,8 +370,7 @@ public class PythonDebugger extends AbstractDebugger {
         }
         // 如果没有启动, 直接返回
         if (!isPortAvailable("localhost", env.getPyPort())) {
-            destroy();
-            // DebugUtils.simpleDebug("python服务关闭成功, PythonDebugger停止", project);
+            DebugUtils.simpleDebug("python服务关闭成功, PythonDebugger停止", project);
             return;
         }
         // 发送终止请求(所谓的终止python, 就是提前让python跑完所有内容, 自动结束)
@@ -384,16 +383,10 @@ public class PythonDebugger extends AbstractDebugger {
             } catch (InterruptedException ignored) {
             }
             if (!isPortAvailable("localhost", env.getPyPort())) {
-                destroy();
-                // DebugUtils.simpleDebug("python服务关闭成功, PythonDebugger停止", project);
+                DebugUtils.simpleDebug("python服务关闭成功, PythonDebugger停止", project);
                 return;
             }
         }
-        destroy();
-        DebugUtils.simpleDebug("python服务强制关闭! PythonDebugger停止", project, false);
-    }
-
-    public void destroy() {
         exec.destroy();
         if (exec.isAlive()) {
             exec.destroyForcibly();

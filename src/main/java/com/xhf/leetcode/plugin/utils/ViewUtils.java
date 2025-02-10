@@ -7,7 +7,6 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
@@ -195,28 +194,12 @@ public class ViewUtils {
         if (currentFile == null) {
             return null;
         }
-
-//        // 获取文件的 Document
-//        Document document = FileDocumentManager.getInstance().getDocument(currentFile);
-//        if (document == null) {
-//            return null;
-//        }
-//        // 获取文件内容
-//        return document.getText();
-
-        // 使用 runReadAction 包装获取文件内容的操作，并等待返回结果
-        // 这里不知道为啥出了个RuntimeExceptionWithAttachments error, 所以把他防弹读写线程执行
-        return ApplicationManager.getApplication().runReadAction(new Computable<String>() {
-            @Override
-            public String compute() {
-                // 获取文件的 Document
-                Document document = FileDocumentManager.getInstance().getDocument(currentFile);
-                if (document != null) {
-                    // 获取文件内容
-                    return document.getText();
-                }
-                return null;
-            }
-        });
+        // 获取文件的 Document
+        Document document = FileDocumentManager.getInstance().getDocument(currentFile);
+        if (document == null) {
+            return null;
+        }
+        // 获取文件内容
+        return document.getText();
     }
 }
