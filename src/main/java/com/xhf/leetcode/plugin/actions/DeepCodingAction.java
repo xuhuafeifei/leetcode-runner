@@ -11,7 +11,7 @@ import com.xhf.leetcode.plugin.bus.LCEventBus;
  */
 public class DeepCodingAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         LCEventBus.getInstance().post(new DeepCodingEvent());
     }
 }

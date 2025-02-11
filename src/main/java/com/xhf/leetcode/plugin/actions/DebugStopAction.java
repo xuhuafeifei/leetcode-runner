@@ -17,7 +17,7 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
 @LoginPass
 public class DebugStopAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         DebugManager.getInstance(project).stopDebugger();
         ConsoleUtils.getInstance(project).simpleShowConsole("结束debug!\n");
     }

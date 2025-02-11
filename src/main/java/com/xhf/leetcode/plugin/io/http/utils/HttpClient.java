@@ -111,11 +111,13 @@ public class HttpClient {
         }
     }
 
-    public HttpResponse executePost(@NotNull HttpRequest httpRequest, @NotNull Project project) {
+    public HttpResponse executePost(@NotNull HttpRequest httpRequest, Project project) {
         HttpResponse httpResponse = executePost(httpRequest);
         if (httpResponse == null) {
             LogUtils.error("httpResponse为null, 可能是网络错误. url = " + httpRequest.getUrl());
-            ConsoleUtils.getInstance(project).showWaring("请求失败, 可能是网络错误! 请检查您是否接入网络!", false, true);
+            if (project != null) {
+                ConsoleUtils.getInstance(project).showWaring("请求失败, 可能是网络错误! 请检查您是否接入网络!", false, true);
+            }
             throw new RuntimeException("网络异常或请求url有误!");
         }
         return httpResponse;

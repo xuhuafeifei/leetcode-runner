@@ -21,7 +21,7 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
 @LoginPass
 public class DebugRAAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         // 如果是处于debug状态, 写入指令
         if (DebugManager.getInstance(project).isDebug()) {
             // 写指令到阻塞队列中

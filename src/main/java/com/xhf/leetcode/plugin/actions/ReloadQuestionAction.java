@@ -10,7 +10,7 @@ import com.xhf.leetcode.plugin.service.QuestionService;
  */
 public class ReloadQuestionAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         QuestionService.getInstance().reloadTotalQuestion(project);
     }
 }

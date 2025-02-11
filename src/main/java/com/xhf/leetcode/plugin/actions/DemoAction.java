@@ -20,7 +20,7 @@ import java.io.IOException;
  */
 public class DemoAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
         /*
           强制为true, 而且要骗过idea的检测. 毕竟我想保留一开始的垃圾代码. 但又不想要执行. 毕竟执行了铁定报错, 我又不想改, 就这么干了

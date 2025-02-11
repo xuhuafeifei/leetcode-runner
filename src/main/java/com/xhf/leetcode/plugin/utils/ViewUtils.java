@@ -144,6 +144,10 @@ public class ViewUtils {
         }
     }
 
+    public static void closeCVFile(Project project) {
+        closeVFile(getCurrentOpenVirtualFile(project), project);
+    }
+
     /**
      * 将内容写入vFile
      * @param cFile 要写入的虚拟文件
@@ -202,4 +206,5 @@ public class ViewUtils {
         // 获取文件内容
         return document.getText();
     }
+
 }

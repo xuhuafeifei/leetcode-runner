@@ -24,12 +24,13 @@ import org.jetbrains.annotations.Nullable;
  */
 public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
     private final ActionToolbar actionToolbar;
+    private final DeepCodingPanel deepCodingPanel;
     private Project project;
     private SearchPanel searchPanel;
     /**
      * 表示当前显示状态, 如果是true, 则显示正常界面, 否则显示deep coding界面
      */
-    private boolean state = false;
+    private Boolean state = true;
 
     public LCPanel(ToolWindow toolWindow, Project project) {
         super(Boolean.TRUE, Boolean.TRUE);
@@ -46,6 +47,8 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
 
         // search panel
         searchPanel = new SearchPanel(project);
+        // deep coding
+        this.deepCodingPanel = new DeepCodingPanel(project, this);
 
         setDefaultContent();
 
@@ -61,26 +64,29 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
     public @Nullable Object getData(@NotNull @NonNls String dataId) {
         if (DataKeys.LEETCODE_QUESTION_LIST.is(dataId)) {
             return searchPanel.getMyList();
+        } else if (DataKeys.LEETCODE_DEEP_CODING_HOT_100_QUESTION_LIST.is(dataId)) {
+            return deepCodingPanel.getHot100Data();
+        } else if (DataKeys.LEETCODE_CODING_STATE.is(dataId)) {
+            return state;
         }
         return null;
     }
 
     @Subscribe
     public void deepCodingEventListener(DeepCodingEvent event) {
+        state = !state;
         if (state) {
             setDefaultContent();
         } else {
             setDeepCodingContent();
         }
-        state = !state;
     }
 
     private void setDeepCodingContent() {
         // store to action toolbar
-        DeepCodingPanel deepCodingPanel = new DeepCodingPanel(project, this);
-        actionToolbar.setTargetComponent(deepCodingPanel);
+        actionToolbar.setTargetComponent(deepCodingPanel.getTabs());
         setToolbar(actionToolbar.getComponent());
-        setContent(deepCodingPanel);
+        setContent(deepCodingPanel.getTabs());
     }
 
     private void setDefaultContent() {

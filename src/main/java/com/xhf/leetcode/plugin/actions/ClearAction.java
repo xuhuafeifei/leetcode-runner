@@ -18,7 +18,7 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
 public class ClearAction extends AbstractAction {
 
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         int result = Messages.showOkCancelDialog(
                 project,
                 "Are you sure you want to delete cache files? This will remove your login status and all cached question content.",

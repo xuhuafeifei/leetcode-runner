@@ -18,7 +18,7 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
 @LoginPass
 public class DebugRunAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         // 写指令到阻塞队列中
         boolean flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.R, ""));
         if (! flag) {

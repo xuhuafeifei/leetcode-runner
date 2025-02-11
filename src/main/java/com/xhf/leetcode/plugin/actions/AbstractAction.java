@@ -15,11 +15,21 @@ import com.xhf.leetcode.plugin.utils.SettingPass;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public abstract class AbstractAction extends AnAction {
+    public AbstractAction(String s, String s1, Icon icon) {
+        super(s, s1, icon);
+    }
+
+    public AbstractAction() {
+        super();
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();
@@ -81,5 +91,5 @@ public abstract class AbstractAction extends AnAction {
         doActionPerformed(project, e);
     }
 
-    abstract void doActionPerformed(Project project, AnActionEvent e);
+    protected abstract void doActionPerformed(Project project, AnActionEvent e);
 }

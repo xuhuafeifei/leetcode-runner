@@ -14,7 +14,7 @@ import com.xhf.leetcode.plugin.utils.SettingPass;
 @LoginPass
 public class SettingAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
     }
 }

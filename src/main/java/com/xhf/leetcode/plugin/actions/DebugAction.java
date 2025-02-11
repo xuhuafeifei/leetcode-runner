@@ -29,7 +29,7 @@ import javax.swing.*;
 @LoginPass
 public class DebugAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         if (DebugManager.getInstance(project).isDebug()) {
             ConsoleUtils.getInstance(project).showInfo("当前处于调试状态, 请先退出调试状态", false, true);
             return;

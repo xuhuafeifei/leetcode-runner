@@ -273,9 +273,6 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
         searchBar.add(iconPanel);
     }
 
-    // 为搜索引擎提供数据源, 同时创建索引
-    public abstract void buildIndex(java.util.List<T> source);
-
     // 登陆锁定. 该方法表示当前项目处于未登录状态, 不提供搜索服务
     public final void loginLock() {
         lock = true;

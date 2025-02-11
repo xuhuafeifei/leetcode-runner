@@ -98,9 +98,39 @@ public class CodeService {
     }
 
     /**
+     * deep coding 模式 创建代码
+     * @param question question
+     * @param deepCodingInfo dci
+     */
+    public void openCodeEditor(Question question, DeepCodingInfo deepCodingInfo) {
+        QuestionService.getInstance().fillQuestion(question, project);
+
+        // create code file
+        String codeFilePath = createCodeFile(question);
+        analysisAndCreateFile(question);
+        // create content file
+        // String markdownFilePath = createContentFile(question);
+
+        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), AppSettings.getInstance().getLangType());
+        le.setDeepCodingInfo(deepCodingInfo);
+
+        // store path info
+        StoreService.getInstance(project).addCache(codeFilePath, le);
+
+        // open code editor and load content
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            VirtualFile file = LocalFileSystem.getInstance().refreshAndFindFileByPath(codeFilePath);
+            if (file != null) {
+                OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+            }
+        });
+    }
+
+    /**
      * 分析代码, 同时创建文件
      * 主要服务于包含ListNode, TreeNode的题目
-     * @param question
+     * @param question question
      */
     private void analysisAndCreateFile(Question question) {
         String codeSnippets = question.getCodeSnippets();
@@ -150,6 +180,28 @@ public class CodeService {
         QuestionService.getInstance().fillQuestion(question, project);
 
         LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
+        // get current file path
+        String currentFilePath = ViewUtils.getUnifyFilePathByVFile(file);
+        // restore
+        StoreService.getInstance(project).addCache(currentFilePath, le);
+        // close
+        ViewUtils.closeVFile(file, project);
+        // reopen
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            VirtualFile reFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(currentFilePath);
+            if (reFile != null) {
+                OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+            }
+        });
+    }
+
+    public void reOpenCodeEditor(Question question, VirtualFile file, String langType, DeepCodingInfo deepCodingInfo) {
+        QuestionService.getInstance().fillQuestion(question, project);
+
+        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
+        le.setDeepCodingInfo(deepCodingInfo);
+
         // get current file path
         String currentFilePath = ViewUtils.getUnifyFilePathByVFile(file);
         // restore

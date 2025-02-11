@@ -12,7 +12,7 @@ import com.xhf.leetcode.plugin.service.QuestionService;
  */
 public class TodayQuestionAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         QuestionService.getInstance().todayQuestion(project);
     }
 }

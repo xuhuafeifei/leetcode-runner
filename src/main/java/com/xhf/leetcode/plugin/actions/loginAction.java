@@ -12,7 +12,7 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
 @LoginPass
 public class loginAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         LoginService.getInstance(project).doLogin();
     }
 }

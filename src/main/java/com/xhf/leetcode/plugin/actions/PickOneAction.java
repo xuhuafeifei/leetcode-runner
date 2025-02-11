@@ -13,7 +13,7 @@ import com.xhf.leetcode.plugin.service.QuestionService;
 public class PickOneAction extends AbstractAction {
 
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         // choose one question randomly
         Question question = QuestionService.getInstance().pickOne(project);
         CodeService.getInstance(project).openCodeEditor(question);

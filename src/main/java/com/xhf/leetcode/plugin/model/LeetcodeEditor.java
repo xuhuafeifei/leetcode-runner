@@ -29,6 +29,7 @@ public class LeetcodeEditor {
      */
     private String topicId;
     private String solutionSlug;
+    private DeepCodingInfo deepCodingInfo;
 
     public String getTopicId() {
         return topicId;
@@ -151,5 +152,13 @@ public class LeetcodeEditor {
                 ", topicId='" + topicId + '\'' +
                 ", solutionSlug='" + solutionSlug + '\'' +
                 '}';
+    }
+
+    public void setDeepCodingInfo(DeepCodingInfo deepCodingInfo) {
+        this.deepCodingInfo = deepCodingInfo;
+    }
+
+    public DeepCodingInfo getDeepCodingInfo() {
+        return deepCodingInfo;
     }
 }

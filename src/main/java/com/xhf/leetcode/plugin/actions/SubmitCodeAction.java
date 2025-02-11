@@ -10,7 +10,7 @@ import com.xhf.leetcode.plugin.service.CodeService;
  */
 public class SubmitCodeAction extends AbstractAction {
     @Override
-    void doActionPerformed(Project project, AnActionEvent e) {
+    public void doActionPerformed(Project project, AnActionEvent e) {
         CodeService.getInstance(project).submitCode();
     }
 }
