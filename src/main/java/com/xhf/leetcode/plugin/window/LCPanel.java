@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.window;
 
+import com.google.common.eventbus.Subscribe;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DataProvider;
@@ -7,9 +9,11 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
+import com.xhf.leetcode.plugin.bus.DeepCodingEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.window.deepcoding.DeepCodingPanel;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,9 +22,14 @@ import org.jetbrains.annotations.Nullable;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
+public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
+    private final ActionToolbar actionToolbar;
     private Project project;
     private SearchPanel searchPanel;
+    /**
+     * 表示当前显示状态, 如果是true, 则显示正常界面, 否则显示deep coding界面
+     */
+    private boolean state = false;
 
     public LCPanel(ToolWindow toolWindow, Project project) {
         super(Boolean.TRUE, Boolean.TRUE);
@@ -29,7 +38,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
         final ActionManager actionManager = ActionManager.getInstance();
 
         // get action toolbar
-        ActionToolbar actionToolbar = actionManager.createActionToolbar("leetcode Toolbar",
+        this.actionToolbar = actionManager.createActionToolbar("leetcode Toolbar",
                 (DefaultActionGroup) actionManager.getAction("leetcode.plugin.lcActionsToolbar"),
                 true);
 
@@ -38,10 +47,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
         // search panel
         searchPanel = new SearchPanel(project);
 
-        // store to action toolbar
-        actionToolbar.setTargetComponent(searchPanel.getMyList());
-        setToolbar(actionToolbar.getComponent());
-        setContent(searchPanel);
+        setDefaultContent();
 
         // register
         LCEventBus.getInstance().register(this);
@@ -57,5 +63,35 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider {
             return searchPanel.getMyList();
         }
         return null;
+    }
+
+    @Subscribe
+    public void deepCodingEventListener(DeepCodingEvent event) {
+        if (state) {
+            setDefaultContent();
+        } else {
+            setDeepCodingContent();
+        }
+        state = !state;
+    }
+
+    private void setDeepCodingContent() {
+        // store to action toolbar
+        DeepCodingPanel deepCodingPanel = new DeepCodingPanel(project, this);
+        actionToolbar.setTargetComponent(deepCodingPanel);
+        setToolbar(actionToolbar.getComponent());
+        setContent(deepCodingPanel);
+    }
+
+    private void setDefaultContent() {
+        // store to action toolbar
+        actionToolbar.setTargetComponent(searchPanel.getMyList());
+        setToolbar(actionToolbar.getComponent());
+        setContent(searchPanel);
+    }
+
+    @Override
+    public void dispose() {
+
     }
 }

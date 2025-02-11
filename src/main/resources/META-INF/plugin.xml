@@ -103,7 +103,9 @@
         <action id="leetcode.plugin.Reposition" class="com.xhf.leetcode.plugin.actions.RePositionAction"
                 text="Reload Reposition" icon="/icons/position.svg">
         </action>
-
+        <action id="leetcode.plugin.DeepCoding" class="com.xhf.leetcode.plugin.actions.DeepCodingAction"
+                text="Change Coding State" icon="AllIcons.Actions.Refresh">
+        </action>
 
         <group id="leetcode.plugin.lcActionsToolbar">
             <reference id="leetcode.plugin.LoginAction"/>
@@ -117,6 +119,7 @@
             <reference id="leetcode.plugin.Clear"/>
             <separator/>
             <reference id="leetcode.plugin.Reposition"/>
+            <reference id="leetcode.plugin.DeepCoding"/>
         </group>
 
         <group id="leetcode.plugin.consoleToolbar">
