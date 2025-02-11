@@ -11,5 +11,5 @@ import java.util.List;
 public interface FilterChain<T> {
     void removeFilter(Filter<T, ?> t);
     FilterChain<Question> addFilter(Filter<T, ?> t);
-    List<Question> apply(List<T> targets);
+    List<T> apply(List<T> targets);
 }

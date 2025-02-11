@@ -46,8 +46,20 @@ public class QuestionEngine implements SearchEngine<Question> {
      * 题目排序比较器
      */
     private final QuestionCompare questionCompare;
+    // 单例
+    private static QuestionEngine instance;
+    public static QuestionEngine getInstance(Project project) {
+        if (instance == null) {
+            synchronized (QuestionEngine.class) {
+                if (instance == null) {
+                    instance = new QuestionEngine(project);
+                }
+            }
+        }
+        return instance;
+    }
 
-    public QuestionEngine(Project project) {
+    private QuestionEngine(Project project) {
         this.analyzer = new LCAnalyzer();
         this.directory = new RAMDirectory();
         this.project = project;

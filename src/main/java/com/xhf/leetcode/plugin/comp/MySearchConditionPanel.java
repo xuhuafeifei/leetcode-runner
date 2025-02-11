@@ -2,7 +2,7 @@ package com.xhf.leetcode.plugin.comp;
 
 import com.intellij.openapi.ui.ComboBox;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.window.filter.QFilter;
+import com.xhf.leetcode.plugin.window.filter.Filter;
 
 import javax.swing.*;
 import java.util.LinkedHashMap;
@@ -14,8 +14,8 @@ import java.util.Map;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class MySearchConditionPanel extends JPanel {
-    private final QFilter myFilter;
+public abstract class MySearchConditionPanel<T> extends JPanel {
+    private final Filter<T, String> myFilter;
     private final ComboBox<String> conditionComb;
     private final String defaultText;
     private String previousSelection;
@@ -30,8 +30,12 @@ public abstract class MySearchConditionPanel extends JPanel {
     /**
      * 创建不同的过滤器, 执行不同过滤行为
      */
-    public abstract QFilter createFilter();
+    public abstract Filter<T, String> createFilter();
 
+    /**
+     * @param runnable 后置触发的查询事件
+     * @param defaultText 默认文本
+     */
     public MySearchConditionPanel(Runnable runnable, String defaultText) {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -86,7 +90,7 @@ public abstract class MySearchConditionPanel extends JPanel {
         this.add(conditionComb);
     }
 
-    public QFilter getFilter() {
+    public Filter<T, String> getFilter() {
         return myFilter;
     }
 
