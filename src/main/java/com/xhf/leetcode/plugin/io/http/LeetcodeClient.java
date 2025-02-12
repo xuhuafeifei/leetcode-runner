@@ -370,12 +370,14 @@ public class LeetcodeClient {
      * get today question
      */
     public Question getTodayQuestion(Project project) {
+        /*
         StoreService service = StoreService.getInstance(project);
         Question q = service.getCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, Question.class);
         if (q != null) {
             return q;
         }
-        q = new Question();
+         */
+        var q = new Question();
 
         /* search question */
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
@@ -410,7 +412,13 @@ public class LeetcodeClient {
         q.setTitleCn(titleCn);
 
         /* store question */
-        service.addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, q, false);
+        /*
+        不再支持缓存每日一题, 可能存在这样的情况, 用户电脑保持开机状态持续若干天, 那么他在第一天缓存的
+        每日一题将会影响到后续几天每日一题的获取, 除非过当天12点时清除数据, 否则不再缓存每日一题
+
+        虽然StoreService支持过期时间, 但该功能并未经过大量测试, 因此不进行引入
+        */
+        // service.addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, q, false);
 
         return q;
     }

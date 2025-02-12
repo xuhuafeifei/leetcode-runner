@@ -15,6 +15,9 @@ import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cef.browser.CefBrowser;
+import org.cef.browser.CefFrame;
+import org.cef.handler.CefLifeSpanHandlerAdapter;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +25,7 @@ import org.jetbrains.ide.BuiltInServerManager;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 
@@ -66,6 +70,21 @@ public class MarkDownEditor implements FileEditor {
         this.project = project;
         this.myComponent = JBUI.Panels.simplePanel();
         this.jcefHtmlPanel = new JCEFHtmlPanel("url");
+
+        // 自定义链接点击处理器
+        jcefHtmlPanel.getCefBrowser().getClient().addLifeSpanHandler(new CefLifeSpanHandlerAdapter() {
+            @Override
+            public boolean onBeforePopup(CefBrowser browser, CefFrame frame, String target_url, String target_frame_name) {
+                // 通过默认浏览器打开链接
+                try {
+                    java.awt.Desktop.getDesktop().browse(java.net.URI.create(target_url));
+                } catch (IOException e) {
+                    LogUtils.error(e);
+                }
+                return true;
+            }
+        });
+
         this.contentType = contentType;
         this.content = content;
 
