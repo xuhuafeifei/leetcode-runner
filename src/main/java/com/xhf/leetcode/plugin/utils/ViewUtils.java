@@ -9,10 +9,13 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
+import com.xhf.leetcode.plugin.bus.RePositionEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
+import com.xhf.leetcode.plugin.model.DeepCodingInfo;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
@@ -237,6 +240,75 @@ public class ViewUtils {
             });
         } else {
             scrollToVisibleOfMyList(myList, i);
+        }
+    }
+
+    /**
+     * deep coding模式下的重定位
+     *
+     * @param event
+     * @param questionList
+     * @param project
+     * @param pattern
+     */
+    public static void rePositionInDeepCoding(RePositionEvent event, MyList<Question> questionList, Project project, String pattern) {
+        String fid = event.getFrontendQuestionId();
+        String titleSlug = event.getTitleSlug();
+        ListModel<Question> model = questionList.getModel();
+        int size = model.getSize();
+        // 遍历, 匹配fid
+        try {
+            int i = Integer.parseInt(fid) - 1;
+            Question question = model.getElementAt(i);
+            // double check
+            if (question.getTitleSlug().equals(titleSlug)) {
+                JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
+                ViewUtils.scrollToVisibleOfMyList(questionList, i);
+                // 重新打开文件
+                DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, i);
+                CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType(), hot1001);
+                return;
+            } else {
+                // for循环遍历model查找
+                for (int j = 0; j < size; j++) {
+                    question = model.getElementAt(j);
+                    if (question.getTitleSlug().equals(titleSlug)) {
+                        JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
+                        ViewUtils.scrollToVisibleOfMyList(questionList, j);
+                        // 重新打开文件
+                        DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, j);
+                        CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType(), hot1001);
+                        return;
+                    }
+                }
+                JOptionPane.showMessageDialog(null, "current file can not reposition");
+            }
+        } catch (Exception ex) {
+            LogUtils.error(ex);
+            ConsoleUtils.getInstance(project).showError("文件重定位错误! 错误原因是: " + ex.getMessage(), false, true);
+        }
+    }
+
+    public static void rePosition(RePositionEvent event, MyList<Question> questionList, Project project) {
+        String fid = event.getFrontendQuestionId();
+        String titleSlug = event.getTitleSlug();
+        ListModel<Question> model = questionList.getModel();
+        try {
+            int i = Integer.parseInt(fid) - 1;
+            Question question = model.getElementAt(i);
+            // double check
+            if (question.getTitleSlug().equals(titleSlug)) {
+                JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
+                ViewUtils.scrollToVisibleOfMyList(questionList, i);
+                // 重新打开文件
+                // 重新打开文件
+                CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
+                return;
+            }
+            JOptionPane.showMessageDialog(null, "current file can not reposition");
+        } catch (Exception ex) {
+            LogUtils.error(ex);
+            ConsoleUtils.getInstance(project).showError("文件重定位错误! 错误原因是: " + ex.getMessage(), false, true);
         }
     }
 }

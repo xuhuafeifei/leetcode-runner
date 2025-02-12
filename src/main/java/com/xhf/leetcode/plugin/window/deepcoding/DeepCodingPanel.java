@@ -9,6 +9,7 @@ import com.intellij.ui.tabs.impl.JBEditorTabs;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -25,6 +26,9 @@ public class DeepCodingPanel extends JPanel {
     private final Hot100Panel hot100Panel;
     private final Interview150Panel interview150Panel;
     private final LCCompetitionPanel lcCompetitionPanel;
+    private final TabInfo hotTab;
+    private final TabInfo interviewTab;
+    private final TabInfo lcCompeTab;
 
     public DeepCodingPanel(Project project, @NotNull Disposable parentDisposable) {
         this.project = project;
@@ -34,21 +38,21 @@ public class DeepCodingPanel extends JPanel {
         this.tabs.setBorder(Constants.BORDER);
 
         this.hot100Panel = new Hot100Panel(project);
-        this.interview150Panel = new Interview150Panel();
+        this.interview150Panel = new Interview150Panel(project);
         this.lcCompetitionPanel = new LCCompetitionPanel();
 
-        TabInfo hotTab = new TabInfo(hot100Panel);
-        hotTab.setText("Hot 100 题");
+        this.hotTab = new TabInfo(hot100Panel);
+        hotTab.setText(Hot100Panel.HOT_100_TEXT);
         hotTab.setIcon(IconLoader.getIcon("/icons/m_hot100.png", this.getClass().getClassLoader()));
         tabs.addTab(hotTab);
 
-        TabInfo interviewTab = new TabInfo(interview150Panel);
-        interviewTab.setText("经典面试 150 题");
+        this.interviewTab = new TabInfo(interview150Panel);
+        interviewTab.setText(Interview150Panel.INTERVIEW_150_TEXT);
         interviewTab.setIcon(IconLoader.getIcon("/icons/m_mianshi150.png", this.getClass().getClassLoader()));
         tabs.addTab(interviewTab);
 
-        TabInfo lcCompeTab = new TabInfo(lcCompetitionPanel);
-        lcCompeTab.setText("LC-竞赛题");
+        this.lcCompeTab = new TabInfo(lcCompetitionPanel);
+        lcCompeTab.setText(LCCompetitionPanel.LC_COMPETITION_TEXT);
         lcCompeTab.setIcon(IconLoader.getIcon("/icons/m_LeetCode_Cup.png", this.getClass().getClassLoader()));
         tabs.addTab(lcCompeTab);
 
@@ -61,5 +65,34 @@ public class DeepCodingPanel extends JPanel {
 
     public MyList<Question> getHot100Data() {
         return hot100Panel.getDataList();
+    }
+
+    public MyList<Question> getInterview150Data() {
+        return interview150Panel.getDataList();
+    }
+
+    public String getCurrentTab() {
+        TabInfo selectedInfo = tabs.getSelectedInfo();
+        if (selectedInfo == null) {
+            return "";
+        }
+        return selectedInfo.getText();
+    }
+
+    public void setTab(String tabName) {
+        switch (tabName) {
+            case Hot100Panel.HOT100:
+                tabs.select(this.hotTab, true);
+                break;
+            case Interview150Panel.INTER150:
+                tabs.select(this.interviewTab, true);
+                break;
+            case LCCompetitionPanel.LC_COMPETITION:
+                tabs.select(this.lcCompeTab, true);
+                break;
+            default:
+                LogUtils.warn("setTab error, 未知的tabName! tabName = " + tabName);
+                break;
+        }
     }
 }

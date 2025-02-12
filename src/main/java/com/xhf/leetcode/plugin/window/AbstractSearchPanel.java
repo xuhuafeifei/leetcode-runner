@@ -7,8 +7,12 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
+import com.xhf.leetcode.plugin.listener.AbstractMouseAdapter;
+import com.xhf.leetcode.plugin.model.DeepCodingInfo;
 import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
+import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.window.filter.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryParser.ParseException;
@@ -17,6 +21,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +31,8 @@ import java.util.List;
  * <p>
  * 该类需要子类提供dataList(数据显示能力)、searchEngine(数据搜索能力)、filterChain(数据过滤能力)
  * 此外, 还需要子类提供筛选组件
+ * <p>
+ * 需要注意的是, 子类构建父类的时候, 需要调用init()方法进行初始化
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -36,6 +43,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
      * 搜索框, 其中存储用户输入的搜索条件
      */
     private final JTextField searchField;
+    private final Project project;
     // 锁定标志位, lock == true, 当前搜索面板的状态处于锁定状态, 不提供搜索服务
     // lock == false, 解锁
     private boolean lock;
@@ -48,6 +56,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
 
     public AbstractSearchPanel(Project project) {
         super(Boolean.TRUE, Boolean.TRUE);
+        this.project = project;
         this.searchBar = new JPanel();
         this.searchField = new JTextField();
         this.conditionPanelArray = new ArrayList<>(5);
@@ -308,7 +317,8 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
     }
 
     /**
-     * 获取需要被更新的数据, 该方法会在搜索/过滤触发时调用
+     * 获取需要被更新的最完整的原始数据
+     * 该方法会在搜索/过滤触发时调用
      * @return data
      */
     protected abstract List<T> getUpdateData();
@@ -344,4 +354,31 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
         }
         this.searchField.setText("");
     }
+
+    /**
+     * 用于帮助deep coding 初始化MyList使用的函数
+     * @param questionList questionList
+     * @param questions questions
+     * @param pattern pattern
+     */
+    protected void initMyListHelper(MyList<Question> questionList, List<Question> questions, String pattern) {
+        questionList.setListData(questions);
+        questionList.setCellRenderer(new QuestionCellRender());
+        questionList.addMouseListener(new AbstractMouseAdapter(project) {
+            @Override
+            protected void doubleClicked(MouseEvent e) {
+                Point point = e.getPoint();
+                int idx = questionList.locationToIndex(point);
+                DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, questionList.getModel().getSize(), idx);
+                Question question = questionList.getModel().getElementAt(idx);
+                CodeService.getInstance(project).openCodeEditor(question, hot1001);
+            }
+        });
+
+        JBScrollPane jbScrollPane = new JBScrollPane(questionList);
+        this.add(jbScrollPane, BorderLayout.CENTER);
+        this.setContent(jbScrollPane);
+    }
+
+
 }

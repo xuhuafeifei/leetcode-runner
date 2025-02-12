@@ -2,18 +2,12 @@ package com.xhf.leetcode.plugin.window.deepcoding;
 
 import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.components.JBScrollPane;
-import com.xhf.leetcode.plugin.bus.LCEventBus;
-import com.xhf.leetcode.plugin.bus.RePositionEvent;
+import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
-import com.xhf.leetcode.plugin.listener.AbstractMouseAdapter;
-import com.xhf.leetcode.plugin.model.DeepCodingInfo;
 import com.xhf.leetcode.plugin.model.Question;
-import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
-import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.ArrayUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
@@ -24,9 +18,6 @@ import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
 import com.xhf.leetcode.plugin.window.filter.QFilterChain;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +27,14 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class Hot100Panel extends AbstractSearchPanel<Question> {
+    /**
+     * 用于DeepCodingInfo 存储的信息, 表示当前通过deep coding哪个模式创建的文件
+     */
     public static final String HOT100 = "hot100";
+    /**
+     * 用于 panel tab显示的信息
+     */
+    public static final String HOT_100_TEXT = "Hot 100 题";
     private final QFilterChain filterChain;
     private final QuestionEngine engine;
     private final Project project;
@@ -69,23 +67,8 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
             hot100TitleSlug[i] = totalQuestion.get(idx).getTitleSlug();
             i += 1;
         }
-        this.questionList.setListData(hot100);
 
-        questionList.setCellRenderer(new QuestionCellRender());
-        questionList.addMouseListener(new AbstractMouseAdapter(project) {
-            @Override
-            protected void doubleClicked(MouseEvent e) {
-                Point point = e.getPoint();
-                int idx = questionList.locationToIndex(point);
-                DeepCodingInfo hot1001 = new DeepCodingInfo(HOT100, questionList.getModel().getSize(), idx);
-                Question question = questionList.getModel().getElementAt(idx);
-                CodeService.getInstance(project).openCodeEditor(question, hot1001);
-            }
-        });
-
-        JBScrollPane jbScrollPane = new JBScrollPane(questionList);
-        this.add(jbScrollPane, BorderLayout.CENTER);
-        this.setContent(jbScrollPane);
+        super.initMyListHelper(questionList, hot100, HOT100);
     }
 
     private int[] getHot100() {
@@ -185,59 +168,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
 
             @Override
             public Filter<Question, String> createFilter() {
-                return new Filter<>() {
-                    private final List<String> items = new ArrayList<>(3);
-
-                    @Override
-                    public boolean doFilter(Question question) {
-                        return contains(question.getFrontendQuestionId());
-                    }
-
-                    @Override
-                    public Filter<Question, String> addItem(String item) {
-                        items.add(item);
-                        return this;
-                    }
-
-                    /**
-                     * item是所有题目fid的集合, 并通过,连接
-                     * @param item item
-                     * @return boolean
-                     */
-                    @Override
-                    public boolean contains(String item) {
-                        // 判断是否是hot 100
-                        for (String it : items) {
-                            String[] split = it.split(",");
-                            for (String fid : split) {
-                                if (fid.equals(item)) {
-                                    return true;
-                                }
-                            }
-                        }
-                        return false;
-                    }
-
-                    @Override
-                    public boolean removeItem(String item) {
-                        return items.remove(item);
-                    }
-
-                    @Override
-                    public void removeAllItems() {
-                        items.clear();
-                    }
-
-                    @Override
-                    public int itemCount() {
-                        return items.size();
-                    }
-
-                    @Override
-                    public boolean usable() {
-                        return itemCount() != 0;
-                    }
-                };
+                return new DCAlgorithmFilter();
             }
         });
         // 添加难度过滤条件
@@ -268,30 +199,60 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
     public void rePositionEventListeners(RePositionEvent event) {
         Boolean state = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE);
         // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
-        if (Boolean.TRUE.equals(state)) {
+        if (! Boolean.FALSE.equals(state)) {
+            return;
+        }
+        String tabName = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CHOOSEN_TAB_NAME);
+        // 当前选中的不是hot 100
+        if (!HOT_100_TEXT.equals(tabName)) {
             return;
         }
         // 这里需要清除Hot100Panel设置的搜索条件, 不然查询到的数据是缺失的
         this.clear();
 
-        String fid = event.getFrontendQuestionId();
-        String titleSlug = event.getTitleSlug();
-        ListModel<Question> model = questionList.getModel();
-        int size = model.getSize();
-        // 遍历, 匹配fid
-        for (int i = 0; i < size; ++i) {
-            Question question = model.getElementAt(i);
-            if (question.getFrontendQuestionId().equals(fid) &&
-                    question.getTitleSlug().equals(titleSlug)
-            ) {
-                JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
-                ViewUtils.scrollToVisibleOfMyList(questionList, i);
-                // 重新打开文件
-                DeepCodingInfo hot1001 = new DeepCodingInfo(HOT100, size, i);
-                CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType(), hot1001);
-                return;
-            }
-        }
-        JOptionPane.showMessageDialog(null, "current file can not reposition");
+        ViewUtils.rePositionInDeepCoding(event, questionList, project, HOT100);
+    }
+
+    @Subscribe
+    public void loginEventListener(LoginEvent listener) {
+        // 提前调用indexLock(). 因为登录后必定要重新加载所有题目数据, 从而rebuild engine's index
+        indexLock();
+        questionList.setEmptyText("Loading data, please wait a second...");
+    }
+
+    /**
+     * 当数据加载完毕后, 执行渲染逻辑
+     * @param event event
+     */
+    @Subscribe
+    public void qLoadEndListener(QLoadEndEvent event) {
+        unLock();
+        questionList.setEmptyText("Noting to show...");
+        initMyList();
+        updateText();
+    }
+
+    @Subscribe
+    public void qLoadStartListener(QLoadStartEvent event) {
+        indexLock();
+        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setNonData();
+    }
+
+    @Subscribe
+    public void codeSubmitEventListener(CodeSubmitEvent event) {
+        indexLock();
+        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setNonData();
+        initMyList();
+        unLock();
+        updateText();
+    }
+
+    @Subscribe
+    public void clearCacheEventListeners(ClearCacheEvent event) {
+        loginLock();
+        questionList.setEmptyText("Please login first...");
+        questionList.setNonData();
     }
 }

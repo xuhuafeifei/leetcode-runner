@@ -1,6 +1,9 @@
 package com.xhf.leetcode.plugin.model;
 
 /**
+ * Deep Coding Info, 简称dci, 用于存储在Deep Coding模式下打开文件的相关信息
+ * 该类已集成到{@link LeetcodeEditor}中
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

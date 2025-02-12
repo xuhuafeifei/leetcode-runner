@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.xhf.leetcode.plugin.bus.DeepCodingEvent;
+import com.xhf.leetcode.plugin.bus.DeepCodingTabChooseEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.utils.DataKeys;
@@ -66,12 +67,19 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
             return searchPanel.getMyList();
         } else if (DataKeys.LEETCODE_DEEP_CODING_HOT_100_QUESTION_LIST.is(dataId)) {
             return deepCodingPanel.getHot100Data();
+        } else if (DataKeys.LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST.is(dataId)) {
+            return deepCodingPanel.getInterview150Data();
         } else if (DataKeys.LEETCODE_CODING_STATE.is(dataId)) {
             return state;
+        } else if (DataKeys.LEETCODE_CHOOSEN_TAB_NAME.is(dataId)) {
+            return deepCodingPanel.getCurrentTab();
         }
         return null;
     }
 
+    /**
+     * 监听 deep coding 切换 事件
+     */
     @Subscribe
     public void deepCodingEventListener(DeepCodingEvent event) {
         state = !state;
@@ -80,6 +88,16 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
         } else {
             setDeepCodingContent();
         }
+    }
+
+    /**
+     * 监听 deep coding tab 选择事件
+     */
+    @Subscribe
+    public void deepCodingTabChooseEventListener(DeepCodingTabChooseEvent event) {
+        state = ! state;
+        setDeepCodingContent();
+        deepCodingPanel.setTab(event.getPattern());
     }
 
     private void setDeepCodingContent() {

@@ -24,7 +24,15 @@ public class DataKeys {
      */
     public static final DataKey<MyList<Question>> LEETCODE_DEEP_CODING_HOT_100_QUESTION_LIST = DataKey.create("LEETCODE_DEEP_CODING_HOT_100_QUESTION_LIST");
     /**
+     * 获取interview 150 panel当前显示的数据
+     */
+    public static final DataKey<MyList<Question>> LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST = DataKey.create("LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST ");
+    /**
      * 当前状态, 是正常模式还是deep coding模式
      */
     public static final DataKey<Boolean> LEETCODE_CODING_STATE = DataKey.create("LEETCODE_CODING_STATE");
+    /**
+     * deep coding模块当前选中的tab名称
+     */
+    public static final DataKey<String> LEETCODE_CHOOSEN_TAB_NAME = DataKey.create("LEETCODE_CHOOSEN_TAB_NAME ");
 }

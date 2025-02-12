@@ -11,13 +11,12 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
-import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
 import com.xhf.leetcode.plugin.window.filter.QFilterChain;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -146,35 +145,12 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
     public void rePositionEventListeners(RePositionEvent event) {
         Boolean state = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE);
         // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
-        if (Boolean.FALSE.equals(state)) {
+        if (! Boolean.TRUE.equals(state)) {
             return;
         }
         // 这里需要清除searchPanel设置的搜索条件, 不然查询到的数据是缺失的
         this.clear();
 
-        String fid = event.getFrontendQuestionId();
-        String titleSlug = event.getTitleSlug();
-        ListModel<Question> model = questionList.getModel();
-        int size = model.getSize();
-        // 遍历, 匹配fid
-        for (int i = 0; i < size; ++i) {
-            Question question = model.getElementAt(i);
-            if (question.getFrontendQuestionId().equals(fid) &&
-                    question.getTitleSlug().equals(titleSlug)
-            ) {
-                JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
-                // 选择匹配到的题目
-                questionList.setSelectedIndex(i);
-                // 滚动到选中的题目位置
-                Rectangle cellRect = questionList.getCellBounds(i, i);
-                if (cellRect != null) {
-                    questionList.scrollRectToVisible(cellRect);
-                }
-                // 重新打开文件
-                CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
-                return;
-            }
-        }
-        JOptionPane.showMessageDialog(null, "current file can not reposition");
+        ViewUtils.rePosition(event, questionList, project);
     }
 }
