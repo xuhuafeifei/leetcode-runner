@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.window.deepcoding;
+package com.xhf.leetcode.plugin.window.deepcoding.filter;
 
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.window.filter.Filter;
@@ -14,7 +14,7 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-class DCAlgorithmFilter implements QFilter {
+public class DCAlgorithmFilter implements QFilter {
     private final List<String> items = new ArrayList<>(3);
 
     @Override

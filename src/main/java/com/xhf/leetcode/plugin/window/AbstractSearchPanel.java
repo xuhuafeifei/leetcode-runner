@@ -43,7 +43,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
      * 搜索框, 其中存储用户输入的搜索条件
      */
     private final JTextField searchField;
-    private final Project project;
+    protected final Project project;
     // 锁定标志位, lock == true, 当前搜索面板的状态处于锁定状态, 不提供搜索服务
     // lock == false, 解锁
     private boolean lock;
@@ -79,10 +79,19 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
         this.add(searchBar, BorderLayout.NORTH);
         this.searchBar.setLayout(new BoxLayout(this.searchBar, BoxLayout.Y_AXIS));
 
+        addToSearchBarBefore(searchBar);
         initSearchContent();
         initSearchCondition();
 
         this.setToolbar(searchBar);
+    }
+
+    /**
+     * 允许子类在searchBar的最开始部分添加内容
+     * @param searchBar sb
+     */
+    protected void addToSearchBarBefore(JPanel searchBar) {
+
     }
 
     /**
@@ -369,9 +378,9 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
             protected void doubleClicked(MouseEvent e) {
                 Point point = e.getPoint();
                 int idx = questionList.locationToIndex(point);
-                DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, questionList.getModel().getSize(), idx);
+                DeepCodingInfo dci = new DeepCodingInfo(pattern, questionList.getModel().getSize(), idx);
                 Question question = questionList.getModel().getElementAt(idx);
-                CodeService.getInstance(project).openCodeEditor(question, hot1001);
+                CodeService.getInstance(project).openCodeEditor(question, dci);
             }
         });
 
@@ -379,6 +388,4 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
         this.add(jbScrollPane, BorderLayout.CENTER);
         this.setContent(jbScrollPane);
     }
-
-
 }

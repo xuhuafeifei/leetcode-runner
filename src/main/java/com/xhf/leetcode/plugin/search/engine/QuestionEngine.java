@@ -19,9 +19,7 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Question问题查询引擎, 索引问题题目. 对外提供题目搜索能力
@@ -99,6 +97,26 @@ public class QuestionEngine implements SearchEngine<Question> {
 //        LogUtils.debug("normalSort花费时间: " + (System.currentTimeMillis() - start));
 
         return questions;
+    }
+
+    protected Set<Integer> searchInner(String queryParam) throws IOException, ParseException {
+        //实例化搜索器
+        IndexSearcher isearcher = new IndexSearcher(directory);
+
+        QueryParser parser = new QueryParser(Version.LUCENE_29, "titleSlug", analyzer);
+        // query如何设置自己的分词器
+        Query query = parser.parse(queryParam);
+
+        TopDocs topDocs = isearcher.search(query, 100);
+
+        Set<Integer> set = new HashSet<>();
+        for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            Document targetDoc = isearcher.doc(scoreDoc.doc);
+            // 通过id在原始数据中找到匹配得到的题目对象
+            int idx = Integer.parseInt(targetDoc.get("id"));
+            set.add(idx);
+        }
+        return set;
     }
 
     /**

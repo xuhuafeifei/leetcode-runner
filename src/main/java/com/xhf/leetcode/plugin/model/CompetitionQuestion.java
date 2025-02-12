@@ -1,11 +1,16 @@
 package com.xhf.leetcode.plugin.model;
 
+import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.service.QuestionService;
+
+import java.util.List;
+
 /**
  * 竞赛题目信息
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class CompetitionQuestion {
+public class CompetitionQuestion implements DeepCodingQuestion {
     private double Rating;
     private int ID;
     private String Title;
@@ -18,6 +23,7 @@ public class CompetitionQuestion {
     private String fid;
     private String difficulty;
     private String algorithm;
+    private String status;
 
     public void setRating(double Rating) {
         this.Rating = Rating;
@@ -108,5 +114,43 @@ public class CompetitionQuestion {
 
     public void setAlgorithm(String algorithm) {
         this.algorithm = algorithm;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public Question toQuestion(Project project) {
+        List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+        return totalQuestion.get(Integer.parseInt(getFid()) - 1);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("      ");
+
+        if ("AC".equals(getStatus())) {
+            // sb.append("done ");
+            sb.append("✔");
+        } else if ("TRIED".equals(getStatus())) {
+            sb.append("❓");
+        } else {
+            // sb.append("          ");
+            sb.append("   ");
+        }
+        sb.append(" ").append("难度分: ").append((int) getRating()).append("   ");
+        sb.append("[")
+                .append(getFid())
+                .append("]")
+                .append(getTitleZH())
+        ;
+        sb.append("   【").append(getAlgorithm()).append("】");
+        sb.append("   【").append(getContestID_zh()).append("】");
+        return sb.toString();
     }
 }

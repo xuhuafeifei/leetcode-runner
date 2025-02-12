@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.utils;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.actionSystem.DataKey;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.window.StdPanel;
 
@@ -26,7 +27,11 @@ public class DataKeys {
     /**
      * 获取interview 150 panel当前显示的数据
      */
-    public static final DataKey<MyList<Question>> LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST = DataKey.create("LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST ");
+    public static final DataKey<MyList<Question>> LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST = DataKey.create("LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST");
+    /**
+     * 获取LC Competition Panel 当前显示的数据
+     */
+    public static final DataKey<MyList<CompetitionQuestion>> LEETCODE_DEEP_CODING_LC_COMPETITION_QUESTION_LIST = DataKey.create("LEETCODE_DEEP_CODING_LC_COMPETITION_QUESTION_LIST");
     /**
      * 当前状态, 是正常模式还是deep coding模式
      */

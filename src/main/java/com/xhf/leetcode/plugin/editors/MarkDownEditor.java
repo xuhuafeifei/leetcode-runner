@@ -58,9 +58,6 @@ public class MarkDownEditor implements FileEditor {
      */
     private final String serverPath = "http://localhost:" + BuiltInServerManager.getInstance().getPort() + LocalHttpRequestHandler.PREFIX;
     /**
-     * lc存储service于editor之间沟通的数据信息
-     */
-    /**
      * 打开内容的类型
      */
     private final MarkdownContentType contentType;

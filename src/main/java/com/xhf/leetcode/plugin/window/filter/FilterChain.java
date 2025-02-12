@@ -1,7 +1,5 @@
 package com.xhf.leetcode.plugin.window.filter;
 
-import com.xhf.leetcode.plugin.model.Question;
-
 import java.util.List;
 
 /**
@@ -10,6 +8,6 @@ import java.util.List;
  */
 public interface FilterChain<T> {
     void removeFilter(Filter<T, ?> t);
-    FilterChain<Question> addFilter(Filter<T, ?> t);
+    FilterChain<T> addFilter(Filter<T, ?> t);
     List<T> apply(List<T> targets);
 }

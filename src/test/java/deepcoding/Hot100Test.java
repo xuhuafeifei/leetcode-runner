@@ -149,4 +149,6 @@ public class Hot100Test {
         String join = ids.stream().map(String::valueOf).collect(Collectors.joining(","));
         System.out.println(join);
     }
+
+
 }

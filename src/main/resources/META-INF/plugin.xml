@@ -104,7 +104,7 @@
                 text="Reload Reposition" icon="/icons/position.svg">
         </action>
         <action id="leetcode.plugin.DeepCoding" class="com.xhf.leetcode.plugin.actions.DeepCodingAction"
-                text="Change Coding State" icon="AllIcons.Actions.Refresh">
+                text="Change UI" icon="AllIcons.Actions.SwapPanels">
         </action>
 
         <group id="leetcode.plugin.lcActionsToolbar">

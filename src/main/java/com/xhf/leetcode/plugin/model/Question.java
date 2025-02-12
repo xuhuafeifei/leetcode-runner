@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class Question {
+public class Question implements DeepCodingQuestion {
     private String questionId;
     private String frontendQuestionId;
 
@@ -245,6 +245,11 @@ public class Question {
 
     public String getTitleSlug() {
         return titleSlug;
+    }
+
+    @Override
+    public Question toQuestion(Project project) {
+        return this;
     }
 
     public void setTitleSlug(String titleSlug) {

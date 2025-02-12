@@ -7,6 +7,7 @@ import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.ui.tabs.TabInfo;
 import com.intellij.ui.tabs.impl.JBEditorTabs;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -39,7 +40,7 @@ public class DeepCodingPanel extends JPanel {
 
         this.hot100Panel = new Hot100Panel(project);
         this.interview150Panel = new Interview150Panel(project);
-        this.lcCompetitionPanel = new LCCompetitionPanel();
+        this.lcCompetitionPanel = new LCCompetitionPanel(project);
 
         this.hotTab = new TabInfo(hot100Panel);
         hotTab.setText(Hot100Panel.HOT_100_TEXT);
@@ -69,6 +70,10 @@ public class DeepCodingPanel extends JPanel {
 
     public MyList<Question> getInterview150Data() {
         return interview150Panel.getDataList();
+    }
+
+    public MyList<CompetitionQuestion> getLcCompetitionData() {
+        return lcCompetitionPanel.getDataList();
     }
 
     public String getCurrentTab() {

@@ -14,6 +14,7 @@ import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
+import com.xhf.leetcode.plugin.window.deepcoding.filter.DCAlgorithmFilter;
 import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
 import com.xhf.leetcode.plugin.window.filter.QFilterChain;

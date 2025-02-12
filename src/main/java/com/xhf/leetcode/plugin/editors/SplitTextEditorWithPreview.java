@@ -20,9 +20,7 @@ import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
-import com.xhf.leetcode.plugin.model.DeepCodingInfo;
-import com.xhf.leetcode.plugin.model.LeetcodeEditor;
-import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -158,7 +156,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     }
                 });
             case LCCompetitionPanel.LC_COMPETITION:
-                return (new AbstractAction("Leetcode 竞赛", "Leetcode 竞赛", IconLoader.getIcon("/icons/m_contest.png", Hot100Panel.class)) {
+                return (new AbstractAction("Leetcode 竞赛", "Leetcode 竞赛", IconLoader.getIcon("/icons/m_LeetCode_Cup.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
                     }
@@ -223,9 +221,11 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
             nextIdx = (idx - 1 + len) % len;
         }
 
-        MyList<Question> data = getData(dci, project);
-        assert data != null;
-        ListModel<Question> model = data.getModel();
+        var dcqs = getDeepCodingQuestion(idx, nextIdx, dci, project);
+
+        DeepCodingQuestion curQ = dcqs.curQ;
+        DeepCodingQuestion nextQ = dcqs.nextQ;
+        MyList<?> data = dcqs.data;
         // 判断是否匹配
         /*
          之所以需要判断是否匹配, 是因为dci在创建后, 实际显示的数据模型已经被更改
@@ -236,34 +236,67 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
 
          如果dci匹配成功, 则表示dci创建时和点击下一题按钮时的数据模型是一致的, 无需重定位
          */
-        if (! isMatch(model, idx, CodeService.getInstance(project).parseTitleSlugFromVFile(cFile))) {
+        if (! isMatch(curQ, CodeService.getInstance(project).parseTitleSlugFromVFile(cFile))) {
             ConsoleUtils.getInstance(project).showWaringWithoutConsole("当前题目无法与显示数据匹配, 请重定位当前文件", false, true);
             return;
         }
         // 显示下一道
         ViewUtils.scrollToVisibleOfMyList(data, nextIdx, true);
         // 下一道题目的dci
-        Question question = model.getElementAt(nextIdx);
         DeepCodingInfo ndci = new DeepCodingInfo(dci.getPattern(), len, nextIdx);
-        CodeService.getInstance(project).openCodeEditor(question, ndci);
+        CodeService.getInstance(project).openCodeEditor(nextQ.toQuestion(project), ndci);
         // 打开对应的界面
         LCEventBus.getInstance().post(new DeepCodingTabChooseEvent(dci.getPattern()));
     }
 
+    static class DeepCodingQuestions {
+        DeepCodingQuestion curQ;
+        DeepCodingQuestion nextQ;
+        MyList<?> data;
+    }
+
+    private DeepCodingQuestions getDeepCodingQuestion(int idx, int nextIdx, DeepCodingInfo dci, Project project) {
+        MyList<Question> data = getData(dci, project);
+        DeepCodingQuestions dcqs = new DeepCodingQuestions();
+        if (data != null) {
+            ListModel<Question> model = data.getModel();
+            if (idx < model.getSize()) {
+                dcqs.curQ = model.getElementAt(idx);
+            }
+            if (nextIdx < model.getSize()) {
+                dcqs.nextQ = model.getElementAt(nextIdx);
+            }
+            dcqs.data = data;
+            return dcqs;
+        } else  {
+            // 获取LC-Competition Question
+            var cq = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_DEEP_CODING_LC_COMPETITION_QUESTION_LIST);
+            if (cq == null) {
+                throw new RuntimeException("data is null!");
+            }
+            ListModel<CompetitionQuestion> model = cq.getModel();
+            if (idx < model.getSize()) {
+                dcqs.curQ = model.getElementAt(idx);
+            }
+            if (nextIdx < model.getSize()) {
+                dcqs.nextQ = model.getElementAt(nextIdx);
+            }
+            dcqs.data = cq;
+            return dcqs;
+        }
+    }
+
     /**
      * 判断当前idx指向题目的titleSlug是否能和传入的titleSlug匹配
-     * @param model model
-     * @param idx idx
      * @param titleSlug titleSlug
      * @return boolean
      */
-    private boolean isMatch(ListModel<Question> model, int idx, String titleSlug) {
+    private boolean isMatch(DeepCodingQuestion curQ, String titleSlug) {
         // 判断titleSlug是否匹配
-        if (idx > model.getSize() - 1) {
+        if (curQ == null) {
             return false;
         }
-        Question question = model.getElementAt(idx);
-        return question.getTitleSlug().equals(titleSlug);
+        return curQ.getTitleSlug().equals(titleSlug);
     }
 
     /**

@@ -69,6 +69,8 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
             return deepCodingPanel.getHot100Data();
         } else if (DataKeys.LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST.is(dataId)) {
             return deepCodingPanel.getInterview150Data();
+        } else if (DataKeys.LEETCODE_DEEP_CODING_LC_COMPETITION_QUESTION_LIST.is(dataId)) {
+            return deepCodingPanel.getLcCompetitionData();
         } else if (DataKeys.LEETCODE_CODING_STATE.is(dataId)) {
             return state;
         } else if (DataKeys.LEETCODE_CHOOSEN_TAB_NAME.is(dataId)) {

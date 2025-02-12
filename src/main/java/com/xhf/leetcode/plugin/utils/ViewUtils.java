@@ -16,6 +16,7 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.DeepCodingInfo;
+import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
@@ -218,7 +219,7 @@ public class ViewUtils {
      * @param myList myList
      * @param i idx
      */
-    public static void scrollToVisibleOfMyList(MyList<Question> myList, int i) {
+    public static void scrollToVisibleOfMyList(MyList<?> myList, int i) {
         // 选择匹配到的题目
         myList.setSelectedIndex(i);
         // 滚动到选中的题目位置
@@ -233,7 +234,7 @@ public class ViewUtils {
      * @param myList myList
      * @param i idx
      */
-    public static void scrollToVisibleOfMyList(MyList<Question> myList, int i, boolean asyn) {
+    public static void scrollToVisibleOfMyList(MyList<?> myList, int i, boolean asyn) {
         if (asyn) {
             ApplicationManager.getApplication().invokeLater(() -> {
                 scrollToVisibleOfMyList(myList, i);
@@ -251,33 +252,33 @@ public class ViewUtils {
      * @param project
      * @param pattern
      */
-    public static void rePositionInDeepCoding(RePositionEvent event, MyList<Question> questionList, Project project, String pattern) {
+    public static void rePositionInDeepCoding(RePositionEvent event, MyList<? extends DeepCodingQuestion> questionList, Project project, String pattern) {
         String fid = event.getFrontendQuestionId();
         String titleSlug = event.getTitleSlug();
-        ListModel<Question> model = questionList.getModel();
+        ListModel<?> model = questionList.getModel();
         int size = model.getSize();
         // 遍历, 匹配fid
         try {
             int i = Integer.parseInt(fid) - 1;
-            Question question = model.getElementAt(i);
+            DeepCodingQuestion question = (DeepCodingQuestion) model.getElementAt(i);
             // double check
             if (question.getTitleSlug().equals(titleSlug)) {
                 JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
                 ViewUtils.scrollToVisibleOfMyList(questionList, i);
                 // 重新打开文件
                 DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, i);
-                CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType(), hot1001);
+                CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
                 return;
             } else {
                 // for循环遍历model查找
                 for (int j = 0; j < size; j++) {
-                    question = model.getElementAt(j);
+                    question = (DeepCodingQuestion) model.getElementAt(j);
                     if (question.getTitleSlug().equals(titleSlug)) {
                         JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
                         ViewUtils.scrollToVisibleOfMyList(questionList, j);
                         // 重新打开文件
                         DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, j);
-                        CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType(), hot1001);
+                        CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
                         return;
                     }
                 }

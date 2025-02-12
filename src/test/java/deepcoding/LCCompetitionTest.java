@@ -13,6 +13,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -84,5 +86,20 @@ public class LCCompetitionTest {
             competitionQuestion.setAlgorithm(question.getTopicTags().stream().map(TopicTag::getNameTranslated).collect(Collectors.joining(",")));
         }
         FileUtils.createAndWriteFile("E:\\java_code\\leetcode-runner\\src\\test\\java\\deepcoding\\dataProcessed.json", GsonUtils.toJsonStr(list));
+    }
+
+    @Test
+    public void test2() {
+        // 读取a.json
+        String s = FileUtils.readContentFromFile("E:\\java_code\\leetcode-runner\\src\\test\\java\\deepcoding\\data.json");
+        List<CompetitionQuestion> list = GsonUtils.fromJsonToList(s, CompetitionQuestion.class);
+
+        Set<String> set = new TreeSet<>();
+        for (CompetitionQuestion c : list) {
+            set.add(c.getContestID_zh());
+        }
+        for (String se : set) {
+            System.out.println("map.addPair(" + "\"" + se + "\"" + ", " + "\"" + se + "\"" + ");");
+        }
     }
 }

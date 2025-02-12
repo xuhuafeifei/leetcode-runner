@@ -14,6 +14,7 @@ import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
+import com.xhf.leetcode.plugin.window.deepcoding.filter.DCAlgorithmFilter;
 import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
 import com.xhf.leetcode.plugin.window.filter.QFilterChain;
@@ -195,7 +196,6 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
             return;
         }
         String tabName = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CHOOSEN_TAB_NAME);
-        // 当前选中的不是hot 100
         if (!INTERVIEW_150_TEXT.equals(tabName)) {
             return;
         }
