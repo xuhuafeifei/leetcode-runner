@@ -151,7 +151,6 @@ public class CPPDebugger extends AbstractDebugger {
     }
 
     private void uiBreakpointInit() {
-        // todo: 没测试, 而且懒得测试. idea不支持cpp, CLion才支持, 不想近一步测试, 就这吧. 反正cmd模式跑得通
         // 获取所有断点
         List<XBreakpoint<?>> allBreakpoint = DebugUtils.getAllBreakpoint(project);
         for (XBreakpoint<?> breakpoint : allBreakpoint) {

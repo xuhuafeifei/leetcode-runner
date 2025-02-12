@@ -28,6 +28,7 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.utils.HotKeyUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 /**
  * @author feigebuge
@@ -72,6 +74,10 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
      * 在debug过程中, 存储变量的面板, 同时提供表达式计算的输入功能
      */
     private final VariablePanel variablePanel;
+    /**
+     * 命令行历史记录, 用于实现命令行历史记录功能
+     */
+    private HistoryCommand historyCommand;
 
     public LCConsolePanel(ToolWindow toolWindow, Project project) {
         super(Boolean.FALSE, Boolean.TRUE);
@@ -128,6 +134,25 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
 
         commandPanel.add(label, BorderLayout.NORTH);
         commandPanel.add(inputField, BorderLayout.CENTER);
+        // 绑定热键
+        AbstractAction up = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                inputField.setText(historyCommand.moveUp());
+            }
+        };
+        HotKeyUtils.bindKey(inputField, KeyEvent.VK_UP, "moveUp", up);  // 上移
+        HotKeyUtils.bindKey(inputField, KeyEvent.VK_KP_UP, "moveUp", up);  // 上移
+
+        AbstractAction down = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                inputField.setText(historyCommand.moveDown());
+            }
+        };
+        HotKeyUtils.bindKey(inputField, KeyEvent.VK_DOWN, "moveDown", down);  // 下移
+        HotKeyUtils.bindKey(inputField, KeyEvent.VK_KP_DOWN, "moveDown", down);  // 下移
+
 
         // 使用 JSplitPane 创建分割面板
         jbSplitter = new JBSplitter();
@@ -178,6 +203,9 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         }
         // 清空输入框
         inputField.setText("");
+        if (historyCommand != null) {
+            historyCommand.add(debugCommand);
+        }
     }
 
     @Override
@@ -198,6 +226,63 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         }
     }
 
+    /**
+     * 命令行历史记录
+     */
+    static class HistoryCommand {
+        static class History {
+            String cmd;
+            History pre;
+            History next;
+
+            public History(String cmd) {
+                this.cmd = cmd;
+            }
+
+            public History(String cmd, History pre, History next) {
+                this.cmd = cmd;
+                this.pre = pre;
+                this.next = next;
+            }
+
+            public History() {
+            }
+        }
+
+        History dummyHead = new History();
+        History point = dummyHead;
+
+        /**
+         * 新添加的记录永远是最后一个
+         * @param cmd cmd
+         */
+        public void add(String cmd) {
+            point.next = new History(cmd, point, null);
+            point = point.next;
+        }
+
+        public String moveUp() {
+            if (point.pre == dummyHead) {
+                return point.cmd;
+            }
+            if (point == dummyHead) {
+                return point.cmd;
+            }
+            String res = point.cmd;
+            point = point.pre;
+            return res;
+        }
+
+        public String moveDown() {
+            if (point.next == null) {
+                return point.cmd;
+            }
+            String res = point.next.cmd;
+            point = point.next;
+            return res;
+        }
+    }
+
     @Subscribe
     public void DebugStartEventListener(DebugStartEvent event) {
         LogUtils.simpleDebug("open command line...");
@@ -207,6 +292,8 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         ApplicationManager.getApplication().invokeLater(() -> {
             if (instance.isCommandReader()) {
                 openSecond();
+                // 初始化命令行记录器
+                historyCommand = new HistoryCommand();
             }
             if (instance.isUIOutput()) {
                 tabs.select(variablesTab, true);
@@ -224,5 +311,9 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         MyList<String> variableList = variablePanel.getVariables();
         variableList.setNonData();
         variableList.setEmptyText("Debug finish...");
+        // gc
+        if (historyCommand != null) {
+            historyCommand = null;
+        }
     }
 }
