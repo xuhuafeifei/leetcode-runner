@@ -141,7 +141,6 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
         return new AbstractAction("Next", "Next question", AllIcons.Chooser.Right) {
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
-
                 try {
                     // 获取当前打开的文件
                     VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
@@ -158,6 +157,8 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     assert data != null;
                     ListModel<Question> model = data.getModel();
                     Question question = model.getElementAt(nextIdx);
+                    // 显示下一道
+                    ViewUtils.scrollToVisibleOfMyList(data, nextIdx, true);
                     // 下一道题目的dci
                     DeepCodingInfo ndci = new DeepCodingInfo(dci.getPattern(), len, nextIdx);
                     CodeService.getInstance(project).openCodeEditor(question, ndci);
@@ -189,6 +190,8 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     assert data != null;
                     ListModel<Question> model = data.getModel();
                     Question question = model.getElementAt(preIdx);
+                    // 显示上一道题
+                    ViewUtils.scrollToVisibleOfMyList(data, preIdx, true);
                     // 下一道题目的dci
                     DeepCodingInfo ndci = new DeepCodingInfo(dci.getPattern(), len, preIdx);
                     CodeService.getInstance(project).openCodeEditor(question, ndci);

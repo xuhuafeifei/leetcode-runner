@@ -17,6 +17,7 @@ import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.ArrayUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import com.xhf.leetcode.plugin.window.filter.Filter;
@@ -284,13 +285,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
                     question.getTitleSlug().equals(titleSlug)
             ) {
                 JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
-                // 选择匹配到的题目
-                questionList.setSelectedIndex(i);
-                // 滚动到选中的题目位置
-                Rectangle cellRect = questionList.getCellBounds(i, i);
-                if (cellRect != null) {
-                    questionList.scrollRectToVisible(cellRect);
-                }
+                ViewUtils.scrollToVisibleOfMyList(questionList, i);
                 // 重新打开文件
                 DeepCodingInfo hot1001 = new DeepCodingInfo(HOT100, size, i);
                 CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType(), hot1001);

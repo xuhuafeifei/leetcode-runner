@@ -9,14 +9,17 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
+import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -207,4 +210,33 @@ public class ViewUtils {
         return document.getText();
     }
 
+    /**
+     * 选择并显示myList第i个元素
+     * @param myList myList
+     * @param i idx
+     */
+    public static void scrollToVisibleOfMyList(MyList<Question> myList, int i) {
+        // 选择匹配到的题目
+        myList.setSelectedIndex(i);
+        // 滚动到选中的题目位置
+        Rectangle cellRect = myList.getCellBounds(i, i);
+        if (cellRect != null) {
+            myList.scrollRectToVisible(cellRect);
+        }
+    }
+
+    /**
+     * 选择并显示myList第i个元素
+     * @param myList myList
+     * @param i idx
+     */
+    public static void scrollToVisibleOfMyList(MyList<Question> myList, int i, boolean asyn) {
+        if (asyn) {
+            ApplicationManager.getApplication().invokeLater(() -> {
+                scrollToVisibleOfMyList(myList, i);
+            });
+        } else {
+            scrollToVisibleOfMyList(myList, i);
+        }
+    }
 }
