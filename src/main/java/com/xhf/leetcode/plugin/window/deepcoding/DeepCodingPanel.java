@@ -43,7 +43,6 @@ public class DeepCodingPanel extends JPanel {
     private final TabInfo lcCompeTab;
 
     public DeepCodingPanel(Project project, @NotNull Disposable parentDisposable) {
-
         // 创建选项卡 (基于 JBEditorTabs)
         this.tabs = new JBEditorTabs(project, IdeFocusManager.getInstance(project), parentDisposable);
         this.tabs.setBorder(Constants.BORDER);
