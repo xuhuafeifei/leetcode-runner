@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.editors;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.impl.EditorImpl;
@@ -176,7 +175,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
      * @return AnAction
      */
     private AnAction createNextAction() {
-        return new AbstractAction("Next", "Next question", AllIcons.Chooser.Right) {
+        return new AbstractAction("Next", "Next question", IconLoader.getIcon("/icons/right.svg", SplitTextEditorWithPreview.class)) {
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
                 try {
@@ -304,7 +303,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
      * @return AnAction
      */
     private AnAction createPreAction() {
-        return new AbstractAction("Pre", "Pre question", AllIcons.Chooser.Left) {
+        return new AbstractAction("Pre", "Pre question", IconLoader.getIcon("/icons/left.svg", SplitTextEditorWithPreview.class)) {
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
                 try {

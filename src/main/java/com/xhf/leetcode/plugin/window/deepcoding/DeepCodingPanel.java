@@ -54,17 +54,17 @@ public class DeepCodingPanel extends JPanel {
 
         this.hotTab = new TabInfo(hot100Panel);
         hotTab.setText(Hot100Panel.HOT_100_TEXT);
-        hotTab.setIcon(IconLoader.getIcon("/icons/m_hot100.png", this.getClass().getClassLoader()));
+        hotTab.setIcon(IconLoader.getIcon("/icons/m_hot100.png", DeepCodingPanel.class));
         tabs.addTab(hotTab);
 
         this.interviewTab = new TabInfo(interview150Panel);
         interviewTab.setText(Interview150Panel.INTERVIEW_150_TEXT);
-        interviewTab.setIcon(IconLoader.getIcon("/icons/m_mianshi150.png", this.getClass().getClassLoader()));
+        interviewTab.setIcon(IconLoader.getIcon("/icons/m_mianshi150.png", DeepCodingPanel.class));
         tabs.addTab(interviewTab);
 
         this.lcCompeTab = new TabInfo(lcCompetitionPanel);
         lcCompeTab.setText(LCCompetitionPanel.LC_COMPETITION_TEXT);
-        lcCompeTab.setIcon(IconLoader.getIcon("/icons/m_LeetCode_Cup.png", this.getClass().getClassLoader()));
+        lcCompeTab.setIcon(IconLoader.getIcon("/icons/m_LeetCode_Cup.png", DeepCodingPanel.class));
         tabs.addTab(lcCompeTab);
 
         add(tabs);
