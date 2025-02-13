@@ -8,7 +8,11 @@ public enum MarkdownContentType {
     /**
      * 题目
      */
-    QUESTION("QUESTION");
+    QUESTION("QUESTION"),
+    /**
+     * 0x3f, 灵神题单
+     */
+    _0x3f("_0x3f");
 
     MarkdownContentType(String type) {
         this.type = type;

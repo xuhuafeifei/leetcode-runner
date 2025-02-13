@@ -30,10 +30,12 @@ public interface Constants {
     String TRANSLATED_TITLE = "TRANSLATED_TITLE";
     String DIFFICULTY = "DIFFICULTY";
     String TITLE_SLUG = "TITLE_SLUG";
+    String VFILE = "VFILE";
     String TOPIC_ID = "TOPIC_ID";
     String SOLUTION_SLUG = "SOLUTION_SLUG";
     String SUBMISSION_ID = "SUBMISSION_ID";
     String QUESTION_CONTENT = "QUESTION_CONTENT";
+    String ARTICLE_URL = "ARTICLE_URL";
 
     Border BORDER = JBUI.Borders.customLine(JBColor.border(), 1);
     String LOCAL_VARIABLE = "Local variable";
@@ -72,4 +74,5 @@ public interface Constants {
      * PythonDebugger用于在UI读取指令状态下, 通知python server终止断点初始化的operation
      */
     String OPT_PYTHON_INIT_BREAKPOINT_DONE = "PYTHON_INIT_BREAKPOINT_DONE";
+    String OPEN_ON_WBE = "[open_on_web]";
 }

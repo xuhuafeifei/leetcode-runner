@@ -1,20 +1,27 @@
 package com.xhf.leetcode.plugin.editors;
 
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorLocation;
-import com.intellij.openapi.fileEditor.FileEditorState;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
+import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
+import com.xhf.leetcode.plugin.model.Article;
+import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cef.CefClient;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.handler.CefLifeSpanHandlerAdapter;
@@ -24,9 +31,12 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.ide.BuiltInServerManager;
 
 import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -62,6 +72,8 @@ public class MarkDownEditor implements FileEditor {
      */
     private final MarkdownContentType contentType;
     private final Map<String, Object> content;
+    private final VirtualFile vFile;
+    private static boolean add = false;
 
     /**
      * 不得不夸赞自己的机智, 幸好之前重构预留了足够多的内容, 不然适配deep coding就只能硬编码了
@@ -74,26 +86,135 @@ public class MarkDownEditor implements FileEditor {
         this.myComponent = JBUI.Panels.simplePanel();
         this.jcefHtmlPanel = new JCEFHtmlPanel("url");
 
-        // 自定义链接点击处理器
-        jcefHtmlPanel.getCefBrowser().getClient().addLifeSpanHandler(new CefLifeSpanHandlerAdapter() {
-            @Override
-            public boolean onBeforePopup(CefBrowser browser, CefFrame frame, String target_url, String target_frame_name) {
-                // 通过默认浏览器打开链接
-                try {
-                    java.awt.Desktop.getDesktop().browse(java.net.URI.create(target_url));
-                } catch (IOException e) {
-                    LogUtils.error(e);
-                }
-                return true;
-            }
-        });
-
         this.contentType = contentType;
         this.content = content;
+        this.vFile = (VirtualFile) content.get(Constants.VFILE);
+
+        // 自定义链接点击处理器
+        // 适配deep coding 的 LC Competition功能
+        // md, client全局唯一. 所以adapter只能添加一次
+        CefClient client = jcefHtmlPanel.getCefBrowser().getClient();
+        if (! add) {
+            client.addLifeSpanHandler(createAdapter());
+            add = true;
+        }
 
         this.jcefHtmlPanel.loadHTML(loadHTMLContent());
 
         this.myComponent.addToCenter(jcefHtmlPanel.getComponent());
+    }
+
+    /**
+     * 根据不同的markdown打开类型创建不同的适配器
+     * 适配器拦截了点击事件, 并且根据点击的url类型, 进行不同的处理, 比如打开浏览器或通过LC-Runner预览
+     * @return adp
+     */
+    private CefLifeSpanHandlerAdapter createAdapter() {
+        CefLifeSpanHandlerAdapter adp;
+        adp = new CefLifeSpanHandlerAdapter() {
+            final int article = 0;
+            final int question = 1;
+            final int other = 2;
+
+            class Info {
+                int type;
+                String value;
+            }
+
+            private Info getType(String url) {
+                if (url.endsWith("/")) {
+                    url = url.substring(0, url.length() - 1);
+                }
+                String[] split = url.split("/");
+                Info info = new Info();
+                if (url.contains("circle/discuss")) {
+                    info.type = article;
+                    info.value = split[split.length - 1]; // uuid
+                } else if (url.contains("problems")) {
+                    // 找到problems字段, 他的下一个内容为titleSlug
+                    for (int i = 0; i < split.length; i++) {
+                        if ("problems".equals(split[i])) {
+                            info.type = question;
+                            if (i + 1 < split.length) {
+                                // 判断后续内容是否存在solutions, 如果是, 则说明是题解, 跳转到web界面
+                                for (int j = i + 2; j < split.length; j++) {
+                                    if ("solutions".equals(split[j])) {
+                                        info.type = other;
+                                        return info;
+                                    }
+                                }
+                                info.value = split[i + 1];
+                            } else {
+                                info.value = "NULL";
+                            }
+                        }
+                    }
+                } else {
+                    info.type = 2;
+                }
+                return info;
+            }
+
+            @Override
+            public boolean onBeforePopup(CefBrowser browser, CefFrame frame, String target_url, String target_frame_name) {
+                if (target_url.endsWith(Constants.OPEN_ON_WBE)) {
+                    String replace = target_url.replace(Constants.OPEN_ON_WBE, "");
+                    openInDesktopBrowser(replace);
+                    return true;
+                }
+                // 判断类型
+                Info info = getType(target_url);
+                switch (info.type) {
+                    case article:
+                        openArticle(target_url);
+                        break;
+                    case question:
+                        openQuestion(info, target_url);
+                        break;
+                    case other:
+                        openInDesktopBrowser(target_url);
+                        break;
+                }
+                return true;
+            }
+
+            private void openQuestion(Info info, String targetUrl) {
+                String titleSlug = info.value;
+                if (titleSlug.equals("NULL")) {
+                    openInDesktopBrowser(targetUrl);
+                } else {
+                    // 通过LC-Runner打开题目
+                    var q = QuestionService.getInstance().getQuestionByTitleSlug(titleSlug, project);
+                    if (q != null) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            CodeService.getInstance(project).openCodeEditor(q);
+                        });
+                    } else {
+                        openInDesktopBrowser(targetUrl);
+                    }
+                }
+            }
+
+            /**
+             * 打开文章
+             */
+            private void openArticle(String targetUrl) {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    LightVirtualFile file = new LightVirtualFile("[0x3f]-article", targetUrl);
+                    OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+                    FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+                });
+            }
+
+            private void openInDesktopBrowser(String url) {
+                try {
+                    Desktop.getDesktop().browse(URI.create(url));
+                } catch (IOException e) {
+                    LogUtils.error(e);
+                }
+            }
+        };
+        return adp;
     }
 
     private String loadHTMLContent() {
@@ -122,16 +243,27 @@ public class MarkDownEditor implements FileEditor {
                             .replace("{{content}}", MapUtils.getString(content, Constants.SOLUTION_CONTENT))
                     ;
                     break;
+                case _0x3f:
+                    String articleUrl = MapUtils.getString(content, Constants.ARTICLE_URL);
+                    Article article = LeetcodeClient.getInstance(project).queryArticle(articleUrl);
+                    articleUrl = "> [灵神原文的链接](" + articleUrl + Constants.OPEN_ON_WBE + ")\n";
+
+                    html = html.replace("{{title}}", article.getTitle())
+                            .replace("{{tag}}", "")
+                            .replace("{{webUrl}}", articleUrl)
+                            .replace("{{content}}", article.getContent())
+                    ;
+                    break;
                 default:
 
             }
             // handle html
             return html;
         } catch (Exception e) {
-            LogUtils.warn("load Markdown content!!\n" + "content = " + GsonUtils.toJsonStr(content) + "\n\r" +
+            LogUtils.warn("load Markdown content error!!\n" + "content = " + GsonUtils.toJsonStr(content) + "\n\r" +
                     "contentType = " + contentType.toString() + "\n\r" + "serverPath = " + serverPath);
             LogUtils.error("Failed to load Markdown content", e);
-            ConsoleUtils.getInstance(project).showWaring("Failed to load Markdown content");
+            ConsoleUtils.getInstance(project).showError("Failed to load Markdown content\n" + DebugUtils.getStackTraceAsString(e), false, true);
             return "Failed to load Markdown content !!";
         }
     }
@@ -163,8 +295,7 @@ public class MarkDownEditor implements FileEditor {
             LogUtils.warn("question web url failed!!\n\r" + "titleSlug = " + titleSlug);
             return "";
         }
-        String html = "<a rel=\"stylesheet\" href=\"" + LeetcodeApiUtils.getQuestionUrl(titleSlug) + "\">在浏览器上访问</a><p>";
-        return html;
+        return "<a rel=\"stylesheet\" href=\"" + LeetcodeApiUtils.getQuestionUrl(titleSlug) + Constants.OPEN_ON_WBE + "\">在浏览器上访问</a><p>";
     }
 
     /**
@@ -191,8 +322,7 @@ public class MarkDownEditor implements FileEditor {
         }
 
 //        String html = "<a rel=\"stylesheet\" href=\"" + LeetcodeApiUtils.getSolutionUrl(titleSlug, topicId, solutionSlug) + "\">在浏览器上访问</a><p>";
-        String markdown = "> [在浏览器上访问](" + LeetcodeApiUtils.getSolutionUrl(titleSlug, topicId, solutionSlug)+ ")";
-        return markdown;
+        return "> [在浏览器上访问](" + LeetcodeApiUtils.getSolutionUrl(titleSlug, topicId, solutionSlug) + Constants.OPEN_ON_WBE + ")";
     }
 
     public String getTag(String difficulty) {
@@ -280,12 +410,14 @@ public class MarkDownEditor implements FileEditor {
 
     @Override
     public <T> @Nullable T getUserData(@NotNull Key<T> key) {
-        return null;
+        return (T) map.get(key);
     }
+
+    private final Map<Key<?>, Object> map = new HashMap<>();
 
     @Override
     public <T> void putUserData(@NotNull Key<T> key, @Nullable T value) {
-
+        map.put(key, value);
     }
 
     /**
@@ -295,5 +427,10 @@ public class MarkDownEditor implements FileEditor {
     @Override
     public @Nullable FileEditorLocation getCurrentLocation() {
         return null;
+    }
+
+    @Override
+    public VirtualFile getFile() {
+        return vFile;
     }
 }

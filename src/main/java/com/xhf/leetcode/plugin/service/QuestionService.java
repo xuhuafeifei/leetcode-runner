@@ -260,4 +260,15 @@ public class QuestionService {
             }
         });
     }
+
+    public Question getQuestionByTitleSlug(String titleSlug, Project project) {
+        List<Question> totalQuestion = getTotalQuestion(project);
+        for (Question question : totalQuestion) {
+            // 比较两个字符串是否相等的函数
+            if (StringUtils.equals(question.getTitleSlug(), titleSlug)) {
+                return question;
+            }
+        }
+        return null;
+    }
 }

@@ -1,12 +1,18 @@
 package com.xhf.leetcode.plugin.window.deepcoding;
 
 import com.google.common.eventbus.Subscribe;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComboBox;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.listener.AbstractMouseAdapter;
 import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.model.DeepCodingInfo;
@@ -16,6 +22,7 @@ import com.xhf.leetcode.plugin.search.engine.CompetitionQuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -27,10 +34,13 @@ import com.xhf.leetcode.plugin.window.deepcoding.filter.CQFilterChain;
 import com.xhf.leetcode.plugin.window.deepcoding.filter.CQRateFilter;
 import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,6 +101,77 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
         });
 
         searchBar.add(editorPane);
+    }
+
+    @Override
+    protected void addToConditionGroup(JPanel conditionGroup) {
+        JLabel label = new JLabel("灵神题单");
+        label.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+
+        var convert = getMapOptionConverter();
+
+        var conditionComb = new ComboBox<>(convert.getOptions());
+        conditionComb.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+        conditionComb.setSelectedIndex(-1); // 没有选择项时，显示默认文本
+
+        conditionComb.addActionListener(new ActionListener() {
+            private String previousSelection = "";
+            private final String filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getFilePath()).append("0x3f").build();
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selectedItem = (String) conditionComb.getSelectedItem();
+
+                // 判断当前选择的项是否与之前的选择项相同
+                if (selectedItem == null || selectedItem.equals(previousSelection)) {
+                    // 如果选择的是之前的项，清空选择
+                    conditionComb.setSelectedIndex(-1);
+                    // 清除记录的选中项
+                    previousSelection = null;
+                } else {
+                    // 否则，更新选中的项
+                    previousSelection = selectedItem;
+//                    // 触发创建题解事件
+//                    String fileName = new FileUtils.PathBuilder(filePath).append("[0x3f]-" + selectedItem).build();
+//                    try {
+//                        FileUtils.createAndWriteFile(fileName, convert.doConvert(selectedItem));
+//                    } catch (IOException ex) {
+//                        LogUtils.error(ex);
+//                        ConsoleUtils.getInstance(project).showError("灵神题单创建错误! 错误原因 = " + ex.getMessage(), false, true);
+//                    }
+
+                    ApplicationManager.getApplication().invokeAndWait(() -> {
+                        LightVirtualFile file = new LightVirtualFile("[0x3f]-" + selectedItem, convert.doConvert(selectedItem));
+                        OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+                        FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+                    });
+                }
+            }
+        });
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+        jPanel.add(label);
+        jPanel.add(conditionComb);
+
+        conditionGroup.add(jPanel);
+    }
+
+    @NotNull
+    private static MySearchConditionPanel.MapOptionConverter getMapOptionConverter() {
+        var convert = new MySearchConditionPanel.MapOptionConverter(11);
+        convert.addPair("滑动窗口", "https://leetcode.cn/circle/discuss/0viNMK");
+        convert.addPair("二分查找", "https://leetcode.cn/circle/discuss/SqopEo");
+        convert.addPair("单调栈", "https://leetcode.cn/circle/discuss/9oZFK9");
+        convert.addPair("网格图", "https://leetcode.cn/circle/discuss/YiXPXW");
+        convert.addPair("位运算", "https://leetcode.cn/circle/discuss/dHn9Vk");
+        convert.addPair("图论算法", "https://leetcode.cn/circle/discuss/01LUak");
+        convert.addPair("动态规划", "https://leetcode.cn/circle/discuss/tXLS3i");
+        convert.addPair("数据结构", "https://leetcode.cn/circle/discuss/mOr1u6");
+        convert.addPair("数学", "https://leetcode.cn/circle/discuss/IYT3ss");
+        convert.addPair("贪心", "https://leetcode.cn/circle/discuss/g6KTKL");
+        convert.addPair("树和二叉树", "https://leetcode.cn/circle/discuss/K0n2gO");
+        convert.addPair("字符串", "https://leetcode.cn/circle/discuss/SJFwQI");
+        return convert;
     }
 
     /**

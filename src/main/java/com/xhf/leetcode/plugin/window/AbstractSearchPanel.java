@@ -102,6 +102,8 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
 
         List<MySearchConditionPanel<T>> searchCondition = getSearchCondition();
 
+        addToConditionGroup(conditionGroup);
+
         for (MySearchConditionPanel<T> mySearchConditionPanel : searchCondition) {
             doAfterInitCond(mySearchConditionPanel);
         }
@@ -113,6 +115,14 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
         searchBar.add(scrollPane);
+    }
+
+    /**
+     * 为LC-Competition Panel开的后门
+     * @param conditionGroup JPanel
+     */
+    protected void addToConditionGroup(JPanel conditionGroup) {
+
     }
 
     protected abstract List<MySearchConditionPanel<T>> getSearchCondition();

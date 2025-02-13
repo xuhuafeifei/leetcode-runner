@@ -61,6 +61,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- editors -->
         <fileEditorProvider implementation="com.xhf.leetcode.plugin.editors.SplitTextEditorProvider"/>
+        <fileEditorProvider implementation="com.xhf.leetcode.plugin.editors.MarkdownTextEditorProvider"/>
 
         <!-- setting -->
         <applicationConfigurable parentId="tools" instance="com.xhf.leetcode.plugin.setting.AppSettingsConfigurable"

@@ -86,6 +86,7 @@ public class SolutionEditor extends AbstractSplitTextEditor {
             secondComponent.addToTop(createToolbarWrapper(jTextPane));
         }else {
             // 显示solution
+            content.put(Constants.VFILE, file);
             MarkDownEditor markDownEditor = new MarkDownEditor(project, content, MarkdownContentType.SOLUTION);
             secondComponent = JBUI.Panels.simplePanel(markDownEditor.getComponent());
             secondComponent.addToTop(createToolbarWrapper(markDownEditor.getComponent()));

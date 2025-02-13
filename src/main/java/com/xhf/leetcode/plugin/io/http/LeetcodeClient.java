@@ -665,4 +665,27 @@ public class LeetcodeClient {
         ql = totalQuestion;
         asyncPersistQuestionCache();
     }
+
+    public Article queryArticle(String articleUrl) {
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.ARTICLE_CONTENT_QUERY);
+        String[] urls = articleUrl.split("/");
+        String uuid = urls[urls.length - 1];
+        body.addVariable("uuid", uuid);
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+
+        String resp = httpResponse.getBody();
+        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+        JsonElement jsonElement = jsonObject.get("data").getAsJsonObject().get("qaQuestion");
+
+        return GsonUtils.fromJson(jsonElement, Article.class);
+    }
 }
