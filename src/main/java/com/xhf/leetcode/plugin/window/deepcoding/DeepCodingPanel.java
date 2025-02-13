@@ -22,17 +22,27 @@ import javax.swing.*;
  * @email 2508020102@qq.com
  */
 public class DeepCodingPanel extends JPanel {
-    private final Project project;
+    /**
+     * 承载不同tab的容器
+     */
     private final JBEditorTabs tabs;
+    /**
+     * leetcode 热题 100道
+     */
     private final Hot100Panel hot100Panel;
+    /**
+     * leetcode 经典面试 150道
+     */
     private final Interview150Panel interview150Panel;
+    /**
+     * leetcode 竞赛题目
+     */
     private final LCCompetitionPanel lcCompetitionPanel;
     private final TabInfo hotTab;
     private final TabInfo interviewTab;
     private final TabInfo lcCompeTab;
 
     public DeepCodingPanel(Project project, @NotNull Disposable parentDisposable) {
-        this.project = project;
 
         // 创建选项卡 (基于 JBEditorTabs)
         this.tabs = new JBEditorTabs(project, IdeFocusManager.getInstance(project), parentDisposable);
@@ -76,6 +86,9 @@ public class DeepCodingPanel extends JPanel {
         return lcCompetitionPanel.getDataList();
     }
 
+    /**
+     * 获取当前正在显示tab的显示名称
+     */
     public String getCurrentTab() {
         TabInfo selectedInfo = tabs.getSelectedInfo();
         if (selectedInfo == null) {
@@ -84,6 +97,9 @@ public class DeepCodingPanel extends JPanel {
         return selectedInfo.getText();
     }
 
+    /**
+     * 根据tab名称设置显示的tab
+     */
     public void setTab(String tabName) {
         switch (tabName) {
             case Hot100Panel.HOT100:

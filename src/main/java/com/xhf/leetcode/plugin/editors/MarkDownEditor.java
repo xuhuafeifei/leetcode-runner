@@ -63,6 +63,12 @@ public class MarkDownEditor implements FileEditor {
     private final MarkdownContentType contentType;
     private final Map<String, Object> content;
 
+    /**
+     * 不得不夸赞自己的机智, 幸好之前重构预留了足够多的内容, 不然适配deep coding就只能硬编码了
+     * @param project project
+     * @param content map
+     * @param contentType 类型
+     */
     public MarkDownEditor(@NotNull Project project, Map<String, Object> content, @NotNull MarkdownContentType contentType) {
         this.project = project;
         this.myComponent = JBUI.Panels.simplePanel();

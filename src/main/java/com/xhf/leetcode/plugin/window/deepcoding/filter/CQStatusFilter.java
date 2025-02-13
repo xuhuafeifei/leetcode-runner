@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 状态过滤器, 按照问题状态过滤题目
+ * CompetitionQuestion: 状态过滤器, 按照问题状态过滤题目
  *
  * @author feigebuge
  * @email 2508020102@qq.com

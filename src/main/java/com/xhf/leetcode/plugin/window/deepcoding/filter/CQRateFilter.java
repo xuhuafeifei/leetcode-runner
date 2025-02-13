@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 竞赛分数过滤器
+ * CompetitionQuestion: 竞赛分数过滤器
  *
  * @author feigebuge
  * @email 2508020102@qq.com

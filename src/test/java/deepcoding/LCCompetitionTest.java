@@ -102,4 +102,30 @@ public class LCCompetitionTest {
             System.out.println("map.addPair(" + "\"" + se + "\"" + ", " + "\"" + se + "\"" + ");");
         }
     }
+
+    @Test
+    public void test3() {
+        String s = FileUtils.readContentFromFile("E:\\java_code\\leetcode-runner\\src\\test\\java\\deepcoding\\data.txt");
+        s = GsonUtils.fromJson(s, String.class);
+        System.out.println(s);
+    }
+
+    public static String convertUnicodeToString(String unicode) {
+        StringBuilder sb = new StringBuilder();
+        String[] hex = unicode.split("\\\\u");
+        for (int i = 1; i < hex.length; i++) {
+            // 去除前后多余的空格
+            String hexValue = hex[i].trim();
+            // 检查是否是有效的四位十六进制数
+            if (hexValue.length() == 4 && hexValue.matches("[0-9a-fA-F]+")) {
+                int data = Integer.parseInt(hexValue, 16);
+                sb.append((char) data);
+            } else {
+                // 如果不是有效的四位十六进制数，可以选择跳过或抛出异常
+                System.out.println("Invalid hex value: " + hexValue);
+            }
+        }
+        return sb.toString();
+    }
+
 }

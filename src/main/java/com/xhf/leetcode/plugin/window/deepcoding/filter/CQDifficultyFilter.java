@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 难度过滤器, 按照难度过滤题目
+ * CompetitionQuestion: 难度过滤器, 按照难度过滤题目
  *
  * @author feigebuge
  * @email 2508020102@qq.com

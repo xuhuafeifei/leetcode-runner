@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 竞赛题目过滤链
+ * CompetitionQuestion: 竞赛题目过滤链
  * @author feigebuge
  * @email 2508020102@qq.com
  */

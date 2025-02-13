@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 /**
  * CompetitionQuestion问题查询引擎, 索引问题题目. 对外提供题目搜索能力
+ * <p>
+ * 底层使用QuestionEngine提供的搜索能力, 避免索引的重复构建
+ * 但本身具有极强的依赖性, 使用时Question的索引必须完成构建
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -38,7 +41,7 @@ public class CompetitionQuestionEngine implements SearchEngine<CompetitionQuesti
 
     @Override
     public void buildIndex(List<CompetitionQuestion> sources) throws Exception {
-        throw new UnsupportedOperationException("not support buildIndex operation in QuestionEngie");
+        throw new UnsupportedOperationException("not support buildIndex operation in CompetitionQuestionEngine");
     }
 
     @Override
@@ -55,6 +58,6 @@ public class CompetitionQuestionEngine implements SearchEngine<CompetitionQuesti
         // directory.close();
         // 暂时没想好关闭操作. 一开始想着如果长期不查询就可以关闭, 但是这样会丢失索引.
         // 下一次查询操作时, 需要重新加载索引. 但重新加载索引的行为不太好设计, 因此暂不考虑
-        throw new UnsupportedOperationException("not support close operation in QuestionEngie");
+        throw new UnsupportedOperationException("not support close operation in CompetitionQuestionEngine");
     }
 }

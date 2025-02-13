@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 服务于deep coding模式下, 搜索使用的filter, 其过滤时用于判断传入的数据
- * 是所有fid 的集合, 并且通过,连接. 该类不具备通用性
+ * 服务于deep coding模式下, 搜索使用的filter, 按照算法过滤
+ * <p>
+ * 内部items维护的是某种算法对应的fid 的集合, 并且通过,连接. 该类不具备通用性
+ * 如: "哈希" -> "1,49,128", 其中"1,49,128"为items内部维护的数据
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -35,7 +37,7 @@ public class DCAlgorithmFilter implements QFilter {
      */
     @Override
     public boolean contains(String item) {
-        // 判断是否是hot 150
+        // 判断是否是hot 100 / 面试 150
         for (String it : items) {
             String[] split = it.split(",");
             for (String fid : split) {

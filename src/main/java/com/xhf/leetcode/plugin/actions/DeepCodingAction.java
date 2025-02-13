@@ -6,6 +6,7 @@ import com.xhf.leetcode.plugin.bus.DeepCodingEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 
 /**
+ * 用于切换正常刷题模式和deep coding刷题模式
  * @author feigebuge
  * @email 2508020102@qq.com
  */

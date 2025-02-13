@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * leetcode 经典热题 100道
  * @author feigebuge
  * @email 2508020102@qq.com
  */
@@ -42,7 +43,6 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
     private final MyList<Question> questionList;
     // hot 100的题目
     private List<Question> hot100;
-    private String[] hot100TitleSlug;
 
     public Hot100Panel(Project project) {
         super(project);
@@ -61,12 +61,8 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
         List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
         int[] hot100Id = getHot100();
         this.hot100 = new ArrayList<>(120);
-        this.hot100TitleSlug = new String[100];
-        int i = 0;
         for (int idx : hot100Id) {
             hot100.add(totalQuestion.get(idx));
-            hot100TitleSlug[i] = totalQuestion.get(idx).getTitleSlug();
-            i += 1;
         }
 
         super.initMyListHelper(questionList, hot100, HOT100);
@@ -116,6 +112,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
                 } catch (Exception ex) {
                     return false;
                 }
+                // hot100Id存储的是下标, fid需要-1才能成为下标
                 return ArrayUtils.binarySearch(hot100Id, id) != -1;
             }
 

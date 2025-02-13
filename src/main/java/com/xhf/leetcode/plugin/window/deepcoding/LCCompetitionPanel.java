@@ -7,7 +7,6 @@ import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
-import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.listener.AbstractMouseAdapter;
 import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.model.DeepCodingInfo;
@@ -17,9 +16,7 @@ import com.xhf.leetcode.plugin.search.engine.CompetitionQuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
-import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
 import com.xhf.leetcode.plugin.utils.DataKeys;
-import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
@@ -36,11 +33,11 @@ import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Leetcode 竞赛
  * @author feigebuge
  * @email 2508020102@qq.com
  */
@@ -59,30 +56,15 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     private final CQFilterChain filterChain;
     private static List<CompetitionQuestion> competitionList;
 
-    static {
-        loadFromFile();
-    }
-
     public LCCompetitionPanel(Project project) {
         super(project);
         this.questionList = new MyList<>();
         this.filterChain = new CQFilterChain();
         this.searchEngine = CompetitionQuestionEngine.getInstance(project);
         initMyList();
-        initHelpContent();
         super.init();
         super.unLock();
         LCEventBus.getInstance().register(this);
-    }
-
-    private void initHelpContent() {
-        InnerHelpTooltip t1 = new InnerHelpTooltip();
-        t1.addHelp("当前界面数据来自于<a href='https://github.com/huxulm/lc-rating'>github开源项目lc-rating</a> <font color=red>感谢!</font>");
-        add(t1.getTargetComponent());
-
-        InnerHelpTooltip t2 = new InnerHelpTooltip();
-        t2.addHelp("当前界面题解来自于<a href='https://space.bilibili.com/206214'>bilibili@灵茶山艾府</a> <font color=red>感谢!</font>");
-        add(t2.getTargetComponent());
     }
 
     @Override
@@ -92,7 +74,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
         editorPane.setMargin(JBUI.emptyInsets());
         editorPane.setBorder(BorderFactory.createEmptyBorder());
         editorPane.setContentType("text/html");
-        editorPane.setText("<p>当前界面数据来自于<a href='https://github.com/huxulm/lc-rating'>github开源项目lc-rating</a> <font color=red>感谢!</font></p><p>当前界面题解来自于<a href='https://space.bilibili.com/206214'>bilibili@灵茶山艾府</a> <font color=red>感谢!</font></p>");
+        editorPane.setText("<p>  当前界面数据来自于<a href='https://github.com/huxulm/lc-rating'>github开源项目lc-rating</a> <font color=red>感谢!</font></p><p>  当前界面题解来自于<a href='https://space.bilibili.com/206214'>bilibili@灵茶山艾府</a> <font color=red>感谢!</font></p>");
         editorPane.setEditable(false);
         editorPane.setOpaque(false);
 
@@ -112,19 +94,10 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     }
 
     /**
-     * 从文件中加载CompetitionList数据
-     */
-    private static void loadFromFile() {
-        String jsonPath = "\\data\\dataProcessed.json";
-        URL url = LCCompetitionPanel.class.getResource(FileUtils.unUnifyPath(jsonPath));
-        String json = FileUtils.readContentFromFile(url);
-        competitionList = GsonUtils.fromJsonToList(json, CompetitionQuestion.class);
-    }
-
-    /**
      * 初始化MyList
      */
     private void initMyList() {
+        competitionList = QuestionService.getInstance().loadCompetitionQuestionData();
         // 处理完善数据信息
         List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
         for (CompetitionQuestion c : competitionList) {

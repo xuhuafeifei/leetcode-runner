@@ -40,6 +40,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     private final QuestionEngine searchEngine;
     private final QFilterChain filterChain;
     private final Project project;
+    // 经典面试150题
     private List<Question> inter150;
 
     public Interview150Panel(Project project) {
@@ -67,6 +68,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     }
 
     private int[] getInter150() {
+        // 缓存面试150题的下标
         return new int[] {87,26,25,79,168,188,120,121,54,44,273,379,237,133,134,41,12,11,57,13,150,5,27,67,124,391,166,10,14,208,2,29,75,35,53,47,72,288,382,204,289,241,48,0,201,218,127,227,55,56,451,19,70,154,149,223,140,1,20,137,91,24,18,81,60,85,145,103,99,225,100,104,105,116,113,111,128,123,172,221,235,198,636,101,102,529,229,97,199,129,132,398,206,209,908,432,126,207,210,211,16,76,45,38,51,21,78,107,147,426,22,52,917,34,73,161,32,33,152,3,214,501,372,294,66,189,190,135,136,200,8,65,171,68,49,148,69,197,138,321,299,119,63,62,4,96,71,122,187,220};
     }
 
@@ -196,6 +198,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
             return;
         }
         String tabName = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CHOOSEN_TAB_NAME);
+        // 当前打开的tab是不是 面试 150 题
         if (!INTERVIEW_150_TEXT.equals(tabName)) {
             return;
         }

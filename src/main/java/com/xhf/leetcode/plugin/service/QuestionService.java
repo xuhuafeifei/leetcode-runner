@@ -11,15 +11,19 @@ import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
 import com.xhf.leetcode.plugin.bus.QLoadStartEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
+import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.model.GraphqlReqBody;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URL;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -34,6 +38,27 @@ public class QuestionService {
 
     public static QuestionService getInstance() {
         return qs;
+    }
+
+    private List<CompetitionQuestion> competitionList;
+
+    /**
+     * 从文件中加载CompetitionList数据
+     */
+    public List<CompetitionQuestion> loadCompetitionQuestionData() {
+        if (competitionList == null) {
+            synchronized (this) {
+                loadFromFile();
+            }
+        }
+        return competitionList;
+    }
+
+    private void loadFromFile() {
+        String jsonPath = "\\data\\dataProcessed.json";
+        URL url = LCCompetitionPanel.class.getResource(FileUtils.unUnifyPath(jsonPath));
+        String json = FileUtils.readContentFromFile(url);
+        competitionList = GsonUtils.fromJsonToList(json, CompetitionQuestion.class);
     }
 
     /**
