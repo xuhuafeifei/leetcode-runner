@@ -132,7 +132,7 @@ public class PythonDebugEnv extends AbstractDebugEnv {
             throw new DebugError("python解释器路径错误 = " + python);
         }
         // 存储正确的javaPath
-        StoreService.getInstance(project).addCache("PYTHON_EXE", python);
+        StoreService.getInstance(project).addCache("PYTHON_EXE", pythonPath);
         return true;
     }
 
