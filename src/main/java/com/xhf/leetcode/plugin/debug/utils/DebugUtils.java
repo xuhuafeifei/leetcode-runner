@@ -478,6 +478,9 @@ public class DebugUtils {
      * @return String
      */
     public static String matchLine(String input, int offset) {
+        if (StringUtils.isBlank(input)) {
+            return "";
+        }
         // 正则匹配数字的模式
         Pattern pattern = Pattern.compile("[l|L]ine\\s*(\\d+)");
         Matcher matcher = pattern.matcher(input);
@@ -492,6 +495,9 @@ public class DebugUtils {
     }
 
     public static String matchLines(String input, int offset) {
+        if (StringUtils.isBlank(input)) {
+            return "";
+        }
         String[] split = input.split("\n");
         StringBuilder sb = new StringBuilder();
         for (String s : split) {
