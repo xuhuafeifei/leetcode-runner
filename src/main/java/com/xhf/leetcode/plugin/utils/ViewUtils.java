@@ -222,12 +222,16 @@ public class ViewUtils {
             return null;
         }
         // 获取文件的 Document
-        Document document = FileDocumentManager.getInstance().getDocument(currentFile);
-        if (document == null) {
+        AtomicReference<Document> document = new AtomicReference<>(null);
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            document.set(FileDocumentManager.getInstance().getDocument(currentFile));
+        });
+        Document res = document.get();
+        if (res == null) {
             return null;
         }
         // 获取文件内容
-        return document.getText();
+        return res.getText();
     }
 
     /**
