@@ -2,52 +2,36 @@
 from typing import List, Optional, Tuple, Dict, Set
 from collections import defaultdict, Counter, deque, namedtuple, OrderedDict
 from heapq import heappush, heappop, heapify
-from functools import lru_cache, cache
+from functools import *
+import operator
 from itertools import permutations, combinations, product, accumulate
 from bisect import bisect_left, bisect_right
-from ListNode import ListNode
-from TreeNode import TreeNode
 import math
 import sys
-#do not modify or remove anything between start-line and end-line
+from ListNode import ListNode
+from TreeNode import TreeNode
+#do not modify or remove start-line comment and end-line comment and including this comment
 #lc-start-line
 class Solution:
-    def __init__(self):
-        self.ans = 0
-
-    def isValid(self, board, i, j, n):
-        dirs = [(-1, 0),(0,1),(0,-1),(-1,-1),(-1,1)] 
-        for dir in dirs:
-            n_x, n_y = i + dir[0], j + dir[1]
-            while 0 <= n_x < n and 0 <= n_y < n:
-                if board[n_x][n_y] == 'Q':
-                    return False
-                n_x += dir[0]
-                n_y += dir[1]
-        return True
-
-    def totalNQueens(self, n: int) -> int:
-        board = [['.'] * n for _ in range(n)]
-        def dfs(i):
-            if i == n:
-                self.ans += 1
-                return
-            for j in range(n):
-                if self.isValid(board, i, j, n):
-                    board[i][j] = 'Q'
-                    dfs(i + 1)
-                    board[i][j] = '.' 
-        dfs(0)
-        return self.ans
+    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
+        """
+        Do not return anything, modify nums1 in-place instead.
+        """
+        l, r, k = m - 1, n - 1, m + n - 1
+        while l >= 0 or r >= 0:
+            if l < 0:
+                nums1[k] = nums2[r]
+                r -= 1
+                continue
+            if r < 0:
+                nums1[k] = nums1[l]
+                l -= 1
+                continue
+            # choose the larger one
+            nums1[k] = max(nums1[l], nums2[r])
+            if nums2[r] > nums1[l]:
+                r -= 1
+            else:
+                l -= 1
+            k -= 1
 #lc-end-line
-
-if __name__ == '__main__':
-    s = Solution()
-    try:
-        a = 1 / 0
-    except Exception as e:
-        print(e)
-    # s.totalNQueens(1)
-    print(s.__dict__)
-    for k, v in s.__dict__.items():
-        print(k, v)

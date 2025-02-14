@@ -20,26 +20,47 @@ from dataclasses import dataclass
 from subprocess import SubprocessError
 from typing import Any, Deque, Dict, Iterator, List, Optional, Tuple, Union
 
-from graphviz import Digraph, nohtml
+# from graphviz import Digraph, nohtml
 
-try:  # pragma: no cover
-    from graphviz.exceptions import ExecutableNotFound
-except ImportError:  # pragma: no cover
-    # noinspection PyProtectedMember
-    from graphviz import ExecutableNotFound
-from pkg_resources import get_distribution
+# try:  # pragma: no cover
+#     from graphviz.exceptions import ExecutableNotFound
+# except ImportError:  # pragma: no cover
+#     # noinspection PyProtectedMember
+#     from graphviz import ExecutableNotFound
+# from pkg_resources import get_distribution
 
-from binarytree.exceptions import (
-    NodeIndexError,
-    NodeModifyError,
-    NodeNotFoundError,
-    NodeReferenceError,
-    NodeTypeError,
-    NodeValueError,
-    TreeHeightError,
-)
+class BinaryTreeError(Exception):
+    """Base (catch-all) binarytree exception."""
 
-__version__ = get_distribution("binarytree").version
+
+class NodeIndexError(BinaryTreeError):
+    """Node index was invalid."""
+
+
+class NodeModifyError(BinaryTreeError):
+    """User tried to overwrite or delete the root node."""
+
+
+class NodeNotFoundError(BinaryTreeError):
+    """Node was missing from the binary tree."""
+
+
+class NodeReferenceError(BinaryTreeError):
+    """Node reference was invalid (e.g. cyclic reference)."""
+
+
+class NodeTypeError(BinaryTreeError):
+    """Node was not an instance of :class:`binarytree.Node`."""
+
+
+class NodeValueError(BinaryTreeError):
+    """Node value was not a number (e.g. float, int, str)."""
+
+
+class TreeHeightError(BinaryTreeError):
+    """Tree height was invalid."""
+
+# __version__ = get_distribution("binarytree").version
 
 _ATTR_LEFT = "left"
 _ATTR_RIGHT = "right"
@@ -502,21 +523,21 @@ class Node:
 
         setattr(parent, child_attr, None)
 
-    def _repr_svg_(self) -> str:  # pragma: no cover
-        """Display the binary tree using Graphviz (used for `Jupyter notebooks`_).
-
-        .. _Jupyter notebooks: https://jupyter.org
-        """
-        try:
-            try:
-                # noinspection PyProtectedMember
-                return str(self.graphviz()._repr_svg_())
-            except AttributeError:
-                # noinspection PyProtectedMember
-                return str(self.graphviz()._repr_image_svg_xml())
-
-        except (SubprocessError, ExecutableNotFound, FileNotFoundError):
-            return self.svg()
+    # def _repr_svg_(self) -> str:  # pragma: no cover
+    #     """Display the binary tree using Graphviz (used for `Jupyter notebooks`_).
+    #
+    #     .. _Jupyter notebooks: https://jupyter.org
+    #     """
+    #     try:
+    #         try:
+    #             # noinspection PyProtectedMember
+    #             return str(self.graphviz()._repr_svg_())
+    #         except AttributeError:
+    #             # noinspection PyProtectedMember
+    #             return str(self.graphviz()._repr_image_svg_xml())
+    #
+    #     except (SubprocessError, ExecutableNotFound, FileNotFoundError):
+    #         return self.svg()
 
     def svg(self, node_radius: int = 16) -> str:
         """Generate SVG XML.
@@ -587,6 +608,7 @@ class Node:
             body="\n".join(xml),
         )
 
+    '''
     def graphviz(self, *args: Any, **kwargs: Any) -> Digraph:  # pragma: no cover
         """Return a graphviz.Digraph_ object representing the binary tree.
 
@@ -630,6 +652,7 @@ class Node:
                 digraph.edge(f"{node_id}:r", f"{id(node.right)}:v")
 
         return digraph
+    '''
 
     def pprint(self, index: bool = False, delimiter: str = "-") -> None:
         """Pretty-print the binary tree.

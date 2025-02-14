@@ -19,9 +19,9 @@ from debug_core import Debugger
 from Solution import Solution
 from server import WebServer
 
-log_dir = "E:\\java_code\\lc-test\\cache\\debug\\run_log.txt"
-std_out_dir = "E:\\java_code\\lc-test\\cache\\debug\\py_std_out.log"
-std_err_dir = "E:\\java_code\\lc-test\\cache\\debug\\py_std_err.log"
+log_dir = "D:\\java_code\\lc\\src\\cache\\debug\\python\\pylog\\run_log.txt"
+std_out_dir = "D:\\java_code\\lc\\src\\cache\\debug\\python\\pylog\\py_std_out.log"
+std_err_dir = "D:\\java_code\\lc\\src\\cache\\debug\\python\\pylog\\py_std_err.log"
 
 class MyOutput():
     def __init__(self, file_path):
@@ -61,11 +61,15 @@ def main():
     thread.start()
 
     solution = Solution()
-    trace_calls = Debugger('totalNQueens', 'std_in', log_out_helper, inst_source).trace_calls
+    trace_calls = Debugger('merge', 'std_in', log_out_helper, inst_source).trace_calls
     sys.settrace(trace_calls)
-    result = solution.totalNQueens(2)
-    sys.settrace(None)  # 停止跟踪
+    a0 = [1,2,3,0,0,0]
+    a1 = 3
+    a2 = [4,5,6]
+    a3 = 3
+    result = solution.merge(a0,a1,a2,a3)
 
+    sys.settrace(None)  # 停止跟踪
 
 if __name__ == '__main__':
     main()

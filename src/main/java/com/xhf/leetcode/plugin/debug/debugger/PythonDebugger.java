@@ -329,17 +329,19 @@ public class PythonDebugger extends AbstractDebugger {
                 Thread.sleep(500);
             } catch (InterruptedException ignored) {
             }
-            if (isPortAvailable("localhost", env.getPyPort())) {
+            if (DebugUtils.isPortAvailable2("localhost", env.getPyPort())) {
                 DebugUtils.simpleDebug("python服务连接成功", project, false);
                 return;
             }
         }
+        /*
         int i = this.exec.exitValue();
         // 如果正常退出, 表示断点服务跑完了
         if (i == 0) {
             DebugManager.getInstance(project).stopDebugger();
             return;
         }
+         */
         throw new DebugError("python服务连接失败! 错误信息可通过Console查看");
     }
 

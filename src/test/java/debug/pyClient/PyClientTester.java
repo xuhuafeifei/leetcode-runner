@@ -22,7 +22,7 @@ public class PyClientTester {
         HttpClient instance = HttpClient.getInstance();
         HttpResponse httpResponse = null;
         try {
-            httpResponse = instance.executePost(new HttpRequest.RequestBuilder("http://localhost:" + 5005 + "/process")
+            httpResponse = instance.executePost(new HttpRequest.RequestBuilder("http://localhost:" + 5005 + "/")
                     .addJsonBody("operation", inst.getOperation().getName())
                     .addJsonBody("param", inst.getParam())
                     .buildByJsonBody()

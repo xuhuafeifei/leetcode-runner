@@ -29,3 +29,4 @@ class LogOutHelper:
 
         # 记录日志
         logging.debug(log_entry)
+        # print(log_entry)

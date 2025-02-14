@@ -40,6 +40,7 @@ class Debugger:
             debug_info += "pre_param = " + str(self.pre_param) + "\n"
             debug_info += "pre_breakpoint = " + str(self.pre_breakpoint) + "\n"
             debug_info += "pre_line = " + str(self.pre_line) + "\n"
+            debug_info += "cur_method = " + str(self.breakpoint_list) + "\n"
             debug_info += "catpure_stack_len = " + str(self.capture_stack_len) + "\n"
             debug_info += "cur_method = " + frame.f_code.co_name + "\n"
             self.log.log_out(debug_info, "---------------trace_calls--------------")
@@ -89,9 +90,57 @@ class Debugger:
 
                 self.log.log_out("检测PythonDebugger的ReadType: " + self.read_type)
                 if self.read_type != "ui_in":
-                    res = "检测到plugin非UI指令读取, 自动初始化断点. init breakpoint_list with line + 1 = " + str(line + 1)
+                    next_line = line + 1
+                    i = 1
+                    round_time = 0
+                    while True:
+                        code = linecache.getline(frame.f_code.co_filename, line + i).strip()
+                        # 如果不是空格
+                        if code != "" and not code.startswith('#') and not code.startswith("'''") and not code.startswith('"""'):
+                            self.log.log_out("第" + str(line + i) + "行是 = " + code + " 不是注释或空行, 推出检测循环")
+                            next_line = line + i
+                            break
+                        if code == "":
+                            self.log.log_out("第" + str(line + i) + "行是空行, 继续查找下一行...")
+                            i += 1
+                        elif code.startswith("#"):
+                            self.log.log_out("第" + str(line + i) + "行是注释#行, 继续查找下一行...")
+                            i += 1
+                        elif code.startswith("'''"):
+                            self.log.log_out("第" + str(line + i) + "行是注释'''行, 继续查找下一行...")
+                            # 循环直到下一个"'''"
+                            i += 1
+                            code = linecache.getline(frame.f_code.co_filename, line + i).strip()
+                            while code == "'''":
+                                self.log.log_out("第" + str(line + i) + "行不是对应注释''', 继续查找下一行...")
+                                i += 1
+                                round_time += 1
+                                if round_time > 20:
+                                    self.log.log_out("入口函数下方存在超过20行注释, debug 服务不兼容!")
+                                    break
+                                code = linecache.getline(frame.f_code.co_filename, line + i).strip()
+                            i += 1
+                        elif code.startswith('"""'):
+                            self.log.log_out("第" + str(line + i) + "行 " + code + " 是注释" + '"""' + "行, 继续查找下一行...")
+                            # 循环直到下一个"'''"
+                            i += 1
+                            code = linecache.getline(frame.f_code.co_filename, line + i).strip()
+                            while code != '"""':
+                                self.log.log_out("第" + str(line + i) + "行 " + code + " 不是对应注释: " + '"""' + ", 继续查找下一行...")
+                                i += 1
+                                round_time += 1
+                                if round_time > 20:
+                                    self.log.log_out("入口函数下方存在超过20行注释, debug 服务不兼容!")
+                                    break
+                                code = linecache.getline(frame.f_code.co_filename, line + i).strip()
+                            i += 1
+                        round_time += 1
+                        if round_time > 20:
+                            self.log.log_out("入口函数下方存在超过10行注释, debug 服务不兼容!")
+                            break
+                    res = "检测到plugin非UI指令读取, 自动初始化断点. init breakpoint_list with next_line = " + str(next_line)
                     self.log.log_out(res)
-                    self.breakpoint_list.add(line + 1)
+                    self.breakpoint_list.add(next_line)
                 else:
                     self.log.log_out("检测到plugin为UI指令读取, 等待初始化断点....")
                     while True:

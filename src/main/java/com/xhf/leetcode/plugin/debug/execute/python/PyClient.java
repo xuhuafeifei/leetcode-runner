@@ -26,7 +26,7 @@ public class PyClient {
     public PyClient(Project project) {
         PythonDebugger debugger = (PythonDebugger) DebugManager.getInstance(project).getCurrentDebugger();
         this.pyPort = ((PythonDebugEnv) debugger.getEnv()).getPyPort();
-        this.url = "http://localhost:" + pyPort + "/process";
+        this.url = "http://localhost:" + pyPort + "/";
         this.instance = HttpClient.getInstance();
     }
 
@@ -78,7 +78,7 @@ public class PyClient {
 
     public PyResponse postRequest(String operation, String param) {
         HttpClient instance = HttpClient.getInstance();
-        HttpResponse httpResponse = instance.executePost(new HttpRequest.RequestBuilder("http://localhost:" + pyPort + "/process")
+        HttpResponse httpResponse = instance.executePost(new HttpRequest.RequestBuilder("http://localhost:" + pyPort + "/")
                 .addJsonBody("operation", operation)
                 .addJsonBody("param", param) // gson默认不会序列化为null字段
                 .buildByJsonBody()
