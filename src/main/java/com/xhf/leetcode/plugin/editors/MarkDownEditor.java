@@ -1,11 +1,15 @@
 package com.xhf.leetcode.plugin.editors;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.colors.EditorColors;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
+import com.intellij.ui.ColorUtil;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
@@ -257,6 +261,13 @@ public class MarkDownEditor implements FileEditor {
                 default:
 
             }
+            String vditorTheme = getVditorTheme();
+            html = html.replace("\"{{theme}}\"", "\"" + vditorTheme + "\"");
+            if (vditorTheme.equals("dark")) {
+                html = html.replace("{{css}}", getDarkCss());
+            } else {
+                html = html.replace("{{css}}", "");
+            }
             // handle html
             return html;
         } catch (Exception e) {
@@ -268,6 +279,27 @@ public class MarkDownEditor implements FileEditor {
         }
     }
 
+    private String getDarkCss() {
+        return "<style id=\"ideaStyle\">.vditor--dark{--panel-background-color:rgba(43,43,43,1.00);--textarea-background-color:rgba(43,43,43,1.00);--toolbar-background-color:rgba(60,63,65,1.00);}::-webkit-scrollbar-track {background-color:rgba(43,43,43,1.00);}::-webkit-scrollbar-thumb {background-color:rgba(166,166,166,0.28);}.vditor-reset {font-size:13px;font-family:\"JetBrains Mono\",\"Helvetica Neue\",\"Luxi Sans\",\"DejaVu Sans\",\"Hiragino Sans GB\",\"Microsoft Yahei\",sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\",\"Noto Color Emoji\",\"Segoe UI Symbol\",\"Android Emoji\",\"EmojiSymbols\";color:rgba(169,183,198,1.00);} body{background-color: rgba(43,43,43,1.00);}.vditor-reset a {color: rgba(30, 136, 234);}</style>";
+    }
+
+    public String getVditorTheme() {
+        // 获取当前编辑器的颜色方案
+        EditorColorsManager colorsManager = EditorColorsManager.getInstance();
+        EditorColorsScheme globalScheme = colorsManager.getGlobalScheme();
+
+        // 直接获取默认背景颜色
+        Color defaultBackground = globalScheme.getDefaultBackground();
+
+        // 判断主题类型
+        String vditorTheme;
+        if (ColorUtil.isDark(defaultBackground)) {
+            vditorTheme = "dark";
+        } else {
+            vditorTheme = "light";
+        }
+        return vditorTheme;
+    }
 
     /**
      * 获取当前渲染界面的leetcode web url

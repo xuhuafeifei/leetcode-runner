@@ -25,7 +25,7 @@
     const vditor = new Vditor('vditor', {
         mode: "sv",
         lang: "zh_CN",
-        theme: "light",
+        theme: "{{theme}}",
         toolbarConfig: {hide: true},
         cache: {
             enable: false
@@ -36,7 +36,7 @@
             },
             maxWidth: $(window).width() - 100,
             actions: [], // close extra toolbar
-            hljs: { style: "dracula" },
+            hljs: { style: "{{theme}}" },
             math: {
                 inlineDigit: true
             }
@@ -44,3 +44,4 @@
         value: document.getElementById("content").innerText
     })
 </script>
+{{css}}
