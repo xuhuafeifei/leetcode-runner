@@ -104,7 +104,7 @@ public class interview150Test {
     @Test
     public void test2() {
         // 读取a.json
-        String content = FileUtils.readContentFromFile("E:\\java_code\\leetcode-runner\\src\\test\\java\\deepcoding\\c.json");
+        String content = FileUtils.readContentFromFile("D:\\github\\leetcode-runner\\src\\test\\java\\deepcoding\\c.json");
         assert content != null;
         JsonElement jsonElement = JsonParser.parseString(content);
         JsonArray asJsonArray = jsonElement.getAsJsonObject().get("data").getAsJsonObject().get("studyPlanV2Detail")
@@ -118,7 +118,7 @@ public class interview150Test {
             String k = "";
             for (JsonElement a : arr) {
                 String fid = a.getAsJsonObject().get("questionFrontendId").getAsString();
-                k += (Integer.parseInt(fid) - 1) + ",";
+                k += (Integer.parseInt(fid)) + ",";
             }
             if (k.endsWith(",")) {
                 k = k.substring(0, k.length() - 1);
