@@ -195,14 +195,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void rePositionEventListeners(RePositionEvent event) {
-        Boolean state = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE);
-        // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
-        if (! Boolean.FALSE.equals(state)) {
-            return;
-        }
-        String tabName = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CHOOSEN_TAB_NAME);
-        // 当前选中的不是hot 100
-        if (!HOT_100_TEXT.equals(tabName)) {
+        if (! super.doCheck(HOT_100_TEXT)) {
             return;
         }
         // 这里需要清除Hot100Panel设置的搜索条件, 不然查询到的数据是缺失的
@@ -239,6 +232,9 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void codeSubmitEventListener(CodeSubmitEvent event) {
+        if (! super.doCheck(HOT_100_TEXT)) {
+            return;
+        }
         indexLock();
         questionList.setEmptyText("Loading data, please wait a second...");
         questionList.setNonData();

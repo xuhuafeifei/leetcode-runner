@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.window;
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.IconLoader;
@@ -13,6 +15,7 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.window.filter.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryParser.ParseException;
@@ -25,6 +28,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 抽象搜索面板, 提供基础的搜索界面显示的能力
@@ -397,5 +401,29 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
         JBScrollPane jbScrollPane = new JBScrollPane(questionList);
         this.add(jbScrollPane, BorderLayout.CENTER);
         this.setContent(jbScrollPane);
+    }
+
+
+    /**
+     * 检查当前是否处于deep coding模式, 并且打开的tab的名称是不是checkTabName
+     * @param checkTabName tab 名称
+     * @return boolean
+     */
+    protected boolean doCheck(String checkTabName) {
+        AtomicReference<Boolean> state = new AtomicReference<>();
+        Application app = ApplicationManager.getApplication();
+        app.invokeAndWait(() -> {
+            state.set(LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE));
+        });
+        // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
+        if (Boolean.TRUE.equals(state.get())) {
+            return false;
+        }
+        AtomicReference<String> tabName = new AtomicReference<>();
+        app.invokeAndWait(() -> {
+            tabName.set(LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CHOOSEN_TAB_NAME));
+        });
+
+        return checkTabName.equals(tabName.get());
     }
 }

@@ -299,13 +299,8 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
 
     @Subscribe
     public void rePositionEventListeners(RePositionEvent event) {
-        Boolean state = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE);
-        // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
-        if (Boolean.TRUE.equals(state)) {
-            return;
-        }
-        String tabName = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CHOOSEN_TAB_NAME);
-        if (!LC_COMPETITION.equals(tabName)) {
+        // 检查当前Panel是否需要监听事件
+        if (! super.doCheck(LC_COMPETITION_TEXT)) {
             return;
         }
         // 必须清除所有筛选条件
@@ -342,6 +337,9 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
 
     @Subscribe
     public void codeSubmitEventListener(CodeSubmitEvent event) {
+        if (! super.doCheck(LC_COMPETITION_TEXT)) {
+            return;
+        }
         indexLock();
         questionList.setEmptyText("Loading data, please wait a second...");
         questionList.setNonData();

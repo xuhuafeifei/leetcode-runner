@@ -192,14 +192,10 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void rePositionEventListeners(RePositionEvent event) {
-        Boolean state = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE);
-        // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
-        if (Boolean.TRUE.equals(state)) {
-            return;
-        }
-        String tabName = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CHOOSEN_TAB_NAME);
-        // 当前打开的tab是不是 面试 150 题
-        if (!INTERVIEW_150_TEXT.equals(tabName)) {
+        if (! super.doCheck(INTERVIEW_150_TEXT)) {
+            if (! super.doCheck(INTERVIEW_150_TEXT)) {
+                return;
+            }
             return;
         }
         // 这里需要清除Interview150Panel设置的搜索条件, 不然查询到的数据是缺失的
@@ -236,6 +232,9 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void codeSubmitEventListener(CodeSubmitEvent event) {
+        if (! super.doCheck(INTERVIEW_150_TEXT)) {
+            return;
+        }
         indexLock();
         questionList.setEmptyText("Loading data, please wait a second...");
         questionList.setNonData();

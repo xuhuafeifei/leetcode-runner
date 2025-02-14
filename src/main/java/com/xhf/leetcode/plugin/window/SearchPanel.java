@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.window;
 
 import com.google.common.eventbus.Subscribe;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;
 import com.xhf.leetcode.plugin.bus.*;
@@ -20,6 +21,7 @@ import com.xhf.leetcode.plugin.window.filter.QFilterChain;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 搜索面板, 提供题目搜索的能力. 内部封装了一个搜索引擎, 提供高效的搜索能力
@@ -126,6 +128,14 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void codeSubmitEventListener(CodeSubmitEvent event) {
+        AtomicReference<Boolean> state = new AtomicReference<>();
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            state.set(LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE));
+        });
+        // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
+        if (! Boolean.TRUE.equals(state.get())) {
+            return;
+        }
         indexLock();
         questionList.setEmptyText("Loading data, please wait a second...");
         questionList.setNonData();
@@ -143,9 +153,12 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void rePositionEventListeners(RePositionEvent event) {
-        Boolean state = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE);
+        AtomicReference<Boolean> state = new AtomicReference<>();
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            state.set(LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE));
+        });
         // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
-        if (! Boolean.TRUE.equals(state)) {
+        if (! Boolean.TRUE.equals(state.get())) {
             return;
         }
         // 这里需要清除searchPanel设置的搜索条件, 不然查询到的数据是缺失的

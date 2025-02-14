@@ -20,6 +20,7 @@ import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -27,6 +28,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author feigebuge

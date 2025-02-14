@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.xhf.leetcode-runner</id>
     <name>Leetcode-Runner</name>
-    <version>3.6.0</version>
+    <version>3.6.1</version>
     <vendor email="2508020102@qq.com" url="https://github.com/xuhuafeifei/leetcode-runner">feigebuge</vendor>
 
     <description><![CDATA[
@@ -148,9 +148,15 @@
         <group id="leetcode.plugin.editor.group">
             <action id="leetcode.plugin.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
                     text="Run Code" description="Run code(editor)" icon="/icons/run.svg">
+                <keyboard-shortcut
+                        keymap="$default"
+                        first-keystroke="ctrl alt 9"/>
             </action>
             <action id="leetcode.plugin.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
                     text="Submit Code" description="Submit code(editor)" icon="/icons/submit.svg">
+                <keyboard-shortcut
+                        keymap="$default"
+                        first-keystroke="ctrl alt 0"/>
             </action>
             <separator/>
             <action id="leetcode.plugin.editor.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
