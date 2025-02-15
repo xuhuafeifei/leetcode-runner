@@ -1,22 +1,18 @@
 <!--演示demo, 用于调试vditor-->
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="http://localhost:63343/leetcode-project/vditor/dist/index.css"/>
-    <script src="http://localhost:63343/leetcode-project/vditor/dist/index.min.js"></script>
-    <script src="http://localhost:63343/leetcode-project/vditor/dist/jquery-3.6.0.min.js"></script>
+	    <link rel="stylesheet" href="vditor/dist/index.css"/>
+	    <script src="vditor/dist/index.min.js"></script>
+	    <script src="vditor/dist/jquery-3.6.0.min.js"></script>
+<!--    <link rel="stylesheet" href="http://localhost:63343/leetcode-project/vditor/dist/index.css"/>-->
+<!--    <script src="http://localhost:63343/leetcode-project/vditor/dist/index.min.js"></script>-->
+<!--    <script src="http://localhost:63343/leetcode-project/vditor/dist/jquery-3.6.0.min.js"></script>-->
 </head>
 
 <body className="body" style="margin: 0px;">
 <div id="vditor" className="vditor vditor--fullscreen" style="height: 100%"></div>
 <textarea id="content" style="display:none;">
-```java
-	public void merge(int[] nums1, int m, int[] nums2, int n) {
-  }
-```
-```python
-	public void merge(int[] nums1, int m, int[] nums2, int n) {
-  }
-```
+
 
 <h1 id="title">88.合并两个有序数组</h1>
 <span style='color: green;'>洒洒水啦【简单题】</span>
@@ -59,7 +55,7 @@
     const vditor = new Vditor('vditor', {
         mode: "sv",
         lang: "zh_CN",
-        theme: "dark",
+        theme: "light",
         toolbarConfig: {hide: true},
         cache: {
             enable: false
@@ -79,4 +75,4 @@
     })
 
 </script>
-<style id="ideaStyle">.vditor--dark{--panel-background-color:rgba(43,43,43,1.00);--textarea-background-color:rgba(43,43,43,1.00);--toolbar-background-color:rgba(60,63,65,1.00);}::-webkit-scrollbar-track {background-color:rgba(43,43,43,1.00);}::-webkit-scrollbar-thumb {background-color:rgba(166,166,166,0.28);}.vditor-reset {font-size:13px;font-family:"JetBrains Mono","Helvetica Neue","Luxi Sans","DejaVu Sans","Hiragino Sans GB","Microsoft Yahei",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiSymbols";color:rgba(169,183,198,1.00);} body{background-color: rgba(43,43,43,1.00);}.vditor-reset a {color: rgba(30, 136, 234);}</style>
+<style id="ideaStyle">.vditor--dark{--panel-background-color:rgba(43,43,43,1.00);--textarea-background-color:rgba(43,43,43,1.00);--toolbar-background-color:rgba(60,63,65,1.00);}::-webkit-scrollbar-track {background-color:rgba(43,43,43,1.00);}::-webkit-scrollbar-thumb {background-color:rgba(166,166,166,0.28);}.vditor-reset {font-size:16px;font-family:"JetBrains Mono","Helvetica Neue","Luxi Sans","DejaVu Sans","Hiragino Sans GB","Microsoft Yahei",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiSymbols";color:rgba(169,183,198,1.00);} body{background-color: rgba(43,43,43,1.00);}.vditor-reset a {color: rgba(30, 136, 234);}</style>
