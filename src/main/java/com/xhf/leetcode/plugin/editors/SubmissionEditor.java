@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.editors;
 
 import com.google.common.eventbus.Subscribe;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBScrollPane;
@@ -64,7 +65,9 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
         }
         SubmissionService.loadSubmission(project, myList, lc.getTitleSlug());
         myList.setEmptyText(Constants.NOTING_TO_SHOW);
-        jbSplitter.setFirstComponent(new JBScrollPane(myList));
+        ApplicationManager.getApplication().invokeLater(() -> {
+            jbSplitter.setFirstComponent(new JBScrollPane(myList));
+        });
     }
 
     /**
