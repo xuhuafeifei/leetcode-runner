@@ -86,6 +86,7 @@ public class FocusTextEditor implements FileEditor {
         map.put(Constants.TITLE_SLUG, lc.getTitleSlug());
         map.put(Constants.QUESTION_CONTENT, lc.getMarkdownContent());
         map.put(Constants.VFILE, this.file);
+        map.put(Constants.STATUS, lc.getStatus());
         return map;
     }
 

@@ -231,6 +231,7 @@ public class CodeService {
         le.setTranslatedTitle(question.getTranslatedTitle());
         le.setDifficulty(question.getDifficulty());
         le.setDebugTestcase(question.getExampleTestcases());
+        le.setStatus(question.getStatus());
         return le;
     }
 

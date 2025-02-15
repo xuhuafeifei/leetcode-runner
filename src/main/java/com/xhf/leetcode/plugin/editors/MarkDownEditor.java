@@ -235,7 +235,7 @@ public class MarkDownEditor implements FileEditor {
             switch (contentType) {
                 case QUESTION:
                     html = html.replace("{{title}}", MapUtils.getString(content, Constants.FRONTEND_QUESTION_ID) + "." + MapUtils.getString(content, Constants.TRANSLATED_TITLE))
-                            .replace("{{tag}}", getTag(MapUtils.getString(content, Constants.DIFFICULTY)))
+                            .replace("{{tag}}", getTag(MapUtils.getString(content, Constants.DIFFICULTY), MapUtils.getString(content, Constants.STATUS)))
                             .replace("{{webUrl}}", getWebUrl())
                             .replace("{{content}}", MapUtils.getString(content, Constants.QUESTION_CONTENT))
                     ;
@@ -357,7 +357,7 @@ public class MarkDownEditor implements FileEditor {
         return "> [在浏览器上访问](" + LeetcodeApiUtils.getSolutionUrl(titleSlug, topicId, solutionSlug) + Constants.OPEN_ON_WBE + ")";
     }
 
-    public String getTag(String difficulty) {
+    public String getTag(String difficulty, String status) {
         /*
           EASY
           MEDIUM
@@ -391,9 +391,20 @@ public class MarkDownEditor implements FileEditor {
                 translatedDifficulty = "【未知题】";
                 break;
         }
-        return "<span style='color: " + color + ";'>" + text + translatedDifficulty + "</span>";
+        String solvedTag;
+        if (StringUtils.isBlank(status)) {
+            solvedTag = "";
+        } else {
+            if ("AC".equals(status)) {
+                solvedTag = "<div >已解答 <svg t=\"1739596183696\" class=\"icon\" viewBox=\"0 0 1024 1024\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" p-id=\"1572\" width=\"16\" height=\"16\"><path d=\"M512 30.72C246.272 30.72 30.72 246.272 30.72 512s215.552 481.28 481.28 481.28 481.28-215.552 481.28-481.28-215.552-481.28-481.28-481.28z m-13.312 632.32L440.32 721.408l-58.368-58.368-145.408-143.872L294.912 460.8 440.32 605.184 728.576 317.44l58.368 58.368-288.256 287.232z\" fill=\"#4CB16D\" p-id=\"1573\"></path></svg></div>";
+            } else if ("TRIED".equals(status)) {
+                solvedTag = "<div >尝试过 <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 14 14\" width=\"1em\" height=\"1em\" fill=\"currentColor\" class=\"text-message-warning dark:text-message-warning\"><path d=\"M6.998 7v-.6a.6.6 0 00-.6.6h.6zm.05 0h.6a.6.6 0 00-.6-.6V7zm0 .045v.6a.6.6 0 00.6-.6h-.6zm-.05 0h-.6a.6.6 0 00.6.6v-.6zm5-.045a5 5 0 01-5 5v1.2a6.2 6.2 0 006.2-6.2h-1.2zm-5 5a5 5 0 01-5-5h-1.2a6.2 6.2 0 006.2 6.2V12zm-5-5a5 5 0 015-5V.8A6.2 6.2 0 00.798 7h1.2zm5-5a5 5 0 015 5h1.2a6.2 6.2 0 00-6.2-6.2V2zm2.2 5a2.2 2.2 0 01-2.2 2.2v1.2a3.4 3.4 0 003.4-3.4h-1.2zm-2.2 2.2a2.2 2.2 0 01-2.2-2.2h-1.2a3.4 3.4 0 003.4 3.4V9.2zM4.798 7a2.2 2.2 0 012.2-2.2V3.6a3.4 3.4 0 00-3.4 3.4h1.2zm2.2-2.2a2.2 2.2 0 012.2 2.2h1.2a3.4 3.4 0 00-3.4-3.4v1.2zm0 2.8h.05V6.4h-.05v1.2zm-.55-.6v.045h1.2V7h-1.2zm.6-.555h-.05v1.2h.05v-1.2zm.55.6V7h-1.2v.045h1.2z\" fill=\"#FFA500\"></path></svg></div>";
+            } else {
+                solvedTag = "";
+            }
+        }
+        return solvedTag + " <span style='color: " + color + ";'>" + text + translatedDifficulty + "</span>";
     }
-
 
     @Override
     public @NotNull JComponent getComponent() {

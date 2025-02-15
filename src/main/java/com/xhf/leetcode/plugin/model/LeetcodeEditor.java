@@ -30,6 +30,8 @@ public class LeetcodeEditor {
     private String topicId;
     private String solutionSlug;
     private DeepCodingInfo deepCodingInfo;
+    // 题目解决状态
+    private String status;
 
     public String getTopicId() {
         return topicId;
@@ -160,5 +162,13 @@ public class LeetcodeEditor {
 
     public DeepCodingInfo getDeepCodingInfo() {
         return deepCodingInfo;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return status;
     }
 }
