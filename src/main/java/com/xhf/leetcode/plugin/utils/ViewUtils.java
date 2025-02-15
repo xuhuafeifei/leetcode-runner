@@ -280,9 +280,12 @@ public class ViewUtils {
         // 遍历, 匹配fid
         try {
             int i = Integer.parseInt(fid) - 1;
-            DeepCodingQuestion question = (DeepCodingQuestion) model.getElementAt(i);
+            DeepCodingQuestion question;
             // double check
-            if (question.getTitleSlug().equals(titleSlug)) {
+            if (
+                    i < size &&
+                    (question = (DeepCodingQuestion) model.getElementAt(i)).getTitleSlug().equals(titleSlug)
+            ) {
                 JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
                 ViewUtils.scrollToVisibleOfMyList(questionList, i);
                 // 重新打开文件
@@ -316,12 +319,14 @@ public class ViewUtils {
         ListModel<Question> model = questionList.getModel();
         try {
             int i = Integer.parseInt(fid) - 1;
-            Question question = model.getElementAt(i);
+            Question question;
             // double check
-            if (question.getTitleSlug().equals(titleSlug)) {
+            if (
+                    i < model.getSize() &&
+                    (question = model.getElementAt(i)).getTitleSlug().equals(titleSlug))
+            {
                 JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
                 ViewUtils.scrollToVisibleOfMyList(questionList, i);
-                // 重新打开文件
                 // 重新打开文件
                 CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
                 return;
