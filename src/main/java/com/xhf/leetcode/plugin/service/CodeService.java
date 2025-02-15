@@ -652,7 +652,7 @@ public class CodeService {
             if (correctAnswer) {
                 // true
                 sb.append("✅ Accept...").append("\n");
-                sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" 💽: ").append(cr.getStatusMemory()).append("\n");
+                sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" s ").append(" 💽: ").append(cr.getStatusMemory()).append("\n");
                 sb.append("total test cases: ").append(cr.getTotalTestcases()).append("\n");
                 sb.append("total correct: ").append(cr.getTotalCorrect()).append("\n");
             } else {
