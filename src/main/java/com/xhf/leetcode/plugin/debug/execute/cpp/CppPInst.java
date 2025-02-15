@@ -106,6 +106,9 @@ public class CppPInst extends AbstractCppInstExecutor {
         if (watchPool.length != 0) {
             res = new StringBuilder(Constants.WATCH + ":\n");
             for (String watch : watchPool) {
+                if (StringUtils.isBlank(watch)) {
+                    continue;
+                }
                 inst.setParam(watch);
                 res.append(doCompute(watch, inst, pCtx));
             }

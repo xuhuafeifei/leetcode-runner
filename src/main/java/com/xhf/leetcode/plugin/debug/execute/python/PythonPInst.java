@@ -54,6 +54,9 @@ public class PythonPInst extends AbstractPythonInstExecutor {
         if (watchPool.length != 0) {
             res = new StringBuilder(Constants.WATCH + ":\n");
             for (String watch : watchPool) {
+                if (StringUtils.isBlank(watch)) {
+                    continue;
+                }
                 inst.setParam(watch);
                 res.append(super.doExecute(inst, pCtx).getResult()).append("\n");
             }

@@ -131,6 +131,9 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         if (watchPool.length != 0) {
             res.append(Constants.WATCH + ":\n");
             for (String watch : watchPool) {
+                if (StringUtils.isBlank(watch)) {
+                    continue;
+                }
                 res.append(computeExpression(watch, context)).append("\n");
             }
         }
