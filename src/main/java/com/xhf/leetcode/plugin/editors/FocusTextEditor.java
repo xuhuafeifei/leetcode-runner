@@ -52,7 +52,7 @@ public class FocusTextEditor implements FileEditor {
         LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
         // lc检测. lc存储了service和editor之间沟通的重要数据, 这些数据会在editor显示内容是使用
         if (lc == null) {
-            ConsoleUtils.getInstance(project).showWaring("open failed! please close all file and try again!", true, true);
+            ConsoleUtils.getInstance(project).showWaring("打开失败! 请重定位题目或关闭文件", true, true);
             return;
         }
         // 参数检测
@@ -62,7 +62,7 @@ public class FocusTextEditor implements FileEditor {
                 StringUtils.isBlank(lc.getTitleSlug()) ||
                 StringUtils.isBlank(lc.getMarkdownContent())
         ) {
-            ConsoleUtils.getInstance(project).showWaring("open failed! please close all file and try again!", true, true);
+            ConsoleUtils.getInstance(project).showWaring("打开失败! 请重定位题目或关闭文件", true, true);
             LogUtils.error("在创建code file并打开的过程中, LeetcodeEditor的{frontedQuestionId, translatedTitle, difficulty, titleSlug}参数不齐全: " + GsonUtils.toJsonStr(lc));
             ConsoleUtils.getInstance(project).showError("在创建code file并打开的过程中, LeetcodeEditor的{frontedQuestionId, translatedTitle, difficulty, titleSlug}参数不齐全: " + GsonUtils.toJsonStr(lc), false);
             return;
@@ -71,9 +71,9 @@ public class FocusTextEditor implements FileEditor {
         JComponent solutionPanel = new SolutionEditor(project, file).getComponent();
         JComponent submissionPanel = new SubmissionEditor(project, file).getComponent();
 
-        tabbedPane.addTab("content", contentPanel);
-        tabbedPane.addTab("solution", solutionPanel);
-        tabbedPane.addTab("submission", submissionPanel);
+        tabbedPane.addTab("题目内容", contentPanel);
+        tabbedPane.addTab("题解", solutionPanel);
+        tabbedPane.addTab("提交记录", submissionPanel);
 
         myComponent = tabbedPane;
     }

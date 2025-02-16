@@ -81,31 +81,31 @@
 
     <actions>
         <action id="leetcode.plugin.LoginAction" class="com.xhf.leetcode.plugin.actions.loginAction"
-                text="Sign In" icon="/icons/login.svg">
+                text="登录" icon="/icons/login.svg">
         </action>
         <action id="leetcode.plugin.DemoAction" class="com.xhf.leetcode.plugin.actions.DemoAction"
-                text="Demo Test" icon="/icons/clean.svg">
+                text="Demo 测试" icon="/icons/clean.svg">
         </action>
         <action id="leetcode.plugin.PickOneAction" class="com.xhf.leetcode.plugin.actions.PickOneAction"
-                text="Pick One" icon="/icons/random.svg">
+                text="随机一题" icon="/icons/random.svg">
         </action>
         <action id="leetcode.plugin.TodayQuestionAction" class="com.xhf.leetcode.plugin.actions.TodayQuestionAction"
-                text="Daily Question" icon="/icons/daily.svg">
+                text="每日一题" icon="/icons/daily.svg">
         </action>
         <action id="leetcode.plugin.Settings" class="com.xhf.leetcode.plugin.actions.SettingAction"
-                text="Setting" icon="/icons/config.svg">
+                text="设置" icon="/icons/config.svg">
         </action>
         <action id="leetcode.plugin.Clear" class="com.xhf.leetcode.plugin.actions.ClearAction"
-                text="Clear Cache" icon="/icons/clear.svg">
+                text="清除缓存" icon="/icons/clear.svg">
         </action>
         <action id="leetcode.plugin.Reload" class="com.xhf.leetcode.plugin.actions.ReloadQuestionAction"
-                text="Reload Question" icon="/icons/refresh.svg">
+                text="重新加载题目" icon="/icons/refresh.svg">
         </action>
         <action id="leetcode.plugin.Reposition" class="com.xhf.leetcode.plugin.actions.RePositionAction"
-                text="Reload Reposition" icon="/icons/position.svg">
+                text="重定位问题" icon="/icons/position.svg">
         </action>
         <action id="leetcode.plugin.DeepCoding" class="com.xhf.leetcode.plugin.actions.DeepCodingAction"
-                text="Change UI" icon="AllIcons.Actions.SwapPanels">
+                text="切换做题模式" icon="AllIcons.Actions.SwapPanels">
         </action>
 
         <group id="leetcode.plugin.lcActionsToolbar">
@@ -147,28 +147,28 @@
 
         <group id="leetcode.plugin.editor.group">
             <action id="leetcode.plugin.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
-                    text="Run Code" description="Run code(editor)" icon="/icons/run.svg">
+                    text="运行代码" description="运行代码(editor)" icon="/icons/run.svg">
                 <keyboard-shortcut
                         keymap="$default"
                         first-keystroke="ctrl alt 9"/>
             </action>
             <action id="leetcode.plugin.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
-                    text="Submit Code" description="Submit code(editor)" icon="/icons/submit.svg">
+                    text="提交代码" description="提交代码(editor)" icon="/icons/submit.svg">
                 <keyboard-shortcut
                         keymap="$default"
                         first-keystroke="ctrl alt 0"/>
             </action>
             <separator/>
             <action id="leetcode.plugin.editor.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
-                    text="Test Cases" description="Test cases" icon="/icons/test_cases.svg">
+                    text="设置测试案例" description="测试案例设置" icon="/icons/test_cases.svg">
             </action>
             <action id="leetcode.plugin.DefaultContent" class="com.xhf.leetcode.plugin.actions.DefaultContentAction"
-                    text="Default Code" description="Default code">
+                    text="恢复默认代码" description="默认代码">
             </action>
             <separator/>
             <reference id="leetcode.plugin.Reposition"/>
             <action id="leetcode.plugin.debug.Debug" class="com.xhf.leetcode.plugin.actions.DebugAction"
-                    text="Debug Code" description="Debug code" icon="AllIcons.Debugger.AttachToProcess">
+                    text="调试代码" description="调试代码" icon="AllIcons.Debugger.AttachToProcess">
             </action>
         </group>
     </actions>

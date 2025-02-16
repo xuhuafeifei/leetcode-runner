@@ -86,6 +86,7 @@ public class FileUtils {
     }
 
     public static void writePropertiesFileContent(String path, Properties properties) throws IOException {
+        LogUtils.info("start to write properties file content to path = " + path);
         boolean flag = checkAndCreateNewFile(path);
         if (! flag) {
             LogUtils.warn("文件持久化失败!");
@@ -264,8 +265,11 @@ public class FileUtils {
     }
 
     public static void deleteFile(String path) {
-        File file = new File(path);
-        file.deleteOnExit();
+        try {
+            Files.deleteIfExists(Paths.get(path));
+        } catch (IOException e) {
+            LogUtils.error(e);
+        }
     }
 
     /**

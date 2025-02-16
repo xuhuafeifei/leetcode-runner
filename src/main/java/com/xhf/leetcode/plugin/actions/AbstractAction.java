@@ -59,7 +59,7 @@ public abstract class AbstractAction extends AnAction {
                 // LoginService.getInstance(project).doLogin();
                 Messages.showOkCancelDialog(
                         project,
-                        "Please login first...",
+                        "请先登录...",
                         "INFO",
                         Messages.getOkButton(),
                         Messages.getCancelButton(),

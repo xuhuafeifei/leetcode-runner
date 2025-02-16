@@ -9,7 +9,6 @@ import com.intellij.openapi.fileEditor.TextEditorWithPreview;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.JBSplitter;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointListener;
@@ -176,7 +175,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
      * @return AnAction
      */
     private AnAction createNextAction() {
-        return new AbstractAction("Next", "Next question", IconLoader.getIcon("/icons/right.svg", SplitTextEditorWithPreview.class)) {
+        return new AbstractAction("下一题", "下一题", IconLoader.getIcon("/icons/right.svg", SplitTextEditorWithPreview.class)) {
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
                 try {
@@ -304,7 +303,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
      * @return AnAction
      */
     private AnAction createPreAction() {
-        return new AbstractAction("Pre", "Pre question", IconLoader.getIcon("/icons/left.svg", SplitTextEditorWithPreview.class)) {
+        return new AbstractAction("上一题", "上一题", IconLoader.getIcon("/icons/left.svg", SplitTextEditorWithPreview.class)) {
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
                 try {

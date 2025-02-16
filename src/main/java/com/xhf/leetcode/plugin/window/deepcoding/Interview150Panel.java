@@ -10,10 +10,8 @@ import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.ArrayUtils;
-import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
-import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import com.xhf.leetcode.plugin.window.deepcoding.filter.DCAlgorithmFilter;
 import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
@@ -53,7 +51,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
         LCEventBus.getInstance().register(this);
         super.init();
         // 一定要unLock. 因为deepCoding功能一定是登陆后才开放, 无需进行锁定
-        super.unLock();
+//        super.unLock();
     }
 
     private void initMyList() {
@@ -208,7 +206,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     public void loginEventListener(LoginEvent listener) {
         // 提前调用indexLock(). 因为登录后必定要重新加载所有题目数据, 从而rebuild engine's index
         indexLock();
-        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setEmptyText("数据加载中, 请稍等");
     }
 
     /**
@@ -218,7 +216,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void qLoadEndListener(QLoadEndEvent event) {
         unLock();
-        questionList.setEmptyText("Noting to show...");
+        questionList.setEmptyText("没有可用于展示的数据...");
         initMyList();
         updateText();
     }
@@ -226,7 +224,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void qLoadStartListener(QLoadStartEvent event) {
         indexLock();
-        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setEmptyText("数据加载中, 请稍等");
         questionList.setNonData();
     }
 
@@ -236,7 +234,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
             return;
         }
         indexLock();
-        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setEmptyText("数据加载中, 请稍等");
         questionList.setNonData();
         initMyList();
         unLock();
@@ -246,7 +244,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void clearCacheEventListeners(ClearCacheEvent event) {
         loginLock();
-        questionList.setEmptyText("Please login first...");
+        questionList.setEmptyText("请先登录...");
         questionList.setNonData();
     }
 

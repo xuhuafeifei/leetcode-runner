@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LogoutEvent;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.utils.LoginPass;
 
@@ -21,8 +22,8 @@ public class ClearAction extends AbstractAction {
     public void doActionPerformed(Project project, AnActionEvent e) {
         int result = Messages.showOkCancelDialog(
                 project,
-                "Are you sure you want to delete cache files? This will remove your login status and all cached question content.",
-                "Confirm Deletion",
+                "您确定要删除缓存文件吗? 这会清除您使用Leetcode-Runner时系统默认缓存的一切题目数据, 同时退出登录状态, 清空部分设置信息",
+                "确认删除",
                 Messages.getOkButton(),
                 Messages.getCancelButton(),
                 Messages.getQuestionIcon()
@@ -32,6 +33,7 @@ public class ClearAction extends AbstractAction {
             StoreService.getInstance(project).clearCache();
             // post. 通过总线异步通知订阅ClearCacheEvent的订阅者, 处理额外逻辑
             // 比如退出登录状态, 清除LCPanel显示的题目数据等
+            LCEventBus.getInstance().post(new LogoutEvent());
             LCEventBus.getInstance().post(new ClearCacheEvent(project));
         }
     }

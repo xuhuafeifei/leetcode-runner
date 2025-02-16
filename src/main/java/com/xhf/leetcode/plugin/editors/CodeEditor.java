@@ -43,7 +43,7 @@ public class CodeEditor extends CopyToolBarEditor {
 
     @Override
     protected AnAction copyAction() {
-        return new AnAction("Copy", "Copy", AllIcons.Actions.Copy) {
+        return new AnAction("复制代码", "复制代码", AllIcons.Actions.Copy) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 // copy to clipboard
@@ -51,14 +51,14 @@ public class CodeEditor extends CopyToolBarEditor {
                 StringSelection stringSelection = new StringSelection(textPane.getText());
                 clipboard.setContents(stringSelection, null);
 
-                JOptionPane.showMessageDialog(null, "Copy Success");
+                JOptionPane.showMessageDialog(null, "复制成功!");
             }
         };
     }
 
     @Override
     protected AnAction copyToAction() {
-        return new AnAction("Copy to Content Editor", "Copy to content editor", AllIcons.Actions.Back) {
+        return new AnAction("切换代码", "切换代码", AllIcons.Actions.Back) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 String content = textPane.getText();
@@ -71,9 +71,9 @@ public class CodeEditor extends CopyToolBarEditor {
                 String curContent = ViewUtils.getContentOfCurrentOpenVFile(project);
                 boolean flag = ViewUtils.writeContentToCurrentVFile(project, Question.replaceCodeSnippets(curContent, content));
                 if (flag) {
-                    instance.showInfoWithoutConsole("Copy To Editor Success", false, true);
+                    instance.showInfoWithoutConsole("切换成功!", false, true);
                 }else {
-                    instance.showWaringWithoutConsole("Copy To Editor Error", false, true);
+                    instance.showWaringWithoutConsole("切换失败!", false, true);
                 }
             }
         };

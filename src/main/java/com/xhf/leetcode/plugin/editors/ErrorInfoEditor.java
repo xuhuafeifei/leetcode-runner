@@ -42,7 +42,7 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
         String status = sd.getStatusDisplay();
 
         FormBuilder fb = FormBuilder.createFormBuilder();
-        fb.addLabeledComponent("Status", createContentLabel(status));
+        fb.addLabeledComponent("状态", createContentLabel(status));
         fb.addSeparator();
 
         switch (status) {
@@ -50,16 +50,16 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
             case "Memory Limit Exceeded":
             case "Runtime Error":
             case "Time Limit Exceeded":
-                fb.addLabeledComponent("Last testcase:", createContentLabel(od.getLastTestcase()));
+                fb.addLabeledComponent("上一个测试案例:", createContentLabel(od.getLastTestcase()));
                 fb.addSeparator();
-                fb.addLabeledComponent("Expected output:", createContentLabel(od.getExpectedOutput()));
+                fb.addLabeledComponent("期待结果:", createContentLabel(od.getExpectedOutput()));
                 fb.addSeparator();
-                fb.addLabeledComponent("Your output:", createContentLabel(od.getCodeOutput()));
+                fb.addLabeledComponent("你的结果:", createContentLabel(od.getCodeOutput()));
                 fb.addSeparator();
-                fb.addLabeledComponent("Standard output:", createContentLabel(sd.getStdOutput()));
+                fb.addLabeledComponent("标准输出:", createContentLabel(sd.getStdOutput()));
                 break;
             case "Compile Error":
-                fb.addLabeledComponent("Compile error:", createContentLabel(od.getCompileError()));
+                fb.addLabeledComponent("编译错误:", createContentLabel(od.getCompileError()));
                 break;
         }
         fb.addSeparator();
@@ -88,7 +88,7 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
      */
     @Override
     protected final AnAction copyAction() {
-        return new AnAction("Copy Testcase", "Copy testcase", AllIcons.Actions.Copy) {
+        return new AnAction("复制测试案例", "复制测试案例", AllIcons.Actions.Copy) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 // copy to clipboard
@@ -96,14 +96,14 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
                 StringSelection stringSelection = new StringSelection(sd.getOutputDetail().getLastTestcase());
                 clipboard.setContents(stringSelection, null);
 
-                JOptionPane.showMessageDialog(null, "Copy Testcase Success");
+                JOptionPane.showMessageDialog(null, "复制测试案例成功!");
             }
         };
     }
 
     @Override
     protected final AnAction copyToAction() {
-        return new AnAction("Copy Testcase to Content Editor", "Copy to Testcase content editor", AllIcons.Actions.Back) {
+        return new AnAction("新增测试案例", "新增测试案例成功!", AllIcons.Actions.Back) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 Project project = e.getProject();
@@ -114,7 +114,7 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
                 // 获取lc
                 LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByCurrentVFile(project);
                 if (lc == null) {
-                    JOptionPane.showMessageDialog(null, "Copy error, please close all file and try again!");
+                    JOptionPane.showMessageDialog(null, "新增测试案例错误! 请关闭文件或重定位题目");
                     return;
                 }
                 String exampleTestcases = lc.getExampleTestcases();
@@ -127,9 +127,9 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
                 // 更新cache
                 boolean flag = ViewUtils.updateLeetcodeEditorByCurrentVFile(project, lc);
                 if (flag) {
-                    ConsoleUtils.getInstance(project).showInfoWithoutConsole("Copy To Editor Success", false, true);
+                    ConsoleUtils.getInstance(project).showInfoWithoutConsole("新增测试案例成功!", false, true);
                 } else {
-                    ConsoleUtils.getInstance(project).showInfoWithoutConsole("Copy To Editor Error", false, true);
+                    ConsoleUtils.getInstance(project).showInfoWithoutConsole("新增测试案例失败!", false, true);
                 }
             }
         };

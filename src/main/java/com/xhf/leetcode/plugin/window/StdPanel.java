@@ -41,8 +41,8 @@ public class StdPanel extends JPanel {
     public void clear() {
         application.invokeLater(() -> {
             application.runWriteAction(() -> {
-                stdoutPanel.setText("Standard Output:\n");
-                stderrPanel.setText("Standard Error:\n");
+                stdoutPanel.setText("标准输出:\n");
+                stderrPanel.setText("标准错误:\n");
             });
         });
     }
@@ -89,14 +89,14 @@ public class StdPanel extends JPanel {
             setEditable(false);
             setLineWrap(true);
             setWrapStyleWord(true);
-            setText("Standard Output:\n");
+            setText("标准输出:\n");
 
             // 清空内容
             JMenuItem clearMenuItem = new JMenuItem("Clear");
             clearMenuItem.addActionListener(e -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ApplicationManager.getApplication().runWriteAction(() -> {
-                        setText("Standard Output:\n");
+                        setText("标准输出:\n");
                     });
                 });
             });
@@ -113,7 +113,7 @@ public class StdPanel extends JPanel {
     private static class StdErrPanel extends MyJTextAreaWithPopupMenu {
         public StdErrPanel() {
             setEditable(false);
-            setText("Standard Error:\n");
+            setText("标准错误:\n");
 
             // 使用 JBColor 获取当前主题下的错误输出颜色
             JBColor errorColor = new JBColor(Color.RED, Color.RED); // 这里设置红色默认
@@ -124,7 +124,7 @@ public class StdPanel extends JPanel {
             clearMenuItem.addActionListener(e -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ApplicationManager.getApplication().runWriteAction(() -> {
-                        setText("Standard Error:\n");
+                        setText("标准错误:\n");
                     });
                 });
             });

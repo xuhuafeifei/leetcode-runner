@@ -20,7 +20,6 @@ import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
-import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -286,7 +285,7 @@ public class ViewUtils {
                     i < size &&
                     (question = (DeepCodingQuestion) model.getElementAt(i)).getTitleSlug().equals(titleSlug)
             ) {
-                JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
+                JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
                 ViewUtils.scrollToVisibleOfMyList(questionList, i);
                 // 重新打开文件
                 DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, i);
@@ -297,7 +296,7 @@ public class ViewUtils {
                 for (int j = 0; j < size; j++) {
                     question = (DeepCodingQuestion) model.getElementAt(j);
                     if (question.getTitleSlug().equals(titleSlug)) {
-                        JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
+                        JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
                         ViewUtils.scrollToVisibleOfMyList(questionList, j);
                         // 重新打开文件
                         DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, j);
@@ -305,7 +304,7 @@ public class ViewUtils {
                         return;
                     }
                 }
-                JOptionPane.showMessageDialog(null, "current file can not reposition");
+                JOptionPane.showMessageDialog(null, "当前文件无法被重新打开");
             }
         } catch (Exception ex) {
             LogUtils.error(ex);
@@ -325,13 +324,13 @@ public class ViewUtils {
                     i < model.getSize() &&
                     (question = model.getElementAt(i)).getTitleSlug().equals(titleSlug))
             {
-                JOptionPane.showMessageDialog(null, "reposition success! it will be reopen soon");
+                JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
                 ViewUtils.scrollToVisibleOfMyList(questionList, i);
                 // 重新打开文件
                 CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
                 return;
             }
-            JOptionPane.showMessageDialog(null, "current file can not reposition");
+            JOptionPane.showMessageDialog(null, "当前文件无法被重新打开");
         } catch (Exception ex) {
             LogUtils.error(ex);
             ConsoleUtils.getInstance(project).showError("文件重定位错误! 错误原因是: " + ex.getMessage(), false, true);

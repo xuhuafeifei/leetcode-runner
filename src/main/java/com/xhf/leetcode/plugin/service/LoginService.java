@@ -8,10 +8,7 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
-import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
-import com.xhf.leetcode.plugin.bus.LCEventBus;
-import com.xhf.leetcode.plugin.bus.LCSubscriber;
-import com.xhf.leetcode.plugin.bus.LoginEvent;
+import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
@@ -26,8 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +64,10 @@ public final class LoginService {
         }
     }
 
+    public void doLoginAfter () {
+        loginSuccessAfter(project, false);
+    }
+
     private void startCookieLogin(Project project) {
         try {
             new CookieLoginWindow(project).start();
@@ -78,33 +77,39 @@ public final class LoginService {
     }
 
     private void loginSuccessAfter(Project project) {
+        loginSuccessAfter(project, true);
+    }
+
+    private void loginSuccessAfter(Project project, boolean info) {
         loginFlag = Boolean.TRUE;
-        LogUtils.info("login success, try to loading data");
-        // 此处不能弹出对话框, 因为对话框会凝固线程. 登录逻辑涉及不少多线程问题, 不适合弹框
-        ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("login success...", false);
+        if (info) {
+            LogUtils.info("登录成功, 正在查询数据...");
+            // 此处不能弹出对话框, 因为对话框会凝固线程. 登录逻辑涉及不少多线程问题, 不适合弹框
+            ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("登录成功...", false);
+        }
         // post event
         LCEventBus.getInstance().post(new LoginEvent(project));
         // load data
         QuestionService.getInstance().loadAllQuestionData(project);
     }
 
+    /**
+     * 只要用户的Cookie存在且合法, 插件就默认登录, 无需用户再次点击
+     */
     private boolean loginFlag = Boolean.FALSE;
 
     /**
-     * judge whether the client is login
-     * <p>
-     * there are two cases in this project
-     * <p>
-     * first, the user isn't logged and the cookie has not been stored in the local file
-     * <p>
-     * second, the user isn't logged in, but the cookie has been stored in the local file. but the cookie was created by last time,
-     * and this time the user did not click the login button, which means the user did not choose to log in
-     * <p>
-     * loginFlag is a flag to check whether the user has clicked the login button and login succussfully
-     *
+     * 判断系统是否登录
      */
     public boolean isLogin() {
-        return loginFlag && LeetcodeClient.getInstance(project).isLogin();
+        if (loginFlag) {
+            return true;
+        }
+        boolean login = LeetcodeClient.getInstance(project).isLogin();
+        if (login) {
+            loginFlag = true;
+        }
+        return login;
     }
 
     abstract static class BasicWindow {
@@ -276,6 +281,7 @@ public final class LoginService {
             CefCookieManager cefCookieManager = jbcebrowser.getJBCefCookieManager().getCefCookieManager();
 
             // set frame listener
+            /*
             frame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
@@ -285,6 +291,7 @@ public final class LoginService {
                     Disposer.dispose(jbcebrowser);
                 }
             });
+             */
 
             // add cookie listener to check whether the target cookie exists when the page is loaded
             jbCefClient.addLoadHandler(new CefLoadHandlerAdapter() {
@@ -307,8 +314,12 @@ public final class LoginService {
                                 LeetcodeClient.getInstance(project).setCookies(cookieList);
                                 loginSuccessAfter(project);
                                 new Thread(() -> {
+                                    // clear all cookies
+                                    cefCookieManager.deleteCookies("", "");
                                     frame.setVisible(false);
                                     frame.dispose();
+                                    // close jcef browser
+                                    Disposer.dispose(jbcebrowser);
                                 }).start();
                             } else {
                                 cookieList.clear();
@@ -325,8 +336,8 @@ public final class LoginService {
 
     // 清除本地登陆状态的标志位
     @Subscribe
-    public void clearCacheListeners(ClearCacheEvent event) {
+    public void logoutEventListeners(LogoutEvent event) {
         loginFlag = false;
-
+        LeetcodeClient.getInstance(project).clearCookies();
     }
 }

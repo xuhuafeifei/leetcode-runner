@@ -15,6 +15,7 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.window.filter.*;
 import org.apache.commons.lang3.StringUtils;
@@ -137,7 +138,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
      */
     protected MySearchConditionPanel<Question> initTagsCond() {
         // converted匹配的时question的tag的slug
-        return new MySearchConditionPanel<>(this::updateText, "Tags") {
+        return new MySearchConditionPanel<>(this::updateText, "算法标签") {
             @Override
             public OptionConvert createConvert() {
                 // converted匹配的是question的tag的slug
@@ -165,7 +166,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
     protected MySearchConditionPanel<Question> initCategoryCond() {
         // converted匹配的是question的tag的slug
         // 封装题目分类筛选组件的容器面板
-        return new MySearchConditionPanel<>(this::updateText, "Category") {
+        return new MySearchConditionPanel<>(this::updateText, "分类") {
             @Override
             public OptionConvert createConvert() {
                 // converted匹配的是question的tag的slug
@@ -199,7 +200,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
      */
     protected MySearchConditionPanel<Question> initDifficultyCond() {
         // 封装难度筛选组件的容器面板
-        return new MySearchConditionPanel<>(this::updateText, "Difficulty") {
+        return new MySearchConditionPanel<>(this::updateText, "难度") {
             @Override
             public OptionConvert createConvert() {
                 /*
@@ -208,9 +209,9 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
                   HARD
                  */
                 ArrayOptionConverter converter = new ArrayOptionConverter(3);
-                converter.addPair("easy", "EASY");
-                converter.addPair("medium", "MEDIUM");
-                converter.addPair("hard", "HARD");
+                converter.addPair("简单", "EASY");
+                converter.addPair("中等", "MEDIUM");
+                converter.addPair("困难", "HARD");
                 return converter;
             }
 
@@ -232,7 +233,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
           NOT_STARTED
          */
         // 封装状态筛选组件的容器面板
-        return new MySearchConditionPanel<Question>(this::updateText, "Status") {
+        return new MySearchConditionPanel<Question>(this::updateText, "题目状态") {
             @Override
             public OptionConvert createConvert() {
                 /*
@@ -241,9 +242,12 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
                   NOT_STARTED
                  */
                 ArrayOptionConverter converter = new ArrayOptionConverter(3);
-                converter.addPair("solved", "AC");
-                converter.addPair("trying", "TRIED");
-                converter.addPair("todo", "NOT_STARTED");
+//                converter.addPair("solved", "AC");
+//                converter.addPair("trying", "TRIED");
+//                converter.addPair("todo", "NOT_STARTED");
+                converter.addPair("已解决", "AC");
+                converter.addPair("尝试中", "TRIED");
+                converter.addPair("未开始", "NOT_STARTED");
                 return converter;
             }
 
@@ -307,11 +311,16 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
 
     // 登陆锁定. 该方法表示当前项目处于未登录状态, 不提供搜索服务
     public final void loginLock() {
+        // 判断当前系统是否登录
+        LoginService instance = LoginService.getInstance(project);
+        if (instance.isLogin()) {
+            instance.doLoginAfter();
+        }
         lock = true;
         this.conditionPanelArray.forEach(e -> e.setEnabled(false));
         searchField.setEnabled(false);
         searchField.setFont(searchField.getFont().deriveFont(Font.ITALIC));
-        searchField.setText("please login first");
+        searchField.setText("请先登录");
         searchField.setForeground(JBColor.RED);
         searchField.repaint(); // 强制重绘
     }

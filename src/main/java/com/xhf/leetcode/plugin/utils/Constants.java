@@ -12,17 +12,17 @@ public interface Constants {
     Color BACKGROUND_COLOR = UIManager.getColor("Table.background");
     Font ENGLISH_FONT = new Font("DejaVu Sans Mono", Font.PLAIN, 15);
     Font CN_FONT = new Font("Monospaced", Font.PLAIN, 15);
-    String SOLUTION_OPEN_ERROR = "Submission Editor open error! please close all file and try again";
-    String SOLUTION_CONTENT_NOT_SUPPORT = "This content is not supported to show yet..., please choose another solution";
+    String SOLUTION_OPEN_ERROR = "提交记录显示功能的编辑器打开错误! 请重定位文件或关闭当前文件";
+    String SOLUTION_CONTENT_NOT_SUPPORT = "当前题解暂不支持显示, 请选择其他题解";
 
     Color GREEN_COLOR = new JBColor(new Color(92, 184, 92), new Color(92, 184, 92));
     Color YELLOW_COLOR = new JBColor(new Color(240, 173, 78), new Color(240, 173, 78));
     Color RED_COLOR = new JBColor(new Color(217, 83, 79), new Color(217, 83, 79));
 
-    String PLEASE_LOGIN = "Please Login First...";
-    String NOTING_TO_SHOW = "Noting To Show";
+    String PLEASE_LOGIN = "请先登录...";
+    String NOTING_TO_SHOW = "没有可用于展示的数据";
 
-    String SUBMISSION_EDITOR_OPEN_ERROR = "Submission Editor open error! please close all file and try again";
+    String SUBMISSION_EDITOR_OPEN_ERROR = "提交记录显示功能的编辑器打开错误! 请重定位文件或关闭当前文件";
 
     /*-------------用于openSecond(Map)的key--------------*/
     String SOLUTION_CONTENT = "SOLUTION_CONTENT";
@@ -39,6 +39,7 @@ public interface Constants {
     String ARTICLE_URL = "ARTICLE_URL";
 
     Border BORDER = JBUI.Borders.customLine(JBColor.border(), 1);
+    // 别改, debug web端代码已经写死了, 改了容易出bug
     String LOCAL_VARIABLE = "Local variable";
     String STATIC_VARIABLE = "Static variable";
     String MEMBER_VARIABLE = "Member variable";

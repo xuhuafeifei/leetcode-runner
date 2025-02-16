@@ -23,11 +23,9 @@ import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
-import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import com.xhf.leetcode.plugin.window.deepcoding.filter.CQAlgorithmFilter;
 import com.xhf.leetcode.plugin.window.deepcoding.filter.CQDifficultyFilter;
 import com.xhf.leetcode.plugin.window.deepcoding.filter.CQFilterChain;
@@ -73,7 +71,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
         this.searchEngine = CompetitionQuestionEngine.getInstance(project);
         initMyList();
         super.init();
-        super.unLock();
+//        super.unLock();
         LCEventBus.getInstance().register(this);
     }
 
@@ -229,7 +227,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     @Override
     protected List<MySearchConditionPanel<CompetitionQuestion>> getSearchCondition() {
         List<MySearchConditionPanel<CompetitionQuestion>> list = new ArrayList<>();
-        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, "Rating") {
+        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, "竞赛分") {
             @Override
             public OptionConvert createConvert() {
                 ArrayOptionConverter arr = new ArrayOptionConverter(7);
@@ -269,9 +267,9 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
             @Override
             public OptionConvert createConvert() {
                 ArrayOptionConverter converter = new ArrayOptionConverter(3);
-                converter.addPair("easy", "EASY");
-                converter.addPair("medium", "MEDIUM");
-                converter.addPair("hard", "HARD");
+                converter.addPair("简单", "EASY");
+                converter.addPair("中等", "MEDIUM");
+                converter.addPair("困难", "HARD");
                 return converter;
             }
 
@@ -313,7 +311,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     public void loginEventListener(LoginEvent listener) {
         // 提前调用indexLock(). 因为登录后必定要重新加载所有题目数据, 从而rebuild engine's index
         indexLock();
-        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setEmptyText("数据加载中, 请稍等");
     }
 
     /**
@@ -323,7 +321,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     @Subscribe
     public void qLoadEndListener(QLoadEndEvent event) {
         unLock();
-        questionList.setEmptyText("Noting to show...");
+        questionList.setEmptyText("没有可用于展示的数据...");
         initMyList();
         updateText();
     }
@@ -331,7 +329,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     @Subscribe
     public void qLoadStartListener(QLoadStartEvent event) {
         indexLock();
-        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setEmptyText("数据加载中, 请稍等");
         questionList.setNonData();
     }
 
@@ -341,7 +339,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
             return;
         }
         indexLock();
-        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setEmptyText("数据加载中, 请稍等");
         questionList.setNonData();
         initMyList();
         unLock();
@@ -351,7 +349,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     @Subscribe
     public void clearCacheEventListeners(ClearCacheEvent event) {
         loginLock();
-        questionList.setEmptyText("Please login first...");
+        questionList.setEmptyText("请先登录...");
         questionList.setNonData();
     }
 
