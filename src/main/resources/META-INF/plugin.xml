@@ -107,6 +107,9 @@
         <action id="leetcode.plugin.DeepCoding" class="com.xhf.leetcode.plugin.actions.DeepCodingAction"
                 text="切换做题模式" icon="AllIcons.Actions.SwapPanels">
         </action>
+        <action id="leetcode.plugin.StarAction" class="com.xhf.leetcode.plugin.actions.StarAction"
+                text="给个star吧, 上帝" icon="/icons/star.svg">
+        </action>
 
         <group id="leetcode.plugin.lcActionsToolbar">
             <reference id="leetcode.plugin.LoginAction"/>
@@ -121,6 +124,8 @@
             <separator/>
             <reference id="leetcode.plugin.Reposition"/>
             <reference id="leetcode.plugin.DeepCoding"/>
+            <separator/>
+            <reference id="leetcode.plugin.StarAction"/>
         </group>
 
         <group id="leetcode.plugin.consoleToolbar">
