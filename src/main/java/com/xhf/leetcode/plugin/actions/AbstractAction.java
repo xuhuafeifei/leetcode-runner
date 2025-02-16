@@ -38,6 +38,7 @@ public abstract class AbstractAction extends AnAction {
         // 目前先对所有action做频率限制
         if (! ActionUtils.get()) {
             ConsoleUtils.getInstance(e.getProject()).showInfo("您当前操作过于频繁!", false, true);
+            return;
         }
         // settings check
         SettingPass settingPass = this.getClass().getAnnotation(SettingPass.class);
