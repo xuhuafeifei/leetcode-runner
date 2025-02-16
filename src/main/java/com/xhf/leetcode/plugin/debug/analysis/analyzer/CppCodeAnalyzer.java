@@ -27,6 +27,7 @@ public class CppCodeAnalyzer extends AbstractCodeAnalyzer {
 
     public AnalysisResult analyze(String code) {
         LogUtils.simpleDebug(code);
+        code = handleCode(code);
         // 正则表达式匹配方法签名
         Matcher matcher = pattern.matcher(code);
 
@@ -54,5 +55,21 @@ public class CppCodeAnalyzer extends AbstractCodeAnalyzer {
         }
 
         throw new DebugError("代码片段分析错误! 无法匹配任何有效信息\n code = \n" + code);
+    }
+
+    private String handleCode(String code) {
+        StringBuilder sb = new StringBuilder();
+        String[] split = code.split("\n");
+        int i = 0;
+        for (i = 0; i < split.length; i++) {
+            String line = split[i];
+            if (line.startsWith("class Solution")) {
+                break;
+            }
+        }
+        for (int j = i; j < split.length; j++) {
+            sb.append(split[j]).append("\n");
+        }
+        return sb.toString();
     }
 }
