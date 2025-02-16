@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
 import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.service.LoginService;
@@ -34,6 +35,10 @@ public abstract class AbstractAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();
         assert project != null;
+        // 目前先对所有action做频率限制
+        if (! ActionUtils.get()) {
+            ConsoleUtils.getInstance(e.getProject()).showInfo("您当前操作过于频繁!", false, true);
+        }
         // settings check
         SettingPass settingPass = this.getClass().getAnnotation(SettingPass.class);
         if (settingPass == null) {

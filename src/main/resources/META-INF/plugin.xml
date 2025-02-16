@@ -7,7 +7,7 @@
     <description><![CDATA[
         <h1>Introducing:</h1>
         <p>
-          <code>Leetcode-runner</code> is a plugin of idea. Aimed at achieving a fully functional core, and easy-to-use plugin. The Leetcode-Runner support everything in daily work, such as <strong>coding</strong>, <strong>run/submit</strong>, <strong>testcase change</strong>, <strong>running result display</strong>, <strong>question solution display</strong>, <strong>submission display</strong>, <strong>coding replace</strong>、<strong>testcase replace</strong> and etc. allow user solove leetcode question without website.
+          <code>Leetcode-runner</code> is a plugin of Jetbrains's Product. Aimed at achieving a fully functional core, and easy-to-use plugin. The Leetcode-Runner support everything in daily work, such as <strong>coding</strong>, <strong>run/submit</strong>, <strong>testcase change</strong>, <strong>running result display</strong>, <strong>question solution display</strong>, <strong>submission display</strong>, <strong>coding replace</strong>、<strong>testcase replace</strong> and etc. allow user solove leetcode question without website.
         </p>
         <p>&nbsp;</p>
         <p>Additionally, the plugin provides tow extremely powerful features: <strong>bulk question fast search</strong> and <strong>core code breakpoint debugging</strong></p>

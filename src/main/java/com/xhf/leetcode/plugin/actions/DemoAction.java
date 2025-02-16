@@ -25,7 +25,7 @@ public class DemoAction extends AbstractAction {
         /*
           强制为true, 而且要骗过idea的检测. 毕竟我想保留一开始的垃圾代码. 但又不想要执行. 毕竟执行了铁定报错, 我又不想改, 就这么干了
          */
-        if (1 != 2) {
+        if (true) {
             // 加载图片资源
             ImageIcon imageIcon = new ImageIcon(getClass().getResource("/icons/jiejie.jpg"));
 
@@ -59,6 +59,10 @@ public class DemoAction extends AbstractAction {
                     new Object[]{"确定", "取消"},
                     "确定"
             );
+            return;
+        }
+        System.out.println("abab");
+        if (true) {
             return;
         }
 
