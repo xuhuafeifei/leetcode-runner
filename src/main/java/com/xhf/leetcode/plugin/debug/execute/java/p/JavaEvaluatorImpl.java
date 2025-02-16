@@ -210,7 +210,7 @@ public class JavaEvaluatorImpl implements Evaluator {
         } catch (ComputeError e) {
             // 把他变成字符串
             String err = DebugUtils.getStackTraceAsString(e);
-            LogUtils.error(e);
+            LogUtils.warn(err);
             throw new ComputeError(e.getMessage());
         } catch (Exception e) {
             LogUtils.error(e);
@@ -352,7 +352,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             try {
                 v = takeValueByVName(vName, Env.getLocalEnv());
             } catch (IncompatibleThreadStateException | AbsentInformationException e) {
-                LogUtils.error(e);
+                LogUtils.error(DebugUtils.getStackTraceAsString(e));
                 throw new ComputeError(e.getMessage());
             }
 //            if (v != null) {
@@ -856,7 +856,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                         throw new ComputeError(e.getMessage());
                     }
                 } catch (Exception e) {
-                    LogUtils.error(e);
+                    LogUtils.warn(DebugUtils.getStackTraceAsString(e));
                     throw new ComputeError(e.getMessage());
                 }
             } else {
@@ -976,7 +976,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 try {
                     values.add(tf.parseToToken(paramNames[i], ctx).getValue());
                 } catch (Exception e) {
-                    LogUtils.error(e);
+                    LogUtils.warn(DebugUtils.getStackTraceAsString(e));
                     throw new ComputeError(token + "的第" + i + "个参数" + paramNames[i] + "解析错误! cause is " + e.getMessage());
                 }
             }
