@@ -12,10 +12,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.DebugCheck;
-import com.xhf.leetcode.plugin.utils.LangType;
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.LoginPass;
+import com.xhf.leetcode.plugin.utils.*;
 
 import javax.swing.*;
 
@@ -27,6 +24,7 @@ import javax.swing.*;
  */
 @DebugCheck
 @LoginPass
+@RatePass
 public class DebugAction extends AbstractAction {
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {

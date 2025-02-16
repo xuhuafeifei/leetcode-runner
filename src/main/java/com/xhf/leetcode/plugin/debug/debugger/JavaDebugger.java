@@ -122,6 +122,8 @@ public class JavaDebugger extends AbstractDebugger {
         } catch (DebugError ex) {
             ConsoleUtils.getInstance(project).showWaring(ex.getMessage(), false, true, ex.getMessage(), "debug异常", ConsoleDialog.ERROR);
             LogUtils.error(ex);
+        } catch (VMDisconnectedException e) {
+            DebugUtils.simpleDebug("vm 链接断开", project, true);
         } catch (Exception e) {
             ConsoleUtils.getInstance(project).showWaring(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
             LogUtils.error(e);

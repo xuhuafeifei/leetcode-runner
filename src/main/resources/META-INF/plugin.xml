@@ -70,9 +70,9 @@
         <applicationService serviceImplementation="com.xhf.leetcode.plugin.setting.AppSettings"/>
 
         <!-- tool window -->
-        <toolWindow id="Leetcode Plugin" secondary="true" icon="/icons/leetcode-runner24x24.svg" anchor="right"
+        <toolWindow id="Leetcode Runner" secondary="true" icon="/icons/leetcode-runner24x24.svg" anchor="right"
                     factoryClass="com.xhf.leetcode.plugin.window.LCToolWindowFactory"/>
-        <toolWindow id="Leetcode Console Plugin" secondary="true" icon="/icons/leetcode-runner24x24.svg" anchor="bottom"
+        <toolWindow id="Leetcode Runner 控制台" secondary="true" icon="/icons/leetcode-runner24x24.svg" anchor="bottom"
                     factoryClass="com.xhf.leetcode.plugin.window.LCConsoleWindowFactory" />
 
         <!-- http request -->

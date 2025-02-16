@@ -12,6 +12,7 @@ import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LoginPass;
+import com.xhf.leetcode.plugin.utils.RatePass;
 import com.xhf.leetcode.plugin.utils.SettingPass;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -35,10 +36,12 @@ public abstract class AbstractAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();
         assert project != null;
-        // 目前先对所有action做频率限制
-        if (! ActionUtils.get()) {
-            ConsoleUtils.getInstance(e.getProject()).showInfo("您当前操作过于频繁!", false, true);
-            return;
+        RatePass ratePass = this.getClass().getAnnotation(RatePass.class);
+        if (ratePass == null) {
+            if (!ActionUtils.get()) {
+                ConsoleUtils.getInstance(e.getProject()).showInfo("您当前操作过于频繁!", false, true);
+                return;
+            }
         }
         // settings check
         SettingPass settingPass = this.getClass().getAnnotation(SettingPass.class);
