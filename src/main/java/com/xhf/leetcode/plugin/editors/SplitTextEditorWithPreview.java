@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileEditor.TextEditorWithPreview;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -146,18 +147,21 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                 return (new AbstractAction("Leetcode 热题 100 道", "Leetcode 热题 100 道", IconLoader.getIcon("/icons/m_hot100.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
+                        ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                     }
                 });
             case Interview150Panel.INTER150:
                 return (new AbstractAction("经典面试 150 道", "经典面试 150 道", IconLoader.getIcon("/icons/m_mianshi150.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
+                        ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                     }
                 });
             case LCCompetitionPanel.LC_COMPETITION:
                 return (new AbstractAction("Leetcode 竞赛", "Leetcode 竞赛", IconLoader.getIcon("/icons/m_LeetCode_Cup.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
+                        ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                     }
                 });
             default:
@@ -165,6 +169,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                 return new AbstractAction("Leetcode", "Leetcode", IconLoader.getIcon("/icons/pluginIcon.svg", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
+                        ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                     }
                 };
         }

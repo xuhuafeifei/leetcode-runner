@@ -49,7 +49,7 @@ public abstract class AbstractAction extends AnAction {
             AppSettings appSettings = AppSettings.getInstance();
             if (!appSettings.initOrNot()) {
                 Messages.showInfoMessage("请先前往设置界面设置插件...", "INFO");
-                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
         }
@@ -79,13 +79,13 @@ public abstract class AbstractAction extends AnAction {
             // reader 检测
             if (StringUtils.isBlank(appSettings.getReadTypeName())) {
                 Messages.showInfoMessage("debug reader没有设置, 请前往设置界面", "INFO");
-                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
             // output 检测
             if (StringUtils.isBlank(appSettings.getOutputTypeName())) {
                 Messages.showInfoMessage("debug output没有设置, 请前往设置界面", "INFO");
-                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
             // 状态检测

@@ -66,7 +66,7 @@
         <!-- setting -->
         <applicationConfigurable parentId="tools" instance="com.xhf.leetcode.plugin.setting.AppSettingsConfigurable"
                                  id="org.intellij.sdk.settings.AppSettingsConfigurable"
-                                 displayName="Leetcode Setting"/>
+                                 displayName="Leetcode Runner Setting"/>
         <applicationService serviceImplementation="com.xhf.leetcode.plugin.setting.AppSettings"/>
 
         <!-- tool window -->

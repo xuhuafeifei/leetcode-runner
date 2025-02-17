@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.io.console;
 
+import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.Disposable;
@@ -9,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -293,11 +295,15 @@ public final class ConsoleUtils implements Disposable {
             assert consoleView != null;
             // 弹出
             if (isShow) {
-                // 获取并显示 ToolWindow（确保控制台窗口可见）
-                ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-                ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.ID);
-                if (toolWindow != null && !toolWindow.isVisible()) {
-                    toolWindow.show();  // 显示控制台窗口
+                try {
+                    // 获取并显示 ToolWindow（确保控制台窗口可见）
+                    ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
+                    ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.ID);
+                    if (toolWindow != null && !toolWindow.isVisible()) {
+                        toolWindow.show();  // 显示控制台窗口
+                    }
+                } catch (Exception e) {
+                    LogUtils.warn(DebugUtils.getStackTraceAsString(e));
                 }
             }
             consoleView.getComponent().setVisible(true);
