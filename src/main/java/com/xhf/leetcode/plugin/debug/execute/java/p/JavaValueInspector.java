@@ -2,6 +2,8 @@ package com.xhf.leetcode.plugin.debug.execute.java.p;
 
 import com.sun.jdi.*;
 import com.xhf.leetcode.plugin.debug.analysis.converter.convert.TreeNode;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.MapUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -125,48 +127,6 @@ public class JavaValueInspector {
         return res;
     }
 
-    private String handleHashSet(ObjectReference objRef, int depth) {
-        if (objRef == null) {
-            return "null";
-        }
-        objRef = (ObjectReference) objRef.getValue(objRef.referenceType().fieldByName("map"));
-        ReferenceType referenceType = objRef.referenceType();
-        Value table = objRef.getValue(referenceType.fieldByName("table"));
-        int size = ((IntegerValue) objRef.getValue(referenceType.fieldByName("size"))).intValue();
-        if (table == null) {
-            return "null";
-        }
-        if (size == 0) {
-            return "{}";
-        }
-        ArrayReference t = (ArrayReference) table;
-        int index = 0;
-        StringBuilder sb = new StringBuilder(getTabsByDepth(depth));
-        sb.append("{");
-
-        for (; index < t.length(); ++index) {
-            Value node = t.getValue(index);
-            if (node != null) {
-                // 获取Node节点
-                ObjectReference objNode = (ObjectReference) node;
-                ReferenceType objNodeRef = objNode.referenceType();
-                Value key = objNode.getValue(objNodeRef.fieldByName("key"));
-                Value next = objNode.getValue(objNodeRef.fieldByName("next"));
-                sb.append(this.inspectValue(key)).append(",   ");
-
-                // 迭代node直到next为null
-                while (next != null) {
-                    objNode = (ObjectReference) next;
-                    objNodeRef = objNode.referenceType();
-                    key = objNode.getValue(objNodeRef.fieldByName("key"));
-                    next = objNode.getValue(objNodeRef.fieldByName("next"));
-                    sb.append(this.inspectValue(key)).append(",   ");
-                }
-            }
-        }
-        return removeBlankAndComma(sb);
-    }
-
     /**
      * 移除末尾的空格和逗号
      */
@@ -193,48 +153,71 @@ public class JavaValueInspector {
     /**
      * 借鉴了{@link java.util.HashMap.HashIterator}的写法
      */
-    private String handleHashMap(ObjectReference objRef, int depth) {
+    private String handleMapBasedCollection(ObjectReference objRef, int depth, boolean includeValue) {
         if (objRef == null) {
             return "null";
         }
-        ReferenceType referenceType = objRef.referenceType();
-        Value table = objRef.getValue(referenceType.fieldByName("table"));
-        int size = ((IntegerValue) objRef.getValue(referenceType.fieldByName("size"))).intValue();
-        if (table == null) {
-            return null;
-        }
-        if (size == 0) {
-            return "{}";
-        }
-        ArrayReference t = (ArrayReference) table;
-        int index = 0;
-        StringBuilder sb = new StringBuilder(getTabsByDepth(depth));
-        sb.append("{");
+        try {
+            if (!includeValue) {
+                // 对于HashSet，需要先获取内部的HashMap
+                objRef = (ObjectReference) objRef.getValue(objRef.referenceType().fieldByName("map"));
+            }
+            ReferenceType referenceType = objRef.referenceType();
+            Value table = objRef.getValue(referenceType.fieldByName("table"));
+            int size = ((IntegerValue) objRef.getValue(referenceType.fieldByName("size"))).intValue();
+            if (table == null || size == 0) {
+                return "{}";
+            }
+            ArrayReference t = (ArrayReference) table;
+            int index = 0;
+            StringBuilder sb = new StringBuilder(getTabsByDepth(depth));
+            sb.append("{");
 
-        for (; index < t.length(); ++index) {
-            Value node = t.getValue(index);
-            if (node != null) {
-                // 获取Node节点
-                ObjectReference objNode = (ObjectReference) node;
-                ReferenceType objNodeRef = objNode.referenceType();
-                Value key = objNode.getValue(objNodeRef.fieldByName("key"));
-                Value value = objNode.getValue(objNodeRef.fieldByName("value"));
-                Value next = objNode.getValue(objNodeRef.fieldByName("next"));
-                sb.append(this.inspectValue(key)).append(":  ").append(value).append(",   ");
+            for (; index < t.length(); ++index) {
+                Value node = t.getValue(index);
+                if (node != null) {
+                    // 获取Node节点
+                    ObjectReference objNode = (ObjectReference) node;
+                    ReferenceType objNodeRef = objNode.referenceType();
+                    Value key = objNode.getValue(objNodeRef.fieldByName("key"));
+                    Value next = objNode.getValue(objNodeRef.fieldByName("next"));
+                    if (includeValue) {
+                        Value value = objNode.getValue(objNodeRef.fieldByName("value"));
+                        sb.append(this.inspectValue(key)).append(":  ").append(this.inspectValue(value)).append(",   ");
+                    } else {
+                        sb.append(this.inspectValue(key)).append(",   ");
+                    }
 
-                // 迭代node直到next为null
-                while (next != null) {
-                    objNode = (ObjectReference) next;
-                    objNodeRef = objNode.referenceType();
-                    key = objNode.getValue(objNodeRef.fieldByName("key"));
-                    value = objNode.getValue(objNodeRef.fieldByName("value"));
-                    next = objNode.getValue(objNodeRef.fieldByName("next"));
-                    sb.append(this.inspectValue(key)).append(":  ").append(value).append(",   ");
+                    // 迭代node直到next为null
+                    while (next != null) {
+                        objNode = (ObjectReference) next;
+                        objNodeRef = objNode.referenceType();
+                        key = objNode.getValue(objNodeRef.fieldByName("key"));
+                        next = objNode.getValue(objNodeRef.fieldByName("next"));
+                        if (includeValue) {
+                            Value value = objNode.getValue(objNodeRef.fieldByName("value"));
+                            sb.append(this.inspectValue(key)).append(":  ").append(this.inspectValue(value)).append(",   ");
+                        } else {
+                            sb.append(this.inspectValue(key)).append(",   ");
+                        }
+                    }
                 }
             }
+            return removeBlankAndComma(sb);
+        } catch (Exception e) {
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            return handleComplexObject(objRef, depth);
         }
-        return removeBlankAndComma(sb);
     }
+
+    private String handleHashSet(ObjectReference objRef, int depth) {
+        return handleMapBasedCollection(objRef, depth, false);
+    }
+
+    private String handleHashMap(ObjectReference objRef, int depth) {
+        return handleMapBasedCollection(objRef, depth, true);
+    }
+
 
     private boolean isHashMap(ObjectReference objRef) {
         if (objRef == null) {
