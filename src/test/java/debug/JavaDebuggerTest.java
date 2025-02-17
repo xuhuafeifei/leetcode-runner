@@ -2,6 +2,8 @@ package debug;
 
 import org.junit.Test;
 
+import java.util.HashMap;
+
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -9,7 +11,11 @@ import org.junit.Test;
 public class JavaDebuggerTest {
     @Test
     public void test() {
-
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < 100; ++i) {
+            map.put(i, i);
+        }
+        System.out.println(map);
     }
 
     public static void main(String[] args) {

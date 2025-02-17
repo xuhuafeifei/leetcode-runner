@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.debug.execute.java.p;
 import com.sun.jdi.*;
 import com.xhf.leetcode.plugin.debug.analysis.converter.convert.TreeNode;
 import com.xhf.leetcode.plugin.utils.MapUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -112,12 +113,134 @@ public class JavaValueInspector {
             res = handleTreeNode(objRef, depth);
         } else if (isListNode(objRef)) {
             res = handleListNode(objRef, depth);
+        } else if (isHashMap(objRef)) {
+            res = handleHashMap(objRef, depth);
         } else if (isPriorityQueue(objRef)) {
             res = handlePriorityQueue(objRef, depth);
+        } else if (isHashSet(objRef)) {
+            res = handleHashSet(objRef, depth);
         } else {
             res = handleComplexObject(objRef, depth);
         }
         return res;
+    }
+
+    private String handleHashSet(ObjectReference objRef, int depth) {
+        if (objRef == null) {
+            return "null";
+        }
+        objRef = (ObjectReference) objRef.getValue(objRef.referenceType().fieldByName("map"));
+        ReferenceType referenceType = objRef.referenceType();
+        Value table = objRef.getValue(referenceType.fieldByName("table"));
+        int size = ((IntegerValue) objRef.getValue(referenceType.fieldByName("size"))).intValue();
+        if (table == null) {
+            return "null";
+        }
+        if (size == 0) {
+            return "{}";
+        }
+        ArrayReference t = (ArrayReference) table;
+        int index = 0;
+        StringBuilder sb = new StringBuilder(getTabsByDepth(depth));
+        sb.append("{");
+
+        for (; index < t.length(); ++index) {
+            Value node = t.getValue(index);
+            if (node != null) {
+                // 获取Node节点
+                ObjectReference objNode = (ObjectReference) node;
+                ReferenceType objNodeRef = objNode.referenceType();
+                Value key = objNode.getValue(objNodeRef.fieldByName("key"));
+                Value next = objNode.getValue(objNodeRef.fieldByName("next"));
+                sb.append(this.inspectValue(key)).append(",   ");
+
+                // 迭代node直到next为null
+                while (next != null) {
+                    objNode = (ObjectReference) next;
+                    objNodeRef = objNode.referenceType();
+                    key = objNode.getValue(objNodeRef.fieldByName("key"));
+                    next = objNode.getValue(objNodeRef.fieldByName("next"));
+                    sb.append(this.inspectValue(key)).append(",   ");
+                }
+            }
+        }
+        return removeBlankAndComma(sb);
+    }
+
+    /**
+     * 移除末尾的空格和逗号
+     */
+    @NotNull
+    private String removeBlankAndComma(StringBuilder sb) {
+        while (sb.length() > 0 && sb.charAt(sb.length() - 1) == ' ') {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        int len = sb.length();
+        if (len - 1 > 0 && sb.charAt(len - 1) == ',') {
+            sb.deleteCharAt(len - 1);
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    private boolean isHashSet(ObjectReference objRef) {
+        if (objRef == null) {
+            return false;
+        }
+        return objRef.type().name().equals("java.util.HashSet");
+    }
+
+    /**
+     * 借鉴了{@link java.util.HashMap.HashIterator}的写法
+     */
+    private String handleHashMap(ObjectReference objRef, int depth) {
+        if (objRef == null) {
+            return "null";
+        }
+        ReferenceType referenceType = objRef.referenceType();
+        Value table = objRef.getValue(referenceType.fieldByName("table"));
+        int size = ((IntegerValue) objRef.getValue(referenceType.fieldByName("size"))).intValue();
+        if (table == null) {
+            return null;
+        }
+        if (size == 0) {
+            return "{}";
+        }
+        ArrayReference t = (ArrayReference) table;
+        int index = 0;
+        StringBuilder sb = new StringBuilder(getTabsByDepth(depth));
+        sb.append("{");
+
+        for (; index < t.length(); ++index) {
+            Value node = t.getValue(index);
+            if (node != null) {
+                // 获取Node节点
+                ObjectReference objNode = (ObjectReference) node;
+                ReferenceType objNodeRef = objNode.referenceType();
+                Value key = objNode.getValue(objNodeRef.fieldByName("key"));
+                Value value = objNode.getValue(objNodeRef.fieldByName("value"));
+                Value next = objNode.getValue(objNodeRef.fieldByName("next"));
+                sb.append(this.inspectValue(key)).append(":  ").append(value).append(",   ");
+
+                // 迭代node直到next为null
+                while (next != null) {
+                    objNode = (ObjectReference) next;
+                    objNodeRef = objNode.referenceType();
+                    key = objNode.getValue(objNodeRef.fieldByName("key"));
+                    value = objNode.getValue(objNodeRef.fieldByName("value"));
+                    next = objNode.getValue(objNodeRef.fieldByName("next"));
+                    sb.append(this.inspectValue(key)).append(":  ").append(value).append(",   ");
+                }
+            }
+        }
+        return removeBlankAndComma(sb);
+    }
+
+    private boolean isHashMap(ObjectReference objRef) {
+        if (objRef == null) {
+            return false;
+        }
+        return objRef.type().name().equals("java.util.HashMap");
     }
 
     private String handlePriorityQueue(ObjectReference objRef, int depth) {
