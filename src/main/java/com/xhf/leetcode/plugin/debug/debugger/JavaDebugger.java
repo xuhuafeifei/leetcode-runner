@@ -14,6 +14,7 @@ import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.cpp.KillPortProcess;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.execute.java.JavaInstFactory;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
@@ -50,7 +51,7 @@ public class JavaDebugger extends AbstractDebugger {
     /**
      * 服务启动端口
      */
-    private int port;
+    private int port = -1;
     /**
      * 用于输出debug过程中, 代码的std out/ std error
      */
@@ -101,6 +102,12 @@ public class JavaDebugger extends AbstractDebugger {
         env.stopDebug();
         try {
             vm.dispose();
+            if (port != -1) {
+                // 强制关停端口
+                if (DebugUtils.isPortAvailable2("localhost", port)) {
+                    KillPortProcess.killProcess(port);
+                }
+            }
         } catch (VMDisconnectedException ignored) {
         }
         DebugUtils.simpleDebug("JavaDebugger停止!", project);
@@ -335,8 +342,10 @@ public class JavaDebugger extends AbstractDebugger {
             FileUtils.createAndWriteFile(stdLogPath, "");
             FileUtils.createAndWriteFile(stdErrPath, "");
         } catch (IOException e) {
-            LogUtils.warn("java日志文件创建错误!");
-            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            DebugUtils.simpleDebug("Java日志文件创建失败! 请检查对应路径下是否存在std_log.log, std_err.log文件, 并请手动删除他们\n"
+                    + "std_log.log = " + stdLogPath + "\n"
+                    + "std_err_log = " + stdErrPath + "\n"
+                    , project);
         }
 
         this.port = DebugUtils.findAvailablePort();
