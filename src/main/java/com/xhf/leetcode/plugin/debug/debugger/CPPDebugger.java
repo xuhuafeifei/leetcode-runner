@@ -59,6 +59,10 @@ public class CPPDebugger extends AbstractDebugger {
                 env.stopDebug();
                 return;
             }
+        } catch (DebugError e) {
+            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            return;
         } catch (Exception e) {
             ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
             LogUtils.error(e);
