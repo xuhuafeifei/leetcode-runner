@@ -463,7 +463,11 @@ Leetcode平台共有接近4000道题目，题目质量层次不齐，用户难�
 
 
 
-如果是原因2，用户会在console控制台中看到std_log.log和std_err.log两个文件的路径, 如果尝试删除, 则会出现如下弹框
+如果是原因2，用户会在console控制台中看到std_log.log和std_err.log两个文件的路径
+
+![image-20250217175128334](README.assets/image-20250217175128334.png)
+
+如果尝试删除, 则会出现如下弹框
 
 
 

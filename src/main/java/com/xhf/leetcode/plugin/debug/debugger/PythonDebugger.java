@@ -87,19 +87,8 @@ public class PythonDebugger extends AbstractDebugger {
     @Override
     public void start() {
         this.env = new PythonDebugEnv(project, this.config);
-        try {
-            if (!env.prepare()) {
-                env.stopDebug();
-                DebugUtils.simpleDebug("环境准备失败!", project, true);
-                return;
-            }
-        } catch (DebugError e) {
-            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
-            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
-            return;
-        } catch (Exception e) {
-            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
-            LogUtils.error(e);
+        boolean flag = super.envPrepare(env);
+        if (! flag) {
             return;
         }
         // 需要开启新线程, 否则指令读取操作会阻塞idea渲染UI的主线程

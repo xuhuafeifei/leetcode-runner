@@ -70,18 +70,8 @@ public class JavaDebugger extends AbstractDebugger {
     @Override
     public void start() {
         env = new JavaDebugEnv(project);
-        try {
-            if (!env.prepare()) {
-                env.stopDebug();
-                return;
-            }
-        } catch (DebugError e) {
-            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
-            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
-            return;
-        } catch (Exception e) {
-            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
-            LogUtils.error(e);
+        boolean flag = super.envPrepare(env);
+        if (! flag) {
             return;
         }
         // 启动debug
@@ -105,6 +95,7 @@ public class JavaDebugger extends AbstractDebugger {
             if (port != -1) {
                 // 强制关停端口
                 if (DebugUtils.isPortAvailable2("localhost", port)) {
+                    LogUtils.info("强制关闭Java debugger 端口 " + port);
                     KillPortProcess.killProcess(port);
                 }
             }
@@ -124,12 +115,12 @@ public class JavaDebugger extends AbstractDebugger {
             // debugLocally();
             debugRemotely();
         } catch (DebugError ex) {
-            ConsoleUtils.getInstance(project).showWaring(ex.getMessage(), false, true, ex.getMessage(), "debug异常", ConsoleDialog.ERROR);
+            ConsoleUtils.getInstance(project).showError(ex.getMessage(), false, true, ex.getMessage(), "debug异常", ConsoleDialog.ERROR);
             LogUtils.error(ex);
         } catch (VMDisconnectedException e) {
             DebugUtils.simpleDebug("vm 链接断开", project, true);
         } catch (Exception e) {
-            ConsoleUtils.getInstance(project).showWaring(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
+            ConsoleUtils.getInstance(project).showError(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
             LogUtils.error(e);
         }
         if (DebugManager.getInstance(project).isDebug()) {
@@ -309,7 +300,7 @@ public class JavaDebugger extends AbstractDebugger {
 
         if (vm == null) {
             LogUtils.warn("vm 连接失败");
-            throw new DebugError("vm 连接失败");
+            throw new DebugError("vm 连接失败, 可能是std_log.log/std_err.log文件无法删除导致, 详细信息请前往控制台查看...");
         }
 
         // 捕获目标虚拟机的输出
@@ -339,13 +330,16 @@ public class JavaDebugger extends AbstractDebugger {
         this.stdLogPath = new FileUtils.PathBuilder(env.getFilePath()).append("javaLog").append("std_log.log").build();
         this.stdErrPath = new FileUtils.PathBuilder(env.getFilePath()).append("javaLog").append("std_err.log").build();
         try {
+            FileUtils.removeFile(this.stdLogPath);
+            FileUtils.removeFile(this.stdErrPath);
             FileUtils.createAndWriteFile(stdLogPath, "");
             FileUtils.createAndWriteFile(stdErrPath, "");
-        } catch (IOException e) {
-            DebugUtils.simpleDebug("Java日志文件创建失败! 请检查对应路径下是否存在std_log.log, std_err.log文件, 并请手动删除他们\n"
+        } catch (Exception e) {
+            String message = "Java日志文件创建失败! 请检查对应路径下是否存在std_log.log, std_err.log文件, 并请手动删除他们\n"
                     + "std_log.log = " + stdLogPath + "\n"
-                    + "std_err_log = " + stdErrPath + "\n"
-                    , project);
+                    + "std_err_log = " + stdErrPath + "\n";
+            LogUtils.simpleDebug(message);
+            ConsoleUtils.getInstance(project).showError(message, false);
         }
 
         this.port = DebugUtils.findAvailablePort();

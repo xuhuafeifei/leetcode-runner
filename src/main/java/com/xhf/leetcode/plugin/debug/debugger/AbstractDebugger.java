@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.debug.debugger;
 
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.DebugManager;
+import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
@@ -13,6 +14,7 @@ import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
@@ -151,6 +153,24 @@ public abstract class AbstractDebugger implements Debugger{
      */
     protected void doAfterReadInstruction(final Instruction inst) {
 
+    }
+
+    protected boolean envPrepare(DebugEnv env) {
+        try {
+            if (!env.prepare()) {
+                env.stopDebug();
+                return false;
+            }
+        } catch (DebugError e) {
+            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            return false;
+        } catch (Exception e) {
+            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
+            LogUtils.error(e);
+            return false;
+        }
+        return true;
     }
 
     protected static class ProcessResult {
