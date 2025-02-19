@@ -66,18 +66,18 @@ public class CPPTest {
 
     @Test
     public void test4() throws Exception {
-        // æµ‹è¯•ç”¨ä¾‹
-        String input1 = "e:\\a\\b"; // å·²è½¬ä¹‰ï¼Œä¸éœ€è¦å¤„ç†
-        String input2 = "e:\\a\\b\\"; // æœ€åä¸€ä¸ªåæ–œæ æœªè½¬ä¹‰
-        String input3 = "e:\\a\\b\\c\\d\\"; // æœ€åä¸€ä¸ªåæ–œæ æœªè½¬ä¹‰
-        String input4 = "e:\\a\\b\\n"; // \n æ˜¯è½¬ä¹‰å­—ç¬¦ï¼Œä¸éœ€è¦å¤„ç†
-        String input5 = "e:\\a\\b\\x"; // \x ä¸æ˜¯è½¬ä¹‰å­—ç¬¦ï¼Œéœ€è¦è½¬ä¹‰
+        // ²âÊÔÓÃÀı
+        String input1 = "e:\\a\\b"; // ÒÑ×ªÒå£¬²»ĞèÒª´¦Àí
+        String input2 = "e:\\a\\b\\"; // ×îºóÒ»¸ö·´Ğ±¸ÜÎ´×ªÒå
+        String input3 = "e:\\a\\b\\c\\d\\"; // ×îºóÒ»¸ö·´Ğ±¸ÜÎ´×ªÒå
+        String input4 = "e:\\a\\b\\n"; // \n ÊÇ×ªÒå×Ö·û£¬²»ĞèÒª´¦Àí
+        String input5 = "e:\\a\\b\\x"; // \x ²»ÊÇ×ªÒå×Ö·û£¬ĞèÒª×ªÒå
 
-        System.out.println("è¾“å…¥: " + input1 + " -> è¾“å‡º: " + escapeBackslash(input1));
-        System.out.println("è¾“å…¥: " + input2 + " -> è¾“å‡º: " + escapeBackslash(input2));
-        System.out.println("è¾“å…¥: " + input3 + " -> è¾“å‡º: " + escapeBackslash(input3));
-        System.out.println("è¾“å…¥: " + input4 + " -> è¾“å‡º: " + escapeBackslash(input4));
-        System.out.println("è¾“å…¥: " + input5 + " -> è¾“å‡º: " + escapeBackslash(input5));
+        System.out.println("ÊäÈë: " + input1 + " -> Êä³ö: " + escapeBackslash(input1));
+        System.out.println("ÊäÈë: " + input2 + " -> Êä³ö: " + escapeBackslash(input2));
+        System.out.println("ÊäÈë: " + input3 + " -> Êä³ö: " + escapeBackslash(input3));
+        System.out.println("ÊäÈë: " + input4 + " -> Êä³ö: " + escapeBackslash(input4));
+        System.out.println("ÊäÈë: " + input5 + " -> Êä³ö: " + escapeBackslash(input5));
     }
 
     @Test
@@ -97,18 +97,18 @@ public class CPPTest {
     public void test7() {
         String data = "done,stack=[frame={level=\"0\",addr=\"0x00007ff6a3a119b3\",func=\"main\",file=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",fullname=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",line=\"66\",arch=\"i386:x86-64\"}]";
 
-        // ç§»é™¤'done,'å‰ç¼€
+        // ÒÆ³ı'done,'Ç°×º
         data = data.replace("done,", "");
 
-        // å°†å­—ç¬¦ä¸²è°ƒæ•´ä¸ºJSONå…¼å®¹æ ¼å¼
+        // ½«×Ö·û´®µ÷ÕûÎªJSON¼æÈİ¸ñÊ½
         data = data.replaceAll("(\\w+)=", "\"$1\":");
         data = data.replace("\"[", "[\"");
         data = data.replace("]\"", "\"]");
 
-        // ä¿®å¤æ–‡ä»¶è·¯å¾„ä¸­çš„åŒåæ–œæ é—®é¢˜
-        data = data.replace("\\\\", "/"); // æˆ–è€…æ›¿æ¢ä¸ºå››é‡åæ–œæ  \\\\\\\\ å¦‚æœéœ€è¦ä¿æŒåŸæ ·
+        // ĞŞ¸´ÎÄ¼şÂ·¾¶ÖĞµÄË«·´Ğ±¸ÜÎÊÌâ
+        data = data.replace("\\\\", "/"); // »òÕßÌæ»»ÎªËÄÖØ·´Ğ±¸Ü \\\\\\\\ Èç¹ûĞèÒª±£³ÖÔ­Ñù
 
-        // å‡è®¾æ¯ä¸ª'frame='ä»£è¡¨ä¸€ä¸ªç‹¬ç«‹çš„mapå¯¹è±¡ï¼Œå¹¶ä¸”æ•´ä¸ª'stack'æ˜¯ä¸€ä¸ªlist
+        // ¼ÙÉèÃ¿¸ö'frame='´ú±íÒ»¸ö¶ÀÁ¢µÄmap¶ÔÏó£¬²¢ÇÒÕû¸ö'stack'ÊÇÒ»¸ölist
         Gson gson = new Gson();
         Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
         Map<String, Object> map = gson.fromJson(data, mapType);
@@ -118,20 +118,20 @@ public class CPPTest {
 
     @Test
     public void test8() {
-        // ç¤ºä¾‹è¾“å…¥
+        // Ê¾ÀıÊäÈë
         String input1 = "^done,stack=[frame={level=\"0\",addr=\"0x00007ff6a3a119b3\",func=\"main\",file=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",fullname=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",line=\"66\",arch=\"i386:x86-64\"}]";
         String input2 = "^done,stack=[frame={level=\"0\",addr=\"0x00007ff6a3a13201\",func=\"Solution::ladderLength\",file=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",fullname=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",line=\"31\",arch=\"i386:x86-64\"},frame={level=\"1\",addr=\"0x00007ff6a3a11a34\",func=\"main\",file=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",fullname=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",line=\"67\",arch=\"i386:x86-64\"}]";
 
-        // è§£æ
+        // ½âÎö
         GdbParser gdbParser = GdbParser.getInstance();
         GdbElement result1 = gdbParser.parse(input1);
         GdbElement result2 = gdbParser.parse(input2);
 
-        // è¾“å‡º
-        System.out.println("è§£æç»“æœ 1:");
+        // Êä³ö
+        System.out.println("½âÎö½á¹û 1:");
         System.out.println(result1);
 
-        System.out.println("è§£æç»“æœ 2:");
+        System.out.println("½âÎö½á¹û 2:");
         System.out.println(result2);
 
         String input3 = "*stopped,reason=\"breakpoint-hit\",thread-id=\"1\",frame={level=\"0\",addr=\"0x00007ff6a3a119b3\",func=\"main\",file=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",fullname=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",line=\"66\",arch=\"i386:x86-64\"}";
@@ -145,7 +145,7 @@ public class CPPTest {
     public void test9() {
         String a = "^done,BreakpointTable={nr_rows=\"1\",nr_cols=\"6\",hdr=[{width=\"7\",alignment=\"-1\",col_name=\"number\",colhdr=\"Num\"},{width=\"14\",alignment=\"-1\",col_name=\"type\",colhdr=\"Type\"},{width=\"4\",alignment=\"-1\",col_name=\"disp\",colhdr=\"Disp\"},{width=\"3\",alignment=\"-1\",col_name=\"enabled\",colhdr=\"Enb\"},{width=\"18\",alignment=\"-1\",col_name=\"addr\",colhdr=\"Address\"},{width=\"40\",alignment=\"2\",col_name=\"what\",colhdr=\"What\"}],body=[bkpt={number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"0x00007ff6a3a13201\",func=\"Solution::ladderLength(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >&)\",file=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",fullname=\"E:\\\\java_code\\\\lc-test\\\\cache\\\\debug\\\\cpp\\\\solution.cpp\",line=\"31\",thread-groups=[\"i1\"],times=\"1\",original-location=\"ladderLength\"}]}";
 
-        // è§£æ
+        // ½âÎö
         GdbElement result1 = gdbParser.parse(a);
 
         System.out.println(result1);
@@ -163,7 +163,7 @@ public class CPPTest {
         System.out.println(result1);
 
 
-        // è¿™æ®µgdbè¿”å›çš„æ•°æ®æ˜¯é”™è¯¯çš„, ä»–ç¼ºå°‘}
+        // Õâ¶Îgdb·µ»ØµÄÊı¾İÊÇ´íÎóµÄ, ËûÈ±ÉÙ}
         String b = "^done,variables=[{name=\"solution\",value=\"{wordId = std::unordered_map with 0 elements, edge = std::vector of length 0, capacity 0, nodeNum = 0}\"},{name=\"a0\",value=\"\\\"hit\\\"\"},{name=\"a1\",value=\"\\\"cog\\\"\"},{name=\"a2\",value=\"std::vector of length -609310409, capacity 1 = {<error reading variable: Cannot access memory at address 0x0>\"}]";
 //        GdbElement r2 = gdbParser.parse(b);
 
@@ -172,7 +172,7 @@ public class CPPTest {
 
     @Test
     public void test11() {
-        // è¿™ä¸ªæµ‹è¯•æ–¹æ³•åˆ«æ‰“å¼€, å¦åˆ™å¾ˆå¯èƒ½æŠŠä¸€äº›é‡è¦çš„çº¿ç¨‹æ€æ­», è¿™ä¸ªç«¯å£ä»…ä»…ç”¨äºæµ‹è¯•æ€æ­»cppæœåŠ¡
+        // Õâ¸ö²âÊÔ·½·¨±ğ´ò¿ª, ·ñÔòºÜ¿ÉÄÜ°ÑÒ»Ğ©ÖØÒªµÄÏß³ÌÉ±ËÀ, Õâ¸ö¶Ë¿Ú½ö½öÓÃÓÚ²âÊÔÉ±ËÀcpp·şÎñ
         // killProcess(63254);
     }
 

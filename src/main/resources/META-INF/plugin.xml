@@ -80,6 +80,13 @@
     </extensions>
 
     <actions>
+        <action id="BossKey" class="com.xhf.leetcode.plugin.actions.BossKeyAction"
+                text="Toggle Plugin Visibility"
+                description="Hide/Show plugin windows">
+            <!-- 同时声明跨平台快捷键 -->
+            <keyboard-shortcut keymap="$default" first-keystroke="control shift period"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta shift period"/>
+        </action>
         <action id="leetcode.plugin.LoginAction" class="com.xhf.leetcode.plugin.actions.loginAction"
                 text="Sign In" icon="/icons/login.svg">
         </action>

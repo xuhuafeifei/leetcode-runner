@@ -218,7 +218,7 @@ public final class ConsoleUtils implements Disposable {
             // 获取并显示 ToolWindow（确保控制台窗口可见）
             if (showConsole) {
                 ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-                ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.ID);
+                ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.LEETCODE_CONSOLE_PLUGIN_ID);
                 if (toolWindow != null && !toolWindow.isVisible()) {
                     toolWindow.show();  // 显示控制台窗口
                 }
@@ -295,7 +295,7 @@ public final class ConsoleUtils implements Disposable {
             if (isShow) {
                 // 获取并显示 ToolWindow（确保控制台窗口可见）
                 ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-                ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.ID);
+                ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.LEETCODE_CONSOLE_PLUGIN_ID);
                 if (toolWindow != null && !toolWindow.isVisible()) {
                     toolWindow.show();  // 显示控制台窗口
                 }

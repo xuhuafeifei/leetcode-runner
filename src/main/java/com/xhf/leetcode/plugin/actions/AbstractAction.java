@@ -39,7 +39,7 @@ public abstract class AbstractAction extends AnAction {
         if (settingPass == null) {
             AppSettings appSettings = AppSettings.getInstance();
             if (!appSettings.initOrNot()) {
-                Messages.showInfoMessage("è¯·å…ˆå‰å¾€è®¾ç½®ç•Œé¢è®¾ç½®æ’ä»¶...", "INFO");
+                Messages.showInfoMessage("ÇëÏÈÇ°ÍùÉèÖÃ½çÃæÉèÖÃ²å¼ş...", "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
                 return;
             }
@@ -65,21 +65,21 @@ public abstract class AbstractAction extends AnAction {
         // debug check
         DebugCheck debugCheck = this.getClass().getAnnotation(DebugCheck.class);
         if (debugCheck != null) {
-            // å¿…é¡»æ£€æµ‹è®¾ç½®
+            // ±ØĞë¼ì²âÉèÖÃ
             AppSettings appSettings = AppSettings.getInstance();
-            // reader æ£€æµ‹
+            // reader ¼ì²â
             if (StringUtils.isBlank(appSettings.getReadTypeName())) {
-                Messages.showInfoMessage("debug readeræ²¡æœ‰è®¾ç½®, è¯·å‰å¾€è®¾ç½®ç•Œé¢", "INFO");
+                Messages.showInfoMessage("debug readerÃ»ÓĞÉèÖÃ, ÇëÇ°ÍùÉèÖÃ½çÃæ", "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
                 return;
             }
-            // output æ£€æµ‹
+            // output ¼ì²â
             if (StringUtils.isBlank(appSettings.getOutputTypeName())) {
-                Messages.showInfoMessage("debug outputæ²¡æœ‰è®¾ç½®, è¯·å‰å¾€è®¾ç½®ç•Œé¢", "INFO");
+                Messages.showInfoMessage("debug outputÃ»ÓĞÉèÖÃ, ÇëÇ°ÍùÉèÖÃ½çÃæ", "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Setting");
                 return;
             }
-            // çŠ¶æ€æ£€æµ‹
+            // ×´Ì¬¼ì²â
             DebugCheck.CheckType value = debugCheck.value();
             if (value == DebugCheck.CheckType.STATUS) {
                 if (!DebugManager.getInstance(project).isDebug()) {

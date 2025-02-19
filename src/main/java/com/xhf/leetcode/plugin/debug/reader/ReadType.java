@@ -17,7 +17,7 @@ public enum ReadType {
      */
     COMMAND_IN("command_in", CommandLineReader.class, "命令行读取"),
     /**
-     * ui输入
+     * UI输入
      */
     UI_IN("ui_in", UIReader.class, "UI读取指令");
     private final Class<? extends InstReader> reader;

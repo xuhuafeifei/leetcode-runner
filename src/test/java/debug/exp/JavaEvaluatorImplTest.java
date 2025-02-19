@@ -52,7 +52,7 @@ public class JavaEvaluatorImplTest {
 //    @Test(expected = DebugError.class)
     @Deprecated
     public void parseToToken_NoMatchingRule_ThrowsDebugError() throws Exception {
-        // 杩欏睘浜庨潪娉曡〃杈惧紡, 浼氬湪璇硶妫�鏌ユ椂鎶涘嚭寮傚父
+        // 这属于非法表达式, 会在语法检查时抛出异常
         tokenFactory.parseToToken("a[");
     }
 
@@ -153,7 +153,7 @@ public class JavaEvaluatorImplTest {
         assert tokenFactory.parseToToken("invoke(1 + 2, c, d).arr[0] + 1") instanceof JavaEvaluatorImpl.EvalToken;
         assert tokenFactory.parseToToken("invoke(1 + 2, c, d).arr[0] + 1").getToken().equals("invoke(1 + 2, c, d).arr[0] + 1");
 
-        assert tokenFactory.parseToToken("[1][2]") instanceof JavaEvaluatorImpl.ArrayTokenChain; // [1][2]鍙湁鍙兘鍦ㄥ鐞嗛摼寮忚皟鐢ㄦ椂鍑虹幇
+        assert tokenFactory.parseToToken("[1][2]") instanceof JavaEvaluatorImpl.ArrayTokenChain; // [1][2]只有可能在处理链式调用时出现
     }
 
     @Test
@@ -250,7 +250,7 @@ public class JavaEvaluatorImplTest {
     }
 
 //    /**
-//     * 娴嬭瘯InvokeToken dot
+//     * 测试InvokeToken dot
 //     */
 //    @Test
 //    public void test3() throws Exception {

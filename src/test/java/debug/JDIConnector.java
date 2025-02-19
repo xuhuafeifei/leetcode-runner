@@ -9,42 +9,42 @@ import java.util.Map;
 
 public class JDIConnector {
     public static void main(String[] args) throws Exception {
-        // 1. è·å–è¿æ¥å‚æ•°
+        // 1. »ñÈ¡Á¬½Ó²ÎÊı
         Map<String, Connector.Argument> connectorArgs = ArgumentsBuilder.buildArguments("localhost", 5005);
 
-        // 2. è·å– SocketAttachingConnector å®ä¾‹
+        // 2. »ñÈ¡ SocketAttachingConnector ÊµÀı
 //            SocketAttachingConnector connector = (SocketAttachingConnector)
         AttachingConnector connector = (AttachingConnector) Bootstrap.virtualMachineManager().allConnectors().stream()
                 .filter(c -> "com.sun.jdi.SocketAttach".equals(c.name()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("SocketAttach connector not found"));
 
-        // 3. ä½¿ç”¨ SocketAttachingConnector è¿æ¥è¿œç¨‹JVM
+        // 3. Ê¹ÓÃ SocketAttachingConnector Á¬½ÓÔ¶³ÌJVM
         VirtualMachine vm = connector.attach(connectorArgs);
 
-        // 4. è·å–äº‹ä»¶è¯·æ±‚ç®¡ç†å™¨
+        // 4. »ñÈ¡ÊÂ¼şÇëÇó¹ÜÀíÆ÷
         EventRequestManager erm = vm.eventRequestManager();
 
-        // 5. è®¾ç½®æ–­ç‚¹
-//        ReferenceType referenceType = vm.classesByName("Solution").get(0); // æ‰¾åˆ° Solution ç±»
-//        Location location = referenceType.locationsOfLine(14).get(0);  // ä½ æƒ³è°ƒè¯•çš„è¡Œå·ï¼Œå‡è®¾åœ¨ç¬¬14è¡Œ
+        // 5. ÉèÖÃ¶Ïµã
+//        ReferenceType referenceType = vm.classesByName("Solution").get(0); // ÕÒµ½ Solution Àà
+//        Location location = referenceType.locationsOfLine(14).get(0);  // ÄãÏëµ÷ÊÔµÄĞĞºÅ£¬¼ÙÉèÔÚµÚ14ĞĞ
 //        BreakpointRequest breakpointRequest = erm.createBreakpointRequest(location);
 //        breakpointRequest.enable();
 
-        // 6. å¯ç”¨è°ƒè¯•æ¨¡å¼
+        // 6. ÆôÓÃµ÷ÊÔÄ£Ê½
         vm.setDebugTraceMode(VirtualMachine.TRACE_NONE);
 
-        // 7. ç›‘å¬äº‹ä»¶å¹¶å¤„ç†æ–­ç‚¹äº‹ä»¶
+        // 7. ¼àÌıÊÂ¼ş²¢´¦Àí¶ÏµãÊÂ¼ş
         while (true) {
             EventSet eventSet = vm.eventQueue().remove();
             for (Event event : eventSet) {
                 if (event instanceof BreakpointEvent) {
                     BreakpointEvent bpEvent = (BreakpointEvent) event;
                     System.out.println("Hit breakpoint at: " + bpEvent.location());
-                    // ä½ å¯ä»¥åœ¨è¿™é‡Œæ‰“å°æ›´å¤šå˜é‡æˆ–å †æ ˆä¿¡æ¯
+                    // Äã¿ÉÒÔÔÚÕâÀï´òÓ¡¸ü¶à±äÁ¿»ò¶ÑÕ»ĞÅÏ¢
                 }
             }
-            eventSet.resume(); // ç»§ç»­æ‰§è¡Œç¨‹åº
+            eventSet.resume(); // ¼ÌĞøÖ´ĞĞ³ÌĞò
         }
 
     }
@@ -52,13 +52,13 @@ public class JDIConnector {
 
 class ArgumentsBuilder {
     public static Map<String, Connector.Argument> buildArguments(String host, int port) {
-        // è·å– SocketAttach è¿æ¥å™¨çš„æ‰€æœ‰è¿æ¥å‚æ•°
+        // »ñÈ¡ SocketAttach Á¬½ÓÆ÷µÄËùÓĞÁ¬½Ó²ÎÊı
         Connector connector = Bootstrap.virtualMachineManager().allConnectors().stream()
                 .filter(c -> "com.sun.jdi.SocketAttach".equals(c.name()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("SocketAttach connector not found"));
 
-        // åˆ›å»ºè¿æ¥å‚æ•°
+        // ´´½¨Á¬½Ó²ÎÊı
         Map<String, Connector.Argument> arguments = connector.defaultArguments();
         arguments.get("hostname").setValue(host);
         arguments.get("port").setValue(String.valueOf(port));

@@ -9,7 +9,7 @@ import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.utils.LoginPass;
 
 /**
- * æ¸…é™¤ç¼“å­˜æ–‡ä»¶
+ * Çå³ı»º´æÎÄ¼ş
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -30,8 +30,8 @@ public class ClearAction extends AbstractAction {
 
         if (result == Messages.OK) {
             StoreService.getInstance(project).clearCache();
-            // post. é€šè¿‡æ€»çº¿å¼‚æ­¥é€šçŸ¥è®¢é˜…ClearCacheEventçš„è®¢é˜…è€…, å¤„ç†é¢å¤–é€»è¾‘
-            // æ¯”å¦‚é€€å‡ºç™»å½•çŠ¶æ€, æ¸…é™¤LCPanelæ˜¾ç¤ºçš„é¢˜ç›®æ•°æ®ç­‰
+            // post. Í¨¹ı×ÜÏßÒì²½Í¨Öª¶©ÔÄClearCacheEventµÄ¶©ÔÄÕß, ´¦Àí¶îÍâÂß¼­
+            // ±ÈÈçÍË³öµÇÂ¼×´Ì¬, Çå³ıLCPanelÏÔÊ¾µÄÌâÄ¿Êı¾İµÈ
             LCEventBus.getInstance().post(new ClearCacheEvent(project));
         }
     }

@@ -2,13 +2,13 @@
 
 
 
-# 帮助文档 v1.0
+# HELPER v1.0
 
 
 
 ## 整体架构
 
-![未命名文件 (3)](帮助文档.assets/structual.png)
+![未命名文件 (3)](HELPER.assets/structual.png)
 
 项目分为三层，分别是
 
@@ -45,7 +45,7 @@
 
 **架构图**
 
-![未命名文件 (4)](帮助文档.assets/IO-File.png)
+![未命名文件 (4)](HELPER.assets/IO-File.png)
 
 
 
@@ -63,7 +63,7 @@ StoreService提供缓存时间检测功能，但目前该功能并未在项目�
 
 ### 1.总体介绍
 
-![IO-HTTP.png](帮助文档.assets/IO-HTTP.png)
+![IO-HTTP.png](HELPER.assets/IO-HTTP.png)
 
 使用apache的httpclient框架作为底层请求支持，在此基础上根据lc-runner业务进行封装
 
@@ -141,7 +141,7 @@ leetcode接口采用graphql技术，按需分配资源，关于该技术的详�
 
 基于此，封装如下三个类，帮助创建请求体
 
-![requestbody](帮助文档.assets\requestbody.png)
+![requestbody](HELPER.assets\requestbody.png)
 
 
 
@@ -178,7 +178,7 @@ String resp = httpResponse.getBody();
 
 ## IO-Console
 
-![image-20241127220901876](帮助文档.assets/image-20241127220901876.png)
+![image-20241127220901876](HELPER.assets/image-20241127220901876.png)
 
 console模块负责在插件自带的控制台上输出信息
 
@@ -192,7 +192,7 @@ Action，通过继承AnAction类来提供用户与IDE的交互能力，在编写
 
 
 
-![image-20241127221627476](帮助文档.assets/image-20241127221627476.png)
+![image-20241127221627476](HELPER.assets/image-20241127221627476.png)
 
 
 
@@ -218,11 +218,11 @@ Action，通过继承AnAction类来提供用户与IDE的交互能力，在编写
 
 ## UI-ToolWindow
 
-![image-20241127222354936](帮助文档.assets/image-20241127222354936.png)
+![image-20241127222354936](HELPER.assets/image-20241127222354936.png)
 
 工具窗口，拓展idea功能的窗口，本项目关于这部分的模块图如下
 
-![未命名文件 (5)](帮助文档.assets/toolwindow.png)
+![未命名文件 (5)](HELPER.assets/toolwindow.png)
 
 `ToolWindowFactory`负责为`ToolWindow`创建内容，`Panel`则是`ToolWindow`显示内容的载体
 
@@ -232,7 +232,7 @@ ToolWindow由idea自身提供，ToolWIndowFactory负责将Panel添加到ToolWind
 
 在本项目中，Panel所在位置如下所示
 
-![image-20241127222932790](帮助文档.assets/image-20241127222932790.png)
+![image-20241127222932790](HELPER.assets/image-20241127222932790.png)
 
 - LCPanel：包含两部分数据内容，分别是Toolbar工具栏，JBList列表。LCPanel通过继承DataProvider提供对外暴露JBList的能力
 - LCConsolePanel：只包含ConsoleView，LCConsolePanel同样通过继承DataProvider提供对外暴露consoleView的能力
@@ -241,7 +241,7 @@ ToolWindow由idea自身提供，ToolWIndowFactory负责将Panel添加到ToolWind
 
 ## UI-Editor
 
-![未命名文件 (6)](帮助文档.assets/UI-Editor.png)
+![未命名文件 (6)](HELPER.assets/UI-Editor.png)
 
 Editor，提供特定文件的编辑显示能力。比如说普通的文本编辑器，只会显示html代码。但自定义的Html编辑器，则会按照html的语法，显示内容
 
@@ -295,7 +295,7 @@ questionService，负责处理question相关逻辑。
 
 ## Service-CodeService
 
-![未命名文件 (7)](帮助文档.assets/codeService.png)
+![未命名文件 (7)](HELPER.assets/codeService.png)
 
 上图表示CodeService与其他模块的沟通信息
 
@@ -303,7 +303,7 @@ questionService，负责处理question相关逻辑。
 
 首先介绍`LeetcodeEditor`，该类用于存储围绕题目内容，创建editor所需要的相关信息
 
-<img src="帮助文档.assets/未命名文件 (8).png" alt="未命名文件 (8)" style="zoom: 25%;" />
+<img src="HELPER.assets/未命名文件 (8).png" alt="未命名文件 (8)" style="zoom: 25%;" />
 
 - questionId：当前题目的id
 - lang：编写当前题目用当的语言类型，比如java或者python
@@ -356,7 +356,7 @@ TestCase()，与runcode类似，通过code 路径获取leetcodeEditor信息。�
 
 
 
-<img src="帮助文档.assets/未命名文件.png" alt="未命名文件" style="zoom: 25%;" />
+<img src="HELPER.assets/未命名文件.png" alt="未命名文件" style="zoom: 25%;" />
 
 Cookie登录和Jcef登录存在通用逻辑，因此向上抽取抽象类
 
@@ -374,7 +374,7 @@ BasicWindow通过start()方法启动，getFrameTItle(), loadConponent()方法下
 
 
 
-![未命名文件 (1)](帮助文档.assets/editor.png)
+![未命名文件 (1)](HELPER.assets/editor.png)
 
 Editor模块稍显复杂，文档将会按照等级依次介绍
 
@@ -382,7 +382,7 @@ Editor模块稍显复杂，文档将会按照等级依次介绍
 
 SplitTextEditorProvider 提供SplitTextEditorWithPreview，SplitTextEditorWithPreview提供第一层的分屏预览能力，左侧是编码区域，右侧是内容预览区域
 
-![image-20241128112353125](帮助文档.assets/image-20241128112353125.png)
+![image-20241128112353125](HELPER.assets/image-20241128112353125.png)
 
 
 
@@ -392,7 +392,7 @@ PsiAwareTextEditorImpl作为SplitTextEditorWithPreview左侧的编辑区域，�
 
 FocusTextEditor作为右侧编辑区域，提供tabs显示能力，包含三个tab，每个tab的显示内容由3个FileEditor维护
 
-![image-20241128112620398](帮助文档.assets/image-20241128112620398.png)
+![image-20241128112620398](HELPER.assets/image-20241128112620398.png)
 
 
 
@@ -404,7 +404,7 @@ MarkDownEditor，提供HTML、Markdown内容的显示能力，其原理是通过
 
 Markdown内容渲染，使用前端vditor框架渲染。因为该框架在项目首次启动**渲染Markdown耗时很长**，因此在渲染HTML的时候会**提前加载需要的js、css文件**
 
-![image-20241128113107495](帮助文档.assets/image-20241128113107495.png)
+![image-20241128113107495](HELPER.assets/image-20241128113107495.png)
 
 
 
@@ -412,15 +412,15 @@ Markdown内容渲染，使用前端vditor框架渲染。因为该框架在项目
 
 SolutionEditor、SubmissionEditor分别提供题解、提交记录显示
 
-<img src="帮助文档.assets/image-20241128113655951.png" alt="image-20241128113655951" style="zoom: 33%;" />
+<img src="HELPER.assets/image-20241128113655951.png" alt="image-20241128113655951" style="zoom: 33%;" />
 
-<img src="帮助文档.assets/image-20241128113718533.png" alt="image-20241128113718533" style="zoom:33%;" />
+<img src="HELPER.assets/image-20241128113718533.png" alt="image-20241128113718533" style="zoom:33%;" />
 
 上述两种FileEditor都需要分屏显示功能，因此向上抽取`AbstractSplitTextEditor`抽象类，提供分窗能力
 
 **AbstractSplitTextEditor**
 
-<img src="帮助文档.assets/未命名文件 (2).png" alt="未命名文件 (2)" style="zoom: 33%;" />
+<img src="HELPER.assets/未命名文件 (2).png" alt="未命名文件 (2)" style="zoom: 33%;" />
 
 - AbstractSplitTextEditor核心组件`jbSplitter`，提供分屏显示的能力
 
@@ -430,7 +430,7 @@ SolutionEditor、SubmissionEditor分别提供题解、提交记录显示
 
 - openSecond(String)的实现下放到子类，创建右侧分屏内容
 
-![image-20241128114640151](帮助文档.assets/image-20241128114640151.png)
+![image-20241128114640151](HELPER.assets/image-20241128114640151.png)
 
 
 
@@ -448,7 +448,7 @@ SolutionEditor、SubmissionEditor分别提供题解、提交记录显示
 
 ## Bus
 
-![未命名文件 (3)](帮助文档.assets/bus.png)
+![未命名文件 (3)](HELPER.assets/bus.png)
 
 总线模块，提供注册和发送消息的能力。订阅方注册到特定的Topic内，接受投放到Topic中的消息内容
 
@@ -502,7 +502,7 @@ SolutionEditor、SubmissionEditor分别提供题解、提交记录显示
 ### 模块整体设计
 
 下图为笔者的模块设计图
-![ss](帮助文档.assets/22.jpg)
+![ss](HELPER.assets/22.jpg)
 
 
 
@@ -660,7 +660,7 @@ Debug服务内容很多，本文仅从宏观的角度做出介绍，有关debug�
 
 ## 整体架构
 
-![debug-jiagou-xiuzheng](帮助文档.assets/debug-jiagou-xiuzheng.jpg)
+![debug-jiagou-xiuzheng](HELPER.assets/debug-jiagou-xiuzheng.jpg)
 
 
 
@@ -696,7 +696,7 @@ JavaDebugger采用**多线程的方式处理**，其中`JavaDebugger`负责和�
 
 其中JavaDebugger、JEvenHandler分别属于不同的线程
 
-<img src="帮助文档.assets/liucheng-tu.jpg" alt="liucheng-tu" style="zoom: 25%;" />
+<img src="HELPER.assets/liucheng-tu.jpg" alt="liucheng-tu" style="zoom: 25%;" />
 
 之所以采用多线程，是为了**避免死锁的出现**，有关死锁发生的场景，将会在后文介绍
 
@@ -765,7 +765,7 @@ JEventHandler捕获**Step Event**，默认不会放行，这适用于绝大多�
 
 **架构图：**
 
-![biaodashi-jiagou-1](帮助文档.assets/biaodashi-jiagou-1.jpg)
+![biaodashi-jiagou-1](HELPER.assets/biaodashi-jiagou-1.jpg)
 
 
 
@@ -799,7 +799,7 @@ JEventHandler捕获**Step Event**，默认不会放行，这适用于绝大多�
 
 **架构图：**
 
-![leetcode-runner](帮助文档.assets/leetcode-runner.jpg)
+![leetcode-runner](HELPER.assets/leetcode-runner.jpg)
 
 后续的C++Debug服务，整体架构类似于python，往后只要是需要接入Leetcode-runner的调试器，基本都会遵循如上架构
 
@@ -819,7 +819,7 @@ GDB从标准输入读取数据，然后在标准输出显示数据，但在leetc
 
 但C++不同，C++具有**管道、重定向**等逆天功能，它可以手动控制GDB的输入输出，使其嵌入项目当中
 
-<img src="帮助文档.assets/cpp-jiagou.jpg" alt="cpp-jiagou" style="zoom: 33%;" />
+<img src="HELPER.assets/cpp-jiagou.jpg" alt="cpp-jiagou" style="zoom: 33%;" />
 
 
 

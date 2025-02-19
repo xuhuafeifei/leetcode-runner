@@ -74,9 +74,9 @@ public class LCCompetitionTest {
     public void test1() throws IOException {
         String s = FileUtils.readContentFromFile("E:\\java_code\\leetcode-runner\\src\\test\\java\\deepcoding\\data.json");
         List<CompetitionQuestion> list = GsonUtils.fromJsonToList(s, CompetitionQuestion.class);
-        // æŸ¥è¯¢æ‰€æœ‰æ•°æ®
+        // ²éÑ¯ËùÓĞÊı¾İ
         List<Question> questions = queryTotalQuestion();
-        // å¡«å……
+        // Ìî³ä
         for (CompetitionQuestion competitionQuestion : list) {
             int id = competitionQuestion.getID();
             Question question = questions.get(id - 1);
@@ -90,7 +90,7 @@ public class LCCompetitionTest {
 
     @Test
     public void test2() {
-        // è¯»å–a.json
+        // ¶ÁÈ¡a.json
         String s = FileUtils.readContentFromFile("E:\\java_code\\leetcode-runner\\src\\test\\java\\deepcoding\\data.json");
         List<CompetitionQuestion> list = GsonUtils.fromJsonToList(s, CompetitionQuestion.class);
 
@@ -114,14 +114,14 @@ public class LCCompetitionTest {
         StringBuilder sb = new StringBuilder();
         String[] hex = unicode.split("\\\\u");
         for (int i = 1; i < hex.length; i++) {
-            // å»é™¤å‰åå¤šä½™çš„ç©ºæ ¼
+            // È¥³ıÇ°ºó¶àÓàµÄ¿Õ¸ñ
             String hexValue = hex[i].trim();
-            // æ£€æŸ¥æ˜¯å¦æ˜¯æœ‰æ•ˆçš„å››ä½åå…­è¿›åˆ¶æ•°
+            // ¼ì²éÊÇ·ñÊÇÓĞĞ§µÄËÄÎ»Ê®Áù½øÖÆÊı
             if (hexValue.length() == 4 && hexValue.matches("[0-9a-fA-F]+")) {
                 int data = Integer.parseInt(hexValue, 16);
                 sb.append((char) data);
             } else {
-                // å¦‚æœä¸æ˜¯æœ‰æ•ˆçš„å››ä½åå…­è¿›åˆ¶æ•°ï¼Œå¯ä»¥é€‰æ‹©è·³è¿‡æˆ–æŠ›å‡ºå¼‚å¸¸
+                // Èç¹û²»ÊÇÓĞĞ§µÄËÄÎ»Ê®Áù½øÖÆÊı£¬¿ÉÒÔÑ¡ÔñÌø¹ı»òÅ×³öÒì³£
                 System.out.println("Invalid hex value: " + hexValue);
             }
         }

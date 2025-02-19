@@ -16,8 +16,8 @@ import org.jetbrains.annotations.NotNull;
  * @email 2508020102@qq.com
  */
 public class LCConsoleWindowFactory implements ToolWindowFactory, DumbAware {
-
-    public static String ID = "Leetcode Console Plugin";
+    //  π”√final–ﬁ Œ
+    public final static String LEETCODE_CONSOLE_PLUGIN_ID = "Leetcode Console Plugin";
 
 
     @Override
@@ -29,7 +29,7 @@ public class LCConsoleWindowFactory implements ToolWindowFactory, DumbAware {
     }
 
     public static DataContext getDataContext(@NotNull Project project) {
-        ToolWindow leetcodeToolWindows = ToolWindowManager.getInstance(project).getToolWindow(ID);
+        ToolWindow leetcodeToolWindows = ToolWindowManager.getInstance(project).getToolWindow(LEETCODE_CONSOLE_PLUGIN_ID);
         LCConsolePanel LCConsolePanel = (LCConsolePanel) leetcodeToolWindows.getContentManager().getContent(0).getComponent();
         return DataManager.getInstance().getDataContext(LCConsolePanel);
     }

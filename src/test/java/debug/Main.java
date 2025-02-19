@@ -9,17 +9,17 @@ public class Main {
     public void test() {
         System.out.println(Thread.currentThread().getName());
 
-        // å¯åŠ¨å­çº¿ç¨‹
+        // Æô¶¯×ÓÏß³Ì
         Thread notifierThread = new Thread(new Notifier(this));
         notifierThread.start();
 
-        // ä¸»çº¿ç¨‹é˜»å¡åœ¨ Scanner ä¸Š
+        // Ö÷Ïß³Ì×èÈûÔÚ Scanner ÉÏ
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Main thread waiting for input...");
 
         try {
-            // ä¸»çº¿ç¨‹é˜»å¡åœ¨ readLine ä¸Š
-            while (!Thread.interrupted()) {  // æ£€æŸ¥ä¸­æ–­æ ‡å¿—
+            // Ö÷Ïß³Ì×èÈûÔÚ readLine ÉÏ
+            while (!Thread.interrupted()) {  // ¼ì²éÖĞ¶Ï±êÖ¾
                 String ln = in.readLine();
                 if (ln == null) {
                     System.out.println("null");
@@ -37,7 +37,7 @@ public class Main {
     public void stop() {
         System.out.println(Thread.currentThread().getName());
         Thread.yield();  // fetch output
-        // ä¸­æ–­ä¸»çº¿ç¨‹
+        // ÖĞ¶ÏÖ÷Ïß³Ì
         Thread.currentThread().interrupt();
     }
 
@@ -60,7 +60,7 @@ public class Main {
         public void run() {
             try {
                 System.out.println(Thread.currentThread().getName());
-                // æ¨¡æ‹Ÿå­çº¿ç¨‹ç­‰å¾… 2 ç§’
+                // Ä£Äâ×ÓÏß³ÌµÈ´ı 2 Ãë
                 Thread.sleep(2000);
                 System.out.println("Notifier thread interrupting main thread.");
                 main.stop();

@@ -31,11 +31,11 @@ public class JavaDebuggerTest {
 //            if (res.equals("bk") || res.equals("exit")) {
 //                return;
 //            }
-//            // è§£ææŒ‡ä»¤, å¹¶æ‰§è¡Œ
+//            // ½âÎöÖ¸Áî, ²¢Ö´ĞĞ
 //            Instruction parse = new InstParserImpl().parse(res);
 //            // debug parse
 //            if (parse == null) {
-//                LogUtils.simpleDebug("æŒ‡ä»¤è§£æå¤±è´¥");
+//                LogUtils.simpleDebug("Ö¸Áî½âÎöÊ§°Ü");
 //                continue;
 //            }
 //            LogUtils.simpleDebug(parse.toString());

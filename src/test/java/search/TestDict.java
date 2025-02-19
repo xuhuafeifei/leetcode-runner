@@ -11,21 +11,21 @@ import org.junit.Test;
 public class TestDict {
     private DictTree build() {
         DictTree dt = DictTree.getInstance();
-        dt.addWords("ä¸€å¦‚æ—¢å¾€");
-        dt.addWords("å¤©å¤©å¼€å¿ƒ");
-        dt.addWords("ä¸€å¾€æ— å‰");
-        dt.addWords("ä½ å¥½");
-        dt.addWords("ä½ ä¸å¥½");
-        dt.addWords("ä¸€å¤©å¤©");
-        dt.addWords("ä½ å¥½å‘€");
+        dt.addWords("Ò»Èç¼ÈÍù");
+        dt.addWords("ÌìÌì¿ªĞÄ");
+        dt.addWords("Ò»ÍùÎŞÇ°");
+        dt.addWords("ÄãºÃ");
+        dt.addWords("Äã²»ºÃ");
+        dt.addWords("Ò»ÌìÌì");
+        dt.addWords("ÄãºÃÑ½");
         return dt;
     }
     @Test
     public void test1() {
         DictTree dt = DictTree.getInstance();
-        dt.addWords("ä¸€å¦‚æ—¢å¾€");
-        dt.addWords("å¤©å¤©å¼€å¿ƒ");
-        dt.addWords("ä¸€å¾€æ— å‰");
+        dt.addWords("Ò»Èç¼ÈÍù");
+        dt.addWords("ÌìÌì¿ªĞÄ");
+        dt.addWords("Ò»ÍùÎŞÇ°");
 
         System.out.println();
     }
@@ -33,26 +33,26 @@ public class TestDict {
     @Test
     public void test2() {
         DictTree dt = build();
-        Hit hit = dt.match('ä½ ');
-        Hit hit1 = dt.match('å¥½', hit);
-        Hit hit2 = dt.match('å‘€', hit1);
-        Hit hit3 = dt.match('å—', hit2);
+        Hit hit = dt.match('Äã');
+        Hit hit1 = dt.match('ºÃ', hit);
+        Hit hit2 = dt.match('Ñ½', hit1);
+        Hit hit3 = dt.match('Âğ', hit2);
 
         assert hit.isHit();
-        assert 'ä½ ' == hit.getC();
+        assert 'Äã' == hit.getC();
         assert ! hit.isEnd();
 
         assert hit1.isHit();
-        assert 'å¥½' == hit1.getC();
+        assert 'ºÃ' == hit1.getC();
         assert hit1.isEnd();
 
         assert hit2.isHit();
-        assert 'å‘€' == hit2.getC();
+        assert 'Ñ½' == hit2.getC();
         assert hit2.isEnd();
 
-        // æœªå‘½ä¸­çš„å­—ç¬¦æ˜¯Tokenç»“å°¾
+        // Î´ÃüÖĞµÄ×Ö·ûÊÇToken½áÎ²
         assert ! hit3.isHit();
-        assert 'å—' == hit3.getC();
+        assert 'Âğ' == hit3.getC();
         assert hit3.isEnd();
     }
 }

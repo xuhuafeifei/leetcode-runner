@@ -89,20 +89,20 @@ public final class LoginService {
     }
 
     private boolean loginFlag = Boolean.FALSE;
+/**
+ * judge whether the client is login
+ * <p>
+ * there are two cases in this project
+ * <p>
+ * first, the user isn't logged and the cookie has not been stored in the local file
+ * <p>
+ * second, the user isn't logged in, but the cookie has been stored in the local file. but the cookie was created by last time,
+ * and this time the user did not click the login button, which means the user did not choose to log in
+ * <p>
+ * loginFlag is a flag to check whether the user has clicked the login button and login succussfully
+ *
+ */
 
-    /**
-     * judge whether the client is login
-     * <p>
-     * there are two cases in this project
-     * <p>
-     * first, the user isn't logged and the cookie has not been stored in the local file
-     * <p>
-     * second, the user isn't logged in, but the cookie has been stored in the local file. but the cookie was created by last time,
-     * and this time the user did not click the login button, which means the user did not choose to log in
-     * <p>
-     * loginFlag is a flag to check whether the user has clicked the login button and login succussfully
-     *
-     */
     public boolean isLogin() {
         return loginFlag && LeetcodeClient.getInstance(project).isLogin();
     }

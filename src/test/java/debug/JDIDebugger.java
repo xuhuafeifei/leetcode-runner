@@ -9,24 +9,24 @@ import java.util.stream.Collectors;
 //    private String handleObjectReference(ObjectReference objRef) throws Exception {
 //        String res;
 //
-//        // è·å–å¯¹è±¡çš„ ReferenceType
+//        // »ñÈ¡¶ÔÏóµÄ ReferenceType
 //        ReferenceType refType = objRef.referenceType();
 //
-//        // æ£€æŸ¥å¯¹è±¡æ˜¯å¦ä¸º String ç±»å‹
+//        // ¼ì²é¶ÔÏóÊÇ·ñÎª String ÀàĞÍ
 //        if (objRef instanceof StringReference) {
 //            res = "\"" + ((StringReference) objRef).value() + "\"";
 //        }
-//        // æ£€æŸ¥å¯¹è±¡æ˜¯å¦ä¸º Array ç±»å‹
+//        // ¼ì²é¶ÔÏóÊÇ·ñÎª Array ÀàĞÍ
 //        else if (objRef instanceof ArrayReference) {
 //            res = "[" + ((ArrayReference) objRef).getValues().stream()
 //                        .map(String::valueOf)
 //                        .collect(Collectors.joining(", ")) + "]";
 //        }
-//        // æ£€æŸ¥å¯¹è±¡æ˜¯å¦å®ç°äº† List æ¥å£
+//        // ¼ì²é¶ÔÏóÊÇ·ñÊµÏÖÁË List ½Ó¿Ú
 //        else if (isListType(refType)) {
 //            res = handleList(objRef, refType);
 //        }
-//        // å…¶ä»–ç±»å‹çš„å¤„ç†
+//        // ÆäËûÀàĞÍµÄ´¦Àí
 //        else if (objRef instanceof ThreadReference) {
 //            res = ((ThreadReference) objRef).name();
 //        } else if (objRef instanceof ClassObjectReference) {
@@ -40,9 +40,9 @@ import java.util.stream.Collectors;
 //        return res;
 //    }
 //
-//    // åˆ¤æ–­å¯¹è±¡æ˜¯å¦å®ç°äº† List æ¥å£
+//    // ÅĞ¶Ï¶ÔÏóÊÇ·ñÊµÏÖÁË List ½Ó¿Ú
 //    private boolean isListType(ReferenceType refType) {
-//        // è·å–å¯¹è±¡ç±»å‹å®ç°çš„æ‰€æœ‰æ¥å£
+//        // »ñÈ¡¶ÔÏóÀàĞÍÊµÏÖµÄËùÓĞ½Ó¿Ú
 //        List<InterfaceType> interfaces = refType.allInterfaces();
 //        for (InterfaceType interfaceType : interfaces) {
 //            if (interfaceType.name().equals("java.util.List")) {
@@ -52,13 +52,13 @@ import java.util.stream.Collectors;
 //        return false;
 //    }
 //
-//    // å¤„ç† List ç±»å‹
+//    // ´¦Àí List ÀàĞÍ
 //    private String handleList(ObjectReference objRef, ReferenceType refType) throws Exception {
 //        StringBuilder sb = new StringBuilder();
 //
-//        // æ£€æŸ¥ä¸åŒ List å®ç°ç±»
+//        // ¼ì²é²»Í¬ List ÊµÏÖÀà
 //        if (refType.name().equals("java.util.ArrayList") || refType.name().equals("java.util.Vector")) {
-//            // å¯¹äº ArrayList å’Œ Vectorï¼Œé€šå¸¸å­˜å‚¨æ•°æ®çš„å­—æ®µæ˜¯ elementData
+//            // ¶ÔÓÚ ArrayList ºÍ Vector£¬Í¨³£´æ´¢Êı¾İµÄ×Ö¶ÎÊÇ elementData
 //            Field elementDataField = refType.fieldByName("elementData");
 //            if (elementDataField != null) {
 //                ArrayReference elementDataArray = (ArrayReference) objRef.getValue(elementDataField);
@@ -71,7 +71,7 @@ import java.util.stream.Collectors;
 //                }
 //            }
 //        } else if (refType.name().equals("java.util.LinkedList")) {
-//            // å¯¹äº LinkedListï¼Œéœ€è¦å¤„ç†é“¾è¡¨ç»“æ„
+//            // ¶ÔÓÚ LinkedList£¬ĞèÒª´¦ÀíÁ´±í½á¹¹
 //            sb.append("LinkedList elements: ");
 //            Field firstField = refType.fieldByName("first");
 //            if (firstField != null) {
@@ -79,7 +79,7 @@ import java.util.stream.Collectors;
 //                sb.append(traverseLinkedList(firstNode));
 //            }
 //        } else if (refType.name().equals("java.util.concurrent.CopyOnWriteArrayList")) {
-//            // å¯¹äº CopyOnWriteArrayListï¼Œé€šå¸¸å®ƒä¹Ÿä½¿ç”¨æ•°ç»„
+//            // ¶ÔÓÚ CopyOnWriteArrayList£¬Í¨³£ËüÒ²Ê¹ÓÃÊı×é
 //            Field arrayField = refType.fieldByName("array");
 //            if (arrayField != null) {
 //                ArrayReference array = (ArrayReference) objRef.getValue(arrayField);
@@ -96,7 +96,7 @@ import java.util.stream.Collectors;
 //        return sb.toString();
 //    }
 //
-//    // éå† LinkedList çš„æ–¹æ³•
+//    // ±éÀú LinkedList µÄ·½·¨
 //    private String traverseLinkedList(ObjectReference node) {
 //        StringBuilder sb = new StringBuilder();
 //        while (node != null) {
@@ -112,7 +112,7 @@ import java.util.stream.Collectors;
 //                    sb.append(", ");
 //                }
 //            } else {
-//                break; // å¦‚æœæ²¡æœ‰å­—æ®µï¼Œå°±é€€å‡º
+//                break; // Èç¹ûÃ»ÓĞ×Ö¶Î£¬¾ÍÍË³ö
 //            }
 //        }
 //        return sb.toString();
