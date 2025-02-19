@@ -6,6 +6,7 @@ import com.xhf.leetcode.plugin.bus.DebugStartEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -30,9 +31,11 @@ public abstract class AbstractExecuteContext implements ExecuteContext {
     public void debugStartListener(DebugStartEvent event) {
         String cache = StoreService.getInstance(project).getCache(StoreService.WATCH_POOL_KEY, String.class);
         if (cache != null) {
-            String[] split = cache.split(",");
+            String[] split = cache.split("\n");
             for (String s : split) {
-                watchPool.push(s);
+                if (StringUtils.isNotBlank(s)) {
+                    watchPool.push(s);
+                }
             }
         }
     }
@@ -42,7 +45,7 @@ public abstract class AbstractExecuteContext implements ExecuteContext {
         // 缓存监听内容
         StringBuilder a = new StringBuilder();
         for (String s : watchPool) {
-            a.append(s).append(",");
+            a.append(s).append("\n");
         }
         StoreService.getInstance(project).addCache(StoreService.WATCH_POOL_KEY, a.toString());
         /*

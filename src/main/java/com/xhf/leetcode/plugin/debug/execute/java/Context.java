@@ -403,7 +403,7 @@ public class Context extends AbstractExecuteContext {
         }
         split[0] = split[0].trim();
         // match
-        List<String> arr = watchPool.stream().filter(e -> !e.startsWith(split[0])).collect(Collectors.toList());
+        List<String> arr = watchPool.stream().filter(e -> !e.trim().startsWith(split[0])).collect(Collectors.toList());
         watchPool.clear();
         watchPool.addAll(arr);
     }

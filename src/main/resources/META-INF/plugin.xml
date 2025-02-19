@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.xhf.leetcode-runner</id>
     <name>Leetcode-Runner</name>
-    <version>3.6.2</version>
+    <version>3.6.5</version>
     <vendor email="2508020102@qq.com" url="https://github.com/xuhuafeifei/leetcode-runner">feigebuge</vendor>
 
     <description><![CDATA[
@@ -17,7 +17,7 @@
         <h1>github repository link: </h1>
         <p><a href='https://github.com/xuhuafeifei/leetcode-runner' target='_blank'
             class='url'>https://github.com/xuhuafeifei/leetcode-runner</a></p>
-        <p>TIP: if images load failed, you can click the github link and see README.md</p>
+        <p>TIP: if images load failed, you can click the github's link and see README.md</p>
         <p>&nbsp;</p>
         <p>&nbsp;</p>
         <h1>Quick Start:</h1>
