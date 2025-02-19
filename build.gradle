@@ -26,7 +26,7 @@ tasks.withType(JavaExec){
 }
 
 group 'com.xhf'
-version '3.6.4'
+version '3.6.5'
 
 sourceCompatibility = 11
 targetCompatibility = 11
