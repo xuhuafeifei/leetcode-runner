@@ -23,7 +23,6 @@ import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
-import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import org.jetbrains.annotations.Nullable;
 
@@ -325,7 +324,7 @@ public class ViewUtils {
         ApplicationManager.getApplication().invokeLater(() -> {
             try {
                 ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-                ToolWindow toolWindow = toolWindowManager.getToolWindow(LCToolWindowFactory.ID);
+                ToolWindow toolWindow = toolWindowManager.getToolWindow(LCToolWindowFactory.LEETCODE_RUNNER_ID);
                 if (toolWindow != null && !toolWindow.isVisible()) {
                     toolWindow.show();  // 显示控制台窗口
                 }

@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class LCToolWindowFactory implements ToolWindowFactory, DumbAware {
 
-    public static String ID = "Leetcode Runner";
+    public final static String LEETCODE_RUNNER_ID = "Leetcode Runner";
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -28,7 +28,7 @@ public class LCToolWindowFactory implements ToolWindowFactory, DumbAware {
     }
 
     public static DataContext getDataContext(@NotNull Project project) {
-        ToolWindow leetcodeToolWindows = ToolWindowManager.getInstance(project).getToolWindow(ID);
+        ToolWindow leetcodeToolWindows = ToolWindowManager.getInstance(project).getToolWindow(LEETCODE_RUNNER_ID);
         LCPanel lcPanel = (LCPanel) leetcodeToolWindows.getContentManager().getContent(0).getComponent();
         return DataManager.getInstance().getDataContext(lcPanel);
     }

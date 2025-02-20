@@ -6,10 +6,9 @@ plugins {
 }
 
 patchPluginXml {
-    sinceBuild = '222'
+    sinceBuild = '203'
     untilBuild = '243.*'
 }
-
 
 intellij {
     version = '2022.2'
@@ -28,8 +27,8 @@ tasks.withType(JavaExec){
 group 'com.xhf'
 version '3.6.5'
 
-sourceCompatibility = 17
-targetCompatibility = 17
+sourceCompatibility = 11
+targetCompatibility = 11
 
 repositories {
     mavenCentral()

@@ -4,43 +4,45 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.LoginPass;
+import com.xhf.leetcode.plugin.utils.RatePass;
+import com.xhf.leetcode.plugin.utils.SettingPass;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
-
-import javax.swing.*;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import com.xhf.leetcode.plugin.window.LCPanel;
+import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 
 /**
  * @author 文艺倾年
  * 老板键
  * Windows/Linux: Ctrl+Shift+.，Mac: Cmd+Shift+.
  */
+@SettingPass // 跳过设置检查
+@LoginPass   // 跳过登录检查
+@RatePass    // 跳过频率限制
 public class BossKeyAction extends AbstractAction {
-    private static boolean isHidden = false;
-
-    public BossKeyAction() {
-        // 注册快捷键
-        registerCustomShortcutSet(
-                new CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
-                        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK)),
-                null
-        );
-    }
 
     @Override
     protected void doActionPerformed(Project project, AnActionEvent e) {
-        if (project == null) return;
+        assert project != null;
+        ToolWindowManager manager = ToolWindowManager.getInstance(project);
+        toggleToolWindow(manager, LCConsoleWindowFactory.LEETCODE_CONSOLE_PLUGIN_ID);
+        toggleToolWindow(manager, LCToolWindowFactory.LEETCODE_RUNNER_ID);
+    }
 
-        ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-        ToolWindow toolWindow = toolWindowManager.getToolWindow(LCConsoleWindowFactory.LEETCODE_CONSOLE_PLUGIN_ID);
-
-        if (toolWindow != null) {
-            if (isHidden) {
-                toolWindow.show();
-            } else {
-                toolWindow.hide();
+    private void toggleToolWindow(ToolWindowManager manager, String windowId) {
+        try {
+            ToolWindow window = manager.getToolWindow(windowId);
+            if (window == null) {
+                return;
             }
-            isHidden = !isHidden;
+            if (window.isVisible()) {
+                window.hide();
+            } else {
+                window.show(() -> window.activate(null));
+            }
+        } catch (Exception ex) {
+            LogUtils.error("Toggle operation failed for: " + windowId, ex);
         }
     }
 }
