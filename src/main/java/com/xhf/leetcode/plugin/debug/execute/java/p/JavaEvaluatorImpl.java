@@ -352,6 +352,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             try {
                 v = takeValueByVName(vName, Env.getLocalEnv());
             } catch (IncompatibleThreadStateException | AbsentInformationException e) {
+                LogUtils.error(DebugUtils.getStackTraceAsString(e));
                 throw new ComputeError(e.getMessage());
             }
 //            if (v != null) {
@@ -851,10 +852,12 @@ public class JavaEvaluatorImpl implements Evaluator {
                     try {
                         matchValueAndType(targetMethod, info);
                     } catch (Exception ex) {
-                        throw new ComputeError(e.toString());
+                        LogUtils.error(ex);
+                        throw new ComputeError(e.getMessage());
                     }
                 } catch (Exception e) {
-                    throw new ComputeError(e.toString());
+                    LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+                    throw new ComputeError(e.getMessage());
                 }
             } else {
                 // todo: 以后支持一下重载类型
@@ -884,7 +887,13 @@ public class JavaEvaluatorImpl implements Evaluator {
             for (int i = 0; i < types.size(); i++) {
                 Type type = types.get(i);
                 // 尝试匹配并进行纠正
-                Value matchedV = tryMatchValue(params.get(i), type, paramNames[i]);
+                Value v = params.get(i);
+                Value matchedV;
+                if (v != null) {
+                    matchedV = tryMatchValue(v, type, paramNames[i]);
+                } else {
+                    matchedV = v;
+                }
                 params.set(i, matchedV);
             }
         }
@@ -967,6 +976,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 try {
                     values.add(tf.parseToToken(paramNames[i], ctx).getValue());
                 } catch (Exception e) {
+                    LogUtils.warn(DebugUtils.getStackTraceAsString(e));
                     throw new ComputeError(token + "的第" + i + "个参数" + paramNames[i] + "解析错误! cause is " + e.getMessage());
                 }
             }
@@ -1163,6 +1173,10 @@ public class JavaEvaluatorImpl implements Evaluator {
             // 从变量env中获取
             if ("this".equals(token)) {
                 return Env._this;
+            }
+            if ("null".equals(token)) {
+                // throw new ComputeError("不支持null");
+                return null;
             }
             return super.takeValueByVName(token);
         }
@@ -2371,12 +2385,16 @@ public class JavaEvaluatorImpl implements Evaluator {
             try {
                 return tokenClass.getDeclaredConstructor(String.class, Context.class).newInstance(s, ctx);
             } catch (InstantiationException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
             } catch (IllegalAccessException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
             } catch (InvocationTargetException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
             } catch (NoSuchMethodException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
             }
         }
@@ -2550,12 +2568,16 @@ public class JavaEvaluatorImpl implements Evaluator {
             try {
                 return tokenClass.getDeclaredConstructor(String.class, Context.class).newInstance(targetHit.token, ctx);
             } catch (InstantiationException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
             } catch (IllegalAccessException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
             } catch (InvocationTargetException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
             } catch (NoSuchMethodException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
             }
         }
@@ -2627,12 +2649,16 @@ public class JavaEvaluatorImpl implements Evaluator {
             try {
                 return (TokenChain) tokenClass.getDeclaredConstructor(String.class, Context.class).newInstance(s, ctx);
             } catch (InstantiationException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "实例化错误, 该对象是抽象类, 无法实例化! " + e.getMessage());
             } catch (IllegalAccessException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "构造函数访问错误, String.class, Context.class的构造函数无权访问! " + e.getMessage());
             } catch (InvocationTargetException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "构造函数执行异常, String.class, Context.class的运行过程中发生报错! " + e.getMessage());
             } catch (NoSuchMethodException e) {
+                LogUtils.error(e);
                 throw new ComputeError(className + "没有符合String.class, Context.class的构造函数! " + e.getMessage());
             }
         }

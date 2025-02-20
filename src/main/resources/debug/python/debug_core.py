@@ -308,7 +308,7 @@ class Debugger:
                 self.log.log_out("solution_env_global: " + str(solution_env_global))
                 self.log.log_out("solution_env_local: " + str(solution_env_local))
                 res = eval(param, solution_env_global, solution_env_local)
-                r.result = str(param) + ': ' + str(res)
+                r.result = str(param) + ': ' + self.handle_value(res)
             except Exception as e:
                 # 如何获取e的报错原因
                 r.result = str(param) + ': '

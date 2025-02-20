@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.editors;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.fileEditor.*;
@@ -274,8 +273,8 @@ public class MarkDownEditor implements FileEditor {
             LogUtils.warn("load Markdown content error!!\n" + "content = " + GsonUtils.toJsonStr(content) + "\n\r" +
                     "contentType = " + contentType.toString() + "\n\r" + "serverPath = " + serverPath);
             LogUtils.error("Failed to load Markdown content", e);
-            ConsoleUtils.getInstance(project).showError("Failed to load Markdown content\n" + DebugUtils.getStackTraceAsString(e), false, true);
-            return "Failed to load Markdown content !!";
+            ConsoleUtils.getInstance(project).showError("无法加载 Markdown 内容!\n" + DebugUtils.getStackTraceAsString(e), false, true);
+            return "无法加载 Markdown 内容 !!";
         }
     }
 

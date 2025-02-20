@@ -30,6 +30,8 @@ public enum ParamType {
     String_ARRAY("String_array", new String[]{"String[]", "List[str]", "vector<string>"}, new StringArrayConvertor()),
     String_MATRIX("String_matrix", new String[]{"String[][]", "List[List[str]]", "vector<vector<string>>"}, new StringMatrixConvertor()),
     LIST_STRING("List_String", new String[]{"List<String>"}, new ListStringConvertor()),
+    LIST_LIST_STRING("List_List_String", new String[]{"List<List<String>>"}, new ListListStringConvertor()),
+    List_List_INTEGER("List_List_Integer", new String[]{"List<List<Integer>>"}, new ListListIntegerConvertor()),
     TREE_NODE("TreeNode", new String[]{"TreeNode", "TreeNode*", "Optional[TreeNode]"}, new TreeNodeConvertor()),
     LIST_NODE("List_Node", new String[]{"ListNode", "ListNode*", "Optional[ListNode]"}, new ListNodeConvertor());
 

@@ -14,6 +14,7 @@ import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.JavaDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
+import com.xhf.leetcode.plugin.debug.execute.cpp.KillPortProcess;
 import com.xhf.leetcode.plugin.debug.execute.java.Context;
 import com.xhf.leetcode.plugin.debug.execute.java.JavaInstFactory;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
@@ -24,6 +25,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import java.io.BufferedReader;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -41,25 +44,20 @@ import java.util.Map;
 public class JavaDebugger extends AbstractDebugger {
     private final JavaDebugConfig config;
     private JavaDebugEnv env;
-    private EventRequestManager erm;
     private VirtualMachine vm;
-    private Context context;
+    private final Context context;
     private Output output;
-    private InstReader reader;
     private List<BreakpointRequest> breakpointRequests;
     /**
      * 服务启动端口
      */
-    @Deprecated // 不适用远程debug方式
-    private int port;
+    private int port = -1;
     /**
      * 用于输出debug过程中, 代码的std out/ std error
      */
     private final OutputHelper outputHelper;
-    /**
-     * java debug event handler
-     */
-    private JEventHandler handler;
+    private String stdLogPath;
+    private String stdErrPath;
 
 
     public JavaDebugger(Project project, JavaDebugConfig config) {
@@ -72,23 +70,13 @@ public class JavaDebugger extends AbstractDebugger {
     @Override
     public void start() {
         env = new JavaDebugEnv(project);
-        try {
-            if (!env.prepare()) {
-                env.stopDebug();
-                return;
-            }
-        } catch (DebugError e) {
-            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
-            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
-            return;
-        } catch (Exception e) {
-            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
-            LogUtils.error(e);
+        boolean flag = super.envPrepare(env);
+        if (! flag) {
             return;
         }
         // 启动debug
         this.output = config.getOutput();
-        this.reader = config.getReader();
+        InstReader reader = config.getReader();
         this.breakpointRequests = new ArrayList<>();
         // 需要开启新线程, 否则指令读取操作会阻塞idea渲染UI的主线程
         new Thread(this::startDebug).start();
@@ -104,6 +92,13 @@ public class JavaDebugger extends AbstractDebugger {
         env.stopDebug();
         try {
             vm.dispose();
+            if (port != -1) {
+                // 强制关停端口
+                if (DebugUtils.isPortAvailable2("localhost", port)) {
+                    LogUtils.info("强制关闭Java debugger 端口 " + port);
+                    KillPortProcess.killProcess(port);
+                }
+            }
         } catch (VMDisconnectedException ignored) {
         }
         DebugUtils.simpleDebug("JavaDebugger停止!", project);
@@ -117,13 +112,15 @@ public class JavaDebugger extends AbstractDebugger {
     private void startDebug() {
         env.startDebug();
         try {
-            debugLocally();
-            // debugRemotely(); // 废弃远程debug方式
+            // debugLocally();
+            debugRemotely();
         } catch (DebugError ex) {
-            ConsoleUtils.getInstance(project).showWaring(ex.getMessage(), false, true, ex.getMessage(), "debug异常", ConsoleDialog.ERROR);
+            ConsoleUtils.getInstance(project).showError(ex.getMessage(), false, true, ex.getMessage(), "debug异常", ConsoleDialog.ERROR);
             LogUtils.error(ex);
+        } catch (VMDisconnectedException e) {
+            DebugUtils.simpleDebug("vm 链接断开", project, true);
         } catch (Exception e) {
-            ConsoleUtils.getInstance(project).showWaring(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
+            ConsoleUtils.getInstance(project).showError(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
             LogUtils.error(e);
         }
         if (DebugManager.getInstance(project).isDebug()) {
@@ -135,23 +132,41 @@ public class JavaDebugger extends AbstractDebugger {
     /**
      * 本地断点启动
      */
+    @Deprecated
     private void debugLocally() {
         // 获取 LaunchingConnector
         LaunchingConnector connector = Bootstrap.virtualMachineManager().defaultConnector();
 
+        /*
+          clion 2024.3.1.1版本, 使用jdk8启动vm时的指令, 该指令会导致报错
+          {home=home=E:\jdk8, options=options=-classpath E:\java_code\lc-test\cache\debug\java -Dencoding=utf-8, main=main=Main, suspend=suspend=true, quote=quote=", vmexec=vmexec=java.exe, includevirtualthreads=includevirtualthreads=n}
+         */
         // 配置启动参数
         Map<String, Connector.Argument> arguments = connector.defaultArguments();
+
+        // 在clion 2024.3.1.1版本中, defaultArguments会包含 includevirtualthreads, 该参数在使用低版本jdk时会报错
+        // 此外, defaultArguments的启动参数决定于jetbrains产品编写使用的jdk版本, 具体参数内容可参考{@link SunCommandLineLauncher.launch}方法
+        // 如果jetbrains产品版本过高, 那他将无法兼容低版本jdk的debug启动, 最终抛出异常. 该异常无法被避免, 因此废弃debugLocally方法
         arguments.get("main").setValue("Main"); // 替换为你的目标类全路径
         arguments.get("options").setValue("-classpath " + env.getFilePath() + " -Dencoding=utf-8"); // 指定类路径
         // fix: 编译jdk和运行jdk不一致问题
         arguments.get("home").setValue(env.getJAVA_HOME());
         arguments.get("vmexec").setValue("java.exe");
 
+        List<String> list = Arrays.asList("main", "options", "home", "vmexec", "suspend", "quote", "vmexec");
+        for (String key : arguments.keySet()) {
+            if (! list.contains(key)) {
+                arguments.remove(key);
+            }
+        }
+
+        DebugUtils.simpleDebug(arguments.toString(), project);
         // 启动目标 JVM
         VirtualMachine vm;
         try {
             vm = connector.launch(arguments);
         } catch (IOException | IllegalConnectorArgumentsException | VMStartException e) {
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
             throw new DebugError("vm启动失败!", e);
         }
 
@@ -194,7 +209,6 @@ public class JavaDebugger extends AbstractDebugger {
         classPrepareRequest.enable();
 
         this.vm = vm;
-        this.erm = erm;
 
         context.addOutput(output);
         context.setErm(erm);
@@ -221,7 +235,10 @@ public class JavaDebugger extends AbstractDebugger {
      * 同时启动事件处理器, 处理VM debug过程中遇到的event
      */
     public void doRun() {
-        this.handler = new JEventHandler(context);
+        /**
+         * java debug event handler
+         */
+        JEventHandler handler = new JEventHandler(context);
 
         while (DebugManager.getInstance(project).isDebug()) {
             // 确保执行指令时, JEventHandler已经处理好必要逻辑
@@ -244,8 +261,6 @@ public class JavaDebugger extends AbstractDebugger {
         }
     }
 
-    // 采用本地debug方式, 废弃远程连接
-    @Deprecated
     private void debugRemotely() {
         startVMService();
         connectVM();
@@ -254,7 +269,6 @@ public class JavaDebugger extends AbstractDebugger {
     /**
      * 连接VM, 开始debug
      */
-    @Deprecated // 取消远程连接的debug方式
     private void connectVM() {
         // 创建连接
         VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
@@ -286,8 +300,16 @@ public class JavaDebugger extends AbstractDebugger {
 
         if (vm == null) {
             LogUtils.warn("vm 连接失败");
-            throw new DebugError("vm 连接失败");
+            throw new DebugError("vm 连接失败, 可能是std_log.log/std_err.log文件无法删除导致, 详细信息请前往控制台查看...");
         }
+
+        // 捕获目标虚拟机的输出
+        // captureStream(vm.process().getInputStream(), OutputHelper.STD_OUT);
+        // captureStream(vm.process().getErrorStream(), OutputHelper.STD_ERROR);
+
+        // 监听stdout/stderr
+        captureStd(OutputHelper.STD_OUT, 0, this.stdLogPath, outputHelper);
+        captureStd(OutputHelper.STD_ERROR, 1, this.stdErrPath, outputHelper);
 
         startProcessEvent(vm);
     }
@@ -303,23 +325,36 @@ public class JavaDebugger extends AbstractDebugger {
         throw new RuntimeException("No suitable connector found.");
     }
 
-    // 取消用远程debug的方式
-    @Deprecated
     private void startVMService() {
-        // 测试
+        // 创建检测标准输出, 标准错误文件
+        this.stdLogPath = new FileUtils.PathBuilder(env.getFilePath()).append("javaLog").append("std_log.log").build();
+        this.stdErrPath = new FileUtils.PathBuilder(env.getFilePath()).append("javaLog").append("std_err.log").build();
+        try {
+            FileUtils.removeFile(this.stdLogPath);
+            FileUtils.removeFile(this.stdErrPath);
+            FileUtils.createAndWriteFile(stdLogPath, "");
+            FileUtils.createAndWriteFile(stdErrPath, "");
+        } catch (Exception e) {
+            String message = "Java日志文件创建失败! 请检查对应路径下是否存在std_log.log, std_err.log文件, 并请手动删除他们\n"
+                    + "std_log.log = " + stdLogPath + "\n"
+                    + "std_err_log = " + stdErrPath + "\n";
+            LogUtils.simpleDebug(message);
+            ConsoleUtils.getInstance(project).showError(message, false);
+        }
+
         this.port = DebugUtils.findAvailablePort();
         LogUtils.simpleDebug("get available port : " + this.port);
 
         String cdCmd = "cd " + env.getFilePath();
-        String startCmd = String.format("%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=%d -cp %s %s",
-                env.getJava(), port, env.getFilePath(), "Main");
+        String startCmd = String.format("%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=%d -cp %s %s %s",
+                env.getJava(), port, env.getFilePath(), "Main", "> " + stdLogPath + " 2> " + stdErrPath);
 
-        String combinedCmd = "cmd /c " + cdCmd + " & " + startCmd;
+        String combinedCmd = cdCmd + " & " + startCmd;
 
         LogUtils.simpleDebug(combinedCmd);
 
         try {
-            Process exec = DebugUtils.buildProcess(combinedCmd);
+            var exec = DebugUtils.buildProcess("cmd.exe", "/c", combinedCmd);
             getRunInfo(exec);
         } catch(InterruptedException ignored) {
         } catch (Exception e) {

@@ -9,6 +9,7 @@ import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LoginPass;
+import com.xhf.leetcode.plugin.utils.RatePass;
 
 /**
  * next
@@ -18,6 +19,7 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
  */
 @DebugCheck(DebugCheck.CheckType.STATUS)
 @LoginPass
+@RatePass
 public class DebugNAction extends AbstractAction {
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {

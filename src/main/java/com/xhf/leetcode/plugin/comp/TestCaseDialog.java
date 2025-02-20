@@ -27,7 +27,7 @@ public class TestCaseDialog extends DialogWrapper {
         this.path = path;
         this.project = project;
         init();
-        setTitle("Set Test Cases");
+        setTitle("设置测试案例");
         setSize(600, 400);
     }
 

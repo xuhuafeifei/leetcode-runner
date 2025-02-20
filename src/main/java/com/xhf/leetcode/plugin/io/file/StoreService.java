@@ -266,7 +266,7 @@ public final class StoreService implements Disposable {
     }
 
     private void persistCache() {
-        this.scanFileCache();
+        // this.scanFileCache();
         // build properties
         Properties properties = new Properties();
         // lock the durableCache to avoid thread problems
@@ -296,6 +296,7 @@ public final class StoreService implements Disposable {
     /**
      * scan all file paths in the cache, and remove those deleted from the local file system
      */
+    @Deprecated
     private void scanFileCache() {
         durableCache.asMap().forEach((k, v) -> {
             if (FileUtils.isPath(k)) {

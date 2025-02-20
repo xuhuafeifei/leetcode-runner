@@ -1,10 +1,12 @@
 package com.xhf.leetcode.plugin.setting;
 
+import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
@@ -83,6 +85,17 @@ public final class AppSettings
 
   private State myState = new State();
 
+  public AppSettings() {
+    LCEventBus.getInstance().register(this);
+  }
+
+  @Subscribe
+  public void clearCacheEventListener(ClearCacheEvent event) {
+    myState.coreFilePath = EMPTY_FILE_PATH;
+    myState.filePath = EMPTY_FILE_PATH;
+    myState.langType = EMPTY_LANGUAGE_TYPE;
+  }
+
   public static AppSettings getInstance() {
     return ApplicationManager.getApplication()
             .getService(AppSettings.class);
@@ -157,13 +170,5 @@ public final class AppSettings
 
   public boolean initOrNot() {
     return !myState.isEmptyFilePath() && !myState.isEmptyLangType();
-  }
-
-  /**
-   * 允许用户重新修改coreFilePath的路径
-   * @param event event
-   */
-  public void clearCacheEventListener(ClearCacheEvent event) {
-    myState.coreFilePath = "";
   }
 }

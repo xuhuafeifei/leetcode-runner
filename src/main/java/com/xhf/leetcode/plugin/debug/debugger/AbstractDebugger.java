@@ -2,19 +2,25 @@ package com.xhf.leetcode.plugin.debug.debugger;
 
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.DebugManager;
+import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.InstructionFactory;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.Output;
+import com.xhf.leetcode.plugin.debug.output.OutputHelper;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+
+import java.io.File;
 
 /**
  * @author feigebuge
@@ -149,6 +155,24 @@ public abstract class AbstractDebugger implements Debugger{
 
     }
 
+    protected boolean envPrepare(DebugEnv env) {
+        try {
+            if (!env.prepare()) {
+                env.stopDebug();
+                return false;
+            }
+        } catch (DebugError e) {
+            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            return false;
+        } catch (Exception e) {
+            ConsoleUtils.getInstance(project).showError(e.toString(), false, true);
+            LogUtils.error(e);
+            return false;
+        }
+        return true;
+    }
+
     protected static class ProcessResult {
         boolean isSuccess;
         boolean isContinue;
@@ -163,5 +187,103 @@ public abstract class AbstractDebugger implements Debugger{
             this.inst = inst;
             this.r = r;
         }
+    }
+
+    /**
+     * 存储两个工作线程, 分别捕获std out/ std error
+     */
+    Thread[] threads = new Thread[2];
+    long[] preSize = new long[2];
+
+    /**
+     * 监控stdout/stderr
+     * @param name
+     */
+    protected void captureStd(String name, int idx, String path, OutputHelper outputHelper) {
+        // 存储文件之前的大小
+        preSize[idx] = 0;
+        // 创建线程
+        threads[idx] = new Thread(new Runnable() {
+            private void doStdOutRead() {
+                // 监测文件变化
+                File file = new File(path);
+                long length = file.length();
+                // LogUtils.simpleDebug(Thread.currentThread().getName() + ": 检测" + path + " 大小变化情况, preSize = " + preSize[idx] + ", currentSize = " + length);
+                if (length > preSize[idx]) {
+                    // 写入panel
+                    String content = FileUtils.readContentFromFile(file);
+                    /*
+                    // 忘了当时为啥这么写了
+                    String[] lines = content.split("\n");
+                    if (lines.length >= 3) {
+                        // 跳过1, 2和最后一行
+                        content = String.join("\n", Arrays.copyOfRange(lines, 2, lines.length));
+                        ExecuteResult success = ExecuteResult.success(null, content);
+                        success.setMoreInfo(name);
+                        outputHelper.output(success, false);
+                    }
+                     */
+                    if (!content.endsWith("\n")) {
+                        content = content + "\n";
+                    }
+                    ExecuteResult success = ExecuteResult.success(null, content);
+                    success.setMoreInfo(name);
+                    outputHelper.output(success, false);
+                    preSize[idx] = length;
+                }
+            }
+
+            private void doStdErrRead() {
+                // 监测文件变化
+                File file = new File(path);
+                long length = file.length();
+                // LogUtils.simpleDebug(Thread.currentThread().getName() + ": 检测" + path + " 大小变化情况, preSize = " + preSize[idx] + ", currentSize = " + length);
+                if (length > preSize[idx]) {
+                    // 写入panel
+                    String content = FileUtils.readContentFromFile(file);
+                    ExecuteResult success = ExecuteResult.success(null, content);
+                    success.setMoreInfo(name);
+                    outputHelper.output(success, false);
+                    preSize[idx] = length;
+                }
+            }
+
+
+            private void doRead() {
+                switch (name) {
+                    case OutputHelper.STD_OUT:
+                        doStdOutRead();
+                        break;
+                    case OutputHelper.STD_ERROR:
+                        doStdErrRead();
+                        break;
+                }
+            }
+
+            @Override
+            public void run() {
+                // 第一阶段：检查中断标志
+                while (!Thread.currentThread().isInterrupted()) {
+                    doRead();
+                    // 检查中断状态并决定是否继续执行
+                    if (Thread.interrupted()) {
+                        LogUtils.info("Thread interrupted at stage 1 (before sleep).");
+                        return;  // 阶段一：在此响应中断
+                    }
+
+                    try {
+                        Thread.sleep(400);
+                    } catch (InterruptedException e) {
+                        // 第二阶段：捕获 InterruptedException 响应中断
+                        LogUtils.simpleDebug("Thread interrupted during sleep (stage 2).");
+                        // 在捕获到 InterruptedException 后，可以直接退出循环
+                        Thread.currentThread().interrupt(); // 保持中断状态
+                        doRead();
+                        break;
+                    }
+                }
+            }
+        }, name);
+        threads[idx].start();
     }
 }

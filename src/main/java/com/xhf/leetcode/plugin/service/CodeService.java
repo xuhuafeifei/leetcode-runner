@@ -419,18 +419,18 @@ public class CodeService {
 
         if (lc == null) {
             ConsoleUtils.getInstance(project).showWaring(
-                    "Some error happens, please close all file and try again!",
+                    "发生了一些错误, 请重新打开文件或对文件进行重定位",
                     false,
                     true,
-                    "Some error happens, please close all file and try again!",
-                    "Run Code Error",
+                    "发生了一些错误, 请重新打开文件或对文件进行重定位",
+                    "运行代码 异常",
                     ConsoleDialog.ERROR
             );
             return;
         }
         RunCode runCode = buildRunCode(lc, codeContent);
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Run code", false){
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "运行代码", false){
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(runCode);
@@ -438,9 +438,9 @@ public class CodeService {
                 AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(runCode.getDataInput(), rcr, project);
                 boolean correctAnswer = rcrb.isCorrectAnswer();
                 if (correctAnswer) {
-                    ConsoleUtils.getInstance(project).showInfo(rcrb.build(), true, true, "Congratulations!", "Run Code Result", ConsoleDialog.INFO);
+                    ConsoleUtils.getInstance(project).showInfo(rcrb.build(), true, true, "运行通过!", "运行代码 结果", ConsoleDialog.INFO);
                 } else {
-                    ConsoleUtils.getInstance(project).showInfo(rcrb.build(), true, true, "Oh No! Not Accept", "Run Code Result", ConsoleDialog.ERROR);
+                    ConsoleUtils.getInstance(project).showInfo(rcrb.build(), true, true, "Oh No! 运行不通过!", "运行代码 结果", ConsoleDialog.ERROR);
                 }
             }
         });
@@ -456,11 +456,11 @@ public class CodeService {
 
         if (lc == null) {
             ConsoleUtils.getInstance(project).showWaring(
-                    "Some error happens, please close all file and try again!",
+                    "发生了一些错误, 请重新打开文件或对文件进行重定位",
                     false,
                     true,
-                    "Some error happens, please close all file and try again!",
-                    "Submit Code Error",
+                    "发生了一些错误, 请重新打开文件或对文件进行重定位",
+                    "提交代码 异常",
                     ConsoleDialog.ERROR
             );
             return;
@@ -469,7 +469,7 @@ public class CodeService {
         // build run code
         RunCode runCode = buildRunCode(lc, codeContent);
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Submit code", false){
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "提交代码", false){
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(runCode);
@@ -477,9 +477,9 @@ public class CodeService {
                 AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr, project);
                 boolean correctAnswer = scrb.isCorrectAnswer();
                 if (correctAnswer) {
-                    ConsoleUtils.getInstance(project).showInfo("运行成功", true, true, "Congratulations!", "Submit Code Result", ConsoleDialog.INFO);
+                    ConsoleUtils.getInstance(project).showInfo("运行成功", true, true, "运行通过!", "运行代码 结果", ConsoleDialog.INFO);
                 } else {
-                    ConsoleUtils.getInstance(project).showError("运行失败", true, true, "Oh No! Not Accept!", "Submit Code Result", ConsoleDialog.ERROR);
+                    ConsoleUtils.getInstance(project).showError("运行失败", true, true, "Oh No! 运行不通过!", "运行代码 结果", ConsoleDialog.ERROR);
                 }
 
                 ConsoleUtils.getInstance(project).showInfo(scrb.build());
@@ -499,7 +499,7 @@ public class CodeService {
     public void rePosition() {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
-            JOptionPane.showMessageDialog(null, "No file is chosen");
+            JOptionPane.showMessageDialog(null, "没有选择问题文件");
             return;
         }
         // 获取当前打开文件的fid
@@ -509,14 +509,14 @@ public class CodeService {
         // 获取当前打开文件的语言类型
         String langType = parseLangTypeFromVFile(cFile);
         if (fid == null || titleSlug == null) {
-            JOptionPane.showMessageDialog(null, "Current file is not support to reposition");
+            JOptionPane.showMessageDialog(null, "当前文件不支持重定位");
             return;
         }
         if (! LangType.contains(langType)) {
-            JOptionPane.showMessageDialog(null, "Current code type is not support. Your type = " + langType
+            JOptionPane.showMessageDialog(null, "当前文件类型不支持. 你的文件类型是 = " + langType
                     + "\n"
-                    + "Supported types: " + LangType.getAllLangType()
-                    + "Please remove this file and choose question again!"
+                    + "支持的文件类型是 : " + LangType.getAllLangType() + "\n"
+                    + "请移除当前文件并重新选择问题"
             );
             return;
         }
@@ -648,20 +648,20 @@ public class CodeService {
          */
         private void createHead() {
             boolean correctAnswer = isCorrectAnswer();
-            sb.append("\n").append(codeTypeSplitter).append(" ").append("⚙ Setting Code Type : ").append(AppSettings.getInstance().getLangType()).append(" ").append(codeTypeSplitter).append("\n\n");
+            sb.append("\n").append(codeTypeSplitter).append(" ").append("⚙ 设置的代码类型 : ").append(AppSettings.getInstance().getLangType()).append(" ").append(codeTypeSplitter).append("\n\n");
             if (correctAnswer) {
                 // true
-                sb.append("✅ Accept...").append("\n");
+                sb.append("✅ 通过...").append("\n");
                 sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" s ").append(" 💽: ").append(cr.getStatusMemory()).append("\n");
-                sb.append("total test cases: ").append(cr.getTotalTestcases()).append("\n");
-                sb.append("total correct: ").append(cr.getTotalCorrect()).append("\n");
+                sb.append("全部的测试案例数量: ").append(cr.getTotalTestcases()).append("\n");
+                sb.append("通过的测试案例数量: ").append(cr.getTotalCorrect()).append("\n");
             } else {
                 boolean runSuccess = cr.getRunSuccess();
                 if (runSuccess) {
                     // true
-                    sb.append("❌ Wrong Answer...").append("\n");
-                    sb.append("total test cases: ").append(cr.getTotalTestcases()).append("\n");
-                    sb.append("total correct: ").append(cr.getTotalCorrect()).append("\n");
+                    sb.append("❌ 答案错误 ...").append("\n");
+                    sb.append("全部的测试案例数量: ").append(cr.getTotalTestcases()).append("\n");
+                    sb.append("通过的测试案例数量: ").append(cr.getTotalCorrect()).append("\n");
                 }else {
                     // run error
                     if ("Runtime Error".equals(cr.getStatusMsg())) {
@@ -779,7 +779,7 @@ public class CodeService {
                 }
                 int total = Integer.parseInt(totalTestcases);
                 for (int i = 0; i < total; i++) {
-                    sb.append(splitter).append("CASE ").append(i + 1).append(": ").append(cr.getCompareResult().charAt(i) == '1' ? "✅" : "❌").append(splitter).append("\n");
+                    sb.append(splitter).append("测试案例 ").append(i + 1).append(": ").append(cr.getCompareResult().charAt(i) == '1' ? "✅" : "❌").append(splitter).append("\n");
                     // extract std_output
                     extractStdoutput(i);
                     // extract input
@@ -795,7 +795,7 @@ public class CodeService {
                 List<String> expectedCodeAnswer = cr.getExpectedCodeAnswer();
                 if (i >= expectedCodeAnswer.size()) return;
 
-                sb.append("Expect Answer:").append("\n");
+                sb.append("期待的答案:").append("\n");
                 sb.append(expectedCodeAnswer.get(i)).append("\n");
             }
 
@@ -803,7 +803,7 @@ public class CodeService {
                 List<String> codeAnswer = cr.getCodeAnswer();
                 if (i >= codeAnswer.size()) return;
 
-                sb.append("Code Answer:").append("\n");
+                sb.append("运行结果:").append("\n");
                 sb.append(codeAnswer.get(i)).append("\n");
             }
 
@@ -812,7 +812,7 @@ public class CodeService {
                 if (i >= stdOutputList.size()) return;
                 if (StringUtils.isBlank(stdOutputList.get(i))) return;
 
-                sb.append("Standard Output:").append("\n");
+                sb.append("标准输出:").append("\n");
                 sb.append(stdOutputList.get(i)).append("\n");
             }
 
@@ -823,7 +823,7 @@ public class CodeService {
                 String[] input = dataInput.split("\n");
                 if (i >= input.length) return;
 
-                sb.append("Input:").append("\n");
+                sb.append("输入:").append("\n");
                 int size = input.length / total;
                 int start = i * size, end = start + size;
                 for (int k = start; k < end; ++k) {
@@ -847,7 +847,7 @@ public class CodeService {
                 if (correctAnswer) {
                     return;
                 }
-                sb.append(splitter).append("LAST CASE").append(": ").append("❌").append(splitter).append("\n");
+                sb.append(splitter).append("上一个测试案例").append(": ").append("❌").append(splitter).append("\n");
                 // extract std_output
                 extractStdoutput();
                 // extract input
@@ -862,7 +862,7 @@ public class CodeService {
                 String expectedOutput = cr.getExpectedOutput();
                 if (StringUtils.isBlank(expectedOutput)) return;
 
-                sb.append("Expect Answer:").append("\n");
+                sb.append("期待的答案:").append("\n");
                 sb.append(expectedOutput).append("\n");
             }
 
@@ -870,7 +870,7 @@ public class CodeService {
                 String codeOutput = cr.getCodeOutput();
                 if (StringUtils.isBlank(codeOutput)) return;
 
-                sb.append("Code Answer:").append("\n");
+                sb.append("运行结果:").append("\n");
                 sb.append(codeOutput).append("\n");
             }
 
@@ -878,7 +878,7 @@ public class CodeService {
                 String stdOutput = cr.getStdOutput();
                 if (StringUtils.isBlank(stdOutput)) return;
 
-                sb.append("Standard Output:").append("\n");
+                sb.append("标准输出:").append("\n");
                 sb.append(stdOutput).append("\n");
             }
 
@@ -887,7 +887,7 @@ public class CodeService {
                 if (StringUtils.isBlank(lastTestcase)) return;
 
                 String[] split = lastTestcase.split("\n");
-                sb.append("Input:").append("\n");
+                sb.append("输入:").append("\n");
                 for (String s : split) {
                     sb.append(s).append("\n");
                 }
@@ -909,10 +909,10 @@ public class CodeService {
 
         if (lc == null) {
             ConsoleUtils.getInstance(project).showWaring(
-                    "Some error happens, please close all file and try again!",
+                    "发生了一些错误, 请重新打开文件或对文件进行重定位",
                     false,
                     true,
-                    "Some error happens, please close all file and try again!",
+                    "发生了一些错误, 请重新打开文件或对文件进行重定位",
                     "Test Cases Set Error",
                     ConsoleDialog.ERROR
             );

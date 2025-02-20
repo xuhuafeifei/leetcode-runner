@@ -106,13 +106,13 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         varAndExpSplitter.setSecondComponent(stdPanel);
 
         this.variablesTab = new TabInfo(varAndExpSplitter);
-        variablesTab.setText("Variables & Expressions");
+        variablesTab.setText("变量 & 表达式计算");
         variablesTab.setIcon(AllIcons.Debugger.Threads);
         tabs.addTab(variablesTab);
 
         // 添加 Console 选项卡
         this.consoleTab = new TabInfo(consoleView.getComponent());
-        consoleTab.setText("Console");
+        consoleTab.setText("控制台");
         consoleTab.setIcon(AllIcons.Debugger.Console);
         tabs.addTab(consoleTab);
 
@@ -130,7 +130,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
 
         // 创建command输入框的面板
         JPanel commandPanel = new JPanel(new BorderLayout());
-        JLabel label = new JLabel("Debug Command Line");
+        JLabel label = new JLabel("Debug 命令行");
 
         commandPanel.add(label, BorderLayout.NORTH);
         commandPanel.add(inputField, BorderLayout.CENTER);
@@ -199,7 +199,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         // 存储用户输入
         boolean flag = InstSource.userCmdInput(debugCommand);
         if (! flag) {
-            ConsoleUtils.getInstance(project).showError("command write failed!", false);
+            ConsoleUtils.getInstance(project).showError("命令写入错误!", false);
         }
         // 清空输入框
         inputField.setText("");
@@ -310,7 +310,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         closeSecond();
         MyList<String> variableList = variablePanel.getVariables();
         variableList.setNonData();
-        variableList.setEmptyText("Debug finish...");
+        variableList.setEmptyText("debug结束...");
         // gc
         if (historyCommand != null) {
             historyCommand = null;

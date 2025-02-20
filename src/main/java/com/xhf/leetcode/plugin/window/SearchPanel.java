@@ -74,7 +74,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
         questionList = new MyList<>();
         questionList.setCellRenderer(new QuestionCellRender());
         questionList.addMouseListener(new QuestionListener(questionList, project));
-        questionList.setEmptyText("Please login first...");
+        questionList.setEmptyText("请先登录...");
 
         JBScrollPane jbScrollPane = new JBScrollPane(questionList);
         this.add(jbScrollPane, BorderLayout.CENTER);
@@ -103,13 +103,13 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
     public void loginEventListener(LoginEvent listener) {
         // 提前调用indexLock(). 因为登录后必定要重新加载所有题目数据, 从而rebuild engine's index
         indexLock();
-        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setEmptyText("数据加载中, 请稍等");
     }
 
     @Subscribe
     public void qLoadStartListener(QLoadStartEvent event) {
         indexLock();
-        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setEmptyText("数据加载中, 请稍等");
         questionList.setNonData();
     }
 
@@ -120,7 +120,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void qLoadEndListener(QLoadEndEvent event) {
         unLock();
-        questionList.setEmptyText("Noting to show...");
+        questionList.setEmptyText("没有可用于展示的数据...");
         List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
         questionList.setListData(totalQuestion);
         buildIndex(totalQuestion);
@@ -137,7 +137,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
             return;
         }
         indexLock();
-        questionList.setEmptyText("Loading data, please wait a second...");
+        questionList.setEmptyText("加载数据中, 请耐心等待...");
         questionList.setNonData();
         buildIndex(QuestionService.getInstance().getTotalQuestion(project));
         unLock();
@@ -147,7 +147,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void clearCacheEventListeners(ClearCacheEvent event) {
         loginLock();
-        questionList.setEmptyText("Please login first...");
+        questionList.setEmptyText("请先登录...");
         questionList.setNonData();
     }
 

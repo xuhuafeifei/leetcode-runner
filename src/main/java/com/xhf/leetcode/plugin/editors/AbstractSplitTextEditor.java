@@ -67,7 +67,7 @@ public abstract class AbstractSplitTextEditor implements FileEditor {
      * @return 返回Toolbar工具栏
      */
     protected final SplitEditorToolbar createToolbarWrapper(JComponent comp) {
-        DefaultActionGroup actionGroup = new DefaultActionGroup(new AnAction("Close Solution", "Close solution", AllIcons.Actions.Close) {
+        DefaultActionGroup actionGroup = new DefaultActionGroup(new AnAction("关闭题目", "关闭题目", AllIcons.Actions.Close) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 closeSplitEditor();

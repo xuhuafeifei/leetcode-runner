@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.setting;
 
+import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
@@ -9,13 +10,15 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LangType;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Objects;
 
 /**
  * @author feigebuge
@@ -54,6 +57,13 @@ public class AppSettingsComponent {
             .addComponent(debugPanel)
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel();
+    LCEventBus.getInstance().register(this);
+  }
+
+  @Subscribe
+  public void clearCacheEventListener(ClearCacheEvent event) {
+    this.myLangType.setSelectedIndex(-1);
+    this.myFileBrowserBtn.setText("");
   }
 
   // 创建一个带文字的分割线
@@ -120,11 +130,19 @@ public class AppSettingsComponent {
   }
 
   public void setLangType(String langType) {
+    if (StringUtils.isBlank(langType)) {
+      myLangType.setSelectedIndex(-1);
+      return;
+    }
     myLangType.setItem(langType);
   }
 
   public String getLangType() {
-    return Objects.requireNonNull(myLangType.getSelectedItem()).toString();
+    Object selectedItem = myLangType.getSelectedItem();
+    if (selectedItem == null) {
+      return "";
+    }
+    return (String) selectedItem;
   }
 
   public void setFilePath(String filePath) {

@@ -31,7 +31,7 @@ public class VariablePanel extends JPanel {
      * 输入表达式的文本框
      */
     private final ExtendableTextField expressionField;
-    private final String defaultText = "Evaluate expression (Enter) or add a watch";
+    private final String defaultText = "计算表达式 (回车) 或添加监视";
 
     public VariablePanel() {
         // 设置垂直布局

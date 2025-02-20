@@ -412,3 +412,79 @@ Leetcode平台共有接近4000道题目，题目质量层次不齐，用户难�
 点击reload question，重新查询题目
 
 ![image-20250113132633574](README.assets/image-20250113132633574.png)
+
+### 3. Cpp debug 文件编译错误
+
+![image-20250207155101682](README.assets/image-20250207155101682.png)
+
+该问题在**v3.5.0**增加cpp debug功能时引入，其产生原因是c++debug server没有正常退出，导致**ServerMain.exe**，**solution.exe**所在进程并未被正常销毁
+作者目前也在尝试着解决这个问题，但并未提供一个安全的解决方案
+此时需要用户手动杀死相关进程，关于solution.exe，ServerMain.exe所在路径会在console中显示，具体如下
+
+![image-20250207155525616](README.assets/image-20250207155525616.png)
+
+进入console显示的目录，尝试删除文件，发现删除失败
+
+![image-20250207155850859](README.assets/image-20250207155850859.png)
+
+这是因为ServerMain.exe被C++进程持有，需要先杀死对应进程，才能删除文件
+**杀死占有.exe的进程**
+- 方案一：
+
+  在终端输入`tasklist | findstr ServerMain.exe`，得到的第二个输出就是ServerMain.exe启动程序占用的端口
+  然后通过`taskkill /F /PID {端口}`杀死进程，即可终止占用ServerMain.exe的程序
+  此时可以删除ServerMain.exe
+  ![image-20250207182324903](README.assets/image-20250207182324903.png)
+- 方案二：
+  重启电脑，通过重启强制杀死所有的程序，此版可以删除ServerMain.exe
+
+
+
+### 4. vm 连接失败
+
+![image-20250217153237755](README.assets/image-20250217153237755.png)
+
+
+
+导致该错误的原因有两种
+
+1. debug启动时设置的jdk版本过低
+2. std_log.log和std_err.log被其他文件占用
+
+
+
+如果是原因1，可选择启动低版本的jetbrains或者选择高版本的jdk，当然最保险的方式还是选择jetbrains自带的jdk，jetbrains产品自带的jdk路径为`${安装目录}\jbr\bin\java.exe`，比如`D:\PyCharm 2024.1.3\jbr\bin\java.exe`
+
+需要说明的是，在debug阶段开始前的填写路径阶段，请不要输入完整路径，而是输入根路径，比如`${安装目录}\jbr`，系统会自动添加`\bin\java.exe`
+
+
+
+值得一提的是，在3.6.4版本中，Leetcode-Runner通过改变JVM启动策略从而解决因为jetbrains版本过高而无法启动低版本jdk的问题
+
+
+
+如果是原因2，用户会在console控制台中看到std_log.log和std_err.log两个文件的路径
+
+![image-20250217175128334](README.assets/image-20250217175128334.png)
+
+如果尝试删除, 则会出现**文件已被占用的报错**
+
+此时需要采取强制手段删除
+
+可以选择重启，又或者选择杀死占用文件的进程，具体操作如下：
+
+在任务管理器中打开资源监视器
+
+![image-20250217154507592](README.assets/image-20250217154507592.png)
+
+
+
+在资源监视器中选择`CPU`，在关联的句柄中搜索`std_log.log`，找到相关程序，并将其杀死
+
+![image-20250217154538862](README.assets/image-20250217154538862.png)
+
+
+
+![image-20250217154626360](README.assets/image-20250217154626360.png)
+
+<font color=red>切忌将系统级别的重要进程终结，在终结进程前请确认句柄名称！！！</font>
