@@ -488,3 +488,45 @@ Leetcode平台共有接近4000道题目，题目质量层次不齐，用户难�
 ![image-20250217154626360](README.assets/image-20250217154626360.png)
 
 <font color=red>切忌将系统级别的重要进程终结，在终结进程前请确认句柄名称！！！</font>
+
+
+
+
+
+### 5. Android Studio出现JCEF登录失败
+
+![image-20250220112051852](README.assets/image-20250220112051852.png)
+
+
+
+解决方法
+Android studio Go to Help -> Find action
+
+
+
+![image-20250220112142865](README.assets/image-20250220112142865.png)
+
+
+
+搜索 Choose Boot Java Runtime for the IDE
+
+![image-20250220112219012](README.assets/image-20250220112219012.png)
+
+
+
+选择JCEF运行的JDK
+
+![image-20250220112243673](README.assets/image-20250220112243673.png)
+
+
+
+确认，等待idea下载即可
+
+
+
+
+
+### 6. JCEF登录失败
+
+![image-20250220113826393](README.assets/image-20250220113826393.png)
+
