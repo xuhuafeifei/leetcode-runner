@@ -9,17 +9,15 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
 import com.xhf.leetcode.plugin.utils.RatePass;
 import com.xhf.leetcode.plugin.utils.SettingPass;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
-import com.xhf.leetcode.plugin.window.LCPanel;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 
 /**
- * @author 文艺倾年
- * 老板键
- * Windows/Linux: Ctrl+Shift+.，Mac: Cmd+Shift+.
+ * @author 鏂囪壓鍊惧勾
+ * Windows/Linux: Ctrl+Shift+. Mac: Cmd+Shift+.
  */
-@SettingPass // 跳过设置检查
-@LoginPass   // 跳过登录检查
-@RatePass    // 跳过频率限制
+@SettingPass // ???????锟斤拷??
+@LoginPass   // ??????????
+@RatePass    // ???????????
 public class BossKeyAction extends AbstractAction {
 
     @Override

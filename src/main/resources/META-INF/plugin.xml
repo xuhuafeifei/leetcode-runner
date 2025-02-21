@@ -79,7 +79,7 @@
         <httpRequestHandler implementation="com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler"/>
     </extensions>
 
-    <actions>
+    <actions resource-bundle="messages.LLConsole">
         <action id="BossKey"
                 class="com.xhf.leetcode.plugin.actions.BossKeyAction"
                 text="Boss Key"
@@ -94,7 +94,7 @@
                     first-keystroke="meta shift PERIOD"/>
         </action>
         <action id="leetcode.plugin.LoginAction" class="com.xhf.leetcode.plugin.actions.loginAction"
-                text="登录" icon="/icons/login.svg">
+                icon="/icons/login.svg">
         </action>
         <action id="leetcode.plugin.DemoAction" class="com.xhf.leetcode.plugin.actions.DemoAction"
                 text="Demo 测试" icon="/icons/clean.svg">
