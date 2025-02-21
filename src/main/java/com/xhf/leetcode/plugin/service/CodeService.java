@@ -179,43 +179,45 @@ public class CodeService {
     public void reOpenCodeEditor(Question question, VirtualFile file, String langType) {
         QuestionService.getInstance().fillQuestion(question, project);
 
-        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
-        // get current file path
-        String currentFilePath = ViewUtils.getUnifyFilePathByVFile(file);
-        // restore
-        StoreService.getInstance(project).addCache(currentFilePath, le);
+//        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
+//        // get current file path
+//        String currentFilePath = ViewUtils.getUnifyFilePathByVFile(file);
+//        // restore
+//        StoreService.getInstance(project).addCache(currentFilePath, le);
         // close
         ViewUtils.closeVFile(file, project);
+        openCodeEditor(question);
         // reopen
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            VirtualFile reFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(currentFilePath);
-            if (reFile != null) {
-                OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
-                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
-            }
-        });
+//        ApplicationManager.getApplication().invokeAndWait(() -> {
+//            VirtualFile reFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(currentFilePath);
+//            if (reFile != null) {
+//                OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+//                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+//            }
+//        });
     }
 
     public void reOpenCodeEditor(Question question, VirtualFile file, String langType, DeepCodingInfo deepCodingInfo) {
         QuestionService.getInstance().fillQuestion(question, project);
 
-        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
-        le.setDeepCodingInfo(deepCodingInfo);
+//        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
+//        le.setDeepCodingInfo(deepCodingInfo);
 
         // get current file path
-        String currentFilePath = ViewUtils.getUnifyFilePathByVFile(file);
+//        String currentFilePath = ViewUtils.getUnifyFilePathByVFile(file);
         // restore
-        StoreService.getInstance(project).addCache(currentFilePath, le);
+//        StoreService.getInstance(project).addCache(currentFilePath, le);
         // close
         ViewUtils.closeVFile(file, project);
         // reopen
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            VirtualFile reFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(currentFilePath);
-            if (reFile != null) {
-                OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
-                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
-            }
-        });
+//        ApplicationManager.getApplication().invokeAndWait(() -> {
+//            VirtualFile reFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(currentFilePath);
+//            if (reFile != null) {
+//                OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+//                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+//            }
+//        });
+        openCodeEditor(question, deepCodingInfo);
     }
 
     private LeetcodeEditor buildLeetcodeEditor(Question question, String translatedContent, String lang) {

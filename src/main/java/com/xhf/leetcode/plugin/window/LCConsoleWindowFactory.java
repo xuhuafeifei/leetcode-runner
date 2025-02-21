@@ -16,8 +16,8 @@ import org.jetbrains.annotations.NotNull;
  * @email 2508020102@qq.com
  */
 public class LCConsoleWindowFactory implements ToolWindowFactory, DumbAware {
-    // Ê¹ÓÃfinalĞŞÊÎ
-    public final static String LEETCODE_CONSOLE_PLUGIN_ID = "Leetcode Runner ¿ØÖÆÌ¨";
+    // ä½¿ç”¨finalä¿®é¥°
+    public final static String LEETCODE_CONSOLE_PLUGIN_ID = "Leetcode Runner æ§åˆ¶å°";
 
 
     @Override

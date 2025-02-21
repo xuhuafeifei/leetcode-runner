@@ -176,17 +176,27 @@
                         keymap="$default"
                         first-keystroke="ctrl alt 0"/>
             </action>
-            <separator/>
             <action id="leetcode.plugin.editor.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
                     text="设置测试案例" description="测试案例设置" icon="/icons/test_cases.svg">
             </action>
+            <separator/>
             <action id="leetcode.plugin.DefaultContent" class="com.xhf.leetcode.plugin.actions.DefaultContentAction"
-                    text="恢复默认代码" description="默认代码">
+                    text="恢复默认代码" description="默认代码" icon="/icons/default_code.svg">
+            </action>
+            <action id="leetcode.plugin.Timmer" class="com.xhf.leetcode.plugin.actions.TimeAction"
+                    text="定时" description="定时" icon="/icons/clock.svg">
             </action>
             <separator/>
             <reference id="leetcode.plugin.Reposition"/>
             <action id="leetcode.plugin.debug.Debug" class="com.xhf.leetcode.plugin.actions.DebugAction"
                     text="调试代码" description="调试代码" icon="AllIcons.Debugger.AttachToProcess">
+            </action>
+            <separator/>
+            <action id="leetcode.plugin.RemoveCommentAction" class="com.xhf.leetcode.plugin.actions.RemoveCommentAction"
+                    text="移除Runner注释" icon="/icons/rubbish.svg">
+            </action>
+            <action id="leetcode.plugin.AddCommentAction" class="com.xhf.leetcode.plugin.actions.AddCommentAction"
+                    text="添加Runner注释" icon="/icons/addComment.svg">
             </action>
         </group>
     </actions>

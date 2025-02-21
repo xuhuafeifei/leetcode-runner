@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.model;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +47,7 @@ public class Question implements DeepCodingQuestion {
 
     public static final String lineStart = "lc-start-line";
     public static final String lineEnd = "lc-end-line";
+    private static final String basicComment = "do not modify or remove start-line comment and end-line comment and including this comment";
 
     /**
      * 目前只在class上方增加两行注释(下方offset暂不考虑)
@@ -88,7 +90,7 @@ public class Question implements DeepCodingQuestion {
     public static String handleCodeSnippets(String code, String langType) {
         String commentSymbol = LangType.getCommentSymbol(langType);
         return
-                commentSymbol + "do not modify or remove start-line comment and end-line comment and including this comment" + "\n" +
+                commentSymbol + basicComment  + "\n" +
                 commentSymbol + lineStart + "\n" +
                 code + "\n" +
                 commentSymbol + lineEnd + "\n";
@@ -161,6 +163,51 @@ public class Question implements DeepCodingQuestion {
             }
         }
         return sb.toString().trim();  // 返回去掉多余空行的核心代码
+    }
+
+    /**
+     * 移除Runner系统增加的注释
+     * @param content content
+     * @return string
+     */
+    public static String removeComment(@Nullable String content) {
+        if (StringUtils.isBlank(content)) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        String[] split = content.split("\n");
+        String commentSymbol = LangType.getCommentSymbol(AppSettings.getInstance().getLangType());
+        String start = commentSymbol + lineStart;
+        String end = commentSymbol + lineEnd;
+        String basic = commentSymbol + basicComment;
+        for (String s : split) {
+            if (StringUtils.equalsAny(s, start, end, basic)) {
+                continue;
+            }
+            sb.append(s).append("\n");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 增加Runner系统注释
+     * @param content content
+     * @return content
+     */
+    public static String addComment(String content) {
+        StringBuilder sb = new StringBuilder();
+        String commentSymbol = LangType.getCommentSymbol(AppSettings.getInstance().getLangType());
+        String start = commentSymbol + lineStart + "\n";
+        String end = commentSymbol + lineEnd + "\n";
+        String basic = commentSymbol + basicComment + "\n";
+        if (content == null) {
+            content = "";
+        }
+        if (! content.endsWith("\n")) {
+            content += "\n";
+        }
+        sb.append(basic).append(start).append(content).append(end);
+        return sb.toString();
     }
 
     public List<TopicTag> getTopicTags() {

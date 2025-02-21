@@ -7,6 +7,7 @@ import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.SplitEditorToolbar;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.Key;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
@@ -58,7 +59,7 @@ public class CodeEditor extends CopyToolBarEditor {
 
     @Override
     protected AnAction copyToAction() {
-        return new AnAction("切换代码", "切换代码", AllIcons.Actions.Back) {
+        return new AnAction("切换代码", "切换代码", IconLoader.getIcon("/icons/switch.svg", CodeEditor.class)) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 String content = textPane.getText();

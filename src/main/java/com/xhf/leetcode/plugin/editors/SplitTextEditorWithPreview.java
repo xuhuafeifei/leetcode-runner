@@ -22,7 +22,9 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
@@ -119,8 +121,11 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
         ActionGroup action = (ActionGroup) ActionManager.getInstance().getAction("leetcode.plugin.editor.group");
         DefaultActionGroup dag = new DefaultActionGroup();
         dag.add(action);
-        // 判断是否是通过deep coding模式创建
         try {
+            dag.addSeparator();
+            // 增加语言图标
+            dag.add(createLangIcon());
+            // 判断是否是通过deep coding模式创建
             VirtualFile file = super.getFile();
             Project project = super.getEditor().getProject();
             LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
@@ -134,6 +139,44 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
             LogUtils.error(e);
         }
         return dag;
+    }
+
+    private AnAction createLangIcon() {
+        String langIconPath;
+        LangType type = LangType.getType(AppSettings.getInstance().getLangType());
+        String text;
+        if (type != null) {
+            switch (type) {
+                case C:
+                    langIconPath = "/icons/C.svg";
+                    text = "c语言";
+                    break;
+                case PYTHON3:
+                    langIconPath = "/icons/Python.svg";
+                    text = "python语言";
+                    break;
+                case CPP:
+                    langIconPath = "/icons/cpp.svg";
+                    text = "c++语言";
+                    break;
+                case JAVA:
+                    langIconPath = "/icons/java.svg";
+                    text = "java语言";
+                    break;
+                default:
+                    langIconPath = "/icons/coding.svg";
+                    text = "编程语言";
+            }
+        } else {
+            langIconPath = "/icons/coding.svg";
+            text = "编程语言";
+        }
+        return (new AbstractAction(text, text, IconLoader.getIcon(langIconPath, Hot100Panel.class)) {
+            @Override
+            public void doActionPerformed(Project project, AnActionEvent e) {
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
+            }
+        });
     }
 
     /**
