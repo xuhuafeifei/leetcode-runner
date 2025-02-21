@@ -1,6 +1,12 @@
 [TOC]
 
+# 开发环境
 
+> feigebuge推荐环境
+> - JDK: JDK 11.0.25
+> - Gradle: Gradle 8.0
+> - IDE: IntelliJ IDEA 2023.2.3
+> - 项目启动的IDE: IntelliJ IDEA 2022.2.3
 
 # HELPER v1.0
 

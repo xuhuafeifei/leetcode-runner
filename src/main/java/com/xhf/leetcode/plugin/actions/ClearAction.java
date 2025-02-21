@@ -10,7 +10,7 @@ import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.utils.LoginPass;
 
 /**
- * Çå³ı»º´æÎÄ¼ş
+ * æ¸…é™¤ç¼“å­˜æ–‡ä»¶
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -22,8 +22,8 @@ public class ClearAction extends AbstractAction {
     public void doActionPerformed(Project project, AnActionEvent e) {
         int result = Messages.showOkCancelDialog(
                 project,
-                "ÄúÈ·¶¨ÒªÉ¾³ı»º´æÎÄ¼şÂğ? Õâ»áÇå³ıÄúÊ¹ÓÃLeetcode-RunnerÊ±ÏµÍ³Ä¬ÈÏ»º´æµÄÒ»ÇĞÌâÄ¿Êı¾İ, Í¬Ê±ÍË³öµÇÂ¼×´Ì¬, Çå¿Õ²¿·ÖÉèÖÃĞÅÏ¢",
-                "È·ÈÏÉ¾³ı",
+                "æ‚¨ç¡®å®šè¦åˆ é™¤ç¼“å­˜æ–‡ä»¶å—? è¿™ä¼šæ¸…é™¤æ‚¨ä½¿ç”¨Leetcode-Runneræ—¶ç³»ç»Ÿé»˜è®¤ç¼“å­˜çš„ä¸€åˆ‡é¢˜ç›®æ•°æ®, åŒæ—¶é€€å‡ºç™»å½•çŠ¶æ€, æ¸…ç©ºéƒ¨åˆ†è®¾ç½®ä¿¡æ¯",
+                "ç¡®è®¤åˆ é™¤",
                 Messages.getOkButton(),
                 Messages.getCancelButton(),
                 Messages.getQuestionIcon()
@@ -31,8 +31,8 @@ public class ClearAction extends AbstractAction {
 
         if (result == Messages.OK) {
             StoreService.getInstance(project).clearCache();
-            // post. Í¨¹ı×ÜÏßÒì²½Í¨Öª¶©ÔÄClearCacheEventµÄ¶©ÔÄÕß, ´¦Àí¶îÍâÂß¼­
-            // ±ÈÈçÍË³öµÇÂ¼×´Ì¬, Çå³ıLCPanelÏÔÊ¾µÄÌâÄ¿Êı¾İµÈ
+            // post. é€šè¿‡æ€»çº¿å¼‚æ­¥é€šçŸ¥è®¢é˜…ClearCacheEventçš„è®¢é˜…è€…, å¤„ç†é¢å¤–é€»è¾‘
+            // æ¯”å¦‚é€€å‡ºç™»å½•çŠ¶æ€, æ¸…é™¤LCPanelæ˜¾ç¤ºçš„é¢˜ç›®æ•°æ®ç­‰
             LCEventBus.getInstance().post(new LogoutEvent());
             LCEventBus.getInstance().post(new ClearCacheEvent(project));
         }

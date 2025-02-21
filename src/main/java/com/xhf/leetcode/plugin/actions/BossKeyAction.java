@@ -1,6 +1,6 @@
 package com.xhf.leetcode.plugin.actions;
 
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -13,11 +13,12 @@ import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 
 /**
  * @author 文艺倾年
- * Windows/Linux: Ctrl+Shift+. Mac: Cmd+Shift+.
+ * 老板键
+ * Windows/Linux: Ctrl+Shift+.，Mac: Cmd+Shift+.
  */
-@SettingPass // ???????��??
-@LoginPass   // ??????????
-@RatePass    // ???????????
+@SettingPass // 跳过设置检查
+@LoginPass   // 跳过登录检查
+@RatePass    // 跳过频率限制
 public class BossKeyAction extends AbstractAction {
 
     @Override
