@@ -39,7 +39,7 @@ public abstract class AbstractAction extends AnAction {
         RatePass ratePass = this.getClass().getAnnotation(RatePass.class);
         if (ratePass == null) {
             if (!ActionUtils.get()) {
-                ConsoleUtils.getInstance(e.getProject()).showInfo("Äúµ±Ç°²Ù×÷¹ıÓÚÆµ·±!", false, true);
+                ConsoleUtils.getInstance(e.getProject()).showInfo("æ‚¨å½“å‰æ“ä½œè¿‡äºé¢‘ç¹!", false, true);
                 return;
             }
         }
@@ -48,7 +48,7 @@ public abstract class AbstractAction extends AnAction {
         if (settingPass == null) {
             AppSettings appSettings = AppSettings.getInstance();
             if (!appSettings.initOrNot()) {
-                Messages.showInfoMessage("ÇëÏÈÇ°ÍùÉèÖÃ½çÃæÉèÖÃ²å¼ş...", "INFO");
+                Messages.showInfoMessage("è¯·å…ˆå‰å¾€è®¾ç½®ç•Œé¢è®¾ç½®æ’ä»¶...", "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
@@ -62,7 +62,7 @@ public abstract class AbstractAction extends AnAction {
                 // LoginService.getInstance(project).doLogin();
                 Messages.showOkCancelDialog(
                         project,
-                        "ÇëÏÈµÇÂ¼...",
+                        "è¯·å…ˆç™»å½•...",
                         "INFO",
                         Messages.getOkButton(),
                         Messages.getCancelButton(),
@@ -74,21 +74,21 @@ public abstract class AbstractAction extends AnAction {
         // debug check
         DebugCheck debugCheck = this.getClass().getAnnotation(DebugCheck.class);
         if (debugCheck != null) {
-            // ±ØĞë¼ì²âÉèÖÃ
+            // å¿…é¡»æ£€æµ‹è®¾ç½®
             AppSettings appSettings = AppSettings.getInstance();
-            // reader ¼ì²â
+            // reader æ£€æµ‹
             if (StringUtils.isBlank(appSettings.getReadTypeName())) {
-                Messages.showInfoMessage("debug readerÃ»ÓĞÉèÖÃ, ÇëÇ°ÍùÉèÖÃ½çÃæ", "INFO");
+                Messages.showInfoMessage("debug readeræ²¡æœ‰è®¾ç½®, è¯·å‰å¾€è®¾ç½®ç•Œé¢", "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
-            // output ¼ì²â
+            // output æ£€æµ‹
             if (StringUtils.isBlank(appSettings.getOutputTypeName())) {
-                Messages.showInfoMessage("debug outputÃ»ÓĞÉèÖÃ, ÇëÇ°ÍùÉèÖÃ½çÃæ", "INFO");
+                Messages.showInfoMessage("debug outputæ²¡æœ‰è®¾ç½®, è¯·å‰å¾€è®¾ç½®ç•Œé¢", "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
-            // ×´Ì¬¼ì²â
+            // çŠ¶æ€æ£€æµ‹
             DebugCheck.CheckType value = debugCheck.value();
             if (value == DebugCheck.CheckType.STATUS) {
                 if (!DebugManager.getInstance(project).isDebug()) {

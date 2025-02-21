@@ -1,6 +1,6 @@
 package com.xhf.leetcode.plugin.actions;
 
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -9,17 +9,16 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
 import com.xhf.leetcode.plugin.utils.RatePass;
 import com.xhf.leetcode.plugin.utils.SettingPass;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
-import com.xhf.leetcode.plugin.window.LCPanel;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 
 /**
- * @author ÎÄÒÕÇãÄê
- * ÀÏ°å¼ü
- * Windows/Linux: Ctrl+Shift+.£¬Mac: Cmd+Shift+.
+ * @author æ–‡è‰ºå€¾å¹´
+ * è€æ¿é”®
+ * Windows/Linux: Ctrl+Shift+.ï¼ŒMac: Cmd+Shift+.
  */
-@SettingPass // Ìø¹ıÉèÖÃ¼ì²é
-@LoginPass   // Ìø¹ıµÇÂ¼¼ì²é
-@RatePass    // Ìø¹ıÆµÂÊÏŞÖÆ
+@SettingPass // è·³è¿‡è®¾ç½®æ£€æŸ¥
+@LoginPass   // è·³è¿‡ç™»å½•æ£€æŸ¥
+@RatePass    // è·³è¿‡é¢‘ç‡é™åˆ¶
 public class BossKeyAction extends AbstractAction {
 
     @Override
