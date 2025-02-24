@@ -11,13 +11,16 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+import java.util.Objects;
+
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class LCConsoleWindowFactory implements ToolWindowFactory, DumbAware {
-    // ʹ��final����
-    public final static String LEETCODE_CONSOLE_PLUGIN_ID = "Leetcode Runner ����̨";
+    // 使用final修饰
+    public final static String LEETCODE_CONSOLE_PLUGIN_ID = "Leetcode Runner 控制台";
 
 
     @Override
@@ -30,7 +33,11 @@ public class LCConsoleWindowFactory implements ToolWindowFactory, DumbAware {
 
     public static DataContext getDataContext(@NotNull Project project) {
         ToolWindow leetcodeToolWindows = ToolWindowManager.getInstance(project).getToolWindow(LEETCODE_CONSOLE_PLUGIN_ID);
-        LCConsolePanel LCConsolePanel = (LCConsolePanel) leetcodeToolWindows.getContentManager().getContent(0).getComponent();
+        if (leetcodeToolWindows == null) {
+            JOptionPane.showMessageDialog(null,  LEETCODE_CONSOLE_PLUGIN_ID + " 工具窗口获取失败\n, 请通过 'View->Tool Windows->Leetcode Runner 控制台' 打开", "提示", JOptionPane.INFORMATION_MESSAGE);
+            throw new RuntimeException(LEETCODE_CONSOLE_PLUGIN_ID + " 获取失败");
+        }
+        LCConsolePanel LCConsolePanel = (LCConsolePanel) Objects.requireNonNull(leetcodeToolWindows.getContentManager().getContent(0)).getComponent();
         return DataManager.getInstance().getDataContext(LCConsolePanel);
     }
 }

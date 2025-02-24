@@ -13,6 +13,7 @@ import com.xhf.leetcode.plugin.bus.DeepCodingEvent;
 import com.xhf.leetcode.plugin.bus.DeepCodingTabChooseEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
+import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.window.deepcoding.DeepCodingPanel;
 import org.jetbrains.annotations.NonNls;
@@ -25,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
     private final ActionToolbar actionToolbar;
-    private final DeepCodingPanel deepCodingPanel;
+    private DeepCodingPanel deepCodingPanel;
     private Project project;
     private SearchPanel searchPanel;
     /**
@@ -48,10 +49,14 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
 
         // search panel
         searchPanel = new SearchPanel(project);
-        // deep coding
-        this.deepCodingPanel = new DeepCodingPanel(project, this);
 
         setDefaultContent();
+
+        // 判断是否登录成功
+        LoginService loginService = LoginService.getInstance(project);
+        if (loginService.isLogin()) {
+            loginService.doLoginAfter();
+        }
 
         // register
         LCEventBus.getInstance().register(this);
@@ -66,14 +71,26 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
         if (DataKeys.LEETCODE_QUESTION_LIST.is(dataId)) {
             return searchPanel.getMyList();
         } else if (DataKeys.LEETCODE_DEEP_CODING_HOT_100_QUESTION_LIST.is(dataId)) {
+            if (deepCodingPanel == null) {
+                return null;
+            }
             return deepCodingPanel.getHot100Data();
         } else if (DataKeys.LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST.is(dataId)) {
+            if (deepCodingPanel == null) {
+                return null;
+            }
             return deepCodingPanel.getInterview150Data();
         } else if (DataKeys.LEETCODE_DEEP_CODING_LC_COMPETITION_QUESTION_LIST.is(dataId)) {
+            if (deepCodingPanel == null) {
+                return null;
+            }
             return deepCodingPanel.getLcCompetitionData();
         } else if (DataKeys.LEETCODE_CODING_STATE.is(dataId)) {
             return state;
         } else if (DataKeys.LEETCODE_CHOOSEN_TAB_NAME.is(dataId)) {
+            if (deepCodingPanel == null) {
+                return null;
+            }
             return deepCodingPanel.getCurrentTab();
         }
         return null;
@@ -103,6 +120,13 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
     }
 
     private void setDeepCodingContent() {
+        // deep coding
+        if (deepCodingPanel == null) {
+            // todo: 需要考虑并发问题吗?
+            // 目前来看不存在并发问题, 一方面是有较为严格的限流, 另一方面所有交互都是通过人手点击的, 并不会有并发问题
+            // lazy init
+            this.deepCodingPanel = new DeepCodingPanel(project, this);
+        }
         // store to action toolbar
         actionToolbar.setTargetComponent(deepCodingPanel.getTabs());
         setToolbar(actionToolbar.getComponent());

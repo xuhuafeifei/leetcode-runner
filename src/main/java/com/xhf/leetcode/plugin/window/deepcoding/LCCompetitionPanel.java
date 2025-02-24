@@ -24,6 +24,7 @@ import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
 import com.xhf.leetcode.plugin.window.deepcoding.filter.CQAlgorithmFilter;
@@ -176,37 +177,39 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
      * 初始化MyList
      */
     private void initMyList() {
-        competitionList = QuestionService.getInstance().loadCompetitionQuestionData();
-        // 处理完善数据信息
-        List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
-        for (CompetitionQuestion c : competitionList) {
-            String fid = c.getFid();
-            int idx = Integer.parseInt(fid) -1;
-            Question question = totalQuestion.get(idx);
-            if (! question.getTitleSlug().equals(c.getTitleSlug())) {
-                LogUtils.warn("fid = " + fid + " 的Competition无法和对应fid的Question匹配! " + " competition titleSlug = " + c.getTitleSlug() + " question titleSlug = " + question.getTitleSlug());
-                continue;
+        TaskCenter.getInstance().createTask(() -> {
+            competitionList = QuestionService.getInstance().loadCompetitionQuestionData();
+            // 处理完善数据信息
+            List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+            for (CompetitionQuestion c : competitionList) {
+                String fid = c.getFid();
+                int idx = Integer.parseInt(fid) -1;
+                Question question = totalQuestion.get(idx);
+                if (! question.getTitleSlug().equals(c.getTitleSlug())) {
+                    LogUtils.warn("fid = " + fid + " 的Competition无法和对应fid的Question匹配! " + " competition titleSlug = " + c.getTitleSlug() + " question titleSlug = " + question.getTitleSlug());
+                    continue;
+                }
+                // 填充完成情况
+                c.setStatus(question.getStatus());
             }
-            // 填充完成情况
-            c.setStatus(question.getStatus());
-        }
-        this.questionList.setListData(competitionList);
+            this.questionList.setListData(competitionList);
 
-        questionList.setCellRenderer(new QuestionCellRender());
-        questionList.addMouseListener(new AbstractMouseAdapter(project) {
-            @Override
-            protected void doubleClicked(MouseEvent e) {
-                Point point = e.getPoint();
-                int idx = questionList.locationToIndex(point);
-                DeepCodingInfo dci = new DeepCodingInfo(LC_COMPETITION, questionList.getModel().getSize(), idx);
-                CompetitionQuestion cq = questionList.getModel().getElementAt(idx);
-                CodeService.getInstance(project).openCodeEditor(cq.toQuestion(project), dci);
-            }
-        });
+            questionList.setCellRenderer(new QuestionCellRender());
+            questionList.addMouseListener(new AbstractMouseAdapter(project) {
+                @Override
+                protected void doubleClicked(MouseEvent e) {
+                    Point point = e.getPoint();
+                    int idx = questionList.locationToIndex(point);
+                    DeepCodingInfo dci = new DeepCodingInfo(LC_COMPETITION, questionList.getModel().getSize(), idx);
+                    CompetitionQuestion cq = questionList.getModel().getElementAt(idx);
+                    CodeService.getInstance(project).openCodeEditor(cq.toQuestion(project), dci);
+                }
+            });
 
-        JBScrollPane jbScrollPane = new JBScrollPane(questionList);
-        this.add(jbScrollPane, BorderLayout.CENTER);
-        this.setContent(jbScrollPane);
+            JBScrollPane jbScrollPane = new JBScrollPane(questionList);
+            this.add(jbScrollPane, BorderLayout.CENTER);
+            this.setContent(jbScrollPane);
+        }).invokeLater();
     }
 
     @Override
