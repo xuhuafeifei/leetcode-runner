@@ -21,6 +21,7 @@ import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.search.engine.CompetitionQuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -72,8 +73,10 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
         this.searchEngine = CompetitionQuestionEngine.getInstance(project);
         initMyList();
         super.init();
-//        super.unLock();
         LCEventBus.getInstance().register(this);
+        if (LoginService.getInstance(project).isLogin()) {
+            super.unLock();
+        }
     }
 
     @Override
@@ -129,15 +132,6 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
                 } else {
                     // 否则，更新选中的项
                     previousSelection = selectedItem;
-//                    // 触发创建题解事件
-//                    String fileName = new FileUtils.PathBuilder(filePath).append("[0x3f]-" + selectedItem).build();
-//                    try {
-//                        FileUtils.createAndWriteFile(fileName, convert.doConvert(selectedItem));
-//                    } catch (IOException ex) {
-//                        LogUtils.error(ex);
-//                        ConsoleUtils.getInstance(project).showError("灵神题单创建错误! 错误原因 = " + ex.getMessage(), false, true);
-//                    }
-
                     ApplicationManager.getApplication().invokeAndWait(() -> {
                         LightVirtualFile file = new LightVirtualFile("[0x3f]-" + selectedItem, convert.doConvert(selectedItem));
                         OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);

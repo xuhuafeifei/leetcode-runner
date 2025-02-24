@@ -40,21 +40,29 @@ public class AppSettingsComponent {
 
   private static final String LANG_TYPE_HELP_TEXT = "选择支持的编程语言类型, 该设置将决定后续创建,提交的代码类型. 此外, 语言类型将决定debug功能启动的执行器类型";
   private static final String STORE_PATH_HELP_TEXT = "选择文件的存储路径. 该参数将影响后续代码文件创建的位置";
+  private static final String REPOSITION_HELP_TEXT = "选择reposition功能文件打开方式. 如果是'" + AppSettings.REPOSITION_DEFAULT + "', 重定位后系统将会依据文件代表的语言类型重新打开文件; 如果是'" + AppSettings.REPOSITION_SETTING + "', 重定位后系统将会依据设置中语言类型打开文件";
 
   /*---------debug----------*/
   private final DebugPanel debugPanel = new DebugPanel();
+
+  /*---------通用配置--------*/
+  private final ComboBox<String> reposition = new ComboBox<>();
 
 
 
   public AppSettingsComponent() {
     initComponent();
     myMainPanel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(new JBLabel("Lang type"), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(myLangType).addHelp(LANG_TYPE_HELP_TEXT).getTargetComponent(), 1, false)
+            .addLabeledComponent(new JBLabel("Lang type "), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(myLangType).addHelp(LANG_TYPE_HELP_TEXT).getTargetComponent(), 1, false)
             .addLabeledComponent(new JBLabel("Store path"), InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(STORE_PATH_HELP_TEXT).getTargetComponent(), 1, false)
             .addComponent((JComponent) Box.createVerticalStrut(10))
             .addComponent(createSeparatorWithText("debug configuration"))
             .addComponent((JComponent) Box.createVerticalStrut(5))
             .addComponent(debugPanel)
+            .addComponent((JComponent) Box.createVerticalStrut(10))
+            .addComponent(createSeparatorWithText("others configuration"))
+            .addComponent((JComponent) Box.createVerticalStrut(5))
+            .addLabeledComponent(new JBLabel("Reposition"), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(reposition).addHelp(REPOSITION_HELP_TEXT).getTargetComponent(), 1, false)
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel();
     LCEventBus.getInstance().register(this);
@@ -86,6 +94,9 @@ public class AppSettingsComponent {
             });
     myFileBrowserBtn.setText(AppSettings.getInstance().getFilePath());
     myFileBrowserBtn.setEditable(false);
+
+    reposition.addItem("按照文件代表的语言类型");
+    reposition.addItem("按照设置中的语言类型");
   }
 
   public JPanel getPanel() {
@@ -151,5 +162,21 @@ public class AppSettingsComponent {
 
   public String getFilePath() {
     return myFileBrowserBtn.getText();
+  }
+
+  public void setReposition(String rePositionSetting) {
+    if (StringUtils.isBlank(rePositionSetting)) {
+      reposition.setItem(AppSettings.REPOSITION_DEFAULT);
+      return;
+    }
+    reposition.setItem(rePositionSetting);
+  }
+
+  public String getReposition() {
+    Object selectedItem = reposition.getSelectedItem();
+    if (selectedItem == null) {
+      return AppSettings.REPOSITION_DEFAULT;
+    }
+    return (String) selectedItem;
   }
 }

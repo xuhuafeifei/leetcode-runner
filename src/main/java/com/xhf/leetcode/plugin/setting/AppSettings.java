@@ -11,6 +11,7 @@ import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -26,6 +27,9 @@ public final class AppSettings
 
   public static final String EMPTY_FILE_PATH = "";
   public static final String EMPTY_LANGUAGE_TYPE = "";
+
+  public static final String REPOSITION_DEFAULT = "按照文件代表的语言类型";
+  public static final String REPOSITION_SETTING = "按照设置中的语言类型";
 
   static class State {
 
@@ -54,6 +58,9 @@ public final class AppSettings
     // debug信息输出到什么地方
     public String outputTypeName;
 
+    /*---------辅助配置---------*/
+    public String rePositionSetting;
+
     @Override
     public String toString() {
       return "State{" +
@@ -62,6 +69,7 @@ public final class AppSettings
               ", coreFilePath='" + coreFilePath + '\'' +
               ", readTypeName='" + readTypeName + '\'' +
               ", outputTypeName='" + outputTypeName + '\'' +
+              ", rePositionSetting='" + rePositionSetting + '\'' +
               '}';
     }
   }
@@ -170,5 +178,13 @@ public final class AppSettings
 
   public boolean initOrNot() {
     return !myState.isEmptyFilePath() && !myState.isEmptyLangType();
+  }
+
+  public String getReposition() {
+    String rePositionSetting = myState.rePositionSetting;
+    if (StringUtils.isBlank(rePositionSetting)) {
+      rePositionSetting = REPOSITION_DEFAULT;
+    }
+    return rePositionSetting;
   }
 }

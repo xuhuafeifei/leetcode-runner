@@ -104,6 +104,9 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
      */
     private void initSearchCondition() {
         conditionGroup = new JPanel();
+        // 左对齐
+        conditionGroup.setAlignmentX(Component.LEFT_ALIGNMENT);
+        conditionGroup.setLayout(new BoxLayout(conditionGroup, BoxLayout.X_AXIS));
 
         List<MySearchConditionPanel<T>> searchCondition = getSearchCondition();
 

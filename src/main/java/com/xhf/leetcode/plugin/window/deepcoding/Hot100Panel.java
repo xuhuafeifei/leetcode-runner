@@ -8,6 +8,7 @@ import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
+import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.ArrayUtils;
 import com.xhf.leetcode.plugin.utils.TaskCenter;
@@ -52,8 +53,9 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
         this.filterChain = new QFilterChain();
         LCEventBus.getInstance().register(this);
         super.init();
-        // 一定要unLock. 因为deepCoding功能一定是登陆后才开放, 无需进行锁定
-//        super.unLock();
+        if (LoginService.getInstance(project).isLogin()) {
+            super.unLock();
+        }
     }
 
     private void initMyList() {

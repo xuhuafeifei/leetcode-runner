@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.utils;
 
+import com.intellij.openapi.application.ApplicationManager;
+
 import java.util.concurrent.*;
 
 /**
@@ -26,8 +28,6 @@ public class TaskCenter {
         }
         return instance;
     }
-
-
 
 
     public interface Task<T> {
@@ -258,6 +258,66 @@ public class TaskCenter {
         }
     }
 
+    /**
+     * 在EDT线程中运行的task
+     */
+    public static class EDTTask extends AbstractTask {
+
+        public EDTTask(Runnable runnable) {
+            super(runnable);
+        }
+
+        @Override
+        public void invokeLater() {
+            ApplicationManager.getApplication().invokeLater(runnable);
+        }
+
+        @Override
+        public void invokeAndWait() {
+            ApplicationManager.getApplication().invokeAndWait(runnable);
+        }
+
+        @Override
+        public Void invokeAndGet() {
+            FutureTask<Void> voidFutureTask = new FutureTask<Void>(runnable, null);
+            ApplicationManager.getApplication().invokeAndWait(voidFutureTask);
+            return null;
+        }
+    }
+
+    public static class EDTFutureTask<T> extends AbstractFutureTask<T> {
+
+        public EDTFutureTask(Callable<T> callback) {
+            super(callback);
+        }
+
+        @Override
+        public void invokeLater() {
+            ApplicationManager.getApplication().invokeLater(new FutureTask<>(callback));
+        }
+
+        @Override
+        public void invokeAndWait() {
+            FutureTask<T> futureTask = new FutureTask<>(callback);
+            ApplicationManager.getApplication().invokeLater(futureTask);
+            try {
+                futureTask.get();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public T invokeAndGet() {
+            FutureTask<T> futureTask = new FutureTask<>(callback);
+            ApplicationManager.getApplication().invokeLater(futureTask);
+            try {
+                return futureTask.get();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     private void execute(Runnable runnable) {
         threadPoolExecutor.execute(runnable);
@@ -305,5 +365,24 @@ public class TaskCenter {
         } else {
             return new SyncFutureTask<>(callback);
         }
+    }
+
+    /**
+     * 创建EDT Task, 并在EDT线程中执行
+     * @param runnable runnable
+     * @return Task
+     */
+    public Task<Void> createEDTTask(Runnable runnable) {
+        return new EDTTask(runnable);
+    }
+
+    /**
+     * 创建EDT Task, 并在EDT线程中执行, 返回对象支持获取数据
+     * @param callback callback
+     * @return T
+     * @param <T> T
+     */
+    public <T> Task<T> createEDTFutureTask(Callable<T> callback) {
+        return new EDTFutureTask<>(callback);
     }
 }
