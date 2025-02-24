@@ -22,13 +22,29 @@
   - ToolWindow：工具窗口，插件项目数据显示的主题部位
   - Editor：提供特定内容的显示编辑器
   - Action：与UI进行交互
+  
 - Service层：处理业务逻辑，负责数据与UI的交互
+
 - Basic层：提供支持环境，目前包括setting和IO模块
   - setting：项目设置模块，可以在File->Settings部位进行项目设置
+  
   - IO
     - file：处理文件IO
+    
     - console：负责控制台IO
+    
     - http：负责网络IO，处理与leetcode平台的请求
+    
+      
+
+## Icon图标
+一律采用svg作为项目图标, 且svg大小尽量为16x16, 如果偏小, 可选择24x24, 32x32. 最大尽量不要超过32x32
+
+图标命名统一为xxx.svg, xxx_dark.svg
+
+其中, xxx_dark.svg表示IDE如果是dark主题, 则会使用此svg作为图标
+
+关于svg颜色, xxx.svg尽量一律选择fill="", 也就是在IDE主题为light时, 默认的黑色; xxx_dark.svg尽量选择fill="#dbdbdb", 也就是IDE主题为dark时, 使用浅银色
 
 
 

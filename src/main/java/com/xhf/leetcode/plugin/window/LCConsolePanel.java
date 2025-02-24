@@ -26,10 +26,7 @@ import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.Constants;
-import com.xhf.leetcode.plugin.utils.DataKeys;
-import com.xhf.leetcode.plugin.utils.HotKeyUtils;
-import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.*;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -106,13 +103,13 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         varAndExpSplitter.setSecondComponent(stdPanel);
 
         this.variablesTab = new TabInfo(varAndExpSplitter);
-        variablesTab.setText("变量 & 表达式计算");
+        variablesTab.setText(BundleUtils.message("action.leetcode.console.variablesTab.text"));
         variablesTab.setIcon(AllIcons.Debugger.Threads);
         tabs.addTab(variablesTab);
 
         // 添加 Console 选项卡
         this.consoleTab = new TabInfo(consoleView.getComponent());
-        consoleTab.setText("控制台");
+        this.consoleTab.setText(BundleUtils.message("action.leetcode.console.consoleTab.text"));
         consoleTab.setIcon(AllIcons.Debugger.Console);
         tabs.addTab(consoleTab);
 
@@ -130,7 +127,8 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
 
         // 创建command输入框的面板
         JPanel commandPanel = new JPanel(new BorderLayout());
-        JLabel label = new JLabel("Debug 命令行");
+        JLabel label = new JLabel();
+        label.setText(BundleUtils.message("action.leetcode.console.commandLabel.text"));
 
         commandPanel.add(label, BorderLayout.NORTH);
         commandPanel.add(inputField, BorderLayout.CENTER);
@@ -199,7 +197,9 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         // 存储用户输入
         boolean flag = InstSource.userCmdInput(debugCommand);
         if (! flag) {
-            ConsoleUtils.getInstance(project).showError("命令写入错误!", false);
+            ConsoleUtils.getInstance(project).showError(
+                    BundleUtils.message("error.command.write"), false
+            );
         }
         // 清空输入框
         inputField.setText("");

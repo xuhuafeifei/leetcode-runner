@@ -13,6 +13,7 @@ import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
@@ -74,7 +75,8 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
         questionList = new MyList<>();
         questionList.setCellRenderer(new QuestionCellRender());
         questionList.addMouseListener(new QuestionListener(questionList, project));
-        questionList.setEmptyText("请先登录...");
+        questionList.setEmptyText(BundleUtils.message("action.leetcode.search.questionList.text", new Object[0])
+        );
 
         JBScrollPane jbScrollPane = new JBScrollPane(questionList);
         this.add(jbScrollPane, BorderLayout.CENTER);

@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.SplitEditorToolbar;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.Key;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
@@ -103,7 +104,7 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
 
     @Override
     protected final AnAction copyToAction() {
-        return new AnAction("新增测试案例", "新增测试案例成功!", AllIcons.Actions.Back) {
+        return new AnAction("新增测试案例", "新增测试案例成功!", IconLoader.getIcon("/icons/switch.svg", ErrorInfoEditor.class)) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 Project project = e.getProject();

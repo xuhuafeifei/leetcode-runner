@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.io.file.utils;
 
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.URL;
@@ -154,14 +156,18 @@ public class FileUtils {
      * @param content
      * @throws IOException
      */
-    public static void createAndWriteFile(String path, String content) throws IOException {
+    public static void createAndWriteFile(String path, @Nullable  String content) throws IOException {
         File file = createAndGetFile(path);
+
+        if (StringUtils.isBlank(content)) {
+            return;
+        }
 
         // write content
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(content.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.error(e);
         }
     }
 

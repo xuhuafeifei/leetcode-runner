@@ -9,7 +9,6 @@ import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LoginPass;
-import com.xhf.leetcode.plugin.utils.RatePass;
 
 /**
  * @author feigebuge
@@ -17,14 +16,13 @@ import com.xhf.leetcode.plugin.utils.RatePass;
  */
 @DebugCheck(DebugCheck.CheckType.STATUS)
 @LoginPass
-@RatePass
 public class DebugRunAction extends AbstractAction {
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
-        // Ð´Ö¸Áîµ½×èÈû¶ÓÁÐÖÐ
+        // å†™æŒ‡ä»¤åˆ°é˜»å¡žé˜Ÿåˆ—ä¸­
         boolean flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.R, ""));
         if (! flag) {
-            ConsoleUtils.getInstance(project).showError("Ö¸ÁîÊäÈëÊ§°Ü ", true);
+            ConsoleUtils.getInstance(project).showError("æŒ‡ä»¤è¾“å…¥å¤±è´¥ ", true);
         }
     }
 }

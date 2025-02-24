@@ -23,6 +23,7 @@ import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import org.jetbrains.annotations.Nullable;
 
@@ -167,24 +168,27 @@ public class ViewUtils {
      * @return 是否写入成功
      */
     public static boolean writeContentToVFile(VirtualFile cFile, String content) {
-        // 获取文件的文档
-        Document document = FileDocumentManager.getInstance().getDocument(cFile);
-        if (document != null) {
-            Application application = ApplicationManager.getApplication();
-            application.invokeAndWait(() -> {
-                application.runWriteAction(() -> {
-                    document.setText(content);
+        Application application = ApplicationManager.getApplication();
+        AtomicReference<Boolean> result = new AtomicReference<>(true);
+        application.invokeAndWait(() -> {
+            // 获取文件的文档
+            Document document = FileDocumentManager.getInstance().getDocument(cFile);
+            if (document != null) {
+                application.invokeAndWait(() -> {
+                    application.runWriteAction(() -> {
+                        document.setText(content);
+                    });
                 });
-            });
-        } else {
-            // 如果无法获取文档，则使用OutputStream写入文件
-            try (OutputStream outputStream = cFile.getOutputStream(CodeService.class)) {
-                outputStream.write(content.getBytes(StandardCharsets.UTF_8));
-            } catch (IOException ignored) {
-                return false;
+            } else {
+                // 如果无法获取文档，则使用OutputStream写入文件
+                try (OutputStream outputStream = cFile.getOutputStream(CodeService.class)) {
+                    outputStream.write(content.getBytes(StandardCharsets.UTF_8));
+                } catch (IOException ignored) {
+                    result.set(false);
+                }
             }
-        }
-        return true;
+        });
+        return result.get();
     }
 
     /**
@@ -270,45 +274,30 @@ public class ViewUtils {
     /**
      * deep coding模式下的重定位
      *
-     * @param event
-     * @param questionList
-     * @param project
-     * @param pattern
+     * @param event event
+     * @param questionList questionList
+     * @param project project
+     * @param pattern deepcoding的对应模式
      */
     public static void rePositionInDeepCoding(RePositionEvent event, MyList<? extends DeepCodingQuestion> questionList, Project project, String pattern) {
         String fid = event.getFrontendQuestionId();
         String titleSlug = event.getTitleSlug();
         ListModel<?> model = questionList.getModel();
         int size = model.getSize();
-        // 遍历, 匹配fid
+
         try {
             int i = Integer.parseInt(fid) - 1;
             DeepCodingQuestion question;
-            // double check
-            if (
-                    i < size &&
-                    (question = (DeepCodingQuestion) model.getElementAt(i)).getTitleSlug().equals(titleSlug)
-            ) {
-                JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
-                ViewUtils.scrollToVisibleOfMyList(questionList, i);
-                // 重新打开文件
-                DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, i);
-                CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
-                // 获取并显示 ToolWindow（确保控制台窗口可见）
-                showToolWindow(project);
-                return;
+
+            // 尝试根据fid直接定位
+            if (i < size && (question = (DeepCodingQuestion) model.getElementAt(i)).getTitleSlug().equals(titleSlug)) {
+                handleSuccessfulReposition(question, size, i, questionList, event, project, pattern);
             } else {
-                // for循环遍历model查找
+                //如果fid匹配失败，遍历model查找
                 for (int j = 0; j < size; j++) {
                     question = (DeepCodingQuestion) model.getElementAt(j);
                     if (question.getTitleSlug().equals(titleSlug)) {
-                        JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
-                        ViewUtils.scrollToVisibleOfMyList(questionList, j);
-                        // 重新打开文件
-                        DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, j);
-                        CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
-                        // 获取并显示 ToolWindow（确保控制台窗口可见）
-                        showToolWindow(project);
+                        handleSuccessfulReposition(question, size, j, questionList, event, project, pattern);
                         return;
                     }
                 }
@@ -319,6 +308,29 @@ public class ViewUtils {
             ConsoleUtils.getInstance(project).showError("文件重定位错误! 错误原因是: " + ex.getMessage(), false, true);
         }
     }
+
+    /**
+     * 根据系统设置的langType打开文件
+     * @param question question
+     * @param size 当前deepcoding模式下显示的有多少题目
+     * @param index 当前题目的index
+     * @param questionList questionList
+     * @param event event
+     * @param project project
+     * @param pattern deepcoding 的那种模式
+     */
+    private static void handleSuccessfulReposition(DeepCodingQuestion question, int size, int index, MyList<? extends DeepCodingQuestion> questionList, RePositionEvent event, Project project, String pattern) {
+        JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
+        ViewUtils.scrollToVisibleOfMyList(questionList, index);
+
+        // 重新打开文件
+        DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, index);
+        CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), AppSettings.getInstance().getLangType(), hot1001);
+
+        // 获取并显示 ToolWindow（确保控制台窗口可见）
+        showToolWindow(project);
+    }
+
 
     private static void showToolWindow(Project project) {
         ApplicationManager.getApplication().invokeLater(() -> {
@@ -349,8 +361,8 @@ public class ViewUtils {
             {
                 JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
                 ViewUtils.scrollToVisibleOfMyList(questionList, i);
-                // 重新打开文件
-                CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
+                // 重新打开文件 (根据当前系统语言打开文件)
+                CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), AppSettings.getInstance().getLangType());
                 // 获取并显示 ToolWindow（确保控制台窗口可见）
                 showToolWindow(project);
                 return;
