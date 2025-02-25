@@ -279,8 +279,7 @@ public class TaskCenter {
 
         @Override
         public Void invokeAndGet() {
-            FutureTask<Void> voidFutureTask = new FutureTask<Void>(runnable, null);
-            ApplicationManager.getApplication().invokeAndWait(voidFutureTask);
+            ApplicationManager.getApplication().invokeAndWait(runnable);
             return null;
         }
     }
