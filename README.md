@@ -24,15 +24,13 @@
 
 插件项目启动后，会出现两块工具栏
 
-![image-20250113105329839](README.assets/image-20250113105329839.png)
+![image-20250225094519143](README.assets/image-20250225094519143.png)
 
 
 
 如果没有出现，可以通过`View -> Tool Windows -> Leetcode Console Plugin / Leetcode Plugin` 打开工具窗口
 
-<img src="README.assets/image-20250113105416823.png" alt="image-20250113105416823" style="zoom:50%;" />
-
-
+<img src="README.assets/image-20250225094554662.png" alt="image-20250225094554662" style="zoom:50%;" />
 
 
 
@@ -40,11 +38,11 @@
 
 1. 打开设置栏
 
-   <img src="README.assets/image-20250113110304269.png" alt="image-20250113110304269" style="zoom:50%;" />
+   <img src="README.assets/image-20250225094710955.png" alt="image-20250225094710955" style="zoom:50%;" />
 
 2. 选择lang type和store path
 
-   <img src="README.assets/image-20250113110352483.png" alt="image-20250113110352483" style="zoom:50%;" />
+   <img src="README.assets/image-20250225094907771.png" alt="image-20250225094907771" style="zoom:50%;" />
 
    > lang type: 指定当前用何种语言解决问题
    >
@@ -54,7 +52,7 @@
 
 3. 点击登录按钮，进行登录操作
 
-   <img src="README.assets/image-20250113110529723.png" alt="image-20250113110529723" style="zoom:50%;" />
+   <img src="README.assets/image-20250225094933923.png" alt="image-20250225094933923" style="zoom:50%;" />
 
 4. 正常情况下，插件会模拟浏览器，出现leetcode官网登录界面，具体如下
 
@@ -62,9 +60,9 @@
 
    如果登录成功，则会加载数据内容，并在右侧的工具栏中出现问题内容
 
-<img src="README.assets/image-20250113110714192.png" alt="image-20250113110714192" style="zoom:50%;" />
+<img src="README.assets/image-20250225095105148.png" alt="image-20250225095105148" style="zoom:50%;" />
 
-> tip: 第一次登录需要加载所有题目，这可能会耗费3-5s左右的时间，在此期间会在后台加载数据，并锁定部分功能。这是正常行为
+> tip: 第一次登录需要加载所有题目，这可能会耗费3-5s左右的时间，在此期间会在后台加载数据，并锁定部分功能。这是正常行为<img src="README.assets/image-20250225095045490.png" alt="image-20250225095045490" style="zoom:50%;" />
 
 
 
@@ -74,11 +72,13 @@
 
 点击右侧问题内容，插件会创建代码文件，并进行问题内容预览
 
-![image-20250113111004920](README.assets/image-20250113111004920.png)
+![image-20250225095254917](README.assets/image-20250225095254917.png)
 
 
 
-编辑栏右上角存在三个按钮
+编辑栏**右上角**存在三个按钮
+
+![image-20250225095318633](README.assets/image-20250225095318633.png)
 
 第一个按钮，会隐藏右侧内容，只留下代码部分
 
@@ -86,33 +86,37 @@
 
 第三个按钮，会隐藏左侧代码编辑区域，只留下右侧部分
 
-<img src="README.assets/image-20250113111402768.png" alt="image-20250113111402768" style="zoom:33%;" />
-
 
 
 ### 4. 运行代码
 
-编辑栏左侧存在六个按钮，前三个和代码运行有关。后三个将在`辅助功能`中进行介绍
+编辑栏左侧存在10个按钮，前三个和代码运行有关。后七个将在`辅助功能`中进行介绍
 
-![image-20250113111532390](README.assets/image-20250113111532390.png)
+<img src="README.assets/image-20250225095358496.png" alt="image-20250225095358496" style="zoom:80%;" />
 
-第一个按钮，runcode，使用题目的默认测试样例运行代码
+第一个按钮，运行代码，使用题目的默认测试样例运行代码（快捷键ctrl + alt + 9）
 
-第二个按钮，submit code
+![image-20250225095512481](README.assets/image-20250225095512481.png)
 
-第三个按钮，Test Cases
+第二个按钮，提交代码，将代码提交到leetcode运行（快捷键ctrl + alt + 0）
+
+![image-20250225095532476](README.assets/image-20250225095532476.png)
+
+第三个按钮，Test Cases，设置测试案例
+
+![image-20250225095547397](README.assets/image-20250225095547397.png)
 
 
 
 点击第一、第二个按钮后，会在**插件自带的控制台**输出执行信息
 
-<img src="README.assets/image-20250113111558701.png" alt="image-20250113111558701" style="zoom:50%;" />
+<img src="README.assets/image-20250225095619107.png" alt="image-20250225095619107" style="zoom:80%;" />
 
 
 
 第三个按钮，会出现弹框，可以自定义测试数据
 
-<img src="README.assets/image-20250113111615478.png" alt="image-20250113111615478" style="zoom:50%;" />
+<img src="README.assets/image-20250225095633796.png" alt="image-20250225095633796" style="zoom:67%;" />
 
 > Reset按钮可以恢复题目的默认测试样例
 
@@ -120,62 +124,77 @@
 
 ## 支持功能
 
-**v3.4.0**
+**v3.6.6**
 
-| 所属模块                       | 功能                              | 介绍                           |
-| ------------------------------ | --------------------------------- | ------------------------------ |
-| 登录                           | Web Auth                          | 模拟web登录                    |
-|                                | Cookie Login                      | 设置cookie登录                 |
-| 题目列表                       | list all                          | 展示所有题目                   |
-|                                | pick one                          | 随机一题                       |
-|                                | daily question                    | 每日一题                       |
-|                                | search question                   | 搜索题目                       |
-|                                | filter question                   | 筛选题目                       |
-|                                | reposition                        | 重定位代码文件                 |
-|                                | reload question                   | 重新查询题目                   |
-|                                | reposition                        | 重定位并重新打开题目文件       |
-| 题目详情                       | 题目展示                          | 题目展示                       |
-|                                | 题解展示                          | 题解展示                       |
-|                                | 提交记录展示                      | 提交记录展示                   |
-|                                | 提交记录代码替换                  | 提交记录代码替换               |
-|                                | 提交记录代码copy                  | 提交记录代码copy               |
-|                                | 错误提交记录的错误信息呈现        | 错误提交记录的错误信息呈现     |
-|                                | 错误提交记录的错误测试案例新增    | 错误提交记录的错误测试案例新增 |
-|                                | 错误提交记录的错误测试案例copy    | 错误提交记录的错误测试案例新增 |
-| coding editor                  | Run Code                          | 运行代码                       |
-|                                | Submit Code                       | 提交代码                       |
-|                                | Test cases                        | 设置测试案例                   |
-|                                | default Code                      | 恢复默认代码                   |
-|                                | RePosition                        | 定位代码                       |
-|                                | Debug                             | 调试当前代码                   |
-| plugin setting                 | 设置语言                          | 设置语言                       |
-|                                | 设置存储路径                      | 设置存储路径                   |
-|                                | 设置debug read type               | 设置debug read type            |
-|                                | 设置debug output type             | 设置debug output type          |
-| debug【支持指令】              | run                               | 运行代码                       |
-|                                | b 行号                            | 在对应行添加断点               |
-|                                | step into                         | step into                      |
-|                                | step over                         | step over                      |
-|                                | step out                          | step out                       |
-|                                | p                                 | 打印当前变量                   |
-|                                | p exp                             | 计算表达式exp                  |
-|                                | watch exp                         | 监视表达式exp                  |
-|                                | remove b 行号                     | 移除断点                       |
-|                                | remove all b                      | 移除所有断点                   |
-|                                | show b                            | 展示所有断点                   |
-|                                | w                                 | 显示当前执行代码               |
-|                                | help                              | help指令，显示所有命令行功能   |
-|                                | stop/quit                         | 终止debug                      |
-| debug【模块功能-read模块】     | 标准输入读取指令                  |                                |
-|                                | 命令行读取指令                    |                                |
-|                                | 通过UI读取指令                    |                                |
-| debug【模块功能-execute模块】  | Java debug执行                    |                                |
-|                                | python debug执行                  |                                |
-| debug【模块功能-output模块】   | 标准输出显示结果                  |                                |
-|                                | Console显示结果                   |                                |
-|                                | UI显示结果                        |                                |
-| debug【模块功能-标准输出捕获】 | 支持Java代码的stdout/stderr捕获   |                                |
-|                                | 支持python代码的stdout/stderr捕获 |                                |
+| 所属模块                       | 功能                               | 介绍                           |
+| ------------------------------ | ---------------------------------- | ------------------------------ |
+| 登录                           | Web Auth                           | 模拟web登录                    |
+|                                | Cookie Login                       | 设置cookie登录                 |
+| 题目列表                       | list all                           | 展示所有题目                   |
+|                                | pick one                           | 随机一题                       |
+|                                | daily question                     | 每日一题                       |
+|                                | search question                    | 搜索题目                       |
+|                                | filter question                    | 筛选题目                       |
+|                                | reposition                         | 重定位代码文件                 |
+|                                | reload question                    | 重新查询题目                   |
+|                                | reposition                         | 重定位并重新打开题目文件       |
+| 题目详情                       | 题目展示                           | 题目展示                       |
+|                                | 题解展示                           | 题解展示                       |
+|                                | 提交记录展示                       | 提交记录展示                   |
+|                                | 提交记录代码替换                   | 提交记录代码替换               |
+|                                | 提交记录代码copy                   | 提交记录代码copy               |
+|                                | 错误提交记录的错误信息呈现         | 错误提交记录的错误信息呈现     |
+|                                | 错误提交记录的错误测试案例新增     | 错误提交记录的错误测试案例新增 |
+|                                | 错误提交记录的错误测试案例copy     | 错误提交记录的错误测试案例新增 |
+| coding editor                  | Run Code                           | 运行代码                       |
+|                                | Submit Code                        | 提交代码                       |
+|                                | Test cases                         | 设置测试案例                   |
+|                                | default Code                       | 恢复默认代码                   |
+|                                | RePosition                         | 定位代码                       |
+|                                | Debug                              | 调试当前代码                   |
+|                                | 移除系统注释                       |                                |
+|                                | 增加系统注释                       |                                |
+|                                | 支持可视化显示当前语言             |                                |
+| plugin setting                 | 设置语言                           | 设置语言                       |
+|                                | 设置存储路径                       | 设置存储路径                   |
+|                                | 设置debug read type                | 设置debug read type            |
+|                                | 设置debug output type              | 设置debug output type          |
+|                                | 设置Reposition策略                 | 设置Reposition策略             |
+| debug【支持指令】              | run                                | 运行代码                       |
+|                                | b 行号                             | 在对应行添加断点               |
+|                                | step into                          | step into                      |
+|                                | step over                          | step over                      |
+|                                | step out                           | step out                       |
+|                                | p                                  | 打印当前变量                   |
+|                                | p exp                              | 计算表达式exp                  |
+|                                | watch exp                          | 监视表达式exp                  |
+|                                | remove b 行号                      | 移除断点                       |
+|                                | remove all b                       | 移除所有断点                   |
+|                                | show b                             | 展示所有断点                   |
+|                                | w                                  | 显示当前执行代码               |
+|                                | help                               | help指令，显示所有命令行功能   |
+|                                | stop/quit                          | 终止debug                      |
+| debug【模块功能-read模块】     | 标准输入读取指令                   |                                |
+|                                | 命令行读取指令                     |                                |
+|                                | 通过UI读取指令                     |                                |
+| debug【模块功能-execute模块】  | Java debug执行                     |                                |
+|                                | python debug执行                   |                                |
+|                                | cpp debug执行                      |                                |
+| debug【模块功能-output模块】   | 标准输出显示结果                   |                                |
+|                                | Console显示结果                    |                                |
+|                                | UI显示结果                         |                                |
+| debug【模块功能-标准输出捕获】 | 支持Java代码的stdout/stderr捕获    |                                |
+|                                | 支持python代码的stdout/stderr捕获  |                                |
+| 各个star吧，上帝               |                                    |                                |
+| deep coding                    | 支持Leetcode Hot 100题             |                                |
+|                                | 支持Leetcode 面试经典 150题        |                                |
+|                                | 支持Leetcode 竞赛按照竞赛分显示    |                                |
+|                                | 支持灵神题单                       |                                |
+|                                | 支持特定UI显示，允许更方便切换题目 |                                |
+
+
+
+
 
 
 
@@ -211,15 +230,13 @@
 
 ## 辅助功能介绍
 
-### 1 default code
+### 1 恢复默认代码
 
-![image-20250113112140245](README.assets/image-20250113112140245.png)
+![image-20250225100225454](README.assets/image-20250225100225454.png)
 
 恢复默认代码，能将当前打开的文件按照设置的语言恢复为默认代码
 
-![default-code](README.assets/default-code.gif)
-
-
+![defualt_code-new](README.assets/defualt_code-new.gif)
 
 ### 2. Reposition
 
@@ -227,19 +244,41 @@
 
 该功能所在位置如图所示
 
-![image-20241215154455937](README.assets/image-20241215154455937.png)
+![image-20250225100338536](README.assets/image-20250225100338536.png)
+
+![image-20250225100353702](README.assets/image-20250225100353702.png)
+
+
 
 在插件使用的时候，可能出现如下情况。原本的code文件无法通过插件提供的编辑器形式打开，具体如下图所示
 
-<img src="README.assets/image-20241215154420353.png" alt="image-20241215154420353" style="zoom:50%;" />
+![image-20250225100759849](README.assets/image-20250225100759849.png)
 
 
 
-`Reposition`允许用户重新定位当前文件所代表的问题，重新加载文件，并通过插件提供的编辑器打开
+`Reposition`允许用户重新定位当前文件所代表的问题，重新加载文件，并通过插件提供的编辑器打开，同时定位到问题所在位置
 
-![image-20241215154642283](README.assets/image-20241215154642283.png)
+![image-20250225100851063](README.assets/image-20250225100851063.png)
 
-![image-20241215154655400](README.assets/image-20241215154655400.png)
+
+
+需要注意的是，Reposition的重定位功能底层需要关闭**用户已打开的当前文件**，**然后再创建新的文件**。之所以需要关闭+打开，其目的有2。1.重构缓存，2.重新打开才可以让idea通过Runner提供的editor显示题目
+
+
+
+此处，对于创建新的文件就存在不同的选择
+
+
+
+假设当前打开two-sum.py，但系统设置语言为Java。Runner在默认情况下会重新打开two-sum.py文件，而不是two-sum.java
+
+
+
+但如果在系统设置中改变Reposition相关设置，则重新打开的文件可以是two-sum.java
+
+
+
+![image-20250225102657345](README.assets/image-20250225102657345.png)
 
 
 
@@ -247,9 +286,11 @@
 
 在大于等于2.6.4版本中，针对提交界面做出了优化，额外增加`显示错误信息`, `代码替换`，`新增测试样例`功能，具体如下
 
-![image-20241216205632916](README.assets/image-20241216205632916.png)
+![image-20250225100924676](README.assets/image-20250225100924676.png)
 
+![image-20250225100939187](README.assets/image-20250225100939187.png)
 
+![image-20250225100952205](README.assets/image-20250225100952205.png)
 
 对于错误的提交记录，界面不仅显示历史代码，还会在Top栏显示错误原因，以及测试样例等信息
 
@@ -261,19 +302,19 @@
 
 **代码cv/替换**
 
-![代码替换](README.assets/代码替换.gif)
+![code-cv-new](README.assets/code-cv-new.gif)
 
 
 
 **测试样例cv/新增**
 
-![测试样例](README.assets/测试样例.gif)
+![testcase-cv-new](README.assets/testcase-cv-new.gif)
 
 
 
 ### 4. 每日一题
 
-![image-20250113112630371](README.assets/image-20250113112630371.png)
+![image-20250225101252159](README.assets/image-20250225101252159.png)
 
 点击按钮，将获得当天需要完成的每日一题，该功能也是作者常用的功能，桀桀
 
@@ -281,11 +322,13 @@
 
 ### 5. 搜索 + 筛选功能
 
+（再录制一次太麻烦了，README这块就用老版本的UI演示了）
+
 ![searcg](README.assets/searcg.gif)
 
 
 
-### 3. debug
+### 6. debug
 
 debug模块是leetcode-runner提供的一个较为强大的功能。该功能允许用户无需任何操作，省去函数入口编写，测试案例转换等诸多繁琐的额外编码，直接对核心代码断点调试，且适用于绝大部分的leetcode题目。值得一提的是，市场上同类型的插件产品**都不支持对核心代码debug调试**，且该功能在leetcode官网使用需要付费
 
@@ -347,7 +390,7 @@ debug模块是leetcode-runner提供的一个较为强大的功能。该功能允
 
 
 
-### 4. 深度刷题
+### 7. 深度刷题
 
 > 该功能在v3.6.0版本引入
 
@@ -390,6 +433,34 @@ Leetcode平台共有接近4000道题目，题目质量层次不齐，用户难�
 
 
 ![deep-coding-linsheng](README.assets/deep-coding-linsheng.gif)
+
+
+
+### 8. 定时
+
+![image-20250225101443505](README.assets/image-20250225101443505.png)
+
+该功能目前正在开发，预计将会在3.6.7~3.6.8版本上线
+
+
+
+### 9. 移除和添加注释功能
+
+![image-20250225101824075](README.assets/image-20250225101824075.png)
+
+上述两个功能可以自动添加或删除Runner的注释，该注释圈定Runner提交给Leetcode的代码区域，因此Runner的注释对于系统的正常运行起到关键作用
+
+
+
+![comment-handle](README.assets/comment-handle.gif)
+
+
+
+### 10. 当前设置语言的显示
+
+![image-20250225102240166](README.assets/image-20250225102240166.png)
+
+该图标显示当前系统设置的语言类型，点击可进行语言类型的切换
 
 
 
