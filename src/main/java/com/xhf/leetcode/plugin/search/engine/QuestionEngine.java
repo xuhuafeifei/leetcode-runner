@@ -1,10 +1,13 @@
 package com.xhf.leetcode.plugin.search.engine;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.search.dict.DictTree;
 import com.xhf.leetcode.plugin.search.lucence.LCAnalyzer;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
@@ -15,6 +18,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
@@ -35,7 +39,7 @@ public class QuestionEngine implements SearchEngine<Question> {
     /**
      * 索引目录
      */
-    private final Directory directory;
+    private Directory directory;
     /**
      * idea 项目
      */
@@ -45,7 +49,7 @@ public class QuestionEngine implements SearchEngine<Question> {
      */
     private final QuestionCompare questionCompare;
     // 单例
-    private static QuestionEngine instance;
+    private static volatile QuestionEngine instance;
     public static QuestionEngine getInstance(Project project) {
         if (instance == null) {
             synchronized (QuestionEngine.class) {
@@ -59,11 +63,19 @@ public class QuestionEngine implements SearchEngine<Question> {
 
     private QuestionEngine(Project project) {
         this.analyzer = new LCAnalyzer();
-        this.directory = new RAMDirectory();
+        try {
+            String path = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("lucence").build();
+            this.directory = new NIOFSDirectory(FileUtils.createAndGetDirectory(path));
+        } catch (Exception e) {
+            LogUtils.warn("QuestionEngine create NIOSDirectory failed! the reason is " + e.getMessage()
+                    + "\nthis may cause memory pressure on the user's computer! "
+            );
+            this.directory = new RAMDirectory();
+        }
         this.project = project;
         this.questionCompare = new QuestionCompare();
         // 提前初始化字典树
-        DictTree.getInstance();
+        DictTree.init();
     }
 
     @Override
