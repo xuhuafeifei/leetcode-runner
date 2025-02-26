@@ -72,7 +72,7 @@
         <!-- tool window -->
         <toolWindow id="Leetcode Runner" secondary="true" icon="/icons/leetcode-runner24x24.svg" anchor="right"
                     factoryClass="com.xhf.leetcode.plugin.window.LCToolWindowFactory"/>
-        <toolWindow id="Leetcode Runner 控制台" secondary="true" icon="/icons/leetcode-runner24x24.svg" anchor="bottom"
+        <toolWindow id="Leetcode Runner Console" secondary="true" icon="/icons/leetcode-runner24x24.svg" anchor="bottom"
                     factoryClass="com.xhf.leetcode.plugin.window.LCConsoleWindowFactory" />
 
         <!-- http request -->
@@ -183,7 +183,7 @@
             <action id="leetcode.plugin.DefaultContent" class="com.xhf.leetcode.plugin.actions.DefaultContentAction"
                     text="恢复默认代码" description="默认代码" icon="/icons/default_code.svg">
             </action>
-            <action id="leetcode.plugin.Timmer" class="com.xhf.leetcode.plugin.actions.TimeAction"
+            <action id="leetcode.plugin.Timmer" class="com.xhf.leetcode.plugin.actions.TimerAction"
                     text="定时" description="定时" icon="/icons/clock.svg">
             </action>
             <separator/>

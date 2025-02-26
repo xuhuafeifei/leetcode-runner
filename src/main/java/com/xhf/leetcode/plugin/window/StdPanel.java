@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
 import com.xhf.leetcode.plugin.comp.MyJTextAreaWithPopupMenu;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,8 +42,10 @@ public class StdPanel extends JPanel {
     public void clear() {
         application.invokeLater(() -> {
             application.runWriteAction(() -> {
-                stdoutPanel.setText("标准输出:\n");
-                stderrPanel.setText("标准错误:\n");
+                // 标准输出
+                stdoutPanel.setText(BundleUtils.message("action.leetcode.stdout.text") + "\n");
+                // stderrPanel.setText("标准错误:\n");
+                stderrPanel.setText(BundleUtils.message("action.leetcode.stderr.text") + "\n");
             });
         });
     }
@@ -89,14 +92,14 @@ public class StdPanel extends JPanel {
             setEditable(false);
             setLineWrap(true);
             setWrapStyleWord(true);
-            setText("标准输出:\n");
+            setText(BundleUtils.message("action.leetcode.stdout.text") + "\n");
 
             // 清空内容
             JMenuItem clearMenuItem = new JMenuItem("Clear");
             clearMenuItem.addActionListener(e -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ApplicationManager.getApplication().runWriteAction(() -> {
-                        setText("标准输出:\n");
+                        setText(BundleUtils.message("action.leetcode.stdout.text") + "\n");
                     });
                 });
             });
@@ -113,7 +116,7 @@ public class StdPanel extends JPanel {
     private static class StdErrPanel extends MyJTextAreaWithPopupMenu {
         public StdErrPanel() {
             setEditable(false);
-            setText("标准错误:\n");
+            setText(BundleUtils.message("action.leetcode.stderr.text") + "\n");
 
             // 使用 JBColor 获取当前主题下的错误输出颜色
             JBColor errorColor = new JBColor(Color.RED, Color.RED); // 这里设置红色默认
@@ -124,7 +127,7 @@ public class StdPanel extends JPanel {
             clearMenuItem.addActionListener(e -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ApplicationManager.getApplication().runWriteAction(() -> {
-                        setText("标准错误:\n");
+                        setText(BundleUtils.message("action.leetcode.stderr.text") + "\n");
                     });
                 });
             });

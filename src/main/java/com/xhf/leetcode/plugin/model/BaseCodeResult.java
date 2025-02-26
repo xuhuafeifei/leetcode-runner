@@ -2,13 +2,13 @@ package com.xhf.leetcode.plugin.model;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * extract base info from the {@link RunCodeResult} result and {@link SubmitCodeResult} result
- *
- * @author feigebuge
- * @email 2508020102@qq.com
- */
-public class BaseCodeResult {
+    /**
+     * extract base info from the {@link RunCodeResult} result and {@link SubmitCodeResult} result
+     *
+     * @author feigebuge
+     * @email 2508020102@qq.com
+     */
+    public class BaseCodeResult {
     @SerializedName("lang")
     private String lang;
     @SerializedName("run_success")
