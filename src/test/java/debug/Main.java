@@ -2,24 +2,23 @@ package debug;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Scanner;
 
 public class Main {
 
     public void test() {
         System.out.println(Thread.currentThread().getName());
 
-        // Æô¶¯×ÓÏß³Ì
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½
         Thread notifierThread = new Thread(new Notifier(this));
         notifierThread.start();
 
-        // Ö÷Ïß³Ì×èÈûÔÚ Scanner ÉÏ
+        // ï¿½ï¿½ï¿½ß³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Scanner ï¿½ï¿½
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Main thread waiting for input...");
 
         try {
-            // Ö÷Ïß³Ì×èÈûÔÚ readLine ÉÏ
-            while (!Thread.interrupted()) {  // ¼ì²éÖÐ¶Ï±êÖ¾
+            // ï¿½ï¿½ï¿½ß³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ readLine ï¿½ï¿½
+            while (!Thread.interrupted()) {  // ï¿½ï¿½ï¿½ï¿½Ð¶Ï±ï¿½Ö¾
                 String ln = in.readLine();
                 if (ln == null) {
                     System.out.println("null");
@@ -31,13 +30,17 @@ public class Main {
             System.out.println("Main thread encountered an error: " + e.getMessage());
         }
 
+        int a = 1;
+        Object obj = a;
+        boolean b = true;
+
         System.out.println("Main thread has stopped waiting.");
     }
 
     public void stop() {
         System.out.println(Thread.currentThread().getName());
         Thread.yield();  // fetch output
-        // ÖÐ¶ÏÖ÷Ïß³Ì
+        // ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ß³ï¿½
         Thread.currentThread().interrupt();
     }
 
@@ -60,7 +63,7 @@ public class Main {
         public void run() {
             try {
                 System.out.println(Thread.currentThread().getName());
-                // Ä£Äâ×ÓÏß³ÌµÈ´ý 2 Ãë
+                // Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ß³ÌµÈ´ï¿½ 2 ï¿½ï¿½
                 Thread.sleep(2000);
                 System.out.println("Notifier thread interrupting main thread.");
                 main.stop();

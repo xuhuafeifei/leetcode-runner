@@ -8,8 +8,10 @@ import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
+import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.ArrayUtils;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
 import com.xhf.leetcode.plugin.window.deepcoding.filter.DCAlgorithmFilter;
@@ -50,19 +52,22 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
         initMyList();
         LCEventBus.getInstance().register(this);
         super.init();
-        // 一定要unLock. 因为deepCoding功能一定是登陆后才开放, 无需进行锁定
-//        super.unLock();
+        if (LoginService.getInstance(project).isLogin()) {
+            super.unLock();
+        }
     }
 
     private void initMyList() {
-        List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
-        int[] inter150Id = getInter150();
-        this.inter150 = new ArrayList<>(180);
-        for (int idx : inter150Id) {
-            inter150.add(totalQuestion.get(idx));
-        }
+        TaskCenter.getInstance().createTask(() -> {
+            List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+            int[] inter150Id = getInter150();
+            this.inter150 = new ArrayList<>(180);
+            for (int idx : inter150Id) {
+                inter150.add(totalQuestion.get(idx));
+            }
 
-        super.initMyListHelper(this.questionList, this.inter150, INTER150);
+            super.initMyListHelper(this.questionList, this.inter150, INTER150);
+        }).invokeLater();
     }
 
     private int[] getInter150() {

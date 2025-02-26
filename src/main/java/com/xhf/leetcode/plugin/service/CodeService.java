@@ -30,6 +30,7 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -77,16 +78,8 @@ public class CodeService {
     public void openCodeEditor(Question question) {
         QuestionService.getInstance().fillQuestion(question, project);
 
-        // create code file
-        String codeFilePath = createCodeFile(question);
-        analysisAndCreateFile(question);
-        // create content file
-        // String markdownFilePath = createContentFile(question);
+        var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null);
 
-        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), AppSettings.getInstance().getLangType());
-
-        // store path info
-        StoreService.getInstance(project).addCache(codeFilePath, le);
         // open code editor and load content
         ApplicationManager.getApplication().invokeAndWait(() -> {
             VirtualFile file = LocalFileSystem.getInstance().refreshAndFindFileByPath(codeFilePath);
@@ -105,17 +98,7 @@ public class CodeService {
     public void openCodeEditor(Question question, DeepCodingInfo deepCodingInfo) {
         QuestionService.getInstance().fillQuestion(question, project);
 
-        // create code file
-        String codeFilePath = createCodeFile(question);
-        analysisAndCreateFile(question);
-        // create content file
-        // String markdownFilePath = createContentFile(question);
-
-        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), AppSettings.getInstance().getLangType());
-        le.setDeepCodingInfo(deepCodingInfo);
-
-        // store path info
-        StoreService.getInstance(project).addCache(codeFilePath, le);
+        var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, deepCodingInfo);
 
         // open code editor and load content
         ApplicationManager.getApplication().invokeAndWait(() -> {
@@ -125,6 +108,80 @@ public class CodeService {
                 FileEditorManager.getInstance(project).openTextEditor(ofd, false);
             }
         });
+    }
+
+    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question, @Nullable DeepCodingInfo deepCodingInfo) {
+        String codeFilePath = createCodeFile(question);
+        analysisAndCreateFile(question);
+
+        AppSettings app = AppSettings.getInstance();
+        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), app.getLangType());
+        if (deepCodingInfo != null) {
+            le.setDeepCodingInfo(deepCodingInfo);
+        }
+
+        // store path info
+        StoreService.getInstance(project).addCache(codeFilePath, le);
+
+        return codeFilePath;
+    }
+
+    /**
+     * 创建Question对应的编码文件, 创建并存储LeetcodeEditor, 并返回文件路径
+     * <p>
+     * 该方法创建Question对应文件时会判断当前系统的 reposition设置. 如果是默认打开方式, 则会通过系统的langType判断文件后缀
+     * 否则则会通过入参fileLangType判断文件代表类型
+     *
+     * @param question question
+     * @param deepCodingInfo dci
+     * @param fileLangType 文件代表的语言类型
+     * @return 文件存储路径
+     */
+    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question, @Nullable DeepCodingInfo deepCodingInfo, String fileLangType) {
+        AppSettings app = AppSettings.getInstance();
+        String reposition = app.getReposition();
+        String fileName = question.getFileName();
+
+        if (StringUtils.isBlank(reposition)) {
+            // todo: 修改打开逻辑. 如果是默认打开方式
+            fileName = fileName + app.getFileTypeSuffix();
+        } else {
+            LangType langType = LangType.getType(app.getLangType());
+            if (langType == null) {
+                LogUtils.error("未知的langType! langType = " + app.getLangType());
+                fileName = fileName + app.getFileTypeSuffix();
+            } else {
+                if (reposition.equals(AppSettings.REPOSITION_DEFAULT)) {
+                    langType = LangType.getType(fileLangType);
+                    if (langType == null) {
+                        LogUtils.error("当前打开文件代表的fileLangType无法识别! fileLangType = " + fileLangType);
+                        // event 传入的文件langType有问题, 回退到系统默认文件后缀
+                        fileName = fileName + app.getFileTypeSuffix();
+                    } else {
+                        fileName = fileName + langType.getSuffix();
+                    }
+                } else if (reposition.equals(AppSettings.REPOSITION_SETTING)) {
+                    fileName = fileName + langType.getSuffix();
+                } else {
+                    LogUtils.error("未知的reposition! reposition = " + reposition);
+                    fileName = fileName + app.getFileTypeSuffix();
+                }
+            }
+        }
+
+        // create code file
+        String codeFilePath = createCodeFile(question, fileName);
+        analysisAndCreateFile(question);
+
+        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), app.getLangType());
+        if (deepCodingInfo != null) {
+            le.setDeepCodingInfo(deepCodingInfo);
+        }
+
+        // store path info
+        StoreService.getInstance(project).addCache(codeFilePath, le);
+
+        return codeFilePath;
     }
 
     /**
@@ -176,48 +233,41 @@ public class CodeService {
         return false;
     }
 
+    /**
+     * 该方法会关闭当前打开文件, 重新打开
+     * 之所以关闭, 是因为只有关闭后, 才能够使用系统提供的编辑器显示
+     */
     public void reOpenCodeEditor(Question question, VirtualFile file, String langType) {
         QuestionService.getInstance().fillQuestion(question, project);
 
-//        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
-//        // get current file path
-//        String currentFilePath = ViewUtils.getUnifyFilePathByVFile(file);
-//        // restore
-//        StoreService.getInstance(project).addCache(currentFilePath, le);
-        // close
-        ViewUtils.closeVFile(file, project);
-        openCodeEditor(question);
-        // reopen
-//        ApplicationManager.getApplication().invokeAndWait(() -> {
-//            VirtualFile reFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(currentFilePath);
-//            if (reFile != null) {
-//                OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
-//                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
-//            }
-//        });
+        // restore
+        var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null, langType);
+
+        // open code editor and load content
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            ViewUtils.closeVFile(file, project);
+            VirtualFile newfile = LocalFileSystem.getInstance().findFileByPath(codeFilePath);
+            if (newfile != null) {
+                OpenFileDescriptor ofd = new OpenFileDescriptor(project, newfile);
+                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+            }
+        });
     }
 
     public void reOpenCodeEditor(Question question, VirtualFile file, String langType, DeepCodingInfo deepCodingInfo) {
         QuestionService.getInstance().fillQuestion(question, project);
 
-//        LeetcodeEditor le = buildLeetcodeEditor(question, question.getTranslatedContent(), langType);
-//        le.setDeepCodingInfo(deepCodingInfo);
-
-        // get current file path
-//        String currentFilePath = ViewUtils.getUnifyFilePathByVFile(file);
         // restore
-//        StoreService.getInstance(project).addCache(currentFilePath, le);
-        // close
-        ViewUtils.closeVFile(file, project);
-        // reopen
-//        ApplicationManager.getApplication().invokeAndWait(() -> {
-//            VirtualFile reFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(currentFilePath);
-//            if (reFile != null) {
-//                OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
-//                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
-//            }
-//        });
-        openCodeEditor(question, deepCodingInfo);
+        var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, deepCodingInfo, langType);
+
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            ViewUtils.closeVFile(file, project);
+            VirtualFile newfile = LocalFileSystem.getInstance().findFileByPath(codeFilePath);
+            if (newfile != null) {
+                OpenFileDescriptor ofd = new OpenFileDescriptor(project, newfile);
+                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+            }
+        });
     }
 
     private LeetcodeEditor buildLeetcodeEditor(Question question, String translatedContent, String lang) {
@@ -260,9 +310,9 @@ public class CodeService {
     /**
      * 根据文件名称 + 文件内容, 创建文件
      *
-     * @param content
-     * @param fileName
-     * @return
+     * @param content content
+     * @param fileName fileName
+     * @return filePath
      */
     private String createCodeFile(String content, String fileName) {
         String filePath = AppSettings.getInstance().getFilePath();
@@ -286,6 +336,24 @@ public class CodeService {
         filePath = new FileUtils.PathBuilder(filePath)
                 // .append("temp")
                 .append(getCodeFileName(question))
+                .build();
+
+        try {
+            if (FileUtils.fileExists(filePath)) {
+                return filePath;
+            }
+            FileUtils.createAndWriteFile(filePath, question.getCodeSnippets());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return filePath;
+    }
+
+    private String createCodeFile(Question question, String fileName) {
+        String filePath = AppSettings.getInstance().getFilePath();
+        filePath = new FileUtils.PathBuilder(filePath)
+                .append(fileName)
                 .build();
 
         try {

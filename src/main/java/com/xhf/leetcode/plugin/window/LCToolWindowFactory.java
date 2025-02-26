@@ -11,6 +11,9 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+import java.util.Objects;
+
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -29,7 +32,11 @@ public class LCToolWindowFactory implements ToolWindowFactory, DumbAware {
 
     public static DataContext getDataContext(@NotNull Project project) {
         ToolWindow leetcodeToolWindows = ToolWindowManager.getInstance(project).getToolWindow(LEETCODE_RUNNER_ID);
-        LCPanel lcPanel = (LCPanel) leetcodeToolWindows.getContentManager().getContent(0).getComponent();
+        if (leetcodeToolWindows == null) {
+            JOptionPane.showMessageDialog(null,  LEETCODE_RUNNER_ID+ " 工具窗口获取失败\n, 请通过 'View->Tool Windows->Leetcode Runner' 打开", "提示", JOptionPane.INFORMATION_MESSAGE);
+            throw new RuntimeException(LEETCODE_RUNNER_ID + " 获取失败");
+        }
+        LCPanel lcPanel = (LCPanel) Objects.requireNonNull(leetcodeToolWindows.getContentManager().getContent(0)).getComponent();
         return DataManager.getInstance().getDataContext(lcPanel);
     }
 }

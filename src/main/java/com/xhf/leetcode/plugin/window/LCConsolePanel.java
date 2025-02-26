@@ -161,25 +161,25 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
 
         LCEventBus.getInstance().register(this);
 
-        // 添加默认工具栏(具有清空, lineWrap等功能)
-        DefaultActionGroup consoleGroup = new DefaultActionGroup(consoleView.createConsoleActions());
-        ActionToolbar consoleToolbar = ActionManager.getInstance().createActionToolbar("MyLCConsoleToolbar", consoleGroup, true);
-        consoleToolbar.setTargetComponent(jbSplitter);
-        setToolbar(consoleToolbar.getComponent());
-
         // 添加工具栏(具有debug的功能)
         DefaultActionGroup ag = (DefaultActionGroup) ActionManager.getInstance().getAction("leetcode.plugin.consoleToolbar");
         ActionToolbar toolbar = ActionManager.getInstance()
                 .createActionToolbar("LCConsoleToolbar", ag, true);
-
         // 设置工具栏的排列方式为竖向排列
         toolbar.setOrientation(SwingConstants.VERTICAL);  // 设置竖直排列
-
         // 设置目标组件
         toolbar.setTargetComponent(jbSplitter);
-
         // 添加到父容器
         add(toolbar.getComponent(), BorderLayout.WEST);
+
+        // 添加默认工具栏(具有清空, lineWrap等功能)
+        DefaultActionGroup consoleGroup = new DefaultActionGroup(consoleView.createConsoleActions());
+        ActionToolbar consoleToolbar = ActionManager.getInstance().createActionToolbar("MyLCConsoleToolbar", consoleGroup, false);
+        consoleToolbar.setOrientation(SwingConstants.VERTICAL);  // 设置竖直排列
+        consoleToolbar.setTargetComponent(jbSplitter);
+        add(consoleToolbar.getComponent(), BorderLayout.EAST);
+
+        setToolbar(toolbar.getComponent());
 
         add(jbSplitter, BorderLayout.CENTER);
     }

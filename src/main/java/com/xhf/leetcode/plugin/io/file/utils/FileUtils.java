@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,20 +134,39 @@ public class FileUtils {
      * @throws IOException
      */
     public static File createAndGetFile(String path) throws IOException {
-        // check file exists
+        // 检查文件是否存在
         File file = new File(path);
         if (file.exists()) return file;
+
         File parentDir = file.getParentFile();
-        // create parent dirs
+
+        // 创建父目录
         if (parentDir != null && !parentDir.exists()) {
             if (!parentDir.mkdirs()) {
-                throw new RuntimeException("dir create error..");
+                throw new RuntimeException("目录创建错误..");
             }
         }
-        // create new file
-        file.createNewFile();
-        return file;
+
+        // 使用Files.createFile创建新文件
+        Path filePath = Files.createFile(Paths.get(path));
+
+        return filePath.toFile();  // 返回File对象
     }
+
+    /**
+     * 创建目录
+     */
+    public static File createAndGetDirectory(String path) throws IOException {
+        Path dirPath = Paths.get(path);
+        // 检查目录是否存在
+        if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
+            return dirPath.toFile();
+        }
+        // 创建目录
+        Files.createDirectories(dirPath);
+        return dirPath.toFile();
+    }
+
 
     /**
      * this method will create a file if it does not exist

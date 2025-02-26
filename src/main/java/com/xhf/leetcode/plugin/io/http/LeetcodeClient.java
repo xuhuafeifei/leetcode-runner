@@ -5,7 +5,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
@@ -20,6 +19,7 @@ import com.xhf.leetcode.plugin.utils.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,6 @@ public class LeetcodeClient {
         this.project = project;
         // loadCache
         httpClient = HttpClient.getInstance();
-        this.loadCache(project);
         LCEventBus.getInstance().register(this);
     }
 
@@ -70,6 +69,7 @@ public class LeetcodeClient {
         synchronized (LeetcodeClient.class) {
             if (instance == null) {
                 instance = new LeetcodeClient(project);
+                instance.loadCache(project);
             }
         }
         return instance;
@@ -94,14 +94,15 @@ public class LeetcodeClient {
      * therefore,
      * it should be called in a thread when the plugin is loaded
      *
-     * @param project
+     * @param project project
      */
     public static void init(Project project) {
         if (first) {
             first = false;
-            ApplicationManager.getApplication().invokeLater(() -> {
-                getInstance(project);
-            });
+            // ApplicationManager.getApplication().invokeLater(() -> {
+            // });
+            // 系统主要组件的初始化, 尽量不使用异步的方式处理
+            getInstance(project);
         }
     }
 
@@ -229,7 +230,7 @@ public class LeetcodeClient {
         return ans;
     }
 
-    public List<Question> queryTotalQuestion() {
+    public @NotNull List<Question> queryTotalQuestion() {
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.PROBLEM_SET_QUERY);

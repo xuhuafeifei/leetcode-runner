@@ -58,6 +58,10 @@ public class DictTree {
         return INSTANCE;
     }
 
+    public static void init() {
+        // 触发类加载, 初始化数据
+    }
+
     /**
      * 添加词组
      * @param words 词组

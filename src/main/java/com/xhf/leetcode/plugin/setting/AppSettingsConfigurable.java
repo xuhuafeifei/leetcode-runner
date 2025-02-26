@@ -45,7 +45,8 @@ final class AppSettingsConfigurable implements Configurable {
     return  !mySettingsComponent.getLangType().equals(state.langType) ||
             !mySettingsComponent.getFilePath().equals(state.filePath) ||
             !mySettingsComponent.getReadTypeName().equals(state.readTypeName) ||
-            !mySettingsComponent.getOutputTypeName().equals(state.outputTypeName)
+            !mySettingsComponent.getOutputTypeName().equals(state.outputTypeName) ||
+            !mySettingsComponent.getReposition().equals(state.rePositionSetting)
             ;
   }
 
@@ -65,6 +66,8 @@ final class AppSettingsConfigurable implements Configurable {
     // debug setting
     state.readTypeName = mySettingsComponent.getReadTypeName();
     state.outputTypeName = mySettingsComponent.getOutputTypeName();
+
+    state.rePositionSetting = mySettingsComponent.getReposition();
   }
 
   /**
@@ -80,6 +83,8 @@ final class AppSettingsConfigurable implements Configurable {
     // debug setting
     mySettingsComponent.setReadTypeName(state.readTypeName);
     mySettingsComponent.setOutputTypeName(state.outputTypeName);
+
+    mySettingsComponent.setReposition(state.rePositionSetting);
   }
 
   @Override

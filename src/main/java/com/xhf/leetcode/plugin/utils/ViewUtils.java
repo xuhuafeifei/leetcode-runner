@@ -23,7 +23,6 @@ import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
-import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import org.jetbrains.annotations.Nullable;
 
@@ -320,15 +319,16 @@ public class ViewUtils {
      * @param pattern deepcoding 的那种模式
      */
     private static void handleSuccessfulReposition(DeepCodingQuestion question, int size, int index, MyList<? extends DeepCodingQuestion> questionList, RePositionEvent event, Project project, String pattern) {
-        JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
         ViewUtils.scrollToVisibleOfMyList(questionList, index);
+        TaskCenter.getInstance().createTask(() -> {
+            // 重新打开文件
+            DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, index);
+            CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
 
-        // 重新打开文件
-        DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, index);
-        CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), AppSettings.getInstance().getLangType(), hot1001);
-
-        // 获取并显示 ToolWindow（确保控制台窗口可见）
-        showToolWindow(project);
+            // 获取并显示 ToolWindow（确保控制台窗口可见）
+            showToolWindow(project);
+        }).invokeLater();
+        // JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
     }
 
 
@@ -359,12 +359,14 @@ public class ViewUtils {
                     i < model.getSize() &&
                     (question = model.getElementAt(i)).getTitleSlug().equals(titleSlug))
             {
-                JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
                 ViewUtils.scrollToVisibleOfMyList(questionList, i);
-                // 重新打开文件 (根据当前系统语言打开文件)
-                CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), AppSettings.getInstance().getLangType());
-                // 获取并显示 ToolWindow（确保控制台窗口可见）
-                showToolWindow(project);
+                TaskCenter.getInstance().createTask(() -> {
+                    // 重新打开文件 (根据当前系统语言打开文件)
+                    CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
+                    // 获取并显示 ToolWindow（确保控制台窗口可见）
+                    showToolWindow(project);
+                }).invokeLater();
+                // JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
                 return;
             }
             JOptionPane.showMessageDialog(null, "当前文件无法被重新打开");

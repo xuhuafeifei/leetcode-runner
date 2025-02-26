@@ -104,6 +104,9 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
      */
     private void initSearchCondition() {
         conditionGroup = new JPanel();
+        // 左对齐
+        conditionGroup.setAlignmentX(Component.LEFT_ALIGNMENT);
+        conditionGroup.setLayout(new BoxLayout(conditionGroup, BoxLayout.X_AXIS));
 
         List<MySearchConditionPanel<T>> searchCondition = getSearchCondition();
 
@@ -310,11 +313,14 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
     }
 
     // 登陆锁定. 该方法表示当前项目处于未登录状态, 不提供搜索服务
+    /**
+     * 在v3.6.6版本中, 该方法会对系统登录态做出判断. 如果系统已经处于登录状态, 则不会锁定
+     */
     public final void loginLock() {
         // 判断当前系统是否登录
         LoginService instance = LoginService.getInstance(project);
         if (instance.isLogin()) {
-            instance.doLoginAfter();
+            return;
         }
         lock = true;
         this.conditionPanelArray.forEach(e -> e.setEnabled(false));

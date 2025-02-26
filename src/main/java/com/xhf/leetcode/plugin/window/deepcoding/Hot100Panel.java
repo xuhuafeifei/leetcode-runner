@@ -8,8 +8,10 @@ import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
+import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.ArrayUtils;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
 import com.xhf.leetcode.plugin.window.deepcoding.filter.DCAlgorithmFilter;
@@ -51,19 +53,23 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
         this.filterChain = new QFilterChain();
         LCEventBus.getInstance().register(this);
         super.init();
-        // 一定要unLock. 因为deepCoding功能一定是登陆后才开放, 无需进行锁定
-//        super.unLock();
+        if (LoginService.getInstance(project).isLogin()) {
+            super.unLock();
+        }
     }
 
     private void initMyList() {
-        List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
-        int[] hot100Id = getHot100();
-        this.hot100 = new ArrayList<>(120);
-        for (int idx : hot100Id) {
-            hot100.add(totalQuestion.get(idx));
-        }
+        TaskCenter.Task<Void> task = TaskCenter.getInstance().createTask(() -> {
+            List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+            int[] hot100Id = getHot100();
+            this.hot100 = new ArrayList<>(120);
+            for (int idx : hot100Id) {
+                hot100.add(totalQuestion.get(idx));
+            }
 
-        super.initMyListHelper(questionList, hot100, HOT100);
+            super.initMyListHelper(questionList, hot100, HOT100);
+        });
+        task.invokeLater();
     }
 
     private int[] getHot100() {

@@ -101,6 +101,12 @@ public class QuestionService {
         });
     }
 
+    /**
+     * 该方法需要加锁, 因为可能存在多个线程同时调用该方法, 导致数据加载多次
+     * 且该方法第一次调用时不会走任何的缓存逻辑, 可能会非常耗时
+     * @param project project
+     * @return 题目列表
+     */
     public synchronized List<Question> getTotalQuestion(Project project) {
         return LeetcodeClient.getInstance(project).getTotalQuestion();
     }
