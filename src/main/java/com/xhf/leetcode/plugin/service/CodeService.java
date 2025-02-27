@@ -725,7 +725,7 @@ public class CodeService {
             if (correctAnswer) {
                 // true
                 sb.append("✅ 通过...").append("\n");
-                sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" s ").append(" 💽: ").append(cr.getStatusMemory()).append("\n");
+                sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" ms ").append(" 💽: ").append(cr.getStatusMemory()).append("\n");
                 sb.append("全部的测试案例数量: ").append(cr.getTotalTestcases()).append("\n");
                 sb.append("通过的测试案例数量: ").append(cr.getTotalCorrect()).append("\n");
                 LCEventBus.getInstance().post(new TimeStopEvent());
