@@ -43,6 +43,16 @@ public class InnerHelpTooltip {
       return innerHelpTooltip;
     }
 
+    public static InnerHelpTooltip FlowLayout(int flowType, int hgap, int vgap) {
+        InnerHelpTooltip innerHelpTooltip = new InnerHelpTooltip();
+        innerHelpTooltip.targetComponent.setLayout(new FlowLayout(flowType, hgap, vgap));
+        return innerHelpTooltip;
+    }
+
+    public static InnerHelpTooltip DefaultLayout() {
+        return new InnerHelpTooltip();
+    }
+
     public static InnerHelpTooltip BorderLayout() {
       InnerHelpTooltip innerHelpTooltip = new InnerHelpTooltip();
       innerHelpTooltip.targetComponent.setLayout(new BorderLayout());

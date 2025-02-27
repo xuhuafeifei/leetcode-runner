@@ -9,9 +9,11 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
 import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.RePositionEvent;
+import com.xhf.leetcode.plugin.bus.TimeStopEvent;
 import com.xhf.leetcode.plugin.comp.TestCaseDialog;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
@@ -28,6 +30,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import com.xhf.leetcode.plugin.window.TimerWindow;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -725,6 +728,11 @@ public class CodeService {
                 sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" s ").append(" 💽: ").append(cr.getStatusMemory()).append("\n");
                 sb.append("全部的测试案例数量: ").append(cr.getTotalTestcases()).append("\n");
                 sb.append("通过的测试案例数量: ").append(cr.getTotalCorrect()).append("\n");
+                LCEventBus.getInstance().post(new TimeStopEvent());
+                TimerWindow timerWindow = ActionUtils.getTimerWindow();
+                if (timerWindow != null) {
+                    sb.append("解题花费时间: ").append(timerWindow.getTime());
+                }
             } else {
                 boolean runSuccess = cr.getRunSuccess();
                 if (runSuccess) {
