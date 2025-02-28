@@ -601,3 +601,20 @@ Android studio Go to Help -> Find action
 
 ![image-20250220113826393](README.assets/image-20250220113826393.png)
 
+
+
+
+
+### 7. 题解显示为空
+
+![image-20250228232251232](README.assets/image-20250228232251232.png)
+
+
+
+点击重定位按钮，进行文件内容刷新
+
+![image-20250228232338556](README.assets/image-20250228232338556.png)
+
+重定位后，内容可以重新显现
+
+![image-20250228232349001](README.assets/image-20250228232349001.png)
