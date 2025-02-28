@@ -15,6 +15,8 @@ import java.io.FileOutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +28,23 @@ public class Demo1 {
     @Test
     public void test() {
         String s = FileUtils.readContentFromFile("E:\\java_code\\leetcode-runner\\src\\main\\resources\\help\\CookieLoginHelp.md");
-         
         System.out.println(s);
+        HashMap<Object, Object> map = new HashMap<>();
+        map.put(null, "");
+        Hashtable<Object, Object> ht = new Hashtable<>();
+        ht.put(null, null);
+    }
+
+    class A {
+        public A a() {
+            return null;
+        }
+    }
+
+    class B extends A {
+        public B a() {
+            return null;
+        }
     }
 
     static LeetcodeClient instance = LeetcodeClient.getInstanceForTest();

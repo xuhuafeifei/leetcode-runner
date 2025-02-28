@@ -59,7 +59,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
 
     private void initMyList() {
         TaskCenter.getInstance().createTask(() -> {
-            List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+            List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
             int[] inter150Id = getInter150();
             this.inter150 = new ArrayList<>(180);
             for (int idx : inter150Id) {

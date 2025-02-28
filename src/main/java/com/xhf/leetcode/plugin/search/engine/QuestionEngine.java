@@ -141,7 +141,7 @@ public class QuestionEngine implements SearchEngine<Question> {
      * @throws IOException
      */
     private List<Question> normalSort(TopDocs topDocs, IndexSearcher isearcher) throws IOException {
-        List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+        List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
 
         int length = topDocs.scoreDocs.length;
         List<Question> ans = new ArrayList<>(length);

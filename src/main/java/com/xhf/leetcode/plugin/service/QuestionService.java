@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.service;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -10,7 +11,9 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
 import com.xhf.leetcode.plugin.bus.QLoadStartEvent;
+import com.xhf.leetcode.plugin.bus.TodayQuestionOkEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.CompetitionQuestion;
@@ -19,12 +22,17 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -34,9 +42,55 @@ import java.util.function.Consumer;
  * @email 2508020102@qq.com
  */
 public class QuestionService {
-    private static final QuestionService qs = new QuestionService();
 
-    public static QuestionService getInstance() {
+    private final Project project;
+
+    private boolean todaySolved = false;
+
+    private boolean needModify = false;
+
+    public QuestionService(Project project) {
+        this.project = project;
+        // 缓存今日每日一题, 同时设置过期时间为当天晚上
+        LeetcodeClient instance = LeetcodeClient.getInstance(project);
+        var todayRecord = instance.getTodayRecord(project);
+        var todayQuestion = todayRecord.getQuestion();
+
+        // 计算当前时间到今天晚上24点差了多少分钟
+        LocalDateTime now = LocalDateTime.now();
+        LogUtils.info("当前时间: " + now);
+
+        // 获取今天24点的时间
+        LocalDateTime endOfDay = now.toLocalDate().atTime(LocalTime.MAX);
+        LogUtils.info("今天24点时间: " + endOfDay);
+
+        // 计算时间差
+        Duration duration = Duration.between(now, endOfDay);
+        long millisecondsUntilMidnight = duration.toMillis();
+        LogUtils.info("diff time = " + millisecondsUntilMidnight);
+
+        // 数据写入内存, 无需持久化
+        StoreService.getInstance(project).addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, todayQuestion.getTitleSlug(), false, millisecondsUntilMidnight, TimeUnit.MILLISECONDS);
+
+        todaySolved = todayRecord.getUserStatus().equalsIgnoreCase("FINISH");
+        // 如果todaySolved为True, 需要修改图标
+        needModify = todaySolved;
+
+        // 注册
+        LCEventBus.getInstance().register(this);
+    }
+
+    private static QuestionService qs;
+
+    public static QuestionService getInstance(Project project) {
+        if (project == null) {
+            return null;
+        }
+        if (qs == null) {
+            synchronized (QuestionService.class) {
+                qs = new QuestionService(project);
+            }
+        }
         return qs;
     }
 
@@ -276,5 +330,42 @@ public class QuestionService {
             }
         }
         return null;
+    }
+
+    /**
+     * 判断当前每日一题解决状态
+     * 该方法会被频繁调用, 因此采用本地变量缓存的形式进行判断, 而不是调用leetcode接口查询数据
+     *
+     * @return 返回1, 表示已经解决. 0表示无需修改图标状态. -1表示需要修改为为解决
+     */
+    public int todayQuestionSolved() {
+        if (! needModify) {
+            return 0;
+        }
+        return todaySolved ? 1 : -1;
+    }
+
+    public void modified() {
+        needModify  = false;
+    }
+
+    /**
+     * 跟新每日一题解决状态
+     */
+    public void updateTodayStatus() {
+        LeetcodeClient instance = LeetcodeClient.getInstance(project);
+        var todayRecord = instance.getTodayRecord(project);
+        todaySolved = todayRecord.getUserStatus().equalsIgnoreCase("FINISH");
+        needModify = todaySolved;
+    }
+
+    /**
+     * 监听每日一题完成状态, 接收到该信息, 表明每日一题已被用户解决
+     * @param event event
+     */
+    @Subscribe
+    public void TodayQuestionOkEventListener(TodayQuestionOkEvent event) {
+        todaySolved = true;
+        needModify  = true;
     }
 }

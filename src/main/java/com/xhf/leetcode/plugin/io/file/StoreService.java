@@ -92,7 +92,7 @@ public final class StoreService implements Disposable {
 
     public static final String QUESTION_LIST_KEY = "QUESTION_LIST_KEY";
 
-    public static final String LEETCODE_TODAY_QUESTION_KEY = "LEETCODE_TODAY_QUESTION_KEY ";
+    public static final String LEETCODE_TODAY_QUESTION_KEY = "LEETCODE_TODAY_QUESTION_KEY";
 
     public static final String WATCH_POOL_KEY = "WATCH_POOL_KEY";
 
@@ -115,7 +115,7 @@ public final class StoreService implements Disposable {
     private int cnt = 0;
     private long last_time = 0;
 
-    public void addCache(String key, String o, boolean isDurable, int expire, TimeUnit timeUnit) {
+    public void addCache(String key, String o, boolean isDurable, long expire, TimeUnit timeUnit) {
         StoreContent c = new StoreContent();
         c.setContentJson(o);
         if (expire != -1) {
@@ -240,7 +240,7 @@ public final class StoreService implements Disposable {
         return System.currentTimeMillis() < expireTimestamp ? content.getContentJson() : null;
     }
 
-    private long convertToTimestamp(int expire, TimeUnit timeUnit) {
+    private long convertToTimestamp(long expire, TimeUnit timeUnit) {
         long currentTimestamp = System.currentTimeMillis();
 
         long expireInMillis = timeUnit.toMillis(expire);
