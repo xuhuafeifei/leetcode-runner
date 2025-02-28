@@ -90,7 +90,7 @@ public final class LoginService {
         // post event
         LCEventBus.getInstance().post(new LoginEvent(project));
         // load data
-        QuestionService.getInstance().loadAllQuestionData(project);
+        QuestionService.getInstance(project).loadAllQuestionData(project);
     }
 
     /**

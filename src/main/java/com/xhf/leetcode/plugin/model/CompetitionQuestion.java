@@ -125,7 +125,7 @@ public class CompetitionQuestion implements DeepCodingQuestion {
     }
 
     public Question toQuestion(Project project) {
-        List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+        List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
         return totalQuestion.get(Integer.parseInt(getFid()) - 1);
     }
 

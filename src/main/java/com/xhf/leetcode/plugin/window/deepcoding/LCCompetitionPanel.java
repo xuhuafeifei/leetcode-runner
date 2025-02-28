@@ -172,9 +172,9 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
      */
     private void initMyList() {
         TaskCenter.getInstance().createTask(() -> {
-            competitionList = QuestionService.getInstance().loadCompetitionQuestionData();
+            competitionList = QuestionService.getInstance(project).loadCompetitionQuestionData();
             // 处理完善数据信息
-            List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+            List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
             for (CompetitionQuestion c : competitionList) {
                 String fid = c.getFid();
                 int idx = Integer.parseInt(fid) -1;

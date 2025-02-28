@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.service;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -10,7 +11,9 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
 import com.xhf.leetcode.plugin.bus.QLoadStartEvent;
+import com.xhf.leetcode.plugin.bus.TodayQuestionOkEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.CompetitionQuestion;
@@ -19,12 +22,17 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -34,9 +42,41 @@ import java.util.function.Consumer;
  * @email 2508020102@qq.com
  */
 public class QuestionService {
-    private static final QuestionService qs = new QuestionService();
 
-    public static QuestionService getInstance() {
+    private final Project project;
+
+    public QuestionService(Project project) {
+        this.project = project;
+        // 缓存今日每日一题, 同时设置过期时间为当天晚上
+        LeetcodeClient instance = LeetcodeClient.getInstance(project);
+        Question todayQuestion = instance.getTodayQuestion(project);
+
+        // 计算当前时间到今天晚上24点差了多少分钟
+        LocalDateTime now = LocalDateTime.now();
+        LogUtils.info("当前时间: " + now);
+
+        // 获取今天24点的时间
+        LocalDateTime endOfDay = now.toLocalDate().atTime(LocalTime.MAX);
+        LogUtils.info("今天24点时间: " + endOfDay);
+
+        // 计算时间差
+        Duration duration = Duration.between(now, endOfDay);
+        long millisecondsUntilMidnight = duration.toMillis();
+        LogUtils.info("diff time = " + millisecondsUntilMidnight);
+
+        StoreService.getInstance(project).addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, todayQuestion.getTitleSlug(), false, millisecondsUntilMidnight, TimeUnit.MILLISECONDS);
+        // 注册
+        LCEventBus.getInstance().register(this);
+    }
+
+    private static QuestionService qs;
+
+    public static QuestionService getInstance(Project project) {
+        if (qs == null) {
+            synchronized (QuestionService.class) {
+                qs = new QuestionService(project);
+            }
+        }
         return qs;
     }
 
@@ -276,5 +316,29 @@ public class QuestionService {
             }
         }
         return null;
+    }
+
+    boolean todaySolved = false;
+    boolean needModify = false;
+
+    /**
+     * 判断当前每日一题解决状态
+     * @return 返回1, 表示已经解决. 0表示无需修改图标状态. -1表示需要修改为为解决
+     */
+    public int todayQuestionSolved() {
+        if (! needModify) {
+            return 0;
+        }
+        return todaySolved ? 1 : -1;
+    }
+
+    public void modified() {
+        needModify  = false;
+    }
+
+    @Subscribe
+    public void TodayQuestionOkEventListener(TodayQuestionOkEvent event) {
+        todaySolved = true;
+        needModify  = true;
     }
 }

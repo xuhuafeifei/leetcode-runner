@@ -94,7 +94,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
 
     @Override
     protected List<Question> getUpdateData() {
-        return QuestionService.getInstance().getTotalQuestion(project);
+        return QuestionService.getInstance(project).getTotalQuestion(project);
     }
 
     public MyList<Question> getMyList() {
@@ -126,7 +126,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
         unLock();
         questionList.setEmptyText(BundleUtils.message("action.leetcode.search.noData"));
         // questionList.setEmptyText("没有可用于展示的数据...");
-        List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+        List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
         questionList.setListData(totalQuestion);
         buildIndex(totalQuestion);
     }
@@ -144,7 +144,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
         indexLock();
         questionList.setEmptyText(BundleUtils.message("action.leetcode.search.loading"));
         questionList.setNonData();
-        buildIndex(QuestionService.getInstance().getTotalQuestion(project));
+        buildIndex(QuestionService.getInstance(project).getTotalQuestion(project));
         unLock();
         updateText();
     }

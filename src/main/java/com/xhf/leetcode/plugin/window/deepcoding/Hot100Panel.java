@@ -60,7 +60,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
 
     private void initMyList() {
         TaskCenter.Task<Void> task = TaskCenter.getInstance().createTask(() -> {
-            List<Question> totalQuestion = QuestionService.getInstance().getTotalQuestion(project);
+            List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
             int[] hot100Id = getHot100();
             this.hot100 = new ArrayList<>(120);
             for (int idx : hot100Id) {

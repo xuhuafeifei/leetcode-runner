@@ -187,7 +187,7 @@ public class MarkDownEditor implements FileEditor {
                     openInDesktopBrowser(targetUrl);
                 } else {
                     // 通过LC-Runner打开题目
-                    var q = QuestionService.getInstance().getQuestionByTitleSlug(titleSlug, project);
+                    var q = QuestionService.getInstance(project).getQuestionByTitleSlug(titleSlug, project);
                     if (q != null) {
                         ApplicationManager.getApplication().invokeLater(() -> {
                             CodeService.getInstance(project).openCodeEditor(q);

@@ -10,10 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
-import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
-import com.xhf.leetcode.plugin.bus.LCEventBus;
-import com.xhf.leetcode.plugin.bus.RePositionEvent;
-import com.xhf.leetcode.plugin.bus.TimeStopEvent;
+import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.TestCaseDialog;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
@@ -79,7 +76,7 @@ public class CodeService {
      * @param question question
      */
     public void openCodeEditor(Question question) {
-        QuestionService.getInstance().fillQuestion(question, project);
+        QuestionService.getInstance(project).fillQuestion(question, project);
 
         var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null);
 
@@ -99,7 +96,7 @@ public class CodeService {
      * @param deepCodingInfo dci
      */
     public void openCodeEditor(Question question, DeepCodingInfo deepCodingInfo) {
-        QuestionService.getInstance().fillQuestion(question, project);
+        QuestionService.getInstance(project).fillQuestion(question, project);
 
         var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, deepCodingInfo);
 
@@ -241,7 +238,7 @@ public class CodeService {
      * 之所以关闭, 是因为只有关闭后, 才能够使用系统提供的编辑器显示
      */
     public void reOpenCodeEditor(Question question, VirtualFile file, String langType) {
-        QuestionService.getInstance().fillQuestion(question, project);
+        QuestionService.getInstance(project).fillQuestion(question, project);
 
         // restore
         var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null, langType);
@@ -258,7 +255,7 @@ public class CodeService {
     }
 
     public void reOpenCodeEditor(Question question, VirtualFile file, String langType, DeepCodingInfo deepCodingInfo) {
-        QuestionService.getInstance().fillQuestion(question, project);
+        QuestionService.getInstance(project).fillQuestion(question, project);
 
         // restore
         var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, deepCodingInfo, langType);
@@ -550,6 +547,11 @@ public class CodeService {
                 AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr, project);
                 boolean correctAnswer = scrb.isCorrectAnswer();
                 if (correctAnswer) {
+                    String todaySlug = StoreService.getInstance(project).getCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, String.class);
+                    if (StringUtils.isNotBlank(todaySlug)) {
+                        // 通知
+                        LCEventBus.getInstance().post(new TodayQuestionOkEvent());
+                    }
                     ConsoleUtils.getInstance(project).showInfo("运行成功", true, true, "运行通过!", "运行代码 结果", ConsoleDialog.INFO);
                 } else {
                     ConsoleUtils.getInstance(project).showError("运行失败", true, true, "Oh No! 运行不通过!", "运行代码 结果", ConsoleDialog.ERROR);
@@ -557,7 +559,7 @@ public class CodeService {
 
                 ConsoleUtils.getInstance(project).showInfo(scrb.build());
                 // update question
-                boolean update = QuestionService.getInstance().updateQuestionStatusByFqid(project, runCode.getFrontendQuestionId(), scrb.isCorrectAnswer());
+                boolean update = QuestionService.getInstance(project).updateQuestionStatusByFqid(project, runCode.getFrontendQuestionId(), scrb.isCorrectAnswer());
                 // post
                 if (update) {
                     LCEventBus.getInstance().post(new CodeSubmitEvent(project));
@@ -641,7 +643,7 @@ public class CodeService {
             }
         }
         // 通过titleSlug查询question的content
-        Question question = QuestionService.getInstance().queryQuestionInfo(titleSlug, project);
+        Question question = QuestionService.getInstance(project).queryQuestionInfo(titleSlug, project);
 
         /*
             查询默认代码, 并写入当前打开的文件
@@ -1000,7 +1002,7 @@ public class CodeService {
         // check testcase data input
         if (lc.getExampleTestcases() == null || lc.getDefaultTestcases() == null) {
             // load example
-            Question q = QuestionService.getInstance().queryQuestionInfo(lc.getTitleSlug(), project);
+            Question q = QuestionService.getInstance(project).queryQuestionInfo(lc.getTitleSlug(), project);
             if (StringUtils.isBlank(q.getExampleTestcases())) {
                 throw new RuntimeException("No example test cases found...");
             }

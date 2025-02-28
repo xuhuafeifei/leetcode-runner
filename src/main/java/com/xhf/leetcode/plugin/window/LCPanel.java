@@ -2,10 +2,7 @@ package com.xhf.leetcode.plugin.window;
 
 import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionToolbar;
-import com.intellij.openapi.actionSystem.DataProvider;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
@@ -27,8 +24,8 @@ import org.jetbrains.annotations.Nullable;
 public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
     private final ActionToolbar actionToolbar;
     private DeepCodingPanel deepCodingPanel;
-    private Project project;
-    private SearchPanel searchPanel;
+    private final Project project;
+    private final SearchPanel searchPanel;
     /**
      * 表示当前显示状态, 如果是true, 则显示正常界面, 否则显示deep coding界面
      */
@@ -41,9 +38,10 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
         final ActionManager actionManager = ActionManager.getInstance();
 
         // get action toolbar
-        this.actionToolbar = actionManager.createActionToolbar("leetcode Toolbar",
-                (DefaultActionGroup) actionManager.getAction("leetcode.plugin.lcActionsToolbar"),
-                true);
+        DefaultActionGroup dag = (DefaultActionGroup) actionManager.getAction("leetcode.plugin.lcActionsToolbar");
+        AnAction dailyAction = actionManager.getAction("leetcode.plugin.TodayQuestionAction");
+
+        this.actionToolbar = actionManager.createActionToolbar("leetcode Toolbar", dag, true);
 
         initLeetcodeClient();
 
