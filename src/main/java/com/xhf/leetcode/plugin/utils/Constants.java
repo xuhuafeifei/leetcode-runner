@@ -31,6 +31,8 @@ public interface Constants {
     String DIFFICULTY = "DIFFICULTY";
     String TITLE_SLUG = "TITLE_SLUG";
     String VFILE = "VFILE";
+    String ARTICLE_CONTENT = "ARTICLE_CONTENT";
+    String ARTICLE_TITLE = "ARTICLE_TITLE";
     String STATUS = "STATUS";
     String TOPIC_ID = "TOPIC_ID";
     String SOLUTION_SLUG = "SOLUTION_SLUG";

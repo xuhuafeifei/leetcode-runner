@@ -356,7 +356,7 @@ public class QuestionService {
         LeetcodeClient instance = LeetcodeClient.getInstance(project);
         var todayRecord = instance.getTodayRecord(project);
         todaySolved = todayRecord.getUserStatus().equalsIgnoreCase("FINISH");
-        needModify = todaySolved;
+        needModify = true;
     }
 
     /**

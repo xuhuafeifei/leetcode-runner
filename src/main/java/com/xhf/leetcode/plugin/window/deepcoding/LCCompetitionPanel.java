@@ -6,6 +6,8 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
@@ -118,7 +120,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
 
         conditionComb.addActionListener(new ActionListener() {
             private String previousSelection = "";
-            private final String filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getFilePath()).append("0x3f").build();
+            private final String filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("0x3f").build();
             @Override
             public void actionPerformed(ActionEvent e) {
                 String selectedItem = (String) conditionComb.getSelectedItem();
@@ -132,11 +134,24 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
                 } else {
                     // 否则，更新选中的项
                     previousSelection = selectedItem;
-                    ApplicationManager.getApplication().invokeAndWait(() -> {
-                        LightVirtualFile file = new LightVirtualFile("[0x3f]-" + selectedItem, convert.doConvert(selectedItem));
-                        OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
-                        FileEditorManager.getInstance(project).openTextEditor(ofd, false);
-                    });
+                    try {
+                        String path = new FileUtils.PathBuilder(filePath).append("[0x3f]-" + selectedItem).build();
+                        FileUtils.createAndWriteFile(path, convert.doConvert(selectedItem));
+                        TaskCenter.getInstance().createEDTTask(() -> {
+                            VirtualFile file = LocalFileSystem.getInstance().refreshAndFindFileByPath(path);
+                            assert file != null;
+                            OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+                            FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+                        }).invokeAndWait();
+                    } catch (IOException ex) {
+                        LogUtils.warn("article file created failed ! the reason is " + ex.getMessage());
+                        ApplicationManager.getApplication().invokeAndWait(() -> {
+                            LightVirtualFile file = new LightVirtualFile("[0x3f]-" + selectedItem, convert.doConvert(selectedItem));
+                            OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+                            FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+                        });
+                    }
+
                 }
             }
         });

@@ -618,3 +618,21 @@ Android studio Go to Help -> Find action
 重定位后，内容可以重新显现
 
 ![image-20250228232349001](README.assets/image-20250228232349001.png)
+
+
+
+### 8. 灵神提单界面显示空白？
+
+![image-20250301002145691](README.assets/image-20250301002145691.png)
+
+通过deep coding入口打开灵神提单，正常情况下会显示文字内容
+
+
+
+但再特殊情况下，比如打开多个文件，同时反复切换，可能会导致其中的某些题解无法正常显示
+
+![image-20250301002135668](README.assets/image-20250301002135668.png)
+
+
+
+这时可以使用reposition重定位功能，重新打开当前文件。值得一提的是，reposition在大于v3.6.7版本才支持重定位灵神题解
