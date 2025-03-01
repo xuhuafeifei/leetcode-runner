@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.ColorUtil;
@@ -21,6 +22,7 @@ import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.model.Article;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -198,15 +200,34 @@ public class MarkDownEditor implements FileEditor {
                 }
             }
 
+            private String extractLastSegment(String url) {
+                String[] segments = url.split("/");
+                return segments[segments.length - 1];
+            }
+
             /**
              * 打开文章
              */
             private void openArticle(String targetUrl) {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    LightVirtualFile file = new LightVirtualFile("[0x3f]-article", targetUrl);
-                    OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
-                    FileEditorManager.getInstance(project).openTextEditor(ofd, false);
-                });
+                // 截取最后一段内容
+                String last = extractLastSegment(targetUrl);
+                String filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("0x3f").append("inner").append("[0x3f]-article-" + last).build();
+                try {
+                    FileUtils.createAndWriteFile(filePath, targetUrl);
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        VirtualFile file = LocalFileSystem.getInstance().refreshAndFindFileByPath(filePath);
+                        assert file != null;
+                        OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+                        FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+                    });
+                } catch (IOException e) {
+                    LogUtils.warn("article file create failed ! the reason is " + e.getMessage());
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        LightVirtualFile file = new LightVirtualFile("[0x3f]-article", targetUrl);
+                        OpenFileDescriptor ofd = new OpenFileDescriptor(project, file);
+                        FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+                    });
+                }
             }
 
             private void openInDesktopBrowser(String url) {

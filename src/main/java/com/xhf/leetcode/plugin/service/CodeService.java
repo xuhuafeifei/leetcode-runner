@@ -26,6 +26,7 @@ import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.TimerWindow;
 import org.apache.commons.lang3.StringUtils;
@@ -244,14 +245,7 @@ public class CodeService {
         var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null, langType);
 
         // open code editor and load content
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            ViewUtils.closeVFile(file, project);
-            VirtualFile newfile = LocalFileSystem.getInstance().findFileByPath(codeFilePath);
-            if (newfile != null) {
-                OpenFileDescriptor ofd = new OpenFileDescriptor(project, newfile);
-                FileEditorManager.getInstance(project).openTextEditor(ofd, false);
-            }
-        });
+        openCodeEditor(file, codeFilePath);
     }
 
     public void reOpenCodeEditor(Question question, VirtualFile file, String langType, DeepCodingInfo deepCodingInfo) {
@@ -260,6 +254,10 @@ public class CodeService {
         // restore
         var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, deepCodingInfo, langType);
 
+        openCodeEditor(file, codeFilePath);
+    }
+
+    private void openCodeEditor(VirtualFile file, String codeFilePath) {
         ApplicationManager.getApplication().invokeAndWait(() -> {
             ViewUtils.closeVFile(file, project);
             VirtualFile newfile = LocalFileSystem.getInstance().findFileByPath(codeFilePath);
@@ -577,8 +575,24 @@ public class CodeService {
             JOptionPane.showMessageDialog(null, "没有选择问题文件");
             return;
         }
+        String filePath = ViewUtils.getUnifyFilePathByVFile(cFile);
+        Path path = Paths.get(filePath);
+        String fileName = path.getFileName().toString();
+        if (fileName.startsWith("[0x3f]")) {
+            // 重新打开当前文件
+            TaskCenter.getInstance().createEDTTask(() -> {
+                ViewUtils.closeVFile(cFile, project);
+                VirtualFile newfile = LocalFileSystem.getInstance().findFileByPath(filePath);
+                if (newfile != null) {
+                    OpenFileDescriptor ofd = new OpenFileDescriptor(project, newfile);
+                    FileEditorManager.getInstance(project).openTextEditor(ofd, false);
+                }
+            }).invokeLater();
+            return;
+        }
         // 获取当前打开文件的fid
         String fid = parseFidFromVFile(cFile);
+
         // 获取当前打开文件的titleSlug
         String titleSlug = parseTitleSlugFromVFile(cFile);
         // 获取当前打开文件的语言类型

@@ -6,6 +6,8 @@ import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
+import com.xhf.leetcode.plugin.model.Article;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.MarkdownContentType;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -54,8 +56,12 @@ public class MarkdownTextEditorProvider implements AsyncFileEditorProvider, Dumb
             @Override
             public FileEditor build() {
                 HashMap<String, Object> map = new HashMap<>();
-                map.put(Constants.ARTICLE_URL, ViewUtils.getContentFromVFile(file));
+                String articleUrl = ViewUtils.getContentFromVFile(file);
+                Article article = LeetcodeClient.getInstance(project).queryArticle(articleUrl);
+                map.put(Constants.ARTICLE_URL, articleUrl);
                 map.put(Constants.VFILE, file);
+                map.put(Constants.ARTICLE_CONTENT, article.getContent());
+                map.put(Constants.ARTICLE_TITLE, article.getTitle());
                 return new MarkDownEditor(project, map, MarkdownContentType._0x3f);
             }
         };

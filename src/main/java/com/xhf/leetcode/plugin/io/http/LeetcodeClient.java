@@ -367,19 +367,7 @@ public class LeetcodeClient {
         return totalQuestion.get(qId);
     }
 
-    /**
-     * get today question
-     */
-    public Question getTodayQuestion(Project project) {
-        /*
-        StoreService service = StoreService.getInstance(project);
-        Question q = service.getCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, Question.class);
-        if (q != null) {
-            return q;
-        }
-         */
-        var q = new Question();
-
+    private JsonElement fetchTodayRecord(Project project) {
         /* search question */
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
@@ -394,32 +382,30 @@ public class LeetcodeClient {
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
-
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-        JsonElement jsonElement = jsonObject.getAsJsonObject("data").getAsJsonArray("todayRecord").get(0);
+
+        return jsonObject.getAsJsonObject("data").getAsJsonArray("todayRecord").get(0);
+    }
+
+    public TodayRecord getTodayRecord(Project project) {
+        JsonElement jsonElement = fetchTodayRecord(project);
+        return GsonUtils.fromJson(jsonElement, TodayRecord.class);
+    }
+
+    /**
+     * get today question
+     */
+    public Question getTodayQuestion(Project project) {
+        JsonElement jsonElement = fetchTodayRecord(project);
         JsonObject questionJOB = jsonElement.getAsJsonObject().getAsJsonObject("question");
 
         // extract field
-        String frontendQuestionId = questionJOB.get("frontendQuestionId").getAsString();
-        String difficulty = questionJOB.get("difficulty").getAsString();
-        String title = questionJOB.get("title").getAsString();
-        String titleSlug = questionJOB.get("titleSlug").getAsString();
-        String titleCn = questionJOB.get("titleCn").getAsString();
-
-        q.setFrontendQuestionId(frontendQuestionId);
-        q.setDifficulty(difficulty);
-        q.setTitle(title);
-        q.setTitleSlug(titleSlug);
-        q.setTitleCn(titleCn);
-
-        /* store question */
-        /*
-        不再支持缓存每日一题, 可能存在这样的情况, 用户电脑保持开机状态持续若干天, 那么他在第一天缓存的
-        每日一题将会影响到后续几天每日一题的获取, 除非过当天12点时清除数据, 否则不再缓存每日一题
-
-        虽然StoreService支持过期时间, 但该功能并未经过大量测试, 因此不进行引入
-        */
-        // service.addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, q, false);
+        Question q = new Question();
+        q.setFrontendQuestionId(questionJOB.get("frontendQuestionId").getAsString());
+        q.setDifficulty(questionJOB.get("difficulty").getAsString());
+        q.setTitle(questionJOB.get("title").getAsString());
+        q.setTitleSlug(questionJOB.get("titleSlug").getAsString());
+        q.setTitleCn(questionJOB.get("titleCn").getAsString());
 
         return q;
     }

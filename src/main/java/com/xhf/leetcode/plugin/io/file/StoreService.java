@@ -92,7 +92,7 @@ public final class StoreService implements Disposable {
 
     public static final String QUESTION_LIST_KEY = "QUESTION_LIST_KEY";
 
-    public static final String LEETCODE_TODAY_QUESTION_KEY = "LEETCODE_TODAY_QUESTION_KEY ";
+    public static final String LEETCODE_TODAY_QUESTION_KEY = "LEETCODE_TODAY_QUESTION_KEY";
 
     public static final String WATCH_POOL_KEY = "WATCH_POOL_KEY";
 

@@ -15,9 +15,16 @@ import org.jetbrains.annotations.NotNull;
  * @email 2508020102@qq.com
  */
 public class TodayQuestionAction extends AbstractAction {
+
+    /**
+     * 每一次点击, 都会刷新每日一题解决状态
+     * 之所以需要刷新, 是为了解决插件跨夜不关, 导致前一天的每日一题解决状态延续至今天
+     */
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
-        QuestionService.getInstance(project).todayQuestion(project);
+        QuestionService instance = QuestionService.getInstance(project);
+        instance.updateTodayStatus();
+        instance.todayQuestion(project);
     }
 
     @Override
@@ -25,6 +32,9 @@ public class TodayQuestionAction extends AbstractAction {
         return super.getActionUpdateThread();
     }
 
+    /**
+     * 该方法会被多次且频繁调用, 因此尽量减少操作逻辑
+     */
     @Override
     public void update(AnActionEvent e) {
         Presentation presentation = e.getPresentation();

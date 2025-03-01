@@ -45,11 +45,16 @@ public class QuestionService {
 
     private final Project project;
 
+    private boolean todaySolved = false;
+
+    private boolean needModify = false;
+
     public QuestionService(Project project) {
         this.project = project;
         // 缓存今日每日一题, 同时设置过期时间为当天晚上
         LeetcodeClient instance = LeetcodeClient.getInstance(project);
-        Question todayQuestion = instance.getTodayQuestion(project);
+        var todayRecord = instance.getTodayRecord(project);
+        var todayQuestion = todayRecord.getQuestion();
 
         // 计算当前时间到今天晚上24点差了多少分钟
         LocalDateTime now = LocalDateTime.now();
@@ -64,7 +69,13 @@ public class QuestionService {
         long millisecondsUntilMidnight = duration.toMillis();
         LogUtils.info("diff time = " + millisecondsUntilMidnight);
 
+        // 数据写入内存, 无需持久化
         StoreService.getInstance(project).addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, todayQuestion.getTitleSlug(), false, millisecondsUntilMidnight, TimeUnit.MILLISECONDS);
+
+        todaySolved = todayRecord.getUserStatus().equalsIgnoreCase("FINISH");
+        // 如果todaySolved为True, 需要修改图标
+        needModify = todaySolved;
+
         // 注册
         LCEventBus.getInstance().register(this);
     }
@@ -321,11 +332,10 @@ public class QuestionService {
         return null;
     }
 
-    boolean todaySolved = false;
-    boolean needModify = false;
-
     /**
      * 判断当前每日一题解决状态
+     * 该方法会被频繁调用, 因此采用本地变量缓存的形式进行判断, 而不是调用leetcode接口查询数据
+     *
      * @return 返回1, 表示已经解决. 0表示无需修改图标状态. -1表示需要修改为为解决
      */
     public int todayQuestionSolved() {
@@ -339,6 +349,20 @@ public class QuestionService {
         needModify  = false;
     }
 
+    /**
+     * 跟新每日一题解决状态
+     */
+    public void updateTodayStatus() {
+        LeetcodeClient instance = LeetcodeClient.getInstance(project);
+        var todayRecord = instance.getTodayRecord(project);
+        todaySolved = todayRecord.getUserStatus().equalsIgnoreCase("FINISH");
+        needModify = true;
+    }
+
+    /**
+     * 监听每日一题完成状态, 接收到该信息, 表明每日一题已被用户解决
+     * @param event event
+     */
     @Subscribe
     public void TodayQuestionOkEventListener(TodayQuestionOkEvent event) {
         todaySolved = true;
