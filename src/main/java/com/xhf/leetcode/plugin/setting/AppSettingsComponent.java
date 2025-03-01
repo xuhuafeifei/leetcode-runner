@@ -12,6 +12,7 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.model.i18nTypeEnum;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LangType;
 import org.apache.commons.lang3.StringUtils;
@@ -41,13 +42,14 @@ public class AppSettingsComponent {
   private static final String LANG_TYPE_HELP_TEXT = "选择支持的编程语言类型, 该设置将决定后续创建,提交的代码类型. 此外, 语言类型将决定debug功能启动的执行器类型";
   private static final String STORE_PATH_HELP_TEXT = "选择文件的存储路径. 该参数将影响后续代码文件创建的位置";
   private static final String REPOSITION_HELP_TEXT = "选择reposition功能文件打开方式. 如果是'" + AppSettings.REPOSITION_DEFAULT + "', 重定位后系统将会依据文件代表的语言类型重新打开文件; 如果是'" + AppSettings.REPOSITION_SETTING + "', 重定位后系统将会依据设置中语言类型打开文件";
+  private static final String LANGUAGE_HELP_TEXT = "选择Leetcode-Runner显示的语言类型";
 
   /*---------debug----------*/
   private final DebugPanel debugPanel = new DebugPanel();
 
   /*---------通用配置--------*/
   private final ComboBox<String> reposition = new ComboBox<>();
-
+  private final ComboBox<String> language   = new ComboBox<>();
 
 
   public AppSettingsComponent() {
@@ -63,6 +65,7 @@ public class AppSettingsComponent {
             .addComponent(createSeparatorWithText("others configuration"))
             .addComponent((JComponent) Box.createVerticalStrut(5))
             .addLabeledComponent(new JBLabel("Reposition"), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(reposition).addHelp(REPOSITION_HELP_TEXT).getTargetComponent(), 1, false)
+            .addLabeledComponent(new JBLabel("Language  "), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(language).addHelp(LANGUAGE_HELP_TEXT).getTargetComponent(), 1, false)
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel();
     LCEventBus.getInstance().register(this);
@@ -97,6 +100,16 @@ public class AppSettingsComponent {
 
     reposition.addItem("按照文件代表的语言类型");
     reposition.addItem("按照设置中的语言类型");
+
+    language.addItem(i18nTypeEnum.ZH.getValue());
+    language.addItem(i18nTypeEnum.EN.getValue());
+    // 增加一个点击事件
+    language.addActionListener(e -> {
+      String selectedItem = (String) language.getSelectedItem();
+      if (StringUtils.isNotBlank(selectedItem) && !selectedItem.equals(AppSettings.getInstance().getLocale())) {
+        JOptionPane.showMessageDialog(null, "语言设置生效需要重启IDE, 请您保存设置并重启");
+      }
+    });
   }
 
   public JPanel getPanel() {
@@ -176,6 +189,22 @@ public class AppSettingsComponent {
     Object selectedItem = reposition.getSelectedItem();
     if (selectedItem == null) {
       return AppSettings.REPOSITION_DEFAULT;
+    }
+    return (String) selectedItem;
+  }
+
+  public void setLocale(String locale) {
+    if (StringUtils.isBlank(locale)) {
+      language.setItem(i18nTypeEnum.ZH.getValue());
+      return;
+    }
+    language.setItem(locale);
+  }
+
+  public String getLocale() {
+    Object selectedItem = language.getSelectedItem();
+    if (selectedItem == null) {
+      return i18nTypeEnum.EN.getValue();
     }
     return (String) selectedItem;
   }

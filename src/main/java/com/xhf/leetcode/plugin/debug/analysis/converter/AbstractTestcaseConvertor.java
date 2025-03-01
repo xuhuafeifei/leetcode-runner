@@ -6,6 +6,7 @@ import com.xhf.leetcode.plugin.debug.analysis.converter.convert.ConverterFactory
 import com.xhf.leetcode.plugin.debug.analysis.converter.convert.VariableConvertor;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 /**
@@ -53,8 +54,10 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
         int len = testCases.length;
         // 判断测试输入和参数个数是否匹配
         if (len != result.getParameterTypes().length) {
-            throw new DebugError("测试样例数量与" + result.getMethodName() + "入参数量不匹配, 请检查!\r\n测试样例个数 = "
-                    + len + " " + result.getMethodName() + "入参个数 = " + result.getParameterTypes().length);
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.testcase.number") + " " + result.getMethodName() + " " + BundleUtils.i18n("debug.leetcode.input.param.number")
+                    + " " + BundleUtils.i18n("debug.leetcode.notmatch") + "\r\n" +
+                    BundleUtils.i18n("debug.leetcode.testcase.number") + " = " + len + "\n"
+                    + result.getMethodName() + BundleUtils.i18n("debug.leetcode.input.param.number") + " = " + result.getParameterTypes().length);
         }
         // 参数类型
         this.varNames = new String[len];
@@ -100,7 +103,7 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
     protected String createVariable(String testcase, String paramType) {
         VariableConvertor cc = cf.createVariableConvertor(paramType);
         if (cc == null) {
-            throw new DebugError("不支持的方法入参类型: " + paramType);
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.notsupport.param.type") + ": " + paramType);
         }
         return cc.convert(testcase, vName());
     }

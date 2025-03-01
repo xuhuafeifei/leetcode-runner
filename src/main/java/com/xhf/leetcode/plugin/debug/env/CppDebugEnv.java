@@ -21,6 +21,7 @@ import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.NotNull;
@@ -97,15 +98,15 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
         try {
             FileUtils.removeFile(this.solutionExePath);
-            LogUtils.simpleDebug("删除solution.exe成功: " + this.solutionExePath);
+            LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.exe.clear.success") + ": " + this.solutionExePath);
         } catch (Exception e) {
-            DebugUtils.simpleDebug("删除solution.exe失败: " + this.solutionExePath + " cause = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
+            DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.exe.clear.failed") + ": " + this.solutionExePath + " " + BundleUtils.i18n("action.leetcode.plugin.cause") +  " = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
         }
         try {
             FileUtils.removeFile(this.serverMainExePath);
-            LogUtils.simpleDebug("删除ServerMain.exe成功: " + this.solutionExePath);
+            LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.main.clear.success") + ": " + this.solutionExePath);
         } catch (Exception e) {
-            DebugUtils.simpleDebug("删除ServerMain.exe失败: " + this.serverMainExePath + " cause = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
+            DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.main.clear.failed") + ": " + this.serverMainExePath + " cause = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
         }
         return true;
     }
@@ -138,11 +139,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
                 });
 
         // 携带帮助文档的按钮
-        String HELP_CONTENT = "<p><strong>MinGW</strong>是一个用于 <strong>Windows</strong> 平台的开发工具集，其中包含如<strong>g++</strong>、<strong>gcc</strong>、<strong>gdb</strong>等<strong>debug</strong>使用的核心工具</p>\n" +
-                "<p>而leetcode-runner的c++ debug运行依赖于<strong>MinGW</strong>提供的工具, 因此需要使用者单独下载MinGW</p>\n" +
-                "<p>另外, 建议使用和项目适配的MinGW, 具体下载链接您可以通过点击<code>没有MinGW?</code>按钮获取</p>" +
-                "<p>如果使用其他版本的MinGW, 可能会出现意料之外的异常</p>"
-                ;
+        String HELP_CONTENT = BundleUtils.i18n("debug.leetcode.main.mingw.help");
         JPanel targetComponent;
         targetComponent = InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(HELP_CONTENT).getTargetComponent();
 
@@ -159,24 +156,24 @@ public class CppDebugEnv extends AbstractDebugEnv {
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
-                new Object[]{"确定", "取消", "没有MinGW?"},
-                "确定"
+                new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel"), BundleUtils.i18n("debug.leetcode.main.mingw.no")},
+                BundleUtils.i18n("action.leetcode.plugin.ok")
         );
         if (i == 2) {
             // 给出下载链接
             JOptionPane.showOptionDialog(
                     null,
                     FormBuilder.createFormBuilder()
-                            .addLabeledComponent(new JBLabel("Github下载链接: "), new JBTextField("https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-win32-seh-ucrt-rt_v12-rev1.7z"), 1, false)
-                            .addLabeledComponent(new JBLabel("Fgbg提供的链接: "), new JBTextField("https://pan.baidu.com/s/15aK7K5AIkMoMwxdV4jCNlA?pwd=1jxa"), 1, false)
+                            .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.github.link")), new JBTextField("https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-win32-seh-ucrt-rt_v12-rev1.7z"), 1, false)
+                            .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.my.link")), new JBTextField("https://pan.baidu.com/s/15aK7K5AIkMoMwxdV4jCNlA?pwd=1jxa"), 1, false)
                             .getPanel()
                     ,
-                    "MinGW的两种下载方式",
+                    BundleUtils.i18n("debug.leetcode.mingw.download.function"),
                     JOptionPane.OK_CANCEL_OPTION,
                     JOptionPane.PLAIN_MESSAGE,
                     null,
-                    new Object[]{"确定", "取消"},
-                    "确定"
+                    new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
+                    BundleUtils.i18n("action.leetcode.plugin.ok")
             );
         }
         if (i != OK_OPTION) {
@@ -188,10 +185,10 @@ public class CppDebugEnv extends AbstractDebugEnv {
         this.GDB = new FileUtils.PathBuilder(this.MINGW_HOME).append("bin").append("gdb.exe").build();
 
         if (!FileUtils.fileExists(GPP)) {
-            throw new DebugError("无法找到g++.exe, g++路径错误 = " + GPP);
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.gpp.error") + GPP);
         }
         if (!FileUtils.fileExists(GDB)) {
-            throw new DebugError("无法找到gdb.exe, gdb路径错误 = " + GDB);
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.gdb.error") + GDB);
         }
         // 存储正确的javaPath
         StoreService.getInstance(project).addCache("MINGW_HOME", MINGW_HOME);
@@ -231,7 +228,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
             FileUtils.createAndWriteFile(stdErrPath, "");
         } catch (IOException e) {
             LogUtils.error(e);
-            throw new DebugError("cpp日志文件创建错误!" + e.toString());
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.cpp.log.create.failed") + e.getMessage());
         }
 
         LogUtils.info("cpp port = " + this.port);
@@ -308,7 +305,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
         @Override
         protected Integer compute(@NotNull ProgressIndicator indicator) throws Exception {
-            LogUtils.simpleDebug("编译combinedCmd = " + combinedCmd);
+            LogUtils.simpleDebug("compile combinedCmd = " + combinedCmd);
             /*
               这里之所以使用全新线程执行combinedCmd, 是因为它会阻塞线程, 导致用户点击cancel后
               无法触发onCancel方法, 所以使用新线程执行, 并且在while循环中判断是否被cancel
@@ -341,7 +338,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
             if (process != null && process.isAlive()) {
                 process.destroy(); // 尝试正常终止进程
                 // process.destroyForcibly();
-                LogUtils.simpleDebug("用户取消了任务，进程已终止");
+                LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.compile.stop"));
             }
         }
     }
@@ -357,13 +354,13 @@ public class CppDebugEnv extends AbstractDebugEnv {
             Integer i = ProgressManager.getInstance().run(new MyTask(project, combinedCmd));
 
             if (i == null) {
-                LogUtils.simpleDebug("取消编译!");
+                LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.compile.cancel"));
                 ConsoleUtils.getInstance(project).showError("取消编译!", false, true);
                 return false;
             }
 
             if (i != 0) {
-                throw new DebugError("编译文件异常, 详细信息可查看Console, 如果在控制台发现ServerMain.exe, solution.exe相关异常\n 请您手动删除ServerMain.exe和Solution.exe\n" +
+                throw new DebugError(BundleUtils.i18n("debug.leetcode.compile.error") + "\n" +
                         "solution.exe = " + this.solutionExePath+
                         "ServerMain.exe = " + this.serverMainExePath
                 );

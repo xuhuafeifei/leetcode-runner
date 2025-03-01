@@ -29,7 +29,7 @@ public class DebugAction extends AbstractAction {
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         if (DebugManager.getInstance(project).isDebug()) {
-            ConsoleUtils.getInstance(project).showInfo("当前处于调试状态, 请先退出调试状态", false, true);
+            ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("action.leetcode.actions.debug.quit"), false, true);
             return;
         }
         LangType langType = LangType.getType(AppSettings.getInstance().getLangType());
@@ -48,7 +48,8 @@ public class DebugAction extends AbstractAction {
                 doCPPDebug(project, langType);
                 break;
             default:
-                ConsoleUtils.getInstance(project).showWaring("当前" + langType.getLangType() + "语言类型不支持调试", false, true);
+                // 别把空格删除了, 否则不好看
+                ConsoleUtils.getInstance(project).showWaring(langType.getLangType() + " " + BundleUtils.i18n("action.leetcode.actions.debug.notsupport"), false, true);
         }
     }
 
@@ -60,7 +61,7 @@ public class DebugAction extends AbstractAction {
         try {
             debugger.start();
         } catch (Exception e) {
-            DebugUtils.simpleDebug("Debug Failed! " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
+            DebugUtils.simpleDebug(BundleUtils.i18n("action.leetcode.actions.debug.failed") + " " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
         }
     }
 
@@ -72,7 +73,7 @@ public class DebugAction extends AbstractAction {
         try {
             debugger.start();
         } catch (Exception e) {
-            DebugUtils.simpleDebug("Debug Failed! " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
+            DebugUtils.simpleDebug(BundleUtils.i18n("action.leetcode.actions.debug.failed") + " " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
         }
     }
 
@@ -84,7 +85,7 @@ public class DebugAction extends AbstractAction {
         try {
             debugger.start();
         } catch (Exception e) {
-            DebugUtils.simpleDebug("Debug Failed! " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
+            DebugUtils.simpleDebug(BundleUtils.i18n("action.leetcode.actions.debug.failed") + " " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
         }
     }
 
@@ -92,10 +93,10 @@ public class DebugAction extends AbstractAction {
         // 通过文件名获取语言类型
         String langFromFile = CodeService.getInstance(project).parseLangTypeFromCVFile(project);
         if (LangType.getType(langFromFile) != langType) {
-            LogUtils.warn("异常, LangType != langFromFile " + langType + " != " + langFromFile);
-            JOptionPane.showMessageDialog(null, "当前文件代表语言类型与设置的语言类型类型不一致, 请重新选择代码文件\n"
-                    + "当前文件语言类型 = " + langFromFile + "\n"
-                    + "设置语言类型 = " + langType.getLangType()
+            LogUtils.warn(BundleUtils.i18n("action.leetcode.plugin.error") + ", LangType != langFromFile " + langType + " != " + langFromFile);
+            JOptionPane.showMessageDialog(null, BundleUtils.i18n("action.leetcode.actions.debug.langtype.not.equal") + "\n"
+                    + BundleUtils.i18n("action.leetcode.actions.debug.langtype.file.type") + " = " + langFromFile + "\n"
+                    + BundleUtils.i18n("action.leetcode.actions.debug.langtype.setting.type") + " = " + langType.getLangType()
             );
             return false;
         }

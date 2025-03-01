@@ -18,6 +18,7 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import java.io.File;
@@ -55,22 +56,25 @@ public abstract class AbstractDebugger implements Debugger{
         switch (outputType) {
             case CONSOLE_OUT:
             case STD_OUT:
-                DebugUtils.simpleDebug(readType.getType() + "命令错误", this.project);
+                DebugUtils.simpleDebug(readType.getType() + BundleUtils.i18n("debug.leetcode.command.error"), this.project);
                 break;
             case UI_OUT:
-                ConsoleUtils.getInstance(project).showWaring(readType.getType() + "指令错误", false, true);
-                LogUtils.warn(readType.getType() + "指令错误 inst = " + inst);
+                ConsoleUtils.getInstance(project).showWaring(readType.getType() + BundleUtils.i18n("debug.leetcode.instruction.error"), false, true);
+                LogUtils.warn(readType.getType() + BundleUtils.i18n("debug.leetcode.instruction.error") + " inst = " + inst);
                 break;
             default:
-                ConsoleUtils.getInstance(project).showWaring("outputType未知错误: " + outputType.getType(), false, true);
-                LogUtils.warn("outputType未知错误: " + outputType.getType());
+                ConsoleUtils instance = ConsoleUtils.getInstance(project);
+                if (instance != null) {
+                    instance.showWaring("outputType" + BundleUtils.i18n("action.leetcode.unknown.error") + ": " + outputType.getType(), false, true);
+                }
+                LogUtils.warn("outputType" + BundleUtils.i18n("action.leetcode.unknown.error") + ": " + outputType.getType());
                 break;
         }
     }
 
     /**
      * 接受用户输入，处理并执行对应的debug指令，并进行输出
-     * @return
+     * @return ProcessResult
      */
     protected ProcessResult processDebugCommand() {
         Instruction inst;

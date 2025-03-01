@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -27,7 +28,7 @@ public class TestCaseDialog extends DialogWrapper {
         this.path = path;
         this.project = project;
         init();
-        setTitle("设置测试案例");
+        setTitle(BundleUtils.i18n("comp.leetcode.testcase"));
         setSize(600, 400);
     }
 
@@ -51,7 +52,7 @@ public class TestCaseDialog extends DialogWrapper {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         // create reset button
-        JButton resetButton = new JButton("Reset");
+        JButton resetButton = new JButton(BundleUtils.i18n("comp.leetcode.reset"));
         resetButton.setBorderPainted(false);
         resetButton.setContentAreaFilled(false);
         resetButton.setFocusPainted(false);
@@ -60,8 +61,7 @@ public class TestCaseDialog extends DialogWrapper {
             // get default data
             LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
             if (lc == null) {
-                JOptionPane.showMessageDialog(null,
-                        "get default cases failed! please close all file and try again");
+                JOptionPane.showMessageDialog(null, BundleUtils.i18n("comp.leetcode.testcase.fetch.failed"));
                 return;
             }
             String defaultTestcases = lc.getDefaultTestcases();
@@ -70,11 +70,11 @@ public class TestCaseDialog extends DialogWrapper {
         buttonPanel.add(resetButton);
 
 
-        JButton okButton = new JButton("OK");
+        JButton okButton = new JButton(BundleUtils.i18n("action.leetcode.plugin.ok"));
         okButton.addActionListener(e -> doOKAction());
         buttonPanel.add(okButton);
 
-        JButton cancelButton = new JButton("Cancel");
+        JButton cancelButton = new JButton(BundleUtils.i18n("action.leetcode.plugin.cancel"));
         cancelButton.addActionListener(e -> doCancelAction());
         buttonPanel.add(cancelButton);
 
@@ -88,8 +88,7 @@ public class TestCaseDialog extends DialogWrapper {
         // update data
         LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
         if (lc == null) {
-            JOptionPane.showMessageDialog(null,
-                    "set cases failed! please close all file and try again");
+            JOptionPane.showMessageDialog(null, BundleUtils.i18n("comp.leetcode.testcase.set.failed"));
             return;
         }
         lc.setExampleTestcases(inputText);

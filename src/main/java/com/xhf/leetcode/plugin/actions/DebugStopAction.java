@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LoginPass;
 import com.xhf.leetcode.plugin.utils.RatePass;
@@ -21,6 +22,6 @@ public class DebugStopAction extends AbstractAction {
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         DebugManager.getInstance(project).stopDebugger();
-        ConsoleUtils.getInstance(project).simpleShowConsole("结束debug!\n");
+        ConsoleUtils.getInstance(project).simpleShowConsole(BundleUtils.i18n("action.leetcode.actions.debug.stop") + "\n");
     }
 }

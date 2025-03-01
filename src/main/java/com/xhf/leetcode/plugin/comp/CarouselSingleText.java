@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.comp;
 
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -23,7 +25,7 @@ public class CarouselSingleText extends JPanel {
         add(textPane, BorderLayout.SOUTH);
 
         // "上一张" 按钮
-        var prevButton = new JRadioButton("上一张");
+        var prevButton = new JRadioButton(BundleUtils.i18n("comp.leetcode.pre"));
         prevButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -34,7 +36,7 @@ public class CarouselSingleText extends JPanel {
         add(prevButton, BorderLayout.WEST);
 
         // "下一张" 按钮
-        var nextButton = new JRadioButton("下一张");
+        var nextButton = new JRadioButton(BundleUtils.i18n("comp.leetcode.next"));
         nextButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -69,7 +71,7 @@ public class CarouselSingleText extends JPanel {
             @Override
             public void run() {
                 JFrame jFrame = new JFrame();
-                jFrame.setTitle("Java 轮播图示例");
+                jFrame.setTitle(BundleUtils.i18n("comp.leetcode.carousel"));
                 jFrame.setSize(400, 300);
                 jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 CarouselSingleText comp = new CarouselSingleText();

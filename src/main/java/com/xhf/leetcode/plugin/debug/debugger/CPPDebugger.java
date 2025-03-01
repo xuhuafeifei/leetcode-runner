@@ -21,6 +21,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -100,7 +101,7 @@ public class CPPDebugger extends AbstractDebugger {
                 return;
             }
             if (!pR.isSuccess) {
-                throw new DebugError("未知异常! debug 指令执行错误!");
+                throw new DebugError(BundleUtils.i18n("action.leetcode.unknown.error"));
             }
         }
     }
@@ -173,13 +174,13 @@ public class CPPDebugger extends AbstractDebugger {
 
     private void startCppService() {
         String serverMainExePath = env.getServerMainExePath();
-        DebugUtils.simpleDebug("启动cpp服务: " + serverMainExePath, project);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd") + ": " + serverMainExePath, project);
 
         try {
             this.exec = DebugUtils.buildProcess(serverMainExePath);
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
-            throw new DebugError("cpp服务启动失败! " + e.getCause() + "\n执行指令 = " + serverMainExePath);
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed") + e.getCause() + "\n" + BundleUtils.i18n("debug.leetcode.instruction") + " = " + serverMainExePath);
         }
 
         // 五次检测连接(3s还连接不上, 挂了)
@@ -189,11 +190,11 @@ public class CPPDebugger extends AbstractDebugger {
             } catch (InterruptedException ignored) {
             }
             if (DebugUtils.isPortAvailable2("localhost", env.getPort())) {
-                DebugUtils.simpleDebug("cpp服务连接成功", project, false);
+                DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.connect.succuess"), project, false);
                 return;
             }
         }
-        throw new DebugError("cpp服务连接失败! 错误信息可通过Console查看");
+        throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed"));
     }
 
     @Override
@@ -213,7 +214,7 @@ public class CPPDebugger extends AbstractDebugger {
             }.execute(Instruction.success(this.readType, Operation.R, ""), context);
         }
 
-        DebugUtils.simpleDebug("CppDebugger即将停止!", project);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stopsoon"), project);
         env.stopDebug();
 
         try {
@@ -223,7 +224,7 @@ public class CPPDebugger extends AbstractDebugger {
 
         // 如果没有启动, 直接返回
         if (!DebugUtils.isPortAvailable2("localhost", env.getPort())) {
-            DebugUtils.simpleDebug("cpp服务关闭成功, CppDebugger停止", project);
+            DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stop"), project);
             return;
         }
 
@@ -234,7 +235,7 @@ public class CPPDebugger extends AbstractDebugger {
             } catch (InterruptedException ignored) {
             }
             if (!DebugUtils.isPortAvailable2("localhost", env.getPort())) {
-                DebugUtils.simpleDebug("cpp服务关闭成功, CppDebugger停止", project);
+                DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stop"), project);
                 return;
             }
         }
@@ -242,7 +243,7 @@ public class CPPDebugger extends AbstractDebugger {
         if (exec.isAlive()) {
             KillPortProcess.killProcess(env.getPort());
         }
-        DebugUtils.simpleDebug("cpp服务强制关闭! CppDebugger停止", project, false);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stop"), project, false);
     }
 
     @Override

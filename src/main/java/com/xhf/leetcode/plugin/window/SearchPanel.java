@@ -75,7 +75,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
         questionList = new MyList<>();
         questionList.setCellRenderer(new QuestionCellRender());
         questionList.addMouseListener(new QuestionListener(questionList, project));
-        questionList.setEmptyText(BundleUtils.message("action.leetcode.login.required", new Object[0])
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.login.required")
         );
 
         JBScrollPane jbScrollPane = new JBScrollPane(questionList);
@@ -105,14 +105,14 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
     public void loginEventListener(LoginEvent listener) {
         // 提前调用indexLock(). 因为登录后必定要重新加载所有题目数据, 从而rebuild engine's index
         indexLock();
-        questionList.setEmptyText(BundleUtils.message("action.leetcode.search.loading"));
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.loading"));
         // questionList.setEmptyText("数据加载中, 请稍等");
     }
 
     @Subscribe
     public void qLoadStartListener(QLoadStartEvent event) {
         indexLock();
-        questionList.setEmptyText(BundleUtils.message("action.leetcode.search.loading"));
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.loading"));
         // questionList.setEmptyText("数据加载中, 请稍等");
         questionList.setNonData();
     }
@@ -124,7 +124,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void qLoadEndListener(QLoadEndEvent event) {
         unLock();
-        questionList.setEmptyText(BundleUtils.message("action.leetcode.search.noData"));
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.noData"));
         // questionList.setEmptyText("没有可用于展示的数据...");
         List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
         questionList.setListData(totalQuestion);
@@ -142,7 +142,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
             return;
         }
         indexLock();
-        questionList.setEmptyText(BundleUtils.message("action.leetcode.search.loading"));
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.loading"));
         questionList.setNonData();
         buildIndex(QuestionService.getInstance(project).getTotalQuestion(project));
         unLock();
@@ -152,7 +152,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void clearCacheEventListeners(ClearCacheEvent event) {
         loginLock();
-        questionList.setEmptyText(BundleUtils.message("action.leetcode.login.required"));
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.login.required"));
         // questionList.setEmptyText("请先登录...");
         questionList.setNonData();
     }

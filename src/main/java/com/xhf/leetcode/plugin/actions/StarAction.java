@@ -5,10 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.xhf.leetcode.plugin.comp.CarouselSingleText;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.LoginPass;
-import com.xhf.leetcode.plugin.utils.RatePass;
-import com.xhf.leetcode.plugin.utils.SettingPass;
+import com.xhf.leetcode.plugin.utils.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -33,8 +30,8 @@ public class StarAction extends AbstractAction {
 //                JOptionPane.OK_CANCEL_OPTION,
 //                JOptionPane.PLAIN_MESSAGE,
 //                null,
-//                new Object[]{"确定", "取消"},
-//                "确定"
+//                new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
+//                BundleUtils.i18n("action.leetcode.plugin.ok")
 //        );
 
         new MyCustomDialog().showAndGet();
@@ -46,7 +43,7 @@ public class StarAction extends AbstractAction {
 
         public MyCustomDialog() {
             super(true);
-            setTitle("给个star吧, 上帝");
+            setTitle(BundleUtils.i18n("action.leetcode.actions.star"));
             init();
         }
 

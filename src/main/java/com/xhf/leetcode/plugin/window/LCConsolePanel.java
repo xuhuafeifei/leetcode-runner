@@ -103,13 +103,13 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         varAndExpSplitter.setSecondComponent(stdPanel);
 
         this.variablesTab = new TabInfo(varAndExpSplitter);
-        variablesTab.setText(BundleUtils.message("action.leetcode.console.variablesTab.text"));
+        variablesTab.setText(BundleUtils.i18n("action.leetcode.console.variablesTab.text"));
         variablesTab.setIcon(AllIcons.Debugger.Threads);
         tabs.addTab(variablesTab);
 
         // 添加 Console 选项卡
         this.consoleTab = new TabInfo(consoleView.getComponent());
-        this.consoleTab.setText(BundleUtils.message("action.leetcode.console.consoleTab.text"));
+        this.consoleTab.setText(BundleUtils.i18n("action.leetcode.console.consoleTab.text"));
         consoleTab.setIcon(AllIcons.Debugger.Console);
         tabs.addTab(consoleTab);
 
@@ -128,7 +128,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         // 创建command输入框的面板
         JPanel commandPanel = new JPanel(new BorderLayout());
         JLabel label = new JLabel();
-        label.setText(BundleUtils.message("action.leetcode.console.commandLabel.text"));
+        label.setText(BundleUtils.i18n("action.leetcode.console.commandLabel.text"));
 
         commandPanel.add(label, BorderLayout.NORTH);
         commandPanel.add(inputField, BorderLayout.CENTER);
@@ -198,7 +198,7 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         boolean flag = InstSource.userCmdInput(debugCommand);
         if (! flag) {
             ConsoleUtils.getInstance(project).showError(
-                    BundleUtils.message("error.command.write"), false
+                    BundleUtils.i18n("error.command.write"), false
             );
         }
         // 清空输入框

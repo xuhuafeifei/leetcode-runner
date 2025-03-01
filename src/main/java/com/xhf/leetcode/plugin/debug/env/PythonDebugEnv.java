@@ -13,6 +13,7 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
@@ -119,8 +120,8 @@ public class PythonDebugEnv extends AbstractDebugEnv {
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
-                new Object[]{"确定", "取消"},
-                "确定"
+                new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
+                BundleUtils.i18n("action.leetcode.plugin.ok")
         );
         if (i != OK_OPTION) {
             return false;
@@ -129,7 +130,7 @@ public class PythonDebugEnv extends AbstractDebugEnv {
         python = new FileUtils.PathBuilder(pythonPath).append("python.exe").build();
 
         if (!FileUtils.fileExists(python)) {
-            throw new DebugError("python解释器路径错误 = " + python);
+            throw new DebugError("python.exe" + BundleUtils.i18n("action.leetcode.plugin.path.error") + python);
         }
         // 存储正确的javaPath
         StoreService.getInstance(project).addCache("PYTHON_EXE", pythonPath);

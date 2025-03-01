@@ -26,6 +26,7 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import java.io.BufferedReader;
@@ -88,20 +89,20 @@ public class JavaDebugger extends AbstractDebugger {
         if (!DebugManager.getInstance(project).isDebug()) {
             return;
         }
-        DebugUtils.simpleDebug("JavaDebugger即将停止!", project);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stopsoon"), project);
         env.stopDebug();
         try {
             vm.dispose();
             if (port != -1) {
                 // 强制关停端口
                 if (DebugUtils.isPortAvailable2("localhost", port)) {
-                    LogUtils.info("强制关闭Java debugger 端口 " + port);
+                    LogUtils.info(BundleUtils.i18n("debug.leetcode.debug.server.stop.force") + " port = " + port);
                     KillPortProcess.killProcess(port);
                 }
             }
         } catch (VMDisconnectedException ignored) {
         }
-        DebugUtils.simpleDebug("JavaDebugger停止!", project);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stop"), project);
     }
 
     @Override
@@ -118,7 +119,7 @@ public class JavaDebugger extends AbstractDebugger {
             ConsoleUtils.getInstance(project).showError(ex.getMessage(), false, true, ex.getMessage(), "debug异常", ConsoleDialog.ERROR);
             LogUtils.error(ex);
         } catch (VMDisconnectedException e) {
-            DebugUtils.simpleDebug("vm 链接断开", project, true);
+            DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.vm.connect.stop"), project, true);
         } catch (Exception e) {
             ConsoleUtils.getInstance(project).showError(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
             LogUtils.error(e);
@@ -167,7 +168,7 @@ public class JavaDebugger extends AbstractDebugger {
             vm = connector.launch(arguments);
         } catch (IOException | IllegalConnectorArgumentsException | VMStartException e) {
             LogUtils.warn(DebugUtils.getStackTraceAsString(e));
-            throw new DebugError("vm启动失败!", e);
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.vm.start.failed"), e);
         }
 
         // 捕获目标虚拟机的输出
@@ -256,7 +257,7 @@ public class JavaDebugger extends AbstractDebugger {
                 return;
             }
             if (!pR.isSuccess) {
-                throw new DebugError("未知异常! debug 指令执行错误!");
+                throw new DebugError(BundleUtils.i18n("action.leetcode.unknown.error"));
             }
         }
     }
@@ -284,12 +285,12 @@ public class JavaDebugger extends AbstractDebugger {
         int tryCount = 1;
         do {
             try {
-                DebugUtils.simpleDebug("第 " + tryCount + " 次连接, 尝试中...", project);
+                DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.connect.try") + tryCount, project);
                 vm = connector.attach(arguments);
-                DebugUtils.simpleDebug("连接成功", project);
+                DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.connect.succuess"), project);
                 break;
             } catch (IOException | IllegalConnectorArgumentsException e) {
-                DebugUtils.simpleDebug("连接失败: " + e, project);
+                DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.connect.failed") + " " + e, project);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ignored) {
@@ -300,7 +301,7 @@ public class JavaDebugger extends AbstractDebugger {
 
         if (vm == null) {
             LogUtils.warn("vm 连接失败");
-            throw new DebugError("vm 连接失败, 可能是std_log.log/std_err.log文件无法删除导致, 详细信息请前往控制台查看...");
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.vm.connect.failed"));
         }
 
         // 捕获目标虚拟机的输出
@@ -335,7 +336,7 @@ public class JavaDebugger extends AbstractDebugger {
             FileUtils.createAndWriteFile(stdLogPath, "");
             FileUtils.createAndWriteFile(stdErrPath, "");
         } catch (Exception e) {
-            String message = "Java日志文件创建失败! 请检查对应路径下是否存在std_log.log, std_err.log文件, 并请手动删除他们\n"
+            String message = BundleUtils.i18n("debug.leetcode.java.log.create.failed") + "\n"
                     + "std_log.log = " + stdLogPath + "\n"
                     + "std_err_log = " + stdErrPath + "\n";
             LogUtils.simpleDebug(message);

@@ -10,10 +10,7 @@ import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.DebugCheck;
-import com.xhf.leetcode.plugin.utils.LoginPass;
-import com.xhf.leetcode.plugin.utils.RatePass;
-import com.xhf.leetcode.plugin.utils.SettingPass;
+import com.xhf.leetcode.plugin.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +36,7 @@ public abstract class AbstractAction extends AnAction {
         RatePass ratePass = this.getClass().getAnnotation(RatePass.class);
         if (ratePass == null) {
             if (!ActionUtils.get()) {
-                ConsoleUtils.getInstance(e.getProject()).showInfo("您当前操作过于频繁!", false, true);
+                ConsoleUtils.getInstance(e.getProject()).showInfo(BundleUtils.i18n("action.leetcode.actions.frequency.info"), false, true);
                 return;
             }
         }
@@ -48,7 +45,7 @@ public abstract class AbstractAction extends AnAction {
         if (settingPass == null) {
             AppSettings appSettings = AppSettings.getInstance();
             if (!appSettings.initOrNot()) {
-                Messages.showInfoMessage("请先前往设置界面设置插件...", "INFO");
+                Messages.showInfoMessage(BundleUtils.i18n("action.leetcode.actions.setting.info"), "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
@@ -58,11 +55,11 @@ public abstract class AbstractAction extends AnAction {
         if (annotation == null) {
             boolean login = LoginService.getInstance(project).isLogin();
             if (! login) {
-                ConsoleUtils.getInstance(e.getProject()).showWaring("not login!", false);
+                ConsoleUtils.getInstance(e.getProject()).showWaring(BundleUtils.i18n("action.leetcode.actions.login.info"), false);
                 // LoginService.getInstance(project).doLogin();
                 Messages.showOkCancelDialog(
                         project,
-                        "请先登录...",
+                        BundleUtils.i18n("action.leetcode.actions.login.info"),
                         "INFO",
                         Messages.getOkButton(),
                         Messages.getCancelButton(),
@@ -78,13 +75,13 @@ public abstract class AbstractAction extends AnAction {
             AppSettings appSettings = AppSettings.getInstance();
             // reader 检测
             if (StringUtils.isBlank(appSettings.getReadTypeName())) {
-                Messages.showInfoMessage("debug reader没有设置, 请前往设置界面", "INFO");
+                Messages.showInfoMessage(BundleUtils.i18n("action.leetcode.actions.debug.reader"), "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
             // output 检测
             if (StringUtils.isBlank(appSettings.getOutputTypeName())) {
-                Messages.showInfoMessage("debug output没有设置, 请前往设置界面", "INFO");
+                Messages.showInfoMessage(BundleUtils.i18n("action.leetcode.actions.debug.output"), "INFO");
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
@@ -92,7 +89,7 @@ public abstract class AbstractAction extends AnAction {
             DebugCheck.CheckType value = debugCheck.value();
             if (value == DebugCheck.CheckType.STATUS) {
                 if (!DebugManager.getInstance(project).isDebug()) {
-                    ConsoleUtils.getInstance(project).showWaring("no debug happen", false, true);
+                    ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("action.leetcode.actions.debug.nodebug"), false, true);
                     return;
                 }
             }

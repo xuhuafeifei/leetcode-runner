@@ -20,6 +20,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -138,12 +139,12 @@ public class PythonDebugger extends AbstractDebugger {
             }
             if (!pR.isSuccess) {
                 LogUtils.simpleDebug("未知异常! debug 指令执行错误!");
-                ConsoleUtils.getInstance(project).showError("未知异常! debug 指令执行错误!", false, true);
+                ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.unknown.error"), false, true);
                 continue;
             }
             if (Constants.PY_SERVER_DISCONNECT.equals(pR.r.getMoreInfo())) {
                 LogUtils.simpleDebug("python服务断开连接, debug结束!");
-                ConsoleUtils.getInstance(project).showInfo("python服务断开连接, debug结束!", false, true);
+                ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("debug.leetcode.debug.server.stop"), false, true);
                 break;
             }
         }
@@ -216,7 +217,7 @@ public class PythonDebugger extends AbstractDebugger {
     private void startPythonService() {
         String python = env.getPython();
         String cmd = String.format("\"%s\" \"%s\"", python, env.getMainPyPath());
-        DebugUtils.simpleDebug("启动python服务: " + cmd, project);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd")  + ": " + cmd, project);
 
         try {
             this.exec = DebugUtils.buildProcess(cmd);
@@ -232,7 +233,7 @@ public class PythonDebugger extends AbstractDebugger {
             } catch (InterruptedException ignored) {
             }
             if (DebugUtils.isPortAvailable2("localhost", env.getPyPort())) {
-                DebugUtils.simpleDebug("python服务连接成功", project, false);
+                DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.connect.succuess"), project, false);
                 return;
             }
         }
@@ -244,7 +245,7 @@ public class PythonDebugger extends AbstractDebugger {
             return;
         }
          */
-        throw new DebugError("python服务连接失败! 错误信息可通过Console查看");
+        throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed"));
     }
 
     /**
@@ -264,7 +265,7 @@ public class PythonDebugger extends AbstractDebugger {
         if (!DebugManager.getInstance(project).isDebug()) {
             return;
         }
-        DebugUtils.simpleDebug("PythonDebugger即将停止!", project);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stopsoon"), project);
         env.stopDebug();
         // 打断监控线程
         for (Thread thread : threads) {
@@ -274,7 +275,7 @@ public class PythonDebugger extends AbstractDebugger {
         }
         // 如果没有启动, 直接返回
         if (!isPortAvailable("localhost", env.getPyPort())) {
-            DebugUtils.simpleDebug("python服务关闭成功, PythonDebugger停止", project);
+            DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stop"), project);
             return;
         }
         // 发送终止请求(所谓的终止python, 就是提前让python跑完所有内容, 自动结束)
@@ -287,7 +288,7 @@ public class PythonDebugger extends AbstractDebugger {
             } catch (InterruptedException ignored) {
             }
             if (!isPortAvailable("localhost", env.getPyPort())) {
-                DebugUtils.simpleDebug("python服务关闭成功, PythonDebugger停止", project);
+                DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stop"), project);
                 return;
             }
         }
@@ -295,7 +296,7 @@ public class PythonDebugger extends AbstractDebugger {
         if (exec.isAlive()) {
             exec.destroyForcibly();
         }
-        DebugUtils.simpleDebug("python服务强制关闭! PythonDebugger停止", project, false);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.debug.server.stop.force"), project);
     }
 
     @Override

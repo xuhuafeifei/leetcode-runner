@@ -33,7 +33,7 @@ public class TimerWindow extends JWindow {
     private final float radio = 1.5f;
     private final int miniHeight = 85;
 
-    private final String HELP_CONTENT = BundleUtils.message("action.leetcode.timer.help");
+    private final String HELP_CONTENT = BundleUtils.i18n("action.leetcode.timer.help");
     private String lastTime = "00:00:00";
 
     public TimerWindow() {
@@ -130,7 +130,7 @@ public class TimerWindow extends JWindow {
         JButton closeBtn = createIconButton("/icons/clean.svg", e -> ActionUtils.disposeTimer());
 
         // 标题文本
-        JLabel title = new JLabel(BundleUtils.message("action.leetcode.timer.title"));
+        JLabel title = new JLabel(BundleUtils.i18n("action.leetcode.timer.title"));
         title.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
         titleBar.add(InnerHelpTooltip.FlowLayout(FlowLayout.LEADING).add(title).addHelp(this.HELP_CONTENT).getTargetComponent(), BorderLayout.WEST);

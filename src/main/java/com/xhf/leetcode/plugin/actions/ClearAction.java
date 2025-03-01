@@ -7,6 +7,7 @@ import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.LogoutEvent;
 import com.xhf.leetcode.plugin.io.file.StoreService;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LoginPass;
 
 /**
@@ -22,8 +23,8 @@ public class ClearAction extends AbstractAction {
     public void doActionPerformed(Project project, AnActionEvent e) {
         int result = Messages.showOkCancelDialog(
                 project,
-                "您确定要删除缓存文件吗? 这会清除您使用Leetcode-Runner时系统默认缓存的一切题目数据, 同时退出登录状态, 清空部分设置信息",
-                "确认删除",
+                BundleUtils.i18n("action.leetcode.actions.clear.confirm.info"),
+                BundleUtils.i18n("action.leetcode.actions.clear.confirm.title"),
                 Messages.getOkButton(),
                 Messages.getCancelButton(),
                 Messages.getQuestionIcon()

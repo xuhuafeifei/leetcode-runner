@@ -30,6 +30,9 @@ public class TodayQuestionAction extends AbstractAction {
         Presentation presentation = e.getPresentation();
         // 根据某些条件动态设置图标
         QuestionService instance = QuestionService.getInstance(e.getProject());
+        if (instance == null) {
+            return;
+        }
         if (instance.todayQuestionSolved() == 1) {
             presentation.setIcon(IconLoader.getIcon("/icons/flame.svg", this.getClass()));
             instance.modified();

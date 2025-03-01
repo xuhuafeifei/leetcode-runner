@@ -7,6 +7,7 @@ import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LoginPass;
 
@@ -22,7 +23,7 @@ public class DebugRunAction extends AbstractAction {
         // 写指令到阻塞队列中
         boolean flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.R, ""));
         if (! flag) {
-            ConsoleUtils.getInstance(project).showError("指令输入失败 ", true);
+            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
         }
     }
 }

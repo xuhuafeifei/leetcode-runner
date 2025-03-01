@@ -12,6 +12,7 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
@@ -108,8 +109,8 @@ public class JavaDebugEnv extends AbstractDebugEnv {
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
-                new Object[]{"确定", "取消"},
-                "确定"
+                new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
+                BundleUtils.i18n("action.leetcode.plugin.ok")
         );
         if (i != OK_OPTION) {
                 return false;
@@ -119,10 +120,10 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         java = new FileUtils.PathBuilder(JAVA_HOME).append("bin").append("java.exe").build();
         javac = new FileUtils.PathBuilder(JAVA_HOME).append("bin").append("javac.exe").build();
         if (!FileUtils.fileExists(java)) {
-            throw new DebugError("Java路径错误 = " + java);
+            throw new DebugError("Java" + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + java);
         }
         if (!FileUtils.fileExists(javac)) {
-            throw new DebugError("Javac路径错误 = " + javac);
+            throw new DebugError("Javac" + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + javac);
         }
         // 存储正确的javaPath
         StoreService.getInstance(project).addCache("JAVA_HOME", JAVA_HOME);
@@ -138,13 +139,13 @@ public class JavaDebugEnv extends AbstractDebugEnv {
 
             String combinedCmd = " cmd /c " + cdCmd + " & " + cmd;
 
-            LogUtils.simpleDebug("编译cmd = " + combinedCmd);
+            LogUtils.simpleDebug("compile cmd = " + combinedCmd);
             Process exec = DebugUtils.buildProcess("cmd.exe", "/c", cdCmd + " & " + cmd);
             DebugUtils.printProcess(exec, false, project);
 
             int i = exec.exitValue();
             if (i != 0) {
-                throw new DebugError("编译文件异常, 详细信息可查看Console");
+                throw new DebugError(BundleUtils.i18n("debug.leetcode.compile.java.error"));
             }
             mainClassPath = mainJavaPath.replace("Main.java", "Main.class");
             return true;

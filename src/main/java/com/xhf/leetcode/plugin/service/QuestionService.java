@@ -72,6 +72,9 @@ public class QuestionService {
     private static QuestionService qs;
 
     public static QuestionService getInstance(Project project) {
+        if (project == null) {
+            return null;
+        }
         if (qs == null) {
             synchronized (QuestionService.class) {
                 qs = new QuestionService(project);

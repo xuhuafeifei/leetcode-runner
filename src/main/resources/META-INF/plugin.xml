@@ -79,7 +79,7 @@
         <httpRequestHandler implementation="com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler"/>
     </extensions>
 
-    <actions resource-bundle="messages.LLConsole">
+    <actions resource-bundle="messages.info">
         <action id="BossKey"
                 class="com.xhf.leetcode.plugin.actions.BossKeyAction"
                 text="Boss Key"

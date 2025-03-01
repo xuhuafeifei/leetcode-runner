@@ -56,8 +56,8 @@ public class DemoAction extends AbstractAction {
                     JOptionPane.OK_CANCEL_OPTION,
                     JOptionPane.PLAIN_MESSAGE,
                     null,
-                    new Object[]{"确定", "取消"},
-                    "确定"
+                    new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
+                    BundleUtils.i18n("action.leetcode.plugin.ok")
             );
             return;
         }

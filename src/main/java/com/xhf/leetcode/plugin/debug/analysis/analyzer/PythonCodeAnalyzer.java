@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.debug.analysis.analyzer;
 
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.exception.DebugError;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class PythonCodeAnalyzer extends AbstractCodeAnalyzer {
             return new AnalysisResult(methodName, parameterTypes.toArray(new String[0]));
         }
 
-        throw new DebugError("代码片段分析错误! 无法匹配任何有效信息\n processCode = " + processCode);
+        throw new DebugError(BundleUtils.i18n("debug.leetcode.analyzer") + "\n processCode = " + processCode);
     }
 
     private String handlePythonCode(String code) {

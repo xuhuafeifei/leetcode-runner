@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
 
 import java.util.Objects;
@@ -26,7 +27,7 @@ public abstract class AbstractVariableConvertor implements VariableConvertor{
             case CPP:
                 return doCpp(testcase, variableName);
             default:
-                throw new DebugError("目前不支持 " + langType.getLangType() + " 语言的debug");
+                throw new DebugError(langType.getLangType() + " " + BundleUtils.i18n("debug.leetcode.notsupport"));
         }
     }
 

@@ -46,7 +46,8 @@ final class AppSettingsConfigurable implements Configurable {
             !mySettingsComponent.getFilePath().equals(state.filePath) ||
             !mySettingsComponent.getReadTypeName().equals(state.readTypeName) ||
             !mySettingsComponent.getOutputTypeName().equals(state.outputTypeName) ||
-            !mySettingsComponent.getReposition().equals(state.rePositionSetting)
+            !mySettingsComponent.getReposition().equals(state.rePositionSetting) ||
+            !mySettingsComponent.getLocale().equals(state.locale)
             ;
   }
 
@@ -68,6 +69,7 @@ final class AppSettingsConfigurable implements Configurable {
     state.outputTypeName = mySettingsComponent.getOutputTypeName();
 
     state.rePositionSetting = mySettingsComponent.getReposition();
+    state.locale = mySettingsComponent.getLocale();
   }
 
   /**
@@ -85,6 +87,7 @@ final class AppSettingsConfigurable implements Configurable {
     mySettingsComponent.setOutputTypeName(state.outputTypeName);
 
     mySettingsComponent.setReposition(state.rePositionSetting);
+    mySettingsComponent.setLocale(state.locale);
   }
 
   @Override

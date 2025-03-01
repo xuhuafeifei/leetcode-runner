@@ -12,6 +12,7 @@ import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.UnSafe;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -77,12 +78,12 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         int i = JOptionPane.showOptionDialog(
                 null,
                 new JBScrollPane(jTextPane),
-                "设置debug的输入(只能设置一个测试案例)",
+                BundleUtils.i18n("debug.leetcode.testcase.input"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
-                new Object[]{"确定", "取消"},
-                "确定"
+                new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
+                BundleUtils.i18n("action.leetcode.plugin.ok")
         );
         if (i != OK_OPTION) {
             return false;
@@ -105,14 +106,14 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         isDebug = false; // 先置为false, 否则后续判断debug状态可能会出现问题. 在结束时可能会出现并发问题. DebugStopAction一个Thread, BQ消费一个Thread
         InstSource.clear();
         DebugUtils.removeHighlightLine(project);
-        DebugUtils.simpleDebug("debug env stop!", project);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.env.stop"), project);
         LCEventBus.getInstance().post(new DebugEndEvent());
     }
 
     public void startDebug() {
         isDebug = true;
         InstSource.clear();
-        DebugUtils.simpleDebug("debug env start", project);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.env.start"), project);
 
         LCEventBus.getInstance().post(new DebugStartEvent());
     }

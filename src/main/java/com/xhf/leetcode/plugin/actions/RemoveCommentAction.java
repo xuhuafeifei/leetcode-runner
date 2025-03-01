@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 /**
@@ -17,6 +18,6 @@ public class RemoveCommentAction extends AbstractAction{
         String content = ViewUtils.getContentOfCurrentOpenVFile(project);
         content = Question.removeComment(content);
         ViewUtils.writeContentToCurrentVFile(project, content);
-        ConsoleUtils.getInstance(project).showInfo("注释移除成功!", false, true);
+        ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("action.leetcode.actions.command.remove"), false, true);
     }
 }
