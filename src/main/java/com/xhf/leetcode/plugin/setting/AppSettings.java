@@ -10,7 +10,7 @@ import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
-import com.xhf.leetcode.plugin.model.i18nTypeEnum;
+import com.xhf.leetcode.plugin.model.I18nTypeEnum;
 import com.xhf.leetcode.plugin.utils.LangType;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ public final class AppSettings
      */
     public String coreFilePath = EMPTY_FILE_PATH;
 
-    public String locale = i18nTypeEnum.EN.getValue();
+    public String locale = I18nTypeEnum.EN.getValue();
 
     public boolean isEmptyFilePath() {
       return filePath.equals(EMPTY_FILE_PATH);

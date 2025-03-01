@@ -1,6 +1,6 @@
 package com.xhf.leetcode.plugin.utils;
 
-import com.xhf.leetcode.plugin.model.i18nTypeEnum;
+import com.xhf.leetcode.plugin.model.I18nTypeEnum;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.PropertyKey;
@@ -17,7 +17,7 @@ public class BundleUtils {
 
     static {
         String locale = AppSettings.getInstance().getLocale();
-        i18nTypeEnum i18N = i18nTypeEnum.getI18N(locale);
+        I18nTypeEnum i18N = I18nTypeEnum.getI18N(locale);
         bundle = ResourceBundle.getBundle(I18N, i18N.getLocal());
     }
 

@@ -289,7 +289,17 @@ public final class StoreService implements Disposable {
     private void loadCache() {
         Properties properties = FileUtils.readPropertiesFileContent(getCacheFilePath());
         properties.forEach((k, v) -> {
-            durableCache.put((String) k, GsonUtils.fromJson((String) v, StoreContent.class));
+            try {
+                durableCache.put((String) k, GsonUtils.fromJson((String) v, StoreContent.class));
+            } catch (Exception e) {
+                LogUtils.warn("some exception happen during the cache loading...\nthe property key is " + k + " and the value is " + v
+                + "\nthe key will be removed by system soon");
+                if (k != null && durableCache.getIfPresent(k) != null) {
+                    durableCache.invalidate(k);
+                    LogUtils.info("key = " + k + " has been removed");
+                }
+                LogUtils.error(e);
+            }
         });
     }
 

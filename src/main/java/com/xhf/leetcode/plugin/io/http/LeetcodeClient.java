@@ -17,6 +17,7 @@ import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpRequestFactory;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.jetbrains.annotations.NotNull;
@@ -674,5 +675,23 @@ public class LeetcodeClient {
         JsonElement jsonElement = jsonObject.get("data").getAsJsonObject().get("qaQuestion");
 
         return GsonUtils.fromJson(jsonElement, Article.class);
+    }
+
+    public CalendarSubmitRecord getCalendarSubmitRecord() {
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.CALENDAR_SUBMIT_RECORD_QUERY);
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+        String resp = httpResponse.getBody();
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject().get("calendarSubmitRecord");
+
+        return GsonUtils.fromJson(jsonElement, CalendarSubmitRecord.class);
     }
 }

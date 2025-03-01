@@ -12,7 +12,7 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
-import com.xhf.leetcode.plugin.model.i18nTypeEnum;
+import com.xhf.leetcode.plugin.model.I18nTypeEnum;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LangType;
 import org.apache.commons.lang3.StringUtils;
@@ -101,8 +101,8 @@ public class AppSettingsComponent {
     reposition.addItem("按照文件代表的语言类型");
     reposition.addItem("按照设置中的语言类型");
 
-    language.addItem(i18nTypeEnum.ZH.getValue());
-    language.addItem(i18nTypeEnum.EN.getValue());
+    language.addItem(I18nTypeEnum.ZH.getValue());
+    language.addItem(I18nTypeEnum.EN.getValue());
     // 增加一个点击事件
     language.addActionListener(e -> {
       String selectedItem = (String) language.getSelectedItem();
@@ -195,7 +195,7 @@ public class AppSettingsComponent {
 
   public void setLocale(String locale) {
     if (StringUtils.isBlank(locale)) {
-      language.setItem(i18nTypeEnum.ZH.getValue());
+      language.setItem(I18nTypeEnum.ZH.getValue());
       return;
     }
     language.setItem(locale);
@@ -204,7 +204,7 @@ public class AppSettingsComponent {
   public String getLocale() {
     Object selectedItem = language.getSelectedItem();
     if (selectedItem == null) {
-      return i18nTypeEnum.EN.getValue();
+      return I18nTypeEnum.EN.getValue();
     }
     return (String) selectedItem;
   }

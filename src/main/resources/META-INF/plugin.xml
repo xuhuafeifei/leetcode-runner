@@ -82,8 +82,7 @@
     <actions resource-bundle="messages.info">
         <action id="BossKey"
                 class="com.xhf.leetcode.plugin.actions.BossKeyAction"
-                text="Boss Key"
-                description="Toggle LeetCode Console">
+        >
             <!-- Windows/Linux 快捷键 -->
             <keyboard-shortcut
                     keymap="$default"
@@ -97,31 +96,31 @@
                 icon="/icons/login.svg">
         </action>
         <action id="leetcode.plugin.DemoAction" class="com.xhf.leetcode.plugin.actions.DemoAction"
-                text="Demo 测试" icon="/icons/clean.svg">
+                icon="/icons/clean.svg">
         </action>
         <action id="leetcode.plugin.PickOneAction" class="com.xhf.leetcode.plugin.actions.PickOneAction"
-                text="随机一题" icon="/icons/random.svg">
+                icon="/icons/random.svg">
         </action>
         <action id="leetcode.plugin.TodayQuestionAction" class="com.xhf.leetcode.plugin.actions.TodayQuestionAction"
-                text="每日一题" icon="/icons/daily.svg">
+                icon="/icons/daily.svg">
         </action>
         <action id="leetcode.plugin.Settings" class="com.xhf.leetcode.plugin.actions.SettingAction"
-                text="设置" icon="/icons/config.svg">
+                icon="/icons/config.svg">
         </action>
         <action id="leetcode.plugin.Clear" class="com.xhf.leetcode.plugin.actions.ClearAction"
-                text="清除缓存" icon="/icons/clear.svg">
+                icon="/icons/clear.svg">
         </action>
         <action id="leetcode.plugin.Reload" class="com.xhf.leetcode.plugin.actions.ReloadQuestionAction"
-                text="重新加载题目" icon="/icons/refresh.svg">
+                icon="/icons/refresh.svg">
         </action>
         <action id="leetcode.plugin.Reposition" class="com.xhf.leetcode.plugin.actions.RePositionAction"
-                text="重定位问题" icon="/icons/position.svg">
+                icon="/icons/position.svg">
         </action>
         <action id="leetcode.plugin.DeepCoding" class="com.xhf.leetcode.plugin.actions.DeepCodingAction"
-                text="切换做题模式" icon="AllIcons.Actions.SwapPanels">
+                icon="AllIcons.Actions.SwapPanels">
         </action>
         <action id="leetcode.plugin.StarAction" class="com.xhf.leetcode.plugin.actions.StarAction"
-                text="给个star吧, 上帝" icon="/icons/star.svg">
+                icon="/icons/star.svg">
         </action>
 
         <group id="leetcode.plugin.lcActionsToolbar">
@@ -143,60 +142,60 @@
 
         <group id="leetcode.plugin.consoleToolbar">
             <action id="leetcode.plugin.console.DebugStopAction" class="com.xhf.leetcode.plugin.actions.DebugStopAction"
-                    text="Stop" description="Stop" icon="AllIcons.Actions.Suspend">
+                    icon="AllIcons.Actions.Suspend">
             </action>
             <action id="leetcode.plugin.console.DebugRunAction" class="com.xhf.leetcode.plugin.actions.DebugRunAction"
-                    text="Resume Program" description="Resume program" icon="AllIcons.Debugger.ThreadRunning">
+                    icon="AllIcons.Debugger.ThreadRunning">
             </action>
             <action id="leetcode.plugin.console.DebugSTEP_OVERAction" class="com.xhf.leetcode.plugin.actions.DebugSTEP_OVERAction"
-                    text="Step Over" description="Step over" icon="AllIcons.Actions.TraceOver">
+                    icon="AllIcons.Actions.TraceOver">
             </action>
             <action id="leetcode.plugin.console.DebugNAction" class="com.xhf.leetcode.plugin.actions.DebugNAction"
-                    text="Step Into" description="Step into" icon="AllIcons.Actions.TraceInto">
+                    icon="AllIcons.Actions.TraceInto">
             </action>
             <action id="leetcode.plugin.console.DebugSTEP_OUTAction" class="com.xhf.leetcode.plugin.actions.DebugSTEP_OUTAction"
-                    text="Step Out" description="Step out" icon="AllIcons.Actions.StepOut">
+                    icon="AllIcons.Actions.StepOut">
             </action>
             <separator/>
             <action id="leetcode.plugin.console.DebugRAAction" class="com.xhf.leetcode.plugin.actions.DebugRAAction"
-                    text="Mute Breakpoints" description="Mute breakpoints" icon="AllIcons.Debugger.MuteBreakpoints">
+                    icon="AllIcons.Debugger.MuteBreakpoints">
             </action>
         </group>
 
         <group id="leetcode.plugin.editor.group">
             <action id="leetcode.plugin.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
-                    text="运行代码" description="运行代码(editor)" icon="/icons/run.svg">
+                    icon="/icons/run.svg">
                 <keyboard-shortcut
                         keymap="$default"
                         first-keystroke="ctrl alt 9"/>
             </action>
             <action id="leetcode.plugin.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
-                    text="提交代码" description="提交代码(editor)" icon="/icons/submit.svg">
+                    icon="/icons/submit.svg">
                 <keyboard-shortcut
                         keymap="$default"
                         first-keystroke="ctrl alt 0"/>
             </action>
             <action id="leetcode.plugin.editor.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
-                    text="设置测试案例" description="测试案例设置" icon="/icons/test_cases.svg">
+                    icon="/icons/test_cases.svg">
             </action>
             <separator/>
             <action id="leetcode.plugin.DefaultContent" class="com.xhf.leetcode.plugin.actions.DefaultContentAction"
-                    text="恢复默认代码" description="默认代码" icon="/icons/default_code.svg">
+                    icon="/icons/default_code.svg">
             </action>
             <action id="leetcode.plugin.Timmer" class="com.xhf.leetcode.plugin.actions.TimerAction"
-                    text="定时" description="定时" icon="/icons/clock.svg">
+                    icon="/icons/clock.svg">
             </action>
             <separator/>
             <reference id="leetcode.plugin.Reposition"/>
             <action id="leetcode.plugin.debug.Debug" class="com.xhf.leetcode.plugin.actions.DebugAction"
-                    text="调试代码" description="调试代码" icon="AllIcons.Debugger.AttachToProcess">
+                    icon="AllIcons.Debugger.AttachToProcess">
             </action>
             <separator/>
             <action id="leetcode.plugin.RemoveCommentAction" class="com.xhf.leetcode.plugin.actions.RemoveCommentAction"
-                    text="移除Runner注释" icon="/icons/rubbish.svg">
+                    icon="/icons/rubbish.svg">
             </action>
             <action id="leetcode.plugin.AddCommentAction" class="com.xhf.leetcode.plugin.actions.AddCommentAction"
-                    text="添加Runner注释" icon="/icons/addComment.svg">
+                    icon="/icons/addComment.svg">
             </action>
         </group>
     </actions>

@@ -13,6 +13,7 @@ import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
+import com.xhf.leetcode.plugin.model.CalendarSubmitRecord;
 import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.model.GraphqlReqBody;
 import com.xhf.leetcode.plugin.model.Question;
@@ -45,6 +46,7 @@ public class QuestionService {
     private boolean todaySolved = false;
 
     private boolean needModify = false;
+    private CalendarSubmitRecord calendarSubmitRecord;
 
     public QuestionService(Project project) {
         this.project = project;
@@ -70,6 +72,9 @@ public class QuestionService {
         StoreService.getInstance(project).addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, todayQuestion.getTitleSlug(), false, millisecondsUntilMidnight, TimeUnit.MILLISECONDS);
 
         todaySolved = "FINISH".equalsIgnoreCase(todayRecord.getUserStatus());
+        if (todaySolved) {
+            this.calendarSubmitRecord = instance.getCalendarSubmitRecord();
+        }
         // 如果todaySolved为True, 需要修改图标
         needModify = todaySolved;
 
@@ -361,6 +366,9 @@ public class QuestionService {
         LeetcodeClient instance = LeetcodeClient.getInstance(project);
         var todayRecord = instance.getTodayRecord(project);
         todaySolved = "FINISH".equalsIgnoreCase(todayRecord.getUserStatus());
+        if (todaySolved) {
+            this.calendarSubmitRecord = instance.getCalendarSubmitRecord();
+        }
         needModify = true;
     }
 
@@ -383,5 +391,13 @@ public class QuestionService {
     public void TodayQuestionOkEventListener(TodayQuestionOkEvent event) {
         todaySolved = true;
         needModify  = true;
+        this.calendarSubmitRecord = LeetcodeClient.getInstance(project).getCalendarSubmitRecord();
+    }
+
+    public String getTodayQuestionCount() {
+        if (calendarSubmitRecord == null) {
+            return "NULL";
+        }
+        return String.valueOf(calendarSubmitRecord.getDailyQuestionStreakCount());
     }
 }
