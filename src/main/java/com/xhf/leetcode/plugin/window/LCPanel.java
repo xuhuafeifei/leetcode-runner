@@ -11,6 +11,7 @@ import com.xhf.leetcode.plugin.bus.DeepCodingTabChooseEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.service.LoginService;
+import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.window.deepcoding.DeepCodingPanel;
 import org.jetbrains.annotations.NonNls;
@@ -37,13 +38,11 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
 
         final ActionManager actionManager = ActionManager.getInstance();
 
+        init();
+
         // get action toolbar
         DefaultActionGroup dag = (DefaultActionGroup) actionManager.getAction("leetcode.plugin.lcActionsToolbar");
-        AnAction dailyAction = actionManager.getAction("leetcode.plugin.TodayQuestionAction");
-
         this.actionToolbar = actionManager.createActionToolbar("leetcode Toolbar", dag, true);
-
-        initLeetcodeClient();
 
         // search panel
         searchPanel = new SearchPanel(project);
@@ -60,8 +59,9 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
         LCEventBus.getInstance().register(this);
     }
 
-    private void initLeetcodeClient() {
+    private void init() {
         LeetcodeClient.init(this.project);
+        QuestionService.init(this.project);
     }
 
     @Override

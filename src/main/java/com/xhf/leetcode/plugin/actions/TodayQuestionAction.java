@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -37,12 +38,15 @@ public class TodayQuestionAction extends AbstractAction {
      */
     @Override
     public void update(AnActionEvent e) {
+        if (e.getProject() == null) {
+            return;
+        }
+        // todo: 未来记得删了方法耗时记录功能, 该功能只是为了判断update这个高频调用的方法是否会导致项目加载速度变慢
+        var start = System.currentTimeMillis();
+        LogUtils.simpleDebug("start to update...");
         Presentation presentation = e.getPresentation();
         // 根据某些条件动态设置图标
         QuestionService instance = QuestionService.getInstance(e.getProject());
-        if (instance == null) {
-            return;
-        }
         if (instance.todayQuestionSolved() == 1) {
             presentation.setIcon(IconLoader.getIcon("/icons/flame.svg", this.getClass()));
             instance.modified();
@@ -50,5 +54,6 @@ public class TodayQuestionAction extends AbstractAction {
             presentation.setIcon(IconLoader.getIcon("/icons/daily.svg", this.getClass()));
             instance.modified();
         }
+        LogUtils.simpleDebug("end update..., take = " + (System.currentTimeMillis() - start));
     }
 }

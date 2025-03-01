@@ -72,7 +72,7 @@ public class QuestionService {
         // 数据写入内存, 无需持久化
         StoreService.getInstance(project).addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, todayQuestion.getTitleSlug(), false, millisecondsUntilMidnight, TimeUnit.MILLISECONDS);
 
-        todaySolved = todayRecord.getUserStatus().equalsIgnoreCase("FINISH");
+        todaySolved = "FINISH".equalsIgnoreCase(todayRecord.getUserStatus());
         // 如果todaySolved为True, 需要修改图标
         needModify = todaySolved;
 
@@ -92,6 +92,14 @@ public class QuestionService {
             }
         }
         return qs;
+    }
+
+    public static void init(Project project) {
+        if (qs == null) {
+            synchronized (QuestionService.class) {
+                qs = new QuestionService(project);
+            }
+        }
     }
 
     private List<CompetitionQuestion> competitionList;
@@ -355,7 +363,7 @@ public class QuestionService {
     public void updateTodayStatus() {
         LeetcodeClient instance = LeetcodeClient.getInstance(project);
         var todayRecord = instance.getTodayRecord(project);
-        todaySolved = todayRecord.getUserStatus().equalsIgnoreCase("FINISH");
+        todaySolved = "FINISH".equalsIgnoreCase(todayRecord.getUserStatus());
         needModify = true;
     }
 
