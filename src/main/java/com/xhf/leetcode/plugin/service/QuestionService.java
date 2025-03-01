@@ -8,10 +8,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.bus.LCEventBus;
-import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
-import com.xhf.leetcode.plugin.bus.QLoadStartEvent;
-import com.xhf.leetcode.plugin.bus.TodayQuestionOkEvent;
+import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
@@ -365,6 +362,17 @@ public class QuestionService {
         var todayRecord = instance.getTodayRecord(project);
         todaySolved = "FINISH".equalsIgnoreCase(todayRecord.getUserStatus());
         needModify = true;
+    }
+
+    @Subscribe
+    public void loginEventListener(LoginEvent event) {
+        updateTodayStatus();
+    }
+
+    @Subscribe
+    public void clearCacheEvent(ClearCacheEvent event) {
+        todaySolved = false;
+        needModify  = true;
     }
 
     /**
