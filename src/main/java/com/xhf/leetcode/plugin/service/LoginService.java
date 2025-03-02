@@ -10,6 +10,7 @@ import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
 import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
@@ -302,6 +303,8 @@ public final class LoginService {
                     // visit all cookies
                     cefCookieManager.visitAllCookies((cookie, count, total, delete) -> {
                         if (cookie.domain.contains("leetcode")) {
+                            // todo: 记得删了... debug
+                            System.out.println(cookie.name + " " + cookie.value);
                             BasicClientCookie2 basicClientCookie2 = new BasicClientCookie2(cookie.name, cookie.value);
                             cookieList.add(basicClientCookie2);
                         }
@@ -339,5 +342,24 @@ public final class LoginService {
     public void logoutEventListeners(LogoutEvent event) {
         loginFlag = false;
         LeetcodeClient.getInstance(project).clearCookies();
+    }
+
+    @Subscribe
+    public void secretUpdateEventListener(SecretKeyUpdateEvent event) {
+        // 重新加密登录cookie
+        LeetcodeClient instance = LeetcodeClient.getInstance(project);
+        // 从客户端中获取session
+        List<Cookie> leetcodeSession = instance.getLeetcodeSession();
+        for (Cookie cookie : leetcodeSession) {
+            // 不是bcc2, 该cookie就不是由Runner创建的, skip
+            if (! (cookie instanceof BasicClientCookie2)) {
+                continue;
+            }
+            if (cookie.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION)) {
+                // 重新加密存储
+                String value = cookie.getValue();
+                StoreService.getInstance(project).addEncryptCache(StoreService.LEETCODE_SESSION_KEY, value, true);
+            }
+        }
     }
 }

@@ -52,7 +52,8 @@ public class HttpClient {
             .setDefaultCookieStore(cookieStore) // 使用自定义的 CookieStore
             .build();
 
-    @Deprecated
+    // 忘了之前为啥把这个方法deprecated了
+    // @Deprecated
     public List<Cookie> getCookies() {
         return cookieStore.getCookies();
     }
@@ -186,4 +187,5 @@ public class HttpClient {
         return cookieStore.getCookies().stream()
                 .anyMatch(cookie -> cookie.getName().equals(key));
     }
+
 }

@@ -5,8 +5,10 @@ import com.google.common.cache.CacheBuilder;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.AESUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -67,9 +69,10 @@ public final class StoreService implements Disposable {
         FileUtils.deleteFile(getCacheFilePath());
     }
 
-    public static class StoreContent {
+    private static class StoreContent {
         private String contentJson;
         private long expireTimestamp;
+        private boolean encryptOrNot;
 
         public String getContentJson() {
             return contentJson;
@@ -85,6 +88,14 @@ public final class StoreService implements Disposable {
 
         public void setExpireTimestamp(long expireTimestamp) {
             this.expireTimestamp = expireTimestamp;
+        }
+
+        public boolean getEncryptOrNot() {
+            return encryptOrNot;
+        }
+
+        public void setEncryptOrNot(boolean encryptOrNot) {
+            this.encryptOrNot = encryptOrNot;
         }
     }
 
@@ -105,8 +116,22 @@ public final class StoreService implements Disposable {
         addCache(key, GsonUtils.toJsonStr(o), isDurable, -1, null);
     }
 
+    /**
+     * 加密缓存数据. 如果系统设置并未开启加密功能, 则不加密
+     */
+    public void addEncryptCache(String key, Object o, boolean isDurable) {
+        addEncryptCache(key, GsonUtils.toJsonStr(o), isDurable, -1, null);
+    }
+
     public void addCache(String key, Object o) {
         addCache(key, GsonUtils.toJsonStr(o), true, -1, null);
+    }
+
+    /**
+     * 加密缓存数据. 如果系统设置并未开启加密功能, 则不加密
+     */
+    public void addEncryptCache(String key, Object o) {
+        addEncryptCache(key, GsonUtils.toJsonStr(o), true, -1, null);
     }
 
     /**
@@ -116,12 +141,54 @@ public final class StoreService implements Disposable {
     private long last_time = 0;
 
     public void addCache(String key, String o, boolean isDurable, long expire, TimeUnit timeUnit) {
+        addCache(key, o, isDurable, expire, timeUnit, false);
+    }
+
+    /**
+     * 加密缓存数据. 如果系统设置并未开启加密功能, 则不加密
+     */
+    public void addEncryptCache(String key, String o, boolean isDurable, long expire, TimeUnit timeUnit) {
+        addCache(key, o, isDurable, expire, timeUnit, true);
+    }
+
+    public void addCache(String key, String o, boolean isDurable, long expire, TimeUnit timeUnit, boolean encryptOrNot) {
         StoreContent c = new StoreContent();
-        c.setContentJson(o);
         if (expire != -1) {
             c.setExpireTimestamp(convertToTimestamp(expire, timeUnit));
         }else {
             c.setExpireTimestamp(-1);
+        }
+
+        if (encryptOrNot) {
+            // double check. 如果系统设置并未开启加密功能, 则不加密
+            AppSettings appSettings = AppSettings.getInstance();
+            if (appSettings.getEncryptOrNot()) {
+                // 尝试获取密钥
+                String secretKey = appSettings.getSecretKey();
+                if (StringUtils.isNotBlank(secretKey)) {
+                    try {
+                        c.setEncryptOrNot(true);
+                        String encrypt = AESUtils.encrypt(o, secretKey);
+                        c.setContentJson(encrypt);
+                    } catch (Exception e) {
+                        LogUtils.warn("encrypt failed! key = " + key + " will not store with encrypted content...");
+                        LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+                        // roll back
+                        c.setEncryptOrNot(false);
+                        c.setContentJson(o);
+                    }
+                } else {
+                    // 用户没有生成过密钥, 不执行加密行为
+                    c.setEncryptOrNot(false);
+                    c.setContentJson(o);
+                }
+            } else {
+                // 系统并未开启加密, skip
+                c.setEncryptOrNot(false);
+                c.setContentJson(o);
+            }
+        } else {
+            c.setContentJson(o);
         }
 
         if (isDurable) {
@@ -186,18 +253,54 @@ public final class StoreService implements Disposable {
         }
         StoreContent content = cache.getIfPresent(key);
         if (content != null) {
-            return handleStoreContent(key, getIfNotExpireTime(content));
+            return handleStoreContent(key, content, "cache");
         }
         content = durableCache.getIfPresent(key);
         if (content != null) {
-            return handleStoreContent(key, getIfNotExpireTime(content));
+            return handleStoreContent(key, content, "durableCache");
         }
         return null;
     }
 
-    private String handleStoreContent(String key, String ifNotExpireTime) {
+    private String handleStoreContent(String key, StoreContent content, String from) {
+        String ifNotExpireTime =  getIfNotExpireTime(content);
         if (ifNotExpireTime == null) {
             removeCache(key);
+            return null;
+        }
+        // 是否需要解密
+        if (content.getEncryptOrNot()) {
+            // double check. 如果系统设置并未开启加密功能, 则尝试解密, 如果解密成功, 则覆盖原有的数据
+            AppSettings appSettings = AppSettings.getInstance();
+            String secretKey = appSettings.getSecretKey();
+            // 解密数据
+            try {
+                ifNotExpireTime = AESUtils.decrypt(ifNotExpireTime, secretKey);
+            } catch (Exception e) {
+                // 解密失败, 可能是新的密钥覆盖原有加密使用密钥, 缓存数据需要重新生成, 返回null
+                LogUtils.warn("store content decrypt failed ! the key is = " + key);
+                LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+                return null;
+            }
+            // 系统要求不解密, 因此需要覆盖解密数据
+            if (! appSettings.getEncryptOrNot()) {
+                try {
+                    // 覆盖缓存
+                    if ("cache".equals(from)) {
+                        content.setContentJson(ifNotExpireTime);
+                        content.setEncryptOrNot(false);
+                        cache.put(key, content);
+                    } else if ("durableCache".equals(from)) {
+                        content.setContentJson(ifNotExpireTime);
+                        content.setEncryptOrNot(false);
+                        durableCache.put(key, content);
+                    }
+                } catch (Exception e) {
+                    LogUtils.warn("store content decrypt failed !");
+                    LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+                    return ifNotExpireTime;
+                }
+            }
         }
         return ifNotExpireTime;
     }
@@ -279,7 +382,7 @@ public final class StoreService implements Disposable {
         try {
             FileUtils.writePropertiesFileContent(getCacheFilePath(), properties);
         } catch (IOException e) {
-            System.err.println("write file error! filePath = " + getCacheFilePath());
+            LogUtils.error("write file error! filePath = " + getCacheFilePath());
         }
     }
 
@@ -293,7 +396,7 @@ public final class StoreService implements Disposable {
                 durableCache.put((String) k, GsonUtils.fromJson((String) v, StoreContent.class));
             } catch (Exception e) {
                 LogUtils.warn("some exception happen during the cache loading...\nthe property key is " + k + " and the value is " + v
-                + "\nthe key will be removed by system soon");
+                + "\nthe key will be removed by system soon if exists");
                 if (k != null && durableCache.getIfPresent(k) != null) {
                     durableCache.invalidate(k);
                     LogUtils.info("key = " + k + " has been removed");

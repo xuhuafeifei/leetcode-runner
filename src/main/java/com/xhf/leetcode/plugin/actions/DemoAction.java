@@ -7,8 +7,7 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.xhf.leetcode.plugin.utils.BundleUtils;
-import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.*;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -19,10 +18,17 @@ import java.io.IOException;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
+@LoginPass
+@SettingPass
+@RatePass
 public class DemoAction extends AbstractAction {
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+        // 测试加密功能
+//        StoreService.getInstance(project).addEncryptCache("abab", "nihao", false);
+//        String cacheJson = StoreService.getInstance(project).getCache("abab", String.class);
+//        System.out.println(cacheJson);
         /*
           强制为true, 而且要骗过idea的检测. 毕竟我想保留一开始的垃圾代码. 但又不想要执行. 毕竟执行了铁定报错, 我又不想改, 就这么干了
          */

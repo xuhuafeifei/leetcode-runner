@@ -63,6 +63,8 @@ public final class AppSettings
 
     /*---------辅助配置---------*/
     public String rePositionSetting;
+    public String secretKey = "";
+    public boolean encryptOrNot = false;
 
     @Override
     public String toString() {
@@ -105,6 +107,8 @@ public final class AppSettings
     myState.coreFilePath = EMPTY_FILE_PATH;
     myState.filePath = EMPTY_FILE_PATH;
     myState.langType = EMPTY_LANGUAGE_TYPE;
+    myState.encryptOrNot = false;
+    myState.secretKey = "";
   }
 
   public static AppSettings getInstance() {
@@ -193,5 +197,13 @@ public final class AppSettings
       rePositionSetting = REPOSITION_DEFAULT;
     }
     return rePositionSetting;
+  }
+
+  public String getSecretKey() {
+    return myState.secretKey;
+  }
+
+  public boolean getEncryptOrNot() {
+    return myState.encryptOrNot;
   }
 }

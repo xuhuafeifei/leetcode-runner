@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.bus;
 
 import com.google.common.eventbus.EventBus;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 
 /**
  * 使用guava的EventBus, LCEventBus对其api做出封装, 适配当前项目
@@ -31,6 +32,7 @@ public class LCEventBus {
     }
 
     public void register(Object listener) {
+        LogUtils.debug(listener.getClass().getName() + " has been register to event bus...");
         eventBus.register(listener);
     }
 

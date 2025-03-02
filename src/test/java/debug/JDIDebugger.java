@@ -1,32 +1,28 @@
 package debug;
 
-import com.sun.jdi.*;
-import java.util.List;
-import java.util.stream.Collectors;
-
 //public class JDIDebugger {
 //
 //    private String handleObjectReference(ObjectReference objRef) throws Exception {
 //        String res;
 //
-//        // »ñÈ¡¶ÔÏóµÄ ReferenceType
+//        // è·å–å¯¹è±¡çš„ ReferenceType
 //        ReferenceType refType = objRef.referenceType();
 //
-//        // ¼ì²é¶ÔÏóÊÇ·ñÎª String ÀàĞÍ
+//        // æ£€æŸ¥å¯¹è±¡æ˜¯å¦ä¸º String ç±»å‹
 //        if (objRef instanceof StringReference) {
 //            res = "\"" + ((StringReference) objRef).value() + "\"";
 //        }
-//        // ¼ì²é¶ÔÏóÊÇ·ñÎª Array ÀàĞÍ
+//        // æ£€æŸ¥å¯¹è±¡æ˜¯å¦ä¸º Array ç±»å‹
 //        else if (objRef instanceof ArrayReference) {
 //            res = "[" + ((ArrayReference) objRef).getValues().stream()
 //                        .map(String::valueOf)
 //                        .collect(Collectors.joining(", ")) + "]";
 //        }
-//        // ¼ì²é¶ÔÏóÊÇ·ñÊµÏÖÁË List ½Ó¿Ú
+//        // æ£€æŸ¥å¯¹è±¡æ˜¯å¦å®ç°äº† List æ¥å£
 //        else if (isListType(refType)) {
 //            res = handleList(objRef, refType);
 //        }
-//        // ÆäËûÀàĞÍµÄ´¦Àí
+//        // å…¶ä»–ç±»å‹çš„å¤„ç†
 //        else if (objRef instanceof ThreadReference) {
 //            res = ((ThreadReference) objRef).name();
 //        } else if (objRef instanceof ClassObjectReference) {
@@ -40,9 +36,9 @@ import java.util.stream.Collectors;
 //        return res;
 //    }
 //
-//    // ÅĞ¶Ï¶ÔÏóÊÇ·ñÊµÏÖÁË List ½Ó¿Ú
+//    // åˆ¤æ–­å¯¹è±¡æ˜¯å¦å®ç°äº† List æ¥å£
 //    private boolean isListType(ReferenceType refType) {
-//        // »ñÈ¡¶ÔÏóÀàĞÍÊµÏÖµÄËùÓĞ½Ó¿Ú
+//        // è·å–å¯¹è±¡ç±»å‹å®ç°çš„æ‰€æœ‰æ¥å£
 //        List<InterfaceType> interfaces = refType.allInterfaces();
 //        for (InterfaceType interfaceType : interfaces) {
 //            if (interfaceType.name().equals("java.util.List")) {
@@ -52,13 +48,13 @@ import java.util.stream.Collectors;
 //        return false;
 //    }
 //
-//    // ´¦Àí List ÀàĞÍ
+//    // å¤„ç† List ç±»å‹
 //    private String handleList(ObjectReference objRef, ReferenceType refType) throws Exception {
 //        StringBuilder sb = new StringBuilder();
 //
-//        // ¼ì²é²»Í¬ List ÊµÏÖÀà
+//        // æ£€æŸ¥ä¸åŒ List å®ç°ç±»
 //        if (refType.name().equals("java.util.ArrayList") || refType.name().equals("java.util.Vector")) {
-//            // ¶ÔÓÚ ArrayList ºÍ Vector£¬Í¨³£´æ´¢Êı¾İµÄ×Ö¶ÎÊÇ elementData
+//            // å¯¹äº ArrayList å’Œ Vectorï¼Œé€šå¸¸å­˜å‚¨æ•°æ®çš„å­—æ®µæ˜¯ elementData
 //            Field elementDataField = refType.fieldByName("elementData");
 //            if (elementDataField != null) {
 //                ArrayReference elementDataArray = (ArrayReference) objRef.getValue(elementDataField);
@@ -71,7 +67,7 @@ import java.util.stream.Collectors;
 //                }
 //            }
 //        } else if (refType.name().equals("java.util.LinkedList")) {
-//            // ¶ÔÓÚ LinkedList£¬ĞèÒª´¦ÀíÁ´±í½á¹¹
+//            // å¯¹äº LinkedListï¼Œéœ€è¦å¤„ç†é“¾è¡¨ç»“æ„
 //            sb.append("LinkedList elements: ");
 //            Field firstField = refType.fieldByName("first");
 //            if (firstField != null) {
@@ -79,7 +75,7 @@ import java.util.stream.Collectors;
 //                sb.append(traverseLinkedList(firstNode));
 //            }
 //        } else if (refType.name().equals("java.util.concurrent.CopyOnWriteArrayList")) {
-//            // ¶ÔÓÚ CopyOnWriteArrayList£¬Í¨³£ËüÒ²Ê¹ÓÃÊı×é
+//            // å¯¹äº CopyOnWriteArrayListï¼Œé€šå¸¸å®ƒä¹Ÿä½¿ç”¨æ•°ç»„
 //            Field arrayField = refType.fieldByName("array");
 //            if (arrayField != null) {
 //                ArrayReference array = (ArrayReference) objRef.getValue(arrayField);
@@ -96,7 +92,7 @@ import java.util.stream.Collectors;
 //        return sb.toString();
 //    }
 //
-//    // ±éÀú LinkedList µÄ·½·¨
+//    // éå† LinkedList çš„æ–¹æ³•
 //    private String traverseLinkedList(ObjectReference node) {
 //        StringBuilder sb = new StringBuilder();
 //        while (node != null) {
@@ -112,7 +108,7 @@ import java.util.stream.Collectors;
 //                    sb.append(", ");
 //                }
 //            } else {
-//                break; // Èç¹ûÃ»ÓĞ×Ö¶Î£¬¾ÍÍË³ö
+//                break; // å¦‚æœæ²¡æœ‰å­—æ®µï¼Œå°±é€€å‡º
 //            }
 //        }
 //        return sb.toString();

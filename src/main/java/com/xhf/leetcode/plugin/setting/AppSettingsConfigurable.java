@@ -2,6 +2,8 @@
 package com.xhf.leetcode.plugin.setting;
 
 import com.intellij.openapi.options.Configurable;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.SecretKeyUpdateEvent;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +49,9 @@ final class AppSettingsConfigurable implements Configurable {
             !mySettingsComponent.getReadTypeName().equals(state.readTypeName) ||
             !mySettingsComponent.getOutputTypeName().equals(state.outputTypeName) ||
             !mySettingsComponent.getReposition().equals(state.rePositionSetting) ||
-            !mySettingsComponent.getLocale().equals(state.locale)
+            !mySettingsComponent.getLocale().equals(state.locale) ||
+            !mySettingsComponent.getSecretKey().equals(state.secretKey) ||
+            !mySettingsComponent.getEncryptOrNot() == state.encryptOrNot
             ;
   }
 
@@ -70,6 +74,18 @@ final class AppSettingsConfigurable implements Configurable {
 
     state.rePositionSetting = mySettingsComponent.getReposition();
     state.locale = mySettingsComponent.getLocale();
+
+    boolean secretKeyUpdateSend = false;
+    if (!Objects.equals(mySettingsComponent.getSecretKey(), state.secretKey)) {
+      secretKeyUpdateSend = true;
+    }
+    state.secretKey = mySettingsComponent.getSecretKey();
+    state.encryptOrNot = mySettingsComponent.getEncryptOrNot();
+
+    // todo: 发送密钥修改的事件, 通知别的服务update之间使用old secret key存储的数据
+    if (secretKeyUpdateSend) {
+      LCEventBus.getInstance().post(new SecretKeyUpdateEvent(state.secretKey));
+    }
   }
 
   /**
@@ -88,6 +104,9 @@ final class AppSettingsConfigurable implements Configurable {
 
     mySettingsComponent.setReposition(state.rePositionSetting);
     mySettingsComponent.setLocale(state.locale);
+
+    mySettingsComponent.setSecretKey(state.secretKey);
+    mySettingsComponent.setEncryptOrNot(state.encryptOrNot);
   }
 
   @Override

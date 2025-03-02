@@ -9,17 +9,20 @@ import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.components.OnOffButton;
 import com.intellij.util.ui.FormBuilder;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.model.I18nTypeEnum;
-import com.xhf.leetcode.plugin.utils.Constants;
-import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.security.NoSuchAlgorithmException;
+
+import static javax.swing.JOptionPane.OK_OPTION;
 
 /**
  * @author feigebuge
@@ -50,6 +53,8 @@ public class AppSettingsComponent {
   /*---------通用配置--------*/
   private final ComboBox<String> reposition = new ComboBox<>();
   private final ComboBox<String> language   = new ComboBox<>();
+  private JBTextField secretText;
+  private OnOffButton onOffButton;
 
 
   public AppSettingsComponent() {
@@ -66,15 +71,104 @@ public class AppSettingsComponent {
             .addComponent((JComponent) Box.createVerticalStrut(5))
             .addLabeledComponent(new JBLabel("Reposition"), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(reposition).addHelp(REPOSITION_HELP_TEXT).getTargetComponent(), 1, false)
             .addLabeledComponent(new JBLabel("Language  "), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(language).addHelp(LANGUAGE_HELP_TEXT).getTargetComponent(), 1, false)
+            .addComponent(createEncryptPanel())
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel();
     LCEventBus.getInstance().register(this);
+  }
+
+  /**
+   * 加密面板
+   */
+  private JComponent createEncryptPanel() {
+    JPanel jPanel = new JPanel();
+    jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
+
+    // 密钥
+    JBLabel secretLabel = new JBLabel(BundleUtils.i18n("setting.leetcode.secret"));
+    secretLabel.setVisible(false);
+
+    this.secretText = new JBTextField();
+    secretText.setVisible(false);
+    secretText.setEditable(false);
+    secretText.setEnabled(false);
+
+    JButton generateBtn = new JButton(BundleUtils.i18n("setting.leetcode.generate"));
+    generateBtn.setVisible(false);
+    generateBtn.setEnabled(false);
+
+    AppSettings appSettings = AppSettings.getInstance();
+    if (appSettings.getEncryptOrNot()) {
+      secretLabel.setVisible(true);
+      secretText.setVisible(true);
+      generateBtn.setVisible(true);
+      generateBtn.setEnabled(true);
+    }
+
+    generateBtn.addActionListener(e -> {
+      try {
+        String text = secretText.getText();
+        if (StringUtils.isNotBlank(text)) {
+          int i = JOptionPane.showOptionDialog(
+                  null,
+                  BundleUtils.i18n("setting.leetcode.has.secret"),
+                  BundleUtils.i18n("debug.leetcode.testcase.input"),
+                  JOptionPane.OK_CANCEL_OPTION,
+                  JOptionPane.PLAIN_MESSAGE,
+                  null,
+                  new Object[]{BundleUtils.i18n("setting.leetcode.generate"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
+                  BundleUtils.i18n("action.leetcode.plugin.cancel")
+          );
+          if (i != OK_OPTION) {
+            return;
+          }
+        }
+        String key = AESUtils.generateKey();
+        secretText.setText(key);
+      } catch (NoSuchAlgorithmException ex) {
+        JOptionPane.showMessageDialog(null, BundleUtils.i18n("setting.leetcode.aes.error")
+                + "\n" + ex.getMessage()
+                , BundleUtils.i18n("action.leetcode.plugin.error"), JOptionPane.ERROR_MESSAGE);
+        LogUtils.error(ex);
+      }
+    });
+
+    // 开关
+    this.onOffButton = new OnOffButton();
+    onOffButton.addActionListener(e -> {
+      // 如何判断当前是on还是off
+      if (onOffButton.isSelected()) {
+        secretLabel.setVisible(true);
+        secretText.setVisible(true);
+        generateBtn.setVisible(true);
+        generateBtn.setEnabled(true);
+        if (StringUtils.isBlank(secretText.getText())) {
+          JOptionPane.showMessageDialog(null, BundleUtils.i18n("setting.leetcode.secret.isnull"));
+        }
+      } else {
+        secretLabel.setVisible(false);
+        secretText.setVisible(false);
+        generateBtn.setVisible(false);
+        generateBtn.setEnabled(false);
+      }
+    });
+
+    jPanel.add(new JBLabel(BundleUtils.i18n("setting.leetcode.encrypt")));
+    jPanel.add(onOffButton);
+
+    jPanel.add(secretLabel);
+    jPanel.add(secretText);
+    jPanel.add(generateBtn);
+
+    return jPanel;
   }
 
   @Subscribe
   public void clearCacheEventListener(ClearCacheEvent event) {
     this.myLangType.setSelectedIndex(-1);
     this.myFileBrowserBtn.setText("");
+    this.onOffButton.setSelected(false);
+    this.secretText.setText("");
   }
 
   // 创建一个带文字的分割线
@@ -207,5 +301,21 @@ public class AppSettingsComponent {
       return I18nTypeEnum.EN.getValue();
     }
     return (String) selectedItem;
+  }
+
+  public String getSecretKey() {
+    return secretText.getText();
+  }
+
+  public void setSecretKey(String secretKey) {
+    secretText.setText(secretKey);
+  }
+
+  public boolean getEncryptOrNot() {
+    return onOffButton.isSelected();
+  }
+
+  public void setEncryptOrNot(boolean encryptOrNot) {
+    onOffButton.setSelected(encryptOrNot);
   }
 }

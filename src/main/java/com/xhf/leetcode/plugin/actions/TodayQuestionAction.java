@@ -5,11 +5,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
-import com.xhf.leetcode.plugin.model.I18nTypeEnum;
 import com.xhf.leetcode.plugin.service.QuestionService;
-import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -45,8 +42,8 @@ public class TodayQuestionAction extends AbstractAction {
             return;
         }
         // todo: 未来记得删了方法耗时记录功能, 该功能只是为了判断update这个高频调用的方法是否会导致项目加载速度变慢
-        var start = System.currentTimeMillis();
-        LogUtils.simpleDebug("start to update...");
+        // var start = System.currentTimeMillis();
+        // LogUtils.simpleDebug("start to update...");
         Presentation presentation = e.getPresentation();
         // 根据某些条件动态设置图标
         QuestionService instance = QuestionService.getInstance(e.getProject());
@@ -60,6 +57,6 @@ public class TodayQuestionAction extends AbstractAction {
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction.text"));
             instance.modified();
         }
-        LogUtils.simpleDebug("end update..., take = " + (System.currentTimeMillis() - start));
+        // LogUtils.simpleDebug("end update..., take = " + (System.currentTimeMillis() - start));
     }
 }

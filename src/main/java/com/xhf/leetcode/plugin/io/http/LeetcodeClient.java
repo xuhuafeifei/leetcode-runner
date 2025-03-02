@@ -17,7 +17,6 @@ import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpRequestFactory;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.jetbrains.annotations.NotNull;
@@ -112,7 +111,8 @@ public class LeetcodeClient {
         if (cookie.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION)) {
             // need to store cache
             if (needCache) {
-                StoreService.getInstance(project).addCache(StoreService.LEETCODE_SESSION_KEY, cookie.getValue());
+                // 加密缓存 v3.6.8引入
+                StoreService.getInstance(project).addEncryptCache(StoreService.LEETCODE_SESSION_KEY, cookie.getValue());
             }
         }
         httpClient.setCookie(cookie);
@@ -693,5 +693,9 @@ public class LeetcodeClient {
         JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject().get("calendarSubmitRecord");
 
         return GsonUtils.fromJson(jsonElement, CalendarSubmitRecord.class);
+    }
+
+    public List<Cookie> getLeetcodeSession() {
+        return httpClient.getCookies();
     }
 }

@@ -37,11 +37,11 @@ public class JavaDebuggerTest {
 //            if (res.equals("bk") || res.equals("exit")) {
 //                return;
 //            }
-//            // ½âÎöÖ¸Áî, ²¢Ö´ĞĞ
+//            // è§£ææŒ‡ä»¤, å¹¶æ‰§è¡Œ
 //            Instruction parse = new InstParserImpl().parse(res);
 //            // debug parse
 //            if (parse == null) {
-//                LogUtils.simpleDebug("Ö¸Áî½âÎöÊ§°Ü");
+//                LogUtils.simpleDebug("æŒ‡ä»¤è§£æå¤±è´¥");
 //                continue;
 //            }
 //            LogUtils.simpleDebug(parse.toString());
