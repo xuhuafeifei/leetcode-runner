@@ -29,6 +29,10 @@ public abstract class AbstractAction extends AnAction {
         super();
     }
 
+    public AbstractAction(String s) {
+        super(s);
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();

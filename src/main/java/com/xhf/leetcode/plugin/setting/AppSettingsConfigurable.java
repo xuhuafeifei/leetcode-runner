@@ -22,6 +22,7 @@ final class AppSettingsConfigurable implements Configurable {
   // A default constructor with no arguments is required because
   // this implementation is registered as an applicationConfigurable
 
+
   @Nls(capitalization = Nls.Capitalization.Title)
   @Override
   public String getDisplayName() {

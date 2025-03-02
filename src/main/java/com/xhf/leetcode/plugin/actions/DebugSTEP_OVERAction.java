@@ -22,16 +22,22 @@ import com.xhf.leetcode.plugin.utils.RatePass;
 @LoginPass
 @RatePass
 public class DebugSTEP_OVERAction extends AbstractAction {
+
+    public DebugSTEP_OVERAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.console.DebugSTEP_OVERAction"));
+    }
+
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         // 写指令到阻塞队列中
         boolean flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.STEP, "over"));
-        if (! flag) {
+        if (!flag) {
             ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
         }
         flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, ""));
-        if (! flag) {
+        if (!flag) {
             ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
         }
     }
+
 }

@@ -12,6 +12,10 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
  */
 public class RemoveCommentAction extends AbstractAction{
 
+    public RemoveCommentAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.RemoveCommentAction"));
+    }
+
     @Override
     protected void doActionPerformed(Project project, AnActionEvent e) {
         // 获取当前代码内容
@@ -20,4 +24,5 @@ public class RemoveCommentAction extends AbstractAction{
         ViewUtils.writeContentToCurrentVFile(project, content);
         ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("action.leetcode.actions.command.remove"), false, true);
     }
+
 }

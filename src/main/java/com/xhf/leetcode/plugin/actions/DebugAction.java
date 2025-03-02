@@ -26,6 +26,11 @@ import javax.swing.*;
 @LoginPass
 @RatePass
 public class DebugAction extends AbstractAction {
+
+    public DebugAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.debug.Debug"));
+    }
+
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         if (DebugManager.getInstance(project).isDebug()) {
@@ -52,6 +57,7 @@ public class DebugAction extends AbstractAction {
                 ConsoleUtils.getInstance(project).showWaring(langType.getLangType() + " " + BundleUtils.i18n("action.leetcode.actions.debug.notsupport"), false, true);
         }
     }
+
 
     private void doCPPDebug(Project project, LangType langType) {
         if (! doCheck(project, langType)) {

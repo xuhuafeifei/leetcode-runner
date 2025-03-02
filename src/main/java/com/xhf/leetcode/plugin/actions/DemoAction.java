@@ -22,6 +22,11 @@ import java.io.IOException;
 @SettingPass
 @RatePass
 public class DemoAction extends AbstractAction {
+
+    public DemoAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.DemoAction"));
+    }
+
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
@@ -77,6 +82,7 @@ public class DemoAction extends AbstractAction {
 
         open(file2, fileEditorManager, project);
     }
+
 
     private void open(VirtualFile file, FileEditorManager fileEditorManager, Project project) {
         ApplicationManager.getApplication().invokeAndWait(() -> {

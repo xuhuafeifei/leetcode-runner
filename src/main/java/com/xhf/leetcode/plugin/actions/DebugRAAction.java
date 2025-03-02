@@ -23,6 +23,11 @@ import com.xhf.leetcode.plugin.utils.RatePass;
 @LoginPass
 @RatePass
 public class DebugRAAction extends AbstractAction {
+
+    public DebugRAAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.console.DebugRAAction"));
+    }
+
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         // 如果是处于debug状态, 写入指令
@@ -36,4 +41,5 @@ public class DebugRAAction extends AbstractAction {
             DebugUtils.removeCurrentVFileAllBreakpoint(project);
         }
     }
+
 }

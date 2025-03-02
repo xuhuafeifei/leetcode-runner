@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.xhf.leetcode-runner</id>
     <name>Leetcode-Runner</name>
-    <version>3.6.7</version>
+    <version>3.6.8</version>
     <vendor email="2508020102@qq.com" url="https://github.com/xuhuafeifei/leetcode-runner">feigebuge</vendor>
 
     <description><![CDATA[

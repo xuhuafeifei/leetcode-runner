@@ -21,6 +21,11 @@ import java.io.IOException;
 @SettingPass
 @RatePass
 public class StarAction extends AbstractAction {
+
+    public StarAction() {
+        super(BundleUtils.i18n("action.leetcode.actions.star"));
+    }
+
     @Override
     protected void doActionPerformed(Project project, AnActionEvent e) {
 //        JOptionPane.showOptionDialog(
@@ -36,6 +41,7 @@ public class StarAction extends AbstractAction {
 
         new MyCustomDialog().showAndGet();
     }
+
 
     public static class MyCustomDialog extends DialogWrapper {
 

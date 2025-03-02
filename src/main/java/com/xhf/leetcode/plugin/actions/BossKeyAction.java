@@ -4,10 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.LoginPass;
-import com.xhf.leetcode.plugin.utils.RatePass;
-import com.xhf.leetcode.plugin.utils.SettingPass;
+import com.xhf.leetcode.plugin.utils.*;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 
@@ -20,6 +17,10 @@ import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 @LoginPass   // 跳过登录检查
 @RatePass    // 跳过频率限制
 public class BossKeyAction extends AbstractAction {
+
+    public BossKeyAction() {
+        super(BundleUtils.i18n("action.BossKey"));
+    }
 
     @Override
     protected void doActionPerformed(Project project, AnActionEvent e) {

@@ -22,16 +22,22 @@ import com.xhf.leetcode.plugin.utils.RatePass;
 @LoginPass
 @RatePass
 public class DebugNAction extends AbstractAction {
+
+    public DebugNAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.console.DebugNAction"));
+    }
+
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         // 写指令到阻塞队列中
         boolean flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.N, "1"));
-        if (! flag) {
+        if (!flag) {
             ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
         }
         flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, ""));
-        if (! flag) {
+        if (!flag) {
             ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
         }
     }
+
 }

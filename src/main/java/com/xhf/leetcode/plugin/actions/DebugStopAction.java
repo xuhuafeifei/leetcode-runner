@@ -19,9 +19,15 @@ import com.xhf.leetcode.plugin.utils.RatePass;
 @LoginPass
 @RatePass
 public class DebugStopAction extends AbstractAction {
+
+    public DebugStopAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.console.DebugStopAction"));
+    }
+
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         DebugManager.getInstance(project).stopDebugger();
         ConsoleUtils.getInstance(project).simpleShowConsole(BundleUtils.i18n("action.leetcode.actions.debug.stop") + "\n");
     }
+
 }

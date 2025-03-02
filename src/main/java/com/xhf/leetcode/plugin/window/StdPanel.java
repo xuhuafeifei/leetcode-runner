@@ -43,9 +43,9 @@ public class StdPanel extends JPanel {
         application.invokeLater(() -> {
             application.runWriteAction(() -> {
                 // 标准输出
-                stdoutPanel.setText(BundleUtils.i18n("action.leetcode.stdout.text") + "\n");
+                stdoutPanel.setText(BundleUtils.i18n("action.leetcode.stdout") + "\n");
                 // stderrPanel.setText("标准错误:\n");
-                stderrPanel.setText(BundleUtils.i18n("action.leetcode.stderr.text") + "\n");
+                stderrPanel.setText(BundleUtils.i18n("action.leetcode.stderr") + "\n");
             });
         });
     }
@@ -92,14 +92,14 @@ public class StdPanel extends JPanel {
             setEditable(false);
             setLineWrap(true);
             setWrapStyleWord(true);
-            setText(BundleUtils.i18n("action.leetcode.stdout.text") + "\n");
+            setText(BundleUtils.i18n("action.leetcode.stdout") + "\n");
 
             // 清空内容
             JMenuItem clearMenuItem = new JMenuItem("Clear");
             clearMenuItem.addActionListener(e -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ApplicationManager.getApplication().runWriteAction(() -> {
-                        setText(BundleUtils.i18n("action.leetcode.stdout.text") + "\n");
+                        setText(BundleUtils.i18n("action.leetcode.stdout") + "\n");
                     });
                 });
             });
@@ -116,7 +116,7 @@ public class StdPanel extends JPanel {
     private static class StdErrPanel extends MyJTextAreaWithPopupMenu {
         public StdErrPanel() {
             setEditable(false);
-            setText(BundleUtils.i18n("action.leetcode.stderr.text") + "\n");
+            setText(BundleUtils.i18n("action.leetcode.stderr") + "\n");
 
             // 使用 JBColor 获取当前主题下的错误输出颜色
             JBColor errorColor = new JBColor(Color.RED, Color.RED); // 这里设置红色默认
@@ -127,7 +127,7 @@ public class StdPanel extends JPanel {
             clearMenuItem.addActionListener(e -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ApplicationManager.getApplication().runWriteAction(() -> {
-                        setText(BundleUtils.i18n("action.leetcode.stderr.text") + "\n");
+                        setText(BundleUtils.i18n("action.leetcode.stderr") + "\n");
                     });
                 });
             });

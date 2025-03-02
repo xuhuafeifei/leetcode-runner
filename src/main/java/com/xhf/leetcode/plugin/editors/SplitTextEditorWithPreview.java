@@ -23,10 +23,7 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.DataKeys;
-import com.xhf.leetcode.plugin.utils.LangType;
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.ViewUtils;
+import com.xhf.leetcode.plugin.utils.*;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import com.xhf.leetcode.plugin.window.deepcoding.Hot100Panel;
 import com.xhf.leetcode.plugin.window.deepcoding.Interview150Panel;
@@ -149,33 +146,34 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
             switch (type) {
                 case C:
                     langIconPath = "/icons/C.svg";
-                    text = "c语言";
+                    text = "c";
                     break;
                 case PYTHON3:
                     langIconPath = "/icons/Python.svg";
-                    text = "python语言";
+                    text = "python";
                     break;
                 case CPP:
                     langIconPath = "/icons/cpp.svg";
-                    text = "c++语言";
+                    text = "c++";
                     break;
                 case JAVA:
                     langIconPath = "/icons/java.svg";
-                    text = "java语言";
+                    text = "java";
                     break;
                 default:
                     langIconPath = "/icons/coding.svg";
-                    text = "编程语言";
+                    text = "language";
             }
         } else {
             langIconPath = "/icons/coding.svg";
-            text = "编程语言";
+            text = "language";
         }
         return (new AbstractAction(text, text, IconLoader.getIcon(langIconPath, Hot100Panel.class)) {
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
             }
+
         });
     }
 
@@ -187,25 +185,28 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
     private AnAction createIcon(String pattern) {
         switch (pattern) {
             case Hot100Panel.HOT100:
-                return (new AbstractAction("Leetcode 热题 100 道", "Leetcode 热题 100 道", IconLoader.getIcon("/icons/m_hot100.png", Hot100Panel.class)) {
+                return (new AbstractAction(BundleUtils.i18n("leetcode.hot.100"), BundleUtils.i18n("leetcode.hot.100"), IconLoader.getIcon("/icons/m_hot100.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
                         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                     }
+
                 });
             case Interview150Panel.INTER150:
-                return (new AbstractAction("经典面试 150 道", "经典面试 150 道", IconLoader.getIcon("/icons/m_mianshi150.png", Hot100Panel.class)) {
+                return (new AbstractAction(BundleUtils.i18n("classic.interview.150"), BundleUtils.i18n("classic.interview.150"), IconLoader.getIcon("/icons/m_mianshi150.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
                         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                     }
+
                 });
             case LCCompetitionPanel.LC_COMPETITION:
-                return (new AbstractAction("Leetcode 竞赛", "Leetcode 竞赛", IconLoader.getIcon("/icons/m_LeetCode_Cup.png", Hot100Panel.class)) {
+                return (new AbstractAction(BundleUtils.i18n("leetcode.competition"), BundleUtils.i18n("leetcode.competition"), IconLoader.getIcon("/icons/m_LeetCode_Cup.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
                         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                     }
+
                 });
             default:
                 LogUtils.warn("什么鬼? pattern 传了个啥? 系统不认识! pattern = " + pattern);
@@ -214,6 +215,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     public void doActionPerformed(Project project, AnActionEvent e) {
                         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                     }
+
                 };
         }
     }
@@ -223,7 +225,8 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
      * @return AnAction
      */
     private AnAction createNextAction() {
-        return new AbstractAction("下一题", "下一题", IconLoader.getIcon("/icons/right.svg", SplitTextEditorWithPreview.class)) {
+        return new AbstractAction(BundleUtils.i18n("deep.coding.next"), BundleUtils.i18n("deep.coding.next"), IconLoader.getIcon("/icons/right.svg", SplitTextEditorWithPreview.class)) {
+
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
                 try {
@@ -241,6 +244,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     Objects.requireNonNull(ConsoleUtils.getInstance(e.getProject())).showError("下一道题目打开错误! 错误原因 = " + ex.getMessage(), false, true);
                 }
             }
+
         };
     }
 
@@ -351,7 +355,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
      * @return AnAction
      */
     private AnAction createPreAction() {
-        return new AbstractAction("上一题", "上一题", IconLoader.getIcon("/icons/left.svg", SplitTextEditorWithPreview.class)) {
+        return new AbstractAction(BundleUtils.i18n("deep.coding.pre"), BundleUtils.i18n("deep.coding.pre"), IconLoader.getIcon("/icons/left.svg", SplitTextEditorWithPreview.class)) {
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
                 try {
@@ -360,10 +364,6 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     // 为了避免Action内存泄露, 不使用外部变量
                     LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(cFile, project);
                     DeepCodingInfo dci = lc.getDeepCodingInfo();
-                    // 获取dci
-                    int len = dci.getTotalLength();
-                    int idx = dci.getIdx();
-                    int preIdx = (idx - 1 + len) % len;
                     // 打开下一道题目
                     assert project != null;
                     doOpen(project, cFile, dci, false);
@@ -372,6 +372,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     Objects.requireNonNull(ConsoleUtils.getInstance(e.getProject())).showError("上一道题目打开错误! 错误原因 = " + ex.getMessage(), false, true);
                 }
             }
+
         };
     }
 }

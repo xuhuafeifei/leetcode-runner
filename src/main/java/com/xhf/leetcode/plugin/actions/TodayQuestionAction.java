@@ -17,6 +17,10 @@ import org.jetbrains.annotations.NotNull;
  */
 public class TodayQuestionAction extends AbstractAction {
 
+    public TodayQuestionAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction"));
+    }
+
     /**
      * 每一次点击, 都会刷新每日一题解决状态
      * 之所以需要刷新, 是为了解决插件跨夜不关, 导致前一天的每日一题解决状态延续至今天
@@ -50,11 +54,11 @@ public class TodayQuestionAction extends AbstractAction {
         if (instance.todayQuestionSolved() == 1) {
             presentation.setIcon(IconLoader.getIcon("/icons/flame.svg", this.getClass()));
             // 获取当日连击次数
-            presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction.text") + " " + instance.getTodayQuestionCount());
+            presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction") + " " + instance.getTodayQuestionCount());
             instance.modified();
         } else if (instance.todayQuestionSolved() == -1){
             presentation.setIcon(IconLoader.getIcon("/icons/daily.svg", this.getClass()));
-            presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction.text"));
+            presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction"));
             instance.modified();
         }
         // LogUtils.simpleDebug("end update..., take = " + (System.currentTimeMillis() - start));

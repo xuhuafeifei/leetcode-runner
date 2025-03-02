@@ -18,6 +18,11 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
 @DebugCheck(DebugCheck.CheckType.STATUS)
 @LoginPass
 public class DebugRunAction extends AbstractAction {
+
+    public DebugRunAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.console.DebugRunAction"));
+    }
+
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         // 写指令到阻塞队列中
@@ -26,4 +31,5 @@ public class DebugRunAction extends AbstractAction {
             ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
         }
     }
+
 }

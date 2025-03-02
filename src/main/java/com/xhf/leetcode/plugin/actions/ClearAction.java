@@ -19,6 +19,10 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
 @LoginPass
 public class ClearAction extends AbstractAction {
 
+    public ClearAction() {
+        super(BundleUtils.i18n("action.leetcode.plugin.Clear"));
+    }
+
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         int result = Messages.showOkCancelDialog(
@@ -38,4 +42,5 @@ public class ClearAction extends AbstractAction {
             LCEventBus.getInstance().post(new ClearCacheEvent(project));
         }
     }
+
 }
