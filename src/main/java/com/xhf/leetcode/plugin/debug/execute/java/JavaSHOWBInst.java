@@ -4,6 +4,7 @@ import com.sun.jdi.Location;
 import com.sun.jdi.request.BreakpointRequest;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -41,14 +42,14 @@ public class JavaSHOWBInst extends AbstractJavaInstExecutor {
             if (! breakpointRequest.isEnabled()) {
                 continue;
             }
-            sb.append("Breakpoint at ").append(className).append(".").append(methodName).append(" line ").append(lineNumber);
+            sb.append(BundleUtils.i18nHelper("断点在 ", "Breakpoint at ")).append(className).append(".").append(methodName).append(BundleUtils.i18nHelper(" 第" + lineNumber + "行", " line "  + lineNumber));
             if (i != breakpointRequests.size() - 1) {
                 sb.append("\n");
             }
         }
         String res = sb.toString();
         if (StringUtils.isBlank(res)) {
-            res = "No enabled breakpoints";
+            res = BundleUtils.i18nHelper("没有有效的断点", "No enabled breakpoints");
         }
         return ExecuteResult.success(inst.getOperation(), res);
     }

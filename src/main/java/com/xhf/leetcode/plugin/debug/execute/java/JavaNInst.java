@@ -9,6 +9,7 @@ import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 /**
  * @author feigebuge
@@ -49,7 +50,7 @@ public class JavaNInst extends AbstractJavaInstExecutor {
         Location location = context.getLocation();
         // debug
         String info = DebugUtils.buildCurrentLineInfoByLocation(location);
-        DebugUtils.simpleDebug("N 指令执行时, 处于 " + info, context.getProject());
+        DebugUtils.simpleDebug(BundleUtils.i18nHelper("N 指令执行时, 处于 ", "N instruction execution, current line is ") + info, context.getProject());
 
         context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_INTO);
         // 放行

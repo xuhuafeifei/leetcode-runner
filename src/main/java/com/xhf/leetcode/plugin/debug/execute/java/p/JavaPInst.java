@@ -10,6 +10,7 @@ import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.ComputeError;
 import com.xhf.leetcode.plugin.exception.DebugError;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +41,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
         // 执行到solution以外的代码, 不做任何处理
         if (! "Solution".equals(className)) {
-            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(), "当前断点执行的是系统函数, 不支持显示局部变量");
+            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(), BundleUtils.i18nHelper("当前断点执行的是系统函数, 不支持显示局部变量", "current breakpoint is in system function, not support for displaying local variables"));
             DebugUtils.fillExecuteResultByLocation(failed, location);
             return failed;
         }
@@ -52,7 +53,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
             DebugUtils.fillExecuteResultByLocation(success, location);
             return success;
         } catch (AbsentInformationException e) {
-            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(), "没有局部变量");
+            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(), BundleUtils.i18nHelper("没有局部变量", "no global variables"));
             DebugUtils.fillExecuteResultByLocation(failed, location);
             return failed;
         } catch (Exception e) {
@@ -79,7 +80,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         } else if (inst.getOperation() == Operation.WATCH) {
             return doWATCH(inst, context);
         }
-        throw new DebugError("JavaPInst不支持的操作 " + inst.getOperation());
+        throw new DebugError(BundleUtils.i18nHelper("JavaPInst不支持的操作 ", "JavaPInst not support this operation ") + inst.getOperation());
     }
 
     /**
@@ -150,7 +151,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         StringBuilder res = new StringBuilder();
         // 设置loading data
         Output output = context.getOutput();
-        output.output(ExecuteResult.success(Operation.NULL, "exp = 计算中..."));
+        output.output(ExecuteResult.success(Operation.NULL, BundleUtils.i18nHelper("exp = 计算中...", "exp = calculating...")));
 
         try {
             res.append(exp).append(" = ").append(new JavaEvaluatorImpl().executeExpression(exp, context));
@@ -244,7 +245,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         } catch (Exception e) {
             DebugUtils.simpleDebug(e.getMessage(), ctx.getProject());
             LogUtils.error(e);
-            return "变量类型不支持显示";
+            return BundleUtils.i18nHelper("变量类型不支持显示", "variable type not support display");
         }
     }
 

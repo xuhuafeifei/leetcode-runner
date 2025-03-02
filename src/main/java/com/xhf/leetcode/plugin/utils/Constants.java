@@ -50,6 +50,7 @@ public interface Constants {
 
     String PY_SERVER_DISCONNECT = "PY_SERVER_DISCONNECT";
     String HELP_INFO =
+            BundleUtils.i18nHelper(
             "帮助文档格式: 指令名词 [指令输入形式] 指令作用\n" +
             "\n" +
             "N指令 [n | n 数字 | n 数字]  step into单步执行\n" +
@@ -71,7 +72,29 @@ public interface Constants {
             "STEP指令 [step out | step over] 功能和idea的debug对应按钮功能一致\n" +
             "\n" +
             "WATCH指令 [watch expression] 计算expression, 同时将expression加入监视池"
-            ;
+                    ,
+            "Help document format: command name [command input format] command function\n" +
+            "\n" +
+            "N command [n | n number | n number] step into single step execution\n" +
+            "\n" +
+            "R command [r] run code until next breakpoint\n" +
+            "\n" +
+            "P command [p | p expression] print local variable, if p command has expression, print local variable and calculate expression\n" +
+            "\n" +
+            "B command [b number] set breakpoint on specified line\n" +
+            "\n" +
+            "SHOWB command [show b | s b | sb] show all breakpoints\n" +
+            "\n" +
+            "RB command [remove b number|r b number|remove bnumber|r bnumber|rbnumber] remove specified line breakpoint\n" +
+            "\n" +
+            "RBA command [remove all|ra|r a] remove all breakpoints\n" +
+            "\n" +
+            "W command [w] show current position\n" +
+            "\n" +
+            "STEP command [step out | step over] function and idea debug corresponding button function\n" +
+            "\n" +
+            "WATCH command [watch expression] calculate expression and add it to watch pool"
+            );
 
 
     /**

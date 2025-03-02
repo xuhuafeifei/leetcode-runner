@@ -5,6 +5,7 @@ import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class JavaBInst extends AbstractJavaInstExecutor {
          */
         Location solutionLocation = context.getSolutionLocation();
         if (solutionLocation == null) {
-            return ExecuteResult.success(inst.getOperation(), "Solution Class未被加载, 无法添加断点");
+            return ExecuteResult.success(inst.getOperation(), BundleUtils.i18nHelper("Solution Class未被加载, 无法添加断点", "Solution Class not loaded, cannot add breakpoint"));
         }
 
         ReferenceType referenceType = solutionLocation.declaringType();
@@ -51,7 +52,7 @@ public class JavaBInst extends AbstractJavaInstExecutor {
         for (BreakpointRequest breakpointRequest : breakpointRequests) {
             if (breakpointRequest.location().lineNumber() == lineNumber) {
                 breakpointRequest.enable();
-                return ExecuteResult.success(inst.getOperation(), "break point set at Solution's line " + lineNumber);
+                return ExecuteResult.success(inst.getOperation(), BundleUtils.i18nHelper("断点设置在Solution的行号 = ", "break point set at Solution's line ") + lineNumber);
             }
         }
 
@@ -63,10 +64,10 @@ public class JavaBInst extends AbstractJavaInstExecutor {
                 breakpointRequest.enable();
                 context.addBreakpointRequest(breakpointRequest);
 
-                return ExecuteResult.success(inst.getOperation(), "Breakpoint set at Solution's line " + lineNumber);
+                return ExecuteResult.success(inst.getOperation(), BundleUtils.i18nHelper("断点设置在Solution的行号 = ", "break point set at Solution's line ") + lineNumber);
             }
         }
-        ExecuteResult r = ExecuteResult.fail(inst.getOperation(), "no valid location found in Solution file");
+        ExecuteResult r = ExecuteResult.fail(inst.getOperation(), BundleUtils.i18nHelper("未找到Solution文件", "no valid location found in Solution file"));
         r.setAddLine(lineNumber);
         return r;
     }

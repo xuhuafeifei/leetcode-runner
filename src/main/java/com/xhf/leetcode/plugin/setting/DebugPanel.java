@@ -4,6 +4,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBRadioButton;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
+import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -96,7 +97,9 @@ public class DebugPanel extends JPanel{
         // 选择
         for (Enumeration<AbstractButton> buttons = this.outputType.getElements(); buttons.hasMoreElements();) {
             AbstractButton button = buttons.nextElement();
-            if (button.getText().equals(outputTypeName)) {
+            if (StringUtils.equals(
+                    OutputType.convertToCN(outputTypeName), OutputType.convertToCN(button.getText())
+            )) {
                 button.setSelected(true);
                 break;
             }
@@ -109,7 +112,9 @@ public class DebugPanel extends JPanel{
         // 选择
         for (Enumeration<AbstractButton> buttons = this.readTypeGroup.getElements(); buttons.hasMoreElements();) {
             AbstractButton button = buttons.nextElement();
-            if (button.getText().equals(readTypeName)) {
+            if (StringUtils.equals(
+                    ReadType.convertToCN(readTypeName), ReadType.convertToCN(button.getText())
+            )) {
                 button.setSelected(true);
                 break;
             }
