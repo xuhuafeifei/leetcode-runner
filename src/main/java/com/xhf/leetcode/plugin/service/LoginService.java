@@ -303,8 +303,6 @@ public final class LoginService {
                     // visit all cookies
                     cefCookieManager.visitAllCookies((cookie, count, total, delete) -> {
                         if (cookie.domain.contains("leetcode")) {
-                            // todo: 记得删了... debug
-                            System.out.println(cookie.name + " " + cookie.value);
                             BasicClientCookie2 basicClientCookie2 = new BasicClientCookie2(cookie.name, cookie.value);
                             cookieList.add(basicClientCookie2);
                         }
