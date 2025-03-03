@@ -12,6 +12,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
 import com.intellij.util.ui.JBUI;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,13 +68,16 @@ public abstract class AbstractSplitTextEditor implements FileEditor {
      * @return 返回Toolbar工具栏
      */
     protected final SplitEditorToolbar createToolbarWrapper(JComponent comp) {
-        DefaultActionGroup actionGroup = new DefaultActionGroup(new AnAction("关闭题目", "关闭题目", AllIcons.Actions.Close) {
+        DefaultActionGroup actionGroup = new DefaultActionGroup(new AnAction(
+                BundleUtils.i18n("editor.split.close.problem"),
+                BundleUtils.i18n("editor.split.close.problem.desc"),
+                AllIcons.Actions.Close) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 closeSplitEditor();
             }
         });
-        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("Solution", actionGroup, true);
+        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(BundleUtils.i18n("editor.split.toolbar.solution"), actionGroup, true);
         actionToolbar.setTargetComponent(comp);
         return new SplitEditorToolbar(null, actionToolbar);
     }

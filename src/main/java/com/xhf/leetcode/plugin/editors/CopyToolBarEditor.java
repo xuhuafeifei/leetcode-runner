@@ -8,6 +8,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.SplitEditorToolbar;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,9 +26,9 @@ public abstract class CopyToolBarEditor implements FileEditor {
      */
     protected final SplitEditorToolbar createToolbarWrapper(JComponent comp) {
         DefaultActionGroup actionGroup = new DefaultActionGroup(copyAction(), copyToAction());
-        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("Solution", actionGroup, true);
+        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(BundleUtils.i18n("editor.toolbar.solution.group"), actionGroup, true);
         actionToolbar.setTargetComponent(comp);
-        ActionToolbar empty = ActionManager.getInstance().createActionToolbar("Empty", new DefaultActionGroup(), true);
+        ActionToolbar empty = ActionManager.getInstance().createActionToolbar(BundleUtils.i18n("editor.toolbar.empty.group"), new DefaultActionGroup(), true);
         empty.setTargetComponent(comp);
         return new SplitEditorToolbar(actionToolbar, empty);
     }

@@ -99,7 +99,7 @@ public class MarkDownEditor implements FileEditor {
         // 适配deep coding 的 LC Competition功能
         // md, client全局唯一. 所以adapter只能添加一次
         CefClient client = jcefHtmlPanel.getCefBrowser().getClient();
-        if (! add) {
+        if (!add) {
             client.addLifeSpanHandler(createAdapter());
             add = true;
         }

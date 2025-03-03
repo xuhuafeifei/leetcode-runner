@@ -15,6 +15,7 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.OutputDetail;
 import com.xhf.leetcode.plugin.model.SubmissionDetail;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.Nls;
@@ -43,7 +44,7 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
         String status = sd.getStatusDisplay();
 
         FormBuilder fb = FormBuilder.createFormBuilder();
-        fb.addLabeledComponent("状态", createContentLabel(status));
+        fb.addLabeledComponent(BundleUtils.i18n("editor.error.info.status"), createContentLabel(status));
         fb.addSeparator();
 
         switch (status) {
@@ -51,16 +52,16 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
             case "Memory Limit Exceeded":
             case "Runtime Error":
             case "Time Limit Exceeded":
-                fb.addLabeledComponent("上一个测试案例:", createContentLabel(od.getLastTestcase()));
+                fb.addLabeledComponent(BundleUtils.i18n("editor.error.info.last.test.case"), createContentLabel(od.getLastTestcase()));
                 fb.addSeparator();
-                fb.addLabeledComponent("期待结果:", createContentLabel(od.getExpectedOutput()));
+                fb.addLabeledComponent(BundleUtils.i18n("editor.error.info.expected.output"), createContentLabel(od.getExpectedOutput()));
                 fb.addSeparator();
-                fb.addLabeledComponent("你的结果:", createContentLabel(od.getCodeOutput()));
+                fb.addLabeledComponent(BundleUtils.i18n("editor.error.info.your.output"), createContentLabel(od.getCodeOutput()));
                 fb.addSeparator();
-                fb.addLabeledComponent("标准输出:", createContentLabel(sd.getStdOutput()));
+                fb.addLabeledComponent(BundleUtils.i18n("editor.error.info.std.output"), createContentLabel(sd.getStdOutput()));
                 break;
             case "Compile Error":
-                fb.addLabeledComponent("编译错误:", createContentLabel(od.getCompileError()));
+                fb.addLabeledComponent(BundleUtils.i18n("editor.error.info.compile.error"), createContentLabel(od.getCompileError()));
                 break;
         }
         fb.addSeparator();
@@ -89,7 +90,7 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
      */
     @Override
     protected final AnAction copyAction() {
-        return new AnAction("复制测试案例", "复制测试案例", AllIcons.Actions.Copy) {
+        return new AnAction(BundleUtils.i18n("editor.error.info.copy.test.case"), BundleUtils.i18n("editor.error.info.copy.test.case"), AllIcons.Actions.Copy) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 // copy to clipboard
@@ -97,25 +98,25 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
                 StringSelection stringSelection = new StringSelection(sd.getOutputDetail().getLastTestcase());
                 clipboard.setContents(stringSelection, null);
 
-                JOptionPane.showMessageDialog(null, "复制测试案例成功!");
+                JOptionPane.showMessageDialog(null, BundleUtils.i18n("editor.error.info.copy.success"));
             }
         };
     }
 
     @Override
     protected final AnAction copyToAction() {
-        return new AnAction("新增测试案例", "新增测试案例成功!", IconLoader.getIcon("/icons/switch.svg", ErrorInfoEditor.class)) {
+        return new AnAction(BundleUtils.i18n("editor.error.info.add.test.case"), BundleUtils.i18n("editor.error.info.add.success.desc"), IconLoader.getIcon("/icons/switch.svg", ErrorInfoEditor.class)) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 Project project = e.getProject();
                 if (project == null) {
-                    JOptionPane.showMessageDialog(null, "Copy error because project is null");
+                    JOptionPane.showMessageDialog(null, BundleUtils.i18n("editor.error.project.null"));
                     return;
                 }
                 // 获取lc
                 LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByCurrentVFile(project);
                 if (lc == null) {
-                    JOptionPane.showMessageDialog(null, "新增测试案例错误! 请关闭文件或重定位题目");
+                    JOptionPane.showMessageDialog(null, BundleUtils.i18n("editor.error.info.add.failure"));
                     return;
                 }
                 String exampleTestcases = lc.getExampleTestcases();
@@ -128,9 +129,9 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
                 // 更新cache
                 boolean flag = ViewUtils.updateLeetcodeEditorByCurrentVFile(project, lc);
                 if (flag) {
-                    ConsoleUtils.getInstance(project).showInfoWithoutConsole("新增测试案例成功!", false, true);
+                    ConsoleUtils.getInstance(project).showInfoWithoutConsole(BundleUtils.i18n("editor.error.info.add.success"), false, true);
                 } else {
-                    ConsoleUtils.getInstance(project).showInfoWithoutConsole("新增测试案例失败!", false, true);
+                    ConsoleUtils.getInstance(project).showInfoWithoutConsole(BundleUtils.i18n("editor.error.info.add.failure"), false, true);
                 }
             }
         };
