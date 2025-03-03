@@ -546,9 +546,17 @@ public class CodeService {
                 boolean correctAnswer = scrb.isCorrectAnswer();
                 if (correctAnswer) {
                     String todaySlug = StoreService.getInstance(project).getCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, String.class);
-                    if (StringUtils.isNotBlank(todaySlug)) {
-                        // 通知
-                        LCEventBus.getInstance().post(new TodayQuestionOkEvent());
+                    if (StringUtils.isNotBlank(todaySlug) && todaySlug.equals(runCode.getTitleSlug())) {
+                        // 延迟两秒发送事件, 异步刷新. 放置跟新太快导致查询到Leetcode的老数据
+                        // todo: 延迟刷新会不会存在问题? 需要测试
+                        TaskCenter.getInstance().createTask(() -> {
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException ignored) {
+                            }
+                            // 通知
+                            LCEventBus.getInstance().post(new TodayQuestionOkEvent());
+                        }).invokeLater();
                     }
                     ConsoleUtils.getInstance(project).showInfo("运行成功", true, true, "运行通过!", "运行代码 结果", ConsoleDialog.INFO);
                 } else {
