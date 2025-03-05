@@ -10,7 +10,9 @@ import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.ArrayUtils;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
@@ -35,7 +37,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     /**
      * 用于 panel tab显示的信息
      */
-    public static final String INTERVIEW_150_TEXT = "经典面试 150 题";
+    public static final String INTERVIEW_150_TEXT = BundleUtils.i18nHelper("经典面试 150 题", "Classic Interview 150");
     private final MyList<Question> questionList;
     private final QuestionEngine searchEngine;
     private final QFilterChain filterChain;
@@ -141,33 +143,59 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
         /*
         因为hot 100属于固定死的题目, 因此所有过滤内容全部写死
          */
-        list.add(new MySearchConditionPanel<>(super::updateText, "算法") {
+        list.add(new MySearchConditionPanel<>(super::updateText, BundleUtils.i18nHelper("算法", "algorithm")) {
             @Override
             public OptionConvert createConvert() {
                 MapOptionConverter map = new MapOptionConverter(20);
-                map.addPair("数组 / 字符串", "88,27,26,80,169,189,121,122,55,45,274,380,238,134,135,42,13,12,58,14,151,6,28,68");
-                map.addPair("双指针", "125,392,167,11,15");
-                map.addPair("滑动窗口", "209,3,30,76");
-                map.addPair("矩阵", "36,54,48,73,289");
-                map.addPair("哈希表", "383,205,290,242,49,1,202,219,128");
-                map.addPair("区间", "228,56,57,452");
-                map.addPair("栈", "20,71,155,150,224");
-                map.addPair("链表", "141,2,21,138,92,25,19,82,61,86,146");
-                map.addPair("二叉树", "104,100,226,101,105,106,117,114,112,129,124,173,222,236");
-                map.addPair("二叉树层次遍历", "199,637,102,103");
-                map.addPair("二叉搜索树", "530,230,98");
-                map.addPair("图", "200,130,133,399,207,210");
-                map.addPair("图的广度优先搜索", "909,433,127");
-                map.addPair("字典树", "208,211,212");
-                map.addPair("回溯", "17,77,46,39,52,22,79");
-                map.addPair("分治", "108,148,427,23");
-                map.addPair("Kadane 算法", "53,918");
-                map.addPair("二分查找", "35,74,162,33,34,153,4");
-                map.addPair("堆", "215,502,373,295");
-                map.addPair("位运算", "67,190,191,136,137,201");
-                map.addPair("数学", "9,66,172,69,50,149");
-                map.addPair("一维动态规划", "70,198,139,322,300");
-                map.addPair("多维动态规划", "120,64,63,5,97,72,123,188,221");
+                if (AppSettings.getInstance().isZh()) {
+                    map.addPair("数组 / 字符串", "88,27,26,80,169,189,121,122,55,45,274,380,238,134,135,42,13,12,58,14,151,6,28,68");
+                    map.addPair("双指针", "125,392,167,11,15");
+                    map.addPair("滑动窗口", "209,3,30,76");
+                    map.addPair("矩阵", "36,54,48,73,289");
+                    map.addPair("哈希表", "383,205,290,242,49,1,202,219,128");
+                    map.addPair("区间", "228,56,57,452");
+                    map.addPair("栈", "20,71,155,150,224");
+                    map.addPair("链表", "141,2,21,138,92,25,19,82,61,86,146");
+                    map.addPair("二叉树", "104,100,226,101,105,106,117,114,112,129,124,173,222,236");
+                    map.addPair("二叉树层次遍历", "199,637,102,103");
+                    map.addPair("二叉搜索树", "530,230,98");
+                    map.addPair("图", "200,130,133,399,207,210");
+                    map.addPair("图的广度优先搜索", "909,433,127");
+                    map.addPair("字典树", "208,211,212");
+                    map.addPair("回溯", "17,77,46,39,52,22,79");
+                    map.addPair("分治", "108,148,427,23");
+                    map.addPair("Kadane 算法", "53,918");
+                    map.addPair("二分查找", "35,74,162,33,34,153,4");
+                    map.addPair("堆", "215,502,373,295");
+                    map.addPair("位运算", "67,190,191,136,137,201");
+                    map.addPair("数学", "9,66,172,69,50,149");
+                    map.addPair("一维动态规划", "70,198,139,322,300");
+                    map.addPair("多维动态规划", "120,64,63,5,97,72,123,188,221");
+                } else {
+                    map.addPair("Array / String", "88,27,26,80,169,189,121,122,55,45,274,380,238,134,135,42,13,12,58,14,151,6,28,68");
+                    map.addPair("Two Pointers", "125,392,167,11,15");
+                    map.addPair("Sliding Window", "209,3,30,76");
+                    map.addPair("Matrix", "36,54,48,73,289");
+                    map.addPair("Hash Table", "383,205,290,242,49,1,202,219,128");
+                    map.addPair("Interval", "228,56,57,452");
+                    map.addPair("Stack", "20,71,155,150,224");
+                    map.addPair("Linked List", "141,2,21,138,92,25,19,82,61,86,146");
+                    map.addPair("Binary Tree", "104,100,226,101,105,106,117,114,112,129,124,173,222,236");
+                    map.addPair("Binary Tree Level Order Traversal", "199,637,102,103");
+                    map.addPair("Binary Search Tree", "530,230,98");
+                    map.addPair("Graph", "200,130,133,399,207,210");
+                    map.addPair("Graph BFS", "909,433,127");
+                    map.addPair("Trie", "208,211,212");
+                    map.addPair("Backtracking", "17,77,46,39,52,22,79");
+                    map.addPair("Divide and Conquer", "108,148,427,23");
+                    map.addPair("Kadane's Algorithm", "53,918");
+                    map.addPair("Binary Search", "35,74,162,33,34,153,4");
+                    map.addPair("Heap", "215,502,373,295");
+                    map.addPair("Bit Manipulation", "67,190,191,136,137,201");
+                    map.addPair("Math", "9,66,172,69,50,149");
+                    map.addPair("1D Dynamic Programming", "70,198,139,322,300");
+                    map.addPair("Multi-dimensional Dynamic Programming", "120,64,63,5,97,72,123,188,221");
+                }
                 return map;
             }
 
@@ -211,7 +239,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     public void loginEventListener(LoginEvent listener) {
         // 提前调用indexLock(). 因为登录后必定要重新加载所有题目数据, 从而rebuild engine's index
         indexLock();
-        questionList.setEmptyText("数据加载中, 请稍等");
+        questionList.setEmptyText(BundleUtils.i18nHelper("数据加载中, 请稍等", "Loading data, please wait..."));
     }
 
     /**
@@ -221,7 +249,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void qLoadEndListener(QLoadEndEvent event) {
         unLock();
-        questionList.setEmptyText("没有可用于展示的数据...");
+        questionList.setEmptyText(BundleUtils.i18nHelper("没有可用于展示的数据...", "No data available..."));
         initMyList();
         updateText();
     }
@@ -229,7 +257,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void qLoadStartListener(QLoadStartEvent event) {
         indexLock();
-        questionList.setEmptyText("数据加载中, 请稍等");
+        questionList.setEmptyText(BundleUtils.i18nHelper("数据加载中, 请稍等", "Loading data, please wait..."));
         questionList.setNonData();
     }
 
@@ -239,7 +267,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
             return;
         }
         indexLock();
-        questionList.setEmptyText("数据加载中, 请稍等");
+        questionList.setEmptyText(BundleUtils.i18nHelper("数据加载中, 请稍等", "Loading data, please wait..."));
         questionList.setNonData();
         initMyList();
         unLock();
@@ -249,7 +277,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void clearCacheEventListeners(ClearCacheEvent event) {
         loginLock();
-        questionList.setEmptyText("请先登录...");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.actions.login.info"));
         questionList.setNonData();
     }
 

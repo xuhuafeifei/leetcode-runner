@@ -16,10 +16,13 @@ import com.xhf.leetcode.plugin.render.QuestionCellRender;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.LoginService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.window.filter.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryParser.ParseException;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -141,12 +144,12 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
      */
     protected MySearchConditionPanel<Question> initTagsCond() {
         // converted匹配的时question的tag的slug
-        return new MySearchConditionPanel<>(this::updateText, "算法标签") {
+        return new MySearchConditionPanel<>(this::updateText, BundleUtils.i18nHelper("算法标签", "algorithm")) {
             @Override
             public OptionConvert createConvert() {
                 // converted匹配的是question的tag的slug
                 var converter = new MapOptionConverter(70);
-                String[] options = new String[]{"数组","字符串","排序","矩阵","模拟","枚举","字符串匹配","计数排序","桶排序","基数排序","动态规划","贪心","深度优先搜索","二分查找","广度优先搜索","回溯","递归","分治","记忆化搜索","归并排序","快速选择","哈希表","树","二叉树","堆（优先队列）","栈","图","链表","单调栈","有序集合","队列","二叉搜索树","拓扑排序","最短路","单调队列","双向链表","最小生成树","强连通分量","欧拉回路","双连通分量","并查集","字典树","线段树","树状数组","后缀数组","位运算","双指针","前缀和","计数","滑动窗口","状态压缩","哈希函数","滚动哈希","扫描线","数学","数论","几何","组合数学","博弈","随机化","概率与统计","水塘抽样","拒绝采样","数据库","设计","数据流","交互","脑筋急转弯","迭代器","多线程","Shell"};
+                String[] options = getStrings();
                 String[] converted = new String[]{"array","string","sorting","matrix","simulation","enumeration","string-matching","counting-sort","bucket-sort","radix-sort","dynamic-programming","greedy","depth-first-search","binary-search","breadth-first-search","backtracking","recursion","divide-and-conquer","memoization","merge-sort","quickselect","hash-table","tree","binary-tree","heap-priority-queue","stack","graph","linked-list","monotonic-stack","ordered-set","queue","binary-search-tree","topological-sort","shortest-path","monotonic-queue","doubly-linked-list","minimum-spanning-tree","strongly-connected-component","eulerian-circuit","biconnected-component","union-find","trie","segment-tree","binary-indexed-tree","suffix-array","bit-manipulation","two-pointers","prefix-sum","counting","sliding-window","bitmask","hash-function","rolling-hash","line-sweep","math","number-theory","geometry","combinatorics","game-theory","randomized","probability-and-statistics","reservoir-sampling","rejection-sampling","database","design","data-stream","interactive","brainteaser","iterator","concurrency","shell"};
                 int len = options.length;
                 for (int i = 0; i < len; ++i) {
@@ -162,6 +165,17 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
         };
     }
 
+    @NotNull
+    private static String[] getStrings() {
+        String[] options;
+        if (AppSettings.getInstance().isZh()) {
+            options = new String[]{"数组", "字符串", "排序", "矩阵", "模拟", "枚举", "字符串匹配", "计数排序", "桶排序", "基数排序", "动态规划", "贪心", "深度优先搜索", "二分查找", "广度优先搜索", "回溯", "递归", "分治", "记忆化搜索", "归并排序", "快速选择", "哈希表", "树", "二叉树", "堆（优先队列）", "栈", "图", "链表", "单调栈", "有序集合", "队列", "二叉搜索树", "拓扑排序", "最短路", "单调队列", "双向链表", "最小生成树", "强连通分量", "欧拉回路", "双连通分量", "并查集", "字典树", "线段树", "树状数组", "后缀数组", "位运算", "双指针", "前缀和", "计数", "滑动窗口", "状态压缩", "哈希函数", "滚动哈希", "扫描线", "数学", "数论", "几何", "组合数学", "博弈", "随机化", "概率与统计", "水塘抽样", "拒绝采样", "数据库", "设计", "数据流", "交互", "脑筋急转弯", "迭代器", "多线程", "Shell"};
+        } else {
+            options =  new String[]{"array","string","sorting","matrix","simulation","enumeration","string-matching","counting-sort","bucket-sort","radix-sort","dynamic-programming","greedy","depth-first-search","binary-search","breadth-first-search","backtracking","recursion","divide-and-conquer","memoization","merge-sort","quickselect","hash-table","tree","binary-tree","heap-priority-queue","stack","graph","linked-list","monotonic-stack","ordered-set","queue","binary-search-tree","topological-sort","shortest-path","monotonic-queue","doubly-linked-list","minimum-spanning-tree","strongly-connected-component","eulerian-circuit","biconnected-component","union-find","trie","segment-tree","binary-indexed-tree","suffix-array","bit-manipulation","two-pointers","prefix-sum","counting","sliding-window","bitmask","hash-function","rolling-hash","line-sweep","math","number-theory","geometry","combinatorics","game-theory","randomized","probability-and-statistics","reservoir-sampling","rejection-sampling","database","design","data-stream","interactive","brainteaser","iterator","concurrency","shell"};
+        }
+        return options;
+    }
+
     /**
      * 提供默认的 初始化题目类别筛选条件
      * @return condition组件
@@ -169,7 +183,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
     protected MySearchConditionPanel<Question> initCategoryCond() {
         // converted匹配的是question的tag的slug
         // 封装题目分类筛选组件的容器面板
-        return new MySearchConditionPanel<>(this::updateText, "分类") {
+        return new MySearchConditionPanel<>(this::updateText, BundleUtils.i18nHelper("分类", "category")) {
             @Override
             public OptionConvert createConvert() {
                 // converted匹配的是question的tag的slug
@@ -182,12 +196,21 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
                   javascript
                   pandas
                  */
-                converter.addPair("算法", "algorithms");
-                converter.addPair("数据库", "database");
-                converter.addPair("Shell", "shell");
-                converter.addPair("多线程", "concurrency");
-                converter.addPair("Javascript", "javascript");
-                converter.addPair("Pandas", "database");
+                if (AppSettings.getInstance().isZh()) {
+                    converter.addPair("算法", "algorithms");
+                    converter.addPair("数据库", "database");
+                    converter.addPair("Shell", "shell");
+                    converter.addPair("多线程", "concurrency");
+                    converter.addPair("Javascript", "javascript");
+                    converter.addPair("Pandas", "database");
+                } else {
+                    converter.addPair("algorithms");
+                    converter.addPair( "database");
+                    converter.addPair( "shell");
+                    converter.addPair( "concurrency");
+                    converter.addPair( "javascript");
+                    converter.addPair( "database");
+                }
                 return converter;
             }
 
@@ -203,7 +226,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
      */
     protected MySearchConditionPanel<Question> initDifficultyCond() {
         // 封装难度筛选组件的容器面板
-        return new MySearchConditionPanel<>(this::updateText, "难度") {
+        return new MySearchConditionPanel<>(this::updateText, BundleUtils.i18nHelper("难度", "difficulty")) {
             @Override
             public OptionConvert createConvert() {
                 /*
@@ -212,9 +235,15 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
                   HARD
                  */
                 ArrayOptionConverter converter = new ArrayOptionConverter(3);
-                converter.addPair("简单", "EASY");
-                converter.addPair("中等", "MEDIUM");
-                converter.addPair("困难", "HARD");
+                if (AppSettings.getInstance().isZh()) {
+                    converter.addPair("简单", "EASY");
+                    converter.addPair("中等", "MEDIUM");
+                    converter.addPair("困难", "HARD");
+                } else {
+                    converter.addPair("easy", "EASY");
+                    converter.addPair("medium", "MEDIUM");
+                    converter.addPair("hard", "HARD");
+                }
                 return converter;
             }
 
@@ -236,7 +265,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
           NOT_STARTED
          */
         // 封装状态筛选组件的容器面板
-        return new MySearchConditionPanel<Question>(this::updateText, "题目状态") {
+        return new MySearchConditionPanel<Question>(this::updateText, BundleUtils.i18nHelper("题目状态", "status")) {
             @Override
             public OptionConvert createConvert() {
                 /*
@@ -248,9 +277,15 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
 //                converter.addPair("solved", "AC");
 //                converter.addPair("trying", "TRIED");
 //                converter.addPair("todo", "NOT_STARTED");
-                converter.addPair("已解决", "AC");
-                converter.addPair("尝试中", "TRIED");
-                converter.addPair("未开始", "NOT_STARTED");
+                if (AppSettings.getInstance().isZh()) {
+                    converter.addPair("已解决", "AC");
+                    converter.addPair("尝试中", "TRIED");
+                    converter.addPair("未开始", "NOT_STARTED");
+                } else {
+                    converter.addPair("accepted", "AC");
+                    converter.addPair("tried", "TRIED");
+                    converter.addPair("not started", "NOT_STARTED");
+                }
                 return converter;
             }
 
@@ -326,7 +361,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
         this.conditionPanelArray.forEach(e -> e.setEnabled(false));
         searchField.setEnabled(false);
         searchField.setFont(searchField.getFont().deriveFont(Font.ITALIC));
-        searchField.setText("请先登录");
+        searchField.setText(BundleUtils.i18n("action.leetcode.actions.login.info"));
         searchField.setForeground(JBColor.RED);
         searchField.repaint(); // 强制重绘
     }
@@ -338,7 +373,7 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
         this.conditionPanelArray.forEach(e -> e.setEnabled(false));
         searchField.setEnabled(false);
         searchField.setFont(searchField.getFont().deriveFont(Font.ITALIC));
-        searchField.setText("indexing...");
+        searchField.setText(BundleUtils.i18nHelper("正在构建索引...", "indexing..."));
         searchField.setForeground(JBColor.RED);
         searchField.repaint(); // 强制重绘
     }

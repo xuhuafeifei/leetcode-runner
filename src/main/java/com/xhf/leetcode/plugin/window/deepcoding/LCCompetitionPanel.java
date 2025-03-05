@@ -26,6 +26,7 @@ import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -61,7 +62,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     /**
      * 用于 panel tab 显示信息
      */
-    public static final String LC_COMPETITION_TEXT = "LC-竞赛题";
+    public static final String LC_COMPETITION_TEXT = BundleUtils.i18nHelper("LC-竞赛题", "LC-Competition");
 
     private final MyList<CompetitionQuestion> questionList;
     private final CompetitionQuestionEngine searchEngine;
@@ -167,18 +168,33 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     @NotNull
     private static MySearchConditionPanel.MapOptionConverter getMapOptionConverter() {
         var convert = new MySearchConditionPanel.MapOptionConverter(11);
-        convert.addPair("滑动窗口", "https://leetcode.cn/circle/discuss/0viNMK");
-        convert.addPair("二分查找", "https://leetcode.cn/circle/discuss/SqopEo");
-        convert.addPair("单调栈", "https://leetcode.cn/circle/discuss/9oZFK9");
-        convert.addPair("网格图", "https://leetcode.cn/circle/discuss/YiXPXW");
-        convert.addPair("位运算", "https://leetcode.cn/circle/discuss/dHn9Vk");
-        convert.addPair("图论算法", "https://leetcode.cn/circle/discuss/01LUak");
-        convert.addPair("动态规划", "https://leetcode.cn/circle/discuss/tXLS3i");
-        convert.addPair("数据结构", "https://leetcode.cn/circle/discuss/mOr1u6");
-        convert.addPair("数学", "https://leetcode.cn/circle/discuss/IYT3ss");
-        convert.addPair("贪心", "https://leetcode.cn/circle/discuss/g6KTKL");
-        convert.addPair("树和二叉树", "https://leetcode.cn/circle/discuss/K0n2gO");
-        convert.addPair("字符串", "https://leetcode.cn/circle/discuss/SJFwQI");
+        if (AppSettings.getInstance().isZh()) {
+            convert.addPair("滑动窗口", "https://leetcode.cn/circle/discuss/0viNMK");
+            convert.addPair("二分查找", "https://leetcode.cn/circle/discuss/SqopEo");
+            convert.addPair("单调栈", "https://leetcode.cn/circle/discuss/9oZFK9");
+            convert.addPair("网格图", "https://leetcode.cn/circle/discuss/YiXPXW");
+            convert.addPair("位运算", "https://leetcode.cn/circle/discuss/dHn9Vk");
+            convert.addPair("图论算法", "https://leetcode.cn/circle/discuss/01LUak");
+            convert.addPair("动态规划", "https://leetcode.cn/circle/discuss/tXLS3i");
+            convert.addPair("数据结构", "https://leetcode.cn/circle/discuss/mOr1u6");
+            convert.addPair("数学", "https://leetcode.cn/circle/discuss/IYT3ss");
+            convert.addPair("贪心", "https://leetcode.cn/circle/discuss/g6KTKL");
+            convert.addPair("树和二叉树", "https://leetcode.cn/circle/discuss/K0n2gO");
+            convert.addPair("字符串", "https://leetcode.cn/circle/discuss/SJFwQI");
+        } else {
+            convert.addPair("Sliding Window", "https://leetcode.cn/circle/discuss/0viNMK");
+            convert.addPair("Binary Search", "https://leetcode.cn/circle/discuss/SqopEo");
+            convert.addPair("Monotonic Stack", "https://leetcode.cn/circle/discuss/9oZFK9");
+            convert.addPair("Grid Graph", "https://leetcode.cn/circle/discuss/YiXPXW");
+            convert.addPair("Bit Manipulation", "https://leetcode.cn/circle/discuss/dHn9Vk");
+            convert.addPair("Graph Theory", "https://leetcode.cn/circle/discuss/01LUak");
+            convert.addPair("Dynamic Programming", "https://leetcode.cn/circle/discuss/tXLS3i");
+            convert.addPair("Data Structures", "https://leetcode.cn/circle/discuss/mOr1u6");
+            convert.addPair("Mathematics", "https://leetcode.cn/circle/discuss/IYT3ss");
+            convert.addPair("Greedy Algorithm", "https://leetcode.cn/circle/discuss/g6KTKL");
+            convert.addPair("Tree and Binary Tree", "https://leetcode.cn/circle/discuss/K0n2gO");
+            convert.addPair("String", "https://leetcode.cn/circle/discuss/SJFwQI");
+        }
         return convert;
     }
 
@@ -239,7 +255,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     @Override
     protected List<MySearchConditionPanel<CompetitionQuestion>> getSearchCondition() {
         List<MySearchConditionPanel<CompetitionQuestion>> list = new ArrayList<>();
-        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, "竞赛分") {
+        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, BundleUtils.i18nHelper("竞赛分", "Rating")) {
             @Override
             public OptionConvert createConvert() {
                 ArrayOptionConverter arr = new ArrayOptionConverter(7);
@@ -258,11 +274,34 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
             }
         });
 
-        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, "Algorithm") {
+        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, BundleUtils.i18nHelper("Algorithm", "算法")) {
             @Override
             public OptionConvert createConvert() {
                 var converter = new MapOptionConverter(70);
-                String[] options = new String[]{"数组","字符串","排序","矩阵","模拟","枚举","字符串匹配","计数排序","桶排序","基数排序","动态规划","贪心","深度优先搜索","二分查找","广度优先搜索","回溯","递归","分治","记忆化搜索","归并排序","快速选择","哈希表","树","二叉树","堆（优先队列）","栈","图","链表","单调栈","有序集合","队列","二叉搜索树","拓扑排序","最短路","单调队列","双向链表","最小生成树","强连通分量","欧拉回路","双连通分量","并查集","字典树","线段树","树状数组","后缀数组","位运算","双指针","前缀和","计数","滑动窗口","状态压缩","哈希函数","滚动哈希","扫描线","数学","数论","几何","组合数学","博弈","随机化","概率与统计","水塘抽样","拒绝采样","数据库","设计","数据流","交互","脑筋急转弯","迭代器","多线程","Shell"};
+                String[] options;
+                if (AppSettings.getInstance().isZh()) {
+                    options = new String[]{"数组", "字符串", "排序", "矩阵", "模拟", "枚举", "字符串匹配", "计数排序", "桶排序", "基数排序", "动态规划", "贪心", "深度优先搜索", "二分查找", "广度优先搜索", "回溯", "递归", "分治", "记忆化搜索", "归并排序", "快速选择", "哈希表", "树", "二叉树", "堆（优先队列）", "栈", "图", "链表", "单调栈", "有序集合", "队列", "二叉搜索树", "拓扑排序", "最短路", "单调队列", "双向链表", "最小生成树", "强连通分量", "欧拉回路", "双连通分量", "并查集", "字典树", "线段树", "树状数组", "后缀数组", "位运算", "双指针", "前缀和", "计数", "滑动窗口", "状态压缩", "哈希函数", "滚动哈希", "扫描线", "数学", "数论", "几何", "组合数学", "博弈", "随机化", "概率与统计", "水塘抽样", "拒绝采样", "数据库", "设计", "数据流", "交互", "脑筋急转弯", "迭代器", "多线程", "Shell"};
+                } else {
+                    options = new String[]{
+                            "Array", "String", "Sorting", "Matrix", "Simulation", "Enumeration",
+                            "String Matching", "Counting Sort", "Bucket Sort", "Radix Sort",
+                            "Dynamic Programming", "Greedy", "Depth-First Search", "Binary Search",
+                            "Breadth-First Search", "Backtracking", "Recursion", "Divide and Conquer",
+                            "Memoization", "Merge Sort", "Quickselect", "Hash Table", "Tree",
+                            "Binary Tree", "Heap (Priority Queue)", "Stack", "Graph", "Linked List",
+                            "Monotonic Stack", "Ordered Set", "Queue", "Binary Search Tree",
+                            "Topological Sort", "Shortest Path", "Monotonic Queue", "Doubly Linked List",
+                            "Minimum Spanning Tree", "Strongly Connected Components", "Eulerian Circuit",
+                            "Biconnected Components", "Union-Find", "Trie", "Segment Tree",
+                            "Binary Indexed Tree", "Suffix Array", "Bit Manipulation", "Two Pointers",
+                            "Prefix Sum", "Counting", "Sliding Window", "State Compression",
+                            "Hash Function", "Rolling Hash", "Scanline", "Mathematics", "Number Theory",
+                            "Geometry", "Combinatorics", "Game Theory", "Randomization",
+                            "Probability and Statistics", "Reservoir Sampling", "Rejection Sampling",
+                            "Database", "Design", "Data Stream", "Interactive", "Brain Teaser",
+                            "Iterator", "Multithreading", "Shell"
+                    };
+                }
                 for (String option : options) {
                     converter.addPair(option);
                 }
@@ -274,14 +313,20 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
             }
         });
 
-        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, "Difficulty") {
+        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, BundleUtils.i18nHelper("difficulty", "难度")) {
 
             @Override
             public OptionConvert createConvert() {
                 ArrayOptionConverter converter = new ArrayOptionConverter(3);
-                converter.addPair("简单", "EASY");
-                converter.addPair("中等", "MEDIUM");
-                converter.addPair("困难", "HARD");
+                if (AppSettings.getInstance().isZh()) {
+                    converter.addPair("简单", "EASY");
+                    converter.addPair("中等", "MEDIUM");
+                    converter.addPair("困难", "HARD");
+                } else {
+                    converter.addPair("Easy", "EASY");
+                    converter.addPair("Medium", "MEDIUM");
+                    converter.addPair("Hard", "HARD");
+                }
                 return converter;
             }
 
@@ -323,7 +368,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     public void loginEventListener(LoginEvent listener) {
         // 提前调用indexLock(). 因为登录后必定要重新加载所有题目数据, 从而rebuild engine's index
         indexLock();
-        questionList.setEmptyText("数据加载中, 请稍等");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.loading"));
     }
 
     /**
@@ -333,7 +378,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     @Subscribe
     public void qLoadEndListener(QLoadEndEvent event) {
         unLock();
-        questionList.setEmptyText("没有可用于展示的数据...");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.noData"));
         initMyList();
         updateText();
     }
@@ -341,7 +386,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     @Subscribe
     public void qLoadStartListener(QLoadStartEvent event) {
         indexLock();
-        questionList.setEmptyText("数据加载中, 请稍等");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.loading"));
         questionList.setNonData();
     }
 
@@ -351,7 +396,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
             return;
         }
         indexLock();
-        questionList.setEmptyText("数据加载中, 请稍等");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.loading"));
         questionList.setNonData();
         initMyList();
         unLock();
@@ -361,7 +406,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
     @Subscribe
     public void clearCacheEventListeners(ClearCacheEvent event) {
         loginLock();
-        questionList.setEmptyText("请先登录...");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.actions.login.info"));
         questionList.setNonData();
     }
 

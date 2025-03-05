@@ -14,6 +14,7 @@ import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
@@ -59,7 +60,9 @@ public final class LoginService {
         try {
             jcefLoginWindow.start();
         } catch (Exception e) {
-            ConsoleUtils.getInstance(project).showInfo("JCEF登录失败, 错误原因为: " + e.getMessage() + "\n请尝试重启idea, 否则系统将采用cookie登录");
+            String msg = BundleUtils.i18nHelper("JCEF登录失败, 错误原因为: " + e.getMessage() + "\n请尝试重启idea, 否则系统将采用cookie登录",
+                    "JCEF login failed, the reason is: " + e.getMessage() + "\nPlease try to restart idea, otherwise the system will use cookie login");
+            ConsoleUtils.getInstance(project).showInfo(msg);
             LogUtils.error("JCEF Login Failed, Start Cookie Login...", e);
             startCookieLogin(project);
         }
@@ -86,7 +89,7 @@ public final class LoginService {
         if (info) {
             LogUtils.info("登录成功, 正在查询数据...");
             // 此处不能弹出对话框, 因为对话框会凝固线程. 登录逻辑涉及不少多线程问题, 不适合弹框
-            ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo("登录成功...", false);
+            ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo(BundleUtils.i18nHelper("登录成功...", "Login Success..."), false);
         }
         // post event
         LCEventBus.getInstance().post(new LoginEvent(project));
@@ -163,9 +166,9 @@ public final class LoginService {
             super(project);
             this.contentPane = new JPanel();
             this.textArea = new JTextArea();
-            this.loginButton = new JButton("Login");
-            this.cancelButton = new JButton("Cancel");
-            this.helpButton = new JButton("Help");
+            this.loginButton = new JButton(BundleUtils.i18n("Login"));
+            this.cancelButton = new JButton(BundleUtils.i18n("Cancel"));
+            this.helpButton = new JButton(BundleUtils.i18n("Help"));
         }
 
         @Override
@@ -215,7 +218,7 @@ public final class LoginService {
             loginButton.addActionListener(e -> {
                 String text = textArea.getText();
                 if (text.isEmpty()) {
-                    JOptionPane.showMessageDialog(contentPane, "Please input your cookie", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPane,  BundleUtils.i18nHelper("请输入你的cookie", "Please input your cookie"), BundleUtils.i18n("leetcode.error"), JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 LeetcodeClient instance = LeetcodeClient.getInstance(project);
@@ -224,7 +227,7 @@ public final class LoginService {
                     loginSuccessAfter(project);
                     frame.dispose();
                 } else {
-                    JOptionPane.showMessageDialog(contentPane, "Cookie Error, Please Try Again", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(contentPane, BundleUtils.i18nHelper("Cookie错误, 请重试", "Cookie Error, Please Try Again"), BundleUtils.i18n("leetcode.error"), JOptionPane.ERROR_MESSAGE);
                 }
             });
         }
@@ -272,7 +275,7 @@ public final class LoginService {
 
         @Override
         String getFrameTitle() {
-            return "Web Auth";
+            return BundleUtils.i18n("WebAuth");
         }
 
         @Override

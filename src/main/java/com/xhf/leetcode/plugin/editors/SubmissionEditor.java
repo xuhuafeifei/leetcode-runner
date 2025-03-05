@@ -17,6 +17,7 @@ import com.xhf.leetcode.plugin.model.SubmissionDetail;
 import com.xhf.leetcode.plugin.render.SubmissionCellRender;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.SubmissionService;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -90,12 +91,12 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
     public void openSecond(Map<String, Object> content) {
         // build light virtual file
         if (content == null) {
-            LogUtils.error("content is null!");
+            LogUtils.error(BundleUtils.i18n("editor.submission.content.null"));
             openError();
             return;
         }
         if (content.get(Constants.SUBMISSION_ID) == null) {
-            LogUtils.error("submission id is null");
+            LogUtils.error(BundleUtils.i18n("editor.submission.id.null"));
             openError();
             return;
         }
@@ -103,7 +104,7 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
                 MapUtils.getString(content, Constants.SUBMISSION_ID), SubmissionDetail.class
         );
         if (submissionDetail == null) {
-            LogUtils.error("submissionDetail is null");
+            LogUtils.error(BundleUtils.i18n("editor.submission.detail.null"));
             openError();
             return;
         }

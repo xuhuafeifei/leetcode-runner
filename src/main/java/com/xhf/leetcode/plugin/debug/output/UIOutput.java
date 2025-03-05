@@ -11,6 +11,7 @@ import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -225,7 +226,7 @@ public class UIOutput extends AbstractOutput{
         } else {
             // 打印局部变量失败, 说明出问题了. 问题可能并不严重, 只是受限于debug功能
             variables.setNonData();
-            variables.setEmptyText("没有可用于展示的数据...");
+            variables.setEmptyText(BundleUtils.i18n("action.leetcode.search.noData"));
             String msg = r.getMsg();
             msg = msg + " : " + DebugUtils.buildCurrentLineInfoByLocation(r);
             if (StringUtils.isNotBlank(msg)) {

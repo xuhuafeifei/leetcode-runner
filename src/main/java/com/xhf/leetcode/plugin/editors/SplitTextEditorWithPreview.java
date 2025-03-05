@@ -65,7 +65,8 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                         if (isBreakpointInEditor(breakpoint, editor)) {
                             XSourcePosition sp = breakpoint.getSourcePosition();
                             assert sp != null;
-                            DebugUtils.simpleDebug("Breakpoint added in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project, false);
+                            String msg = BundleUtils.i18nHelper("断点以添加到文件 " + sp.getFile().getPath() + " 第" + (sp.getLine() + 1) + "行处", "Breakpoint added in editor: " + sp.getFile().getPath() + " line " + (sp.getLine() + 1));
+                            DebugUtils.simpleDebug(msg, project, false);
                             InstSource.uiInstInput(DebugUtils.buildBInst(sp));
                         }
                     }
@@ -75,7 +76,8 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                         if (isBreakpointInEditor(breakpoint, editor)) {
                             XSourcePosition sp = breakpoint.getSourcePosition();
                             assert sp != null;
-                            DebugUtils.simpleDebug("Breakpoint removed in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project, false);
+                            String msg = BundleUtils.i18nHelper("断点以添加到文件 " + sp.getFile().getPath() + " 第" + (sp.getLine() + 1) + "行处", "Breakpoint added in editor: " + sp.getFile().getPath() + " line " + (sp.getLine() + 1));
+                            DebugUtils.simpleDebug(msg, project, false);
                             InstSource.uiInstInput(DebugUtils.buildRBInst(sp));
                         }
                     }
@@ -85,7 +87,8 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                         if (isBreakpointInEditor(breakpoint, editor)) {
                             XSourcePosition sp = breakpoint.getSourcePosition();
                             assert sp != null;
-                            DebugUtils.simpleDebug("Breakpoint added in editor: " + sp.getFile().getPath() + " line "  + (sp.getLine() + 1), project, false);
+                            String msg = BundleUtils.i18nHelper("断点以添加到文件 " + sp.getFile().getPath() + " 第" + (sp.getLine() + 1) + "行处", "Breakpoint added in editor: " + sp.getFile().getPath() + " line " + (sp.getLine() + 1));
+                            DebugUtils.simpleDebug(msg, project, false);
                         }
                     }
                 });
@@ -369,7 +372,8 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     doOpen(project, cFile, dci, false);
                 } catch (Exception ex) {
                     LogUtils.error(ex);
-                    Objects.requireNonNull(ConsoleUtils.getInstance(e.getProject())).showError("上一道题目打开错误! 错误原因 = " + ex.getMessage(), false, true);
+                    String msg = BundleUtils.i18nHelper("上一道题目打开错误! 错误原因 = " + ex.getMessage(), "Previous question open error! Reason: " + ex.getMessage());
+                    Objects.requireNonNull(ConsoleUtils.getInstance(e.getProject())).showError(msg, false, true);
                 }
             }
 

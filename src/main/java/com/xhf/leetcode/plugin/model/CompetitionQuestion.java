@@ -148,6 +148,7 @@ public class CompetitionQuestion implements DeepCodingQuestion {
                 .append(getFid())
                 .append("]")
                 .append(getTitleZH())
+//                .append(AppSettings.getInstance().isZh() ? " " + getTitleZH() : " " + getTitle())
         ;
         sb.append("   【").append(getAlgorithm()).append("】");
         sb.append("   【").append(getContestID_zh()).append("】");

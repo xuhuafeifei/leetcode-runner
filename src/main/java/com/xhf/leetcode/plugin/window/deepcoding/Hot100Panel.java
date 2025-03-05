@@ -10,7 +10,9 @@ import com.xhf.leetcode.plugin.search.engine.QuestionEngine;
 import com.xhf.leetcode.plugin.search.engine.SearchEngine;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.ArrayUtils;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.AbstractSearchPanel;
@@ -36,7 +38,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
     /**
      * 用于 panel tab显示的信息
      */
-    public static final String HOT_100_TEXT = "Hot 100 题";
+    public static final String HOT_100_TEXT = BundleUtils.i18nHelper("Hot 100 题", "Hot 100");
     private final QFilterChain filterChain;
     private final QuestionEngine engine;
     private final Project project;
@@ -144,27 +146,47 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
         /*
         因为hot 100属于固定死的题目, 因此所有过滤内容全部写死
          */
-        list.add(new MySearchConditionPanel<>(super::updateText, "算法") {
+        list.add(new MySearchConditionPanel<>(super::updateText, BundleUtils.i18nHelper("算法", "algorithm")) {
             @Override
             public OptionConvert createConvert() {
                 MapOptionConverter map = new MapOptionConverter(20);
-                map.addPair("哈希", "1,49,128");
-                map.addPair("双指针", "283,11,15,42");
-                map.addPair("滑动窗口", "3,438");
-                map.addPair("子串", "560,239,76");
-                map.addPair("普通数组", "53,56,189,238,41");
-                map.addPair("矩阵", "73,54,48,240");
-                map.addPair("链表", "160,206,234,141,142,21,2,19,24,25,138,148,23,146");
-                map.addPair("二叉树", "94,104,226,101,543,102,108,98,230,199,114,105,437,236,124");
-                map.addPair("图论", "200,994,207,208");
-                map.addPair("回溯", "46,78,17,39,22,79,131,51");
-                map.addPair("二分查找", "35,74,34,33,153,4");
-                map.addPair("栈", "20,155,394,739,84");
-                map.addPair("堆", "215,347,295");
-                map.addPair("贪心算法", "121,55,45,763");
-                map.addPair("动态规划", "70,118,198,279,322,139,300,152,416,32");
-                map.addPair("多维动态规划", "62,64,5,1143,72");
-                map.addPair("技巧", "136,169,75,31,287");
+                if (AppSettings.getInstance().isZh()) {
+                    map.addPair("哈希", "1,49,128");
+                    map.addPair("双指针", "283,11,15,42");
+                    map.addPair("滑动窗口", "3,438");
+                    map.addPair("子串", "560,239,76");
+                    map.addPair("普通数组", "53,56,189,238,41");
+                    map.addPair("矩阵", "73,54,48,240");
+                    map.addPair("链表", "160,206,234,141,142,21,2,19,24,25,138,148,23,146");
+                    map.addPair("二叉树", "94,104,226,101,543,102,108,98,230,199,114,105,437,236,124");
+                    map.addPair("图论", "200,994,207,208");
+                    map.addPair("回溯", "46,78,17,39,22,79,131,51");
+                    map.addPair("二分查找", "35,74,34,33,153,4");
+                    map.addPair("栈", "20,155,394,739,84");
+                    map.addPair("堆", "215,347,295");
+                    map.addPair("贪心算法", "121,55,45,763");
+                    map.addPair("动态规划", "70,118,198,279,322,139,300,152,416,32");
+                    map.addPair("多维动态规划", "62,64,5,1143,72");
+                    map.addPair("技巧", "136,169,75,31,287");
+                } else {
+                    map.addPair("Hash", "1,49,128");
+                    map.addPair("Two Pointers", "283,11,15,42");
+                    map.addPair("Sliding Window", "3,438");
+                    map.addPair("Substring", "560,239,76");
+                    map.addPair("Basic Array", "53,56,189,238,41");
+                    map.addPair("Matrix", "73,54,48,240");
+                    map.addPair("Linked List", "160,206,234,141,142,21,2,19,24,25,138,148,23,146");
+                    map.addPair("Binary Tree", "94,104,226,101,543,102,108,98,230,199,114,105,437,236,124");
+                    map.addPair("Graph Theory", "200,994,207,208");
+                    map.addPair("Backtracking", "46,78,17,39,22,79,131,51");
+                    map.addPair("Binary Search", "35,74,34,33,153,4");
+                    map.addPair("Stack", "20,155,394,739,84");
+                    map.addPair("Heap", "215,347,295");
+                    map.addPair("Greedy Algorithm", "121,55,45,763");
+                    map.addPair("Dynamic Programming", "70,118,198,279,322,139,300,152,416,32");
+                    map.addPair("Multi-dimensional Dynamic Programming", "62,64,5,1143,72");
+                    map.addPair("Techniques", "136,169,75,31,287");
+                }
                 return map;
             }
 
@@ -212,7 +234,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
     public void loginEventListener(LoginEvent listener) {
         // 提前调用indexLock(). 因为登录后必定要重新加载所有题目数据, 从而rebuild engine's index
         indexLock();
-        questionList.setEmptyText("数据加载中, 请稍等");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.loading"));
     }
 
     /**
@@ -222,7 +244,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void qLoadEndListener(QLoadEndEvent event) {
         unLock();
-        questionList.setEmptyText("没有可用于展示的数据...");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.noData"));
         initMyList();
         updateText();
     }
@@ -230,7 +252,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void qLoadStartListener(QLoadStartEvent event) {
         indexLock();
-        questionList.setEmptyText("数据加载中, 请稍等");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.loading"));
         questionList.setNonData();
     }
 
@@ -240,7 +262,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
             return;
         }
         indexLock();
-        questionList.setEmptyText("数据加载中, 请稍等");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.search.loading"));
         questionList.setNonData();
         initMyList();
         unLock();
@@ -250,7 +272,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
     @Subscribe
     public void clearCacheEventListeners(ClearCacheEvent event) {
         loginLock();
-        questionList.setEmptyText("请先登录...");
+        questionList.setEmptyText(BundleUtils.i18n("action.leetcode.actions.login.info"));
         questionList.setNonData();
     }
 }

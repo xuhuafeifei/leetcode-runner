@@ -95,7 +95,7 @@ public class StdPanel extends JPanel {
             setText(BundleUtils.i18n("action.leetcode.stdout") + "\n");
 
             // 清空内容
-            JMenuItem clearMenuItem = new JMenuItem("Clear");
+            JMenuItem clearMenuItem = new JMenuItem(BundleUtils.i18n("action.leetcode.clear"));
             clearMenuItem.addActionListener(e -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ApplicationManager.getApplication().runWriteAction(() -> {
@@ -106,7 +106,7 @@ public class StdPanel extends JPanel {
             popupMenu.add(clearMenuItem);
 
             // 复制内容
-            JMenuItem copyMenuItem = new JMenuItem("Copy");
+            JMenuItem copyMenuItem = new JMenuItem(BundleUtils.i18n("copy"));
             copyMenuItem.addActionListener(e -> copy());
             popupMenu.add(copyMenuItem);
         }
@@ -123,7 +123,7 @@ public class StdPanel extends JPanel {
             setForeground(errorColor);
 
             // 清空内容
-            JMenuItem clearMenuItem = new JMenuItem("Clear");
+            JMenuItem clearMenuItem = new JMenuItem(BundleUtils.i18n("action.leetcode.clear"));
             clearMenuItem.addActionListener(e -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ApplicationManager.getApplication().runWriteAction(() -> {
@@ -134,7 +134,7 @@ public class StdPanel extends JPanel {
             popupMenu.add(clearMenuItem);
 
             // 复制内容
-            JMenuItem copyMenuItem = new JMenuItem("Copy");
+            JMenuItem copyMenuItem = new JMenuItem(BundleUtils.i18n("copy"));
             copyMenuItem.addActionListener(e -> copy());
             popupMenu.add(copyMenuItem);
         }

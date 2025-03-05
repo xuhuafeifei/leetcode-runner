@@ -320,10 +320,10 @@ public class Question implements DeepCodingQuestion {
         sb.append("[")
                 .append(frontendQuestionId)
                 .append("]")
-                .append(getTitleCn())
+                .append(" ").append(getTitleCn())
+//                .append(AppSettings.getInstance().isZh() ? " " + getTitleCn() : " " + getTitle())
         ;
-        String res = sb.toString();
-        return res;
+        return sb.toString();
     }
 
     public String getTranslatedTitle() {

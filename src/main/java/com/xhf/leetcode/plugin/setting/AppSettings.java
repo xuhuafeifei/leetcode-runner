@@ -11,6 +11,7 @@ import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.I18nTypeEnum;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +30,8 @@ public final class AppSettings
   public static final String EMPTY_FILE_PATH = "";
   public static final String EMPTY_LANGUAGE_TYPE = "";
 
-  public static final String REPOSITION_DEFAULT = "按照文件代表的语言类型";
-  public static final String REPOSITION_SETTING = "按照设置中的语言类型";
+  public static final String REPOSITION_DEFAULT = BundleUtils.i18nHelper(LanguageConvertor.REPOSITION_DEFAULT_ZH, LanguageConvertor.REPOSITION_DEFAULT_EN);
+  public static final String REPOSITION_SETTING = BundleUtils.i18nHelper(LanguageConvertor.REPOSITION_SETTING_ZH, LanguageConvertor.REPOSITION_SETTING_EN);
 
   static class State {
 
@@ -43,7 +44,7 @@ public final class AppSettings
      */
     public String coreFilePath = EMPTY_FILE_PATH;
 
-    public String locale = I18nTypeEnum.EN.getValue();
+    public String locale = I18nTypeEnum.ZH.getValue();
 
     public boolean isEmptyFilePath() {
       return filePath.equals(EMPTY_FILE_PATH);
@@ -175,6 +176,18 @@ public final class AppSettings
 
   public String getLocale() {
     return myState.locale;
+  }
+
+  public I18nTypeEnum getI18nType() {
+    return I18nTypeEnum.getI18N(AppSettings.getInstance().getLocale());
+  }
+
+  public boolean isZh() {
+    return I18nTypeEnum.ZH.getValue().equals(AppSettings.getInstance().getLocale());
+  }
+
+  public boolean isEn() {
+    return I18nTypeEnum.EN.getValue().equals(AppSettings.getInstance().getLocale());
   }
 
   @Override

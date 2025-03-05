@@ -52,7 +52,7 @@ public class FocusTextEditor implements FileEditor {
         LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByVFile(file, project);
         // lc检测. lc存储了service和editor之间沟通的重要数据, 这些数据会在editor显示内容是使用
         if (lc == null) {
-            ConsoleUtils.getInstance(project).showWaring("打开失败! 请重定位题目或关闭文件", true, true);
+            ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("editor.focus.open.error"), true, true);
             return;
         }
         // 参数检测
@@ -62,18 +62,19 @@ public class FocusTextEditor implements FileEditor {
                 StringUtils.isBlank(lc.getTitleSlug()) ||
                 StringUtils.isBlank(lc.getMarkdownContent())
         ) {
-            ConsoleUtils.getInstance(project).showWaring("打开失败! 请重定位题目或关闭文件", true, true);
-            LogUtils.error("在创建code file并打开的过程中, LeetcodeEditor的{frontedQuestionId, translatedTitle, difficulty, titleSlug}参数不齐全: " + GsonUtils.toJsonStr(lc));
-            ConsoleUtils.getInstance(project).showError("在创建code file并打开的过程中, LeetcodeEditor的{frontedQuestionId, translatedTitle, difficulty, titleSlug}参数不齐全: " + GsonUtils.toJsonStr(lc), false);
+            ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("editor.focus.open.error"), true, true);
+            String s = BundleUtils.i18n("editor.focus.open.error.desc") + GsonUtils.toJsonStr(lc);
+            LogUtils.error(s);
+            ConsoleUtils.getInstance(project).showError(s, false);
             return;
         }
         JComponent contentPanel = new MarkDownEditor(project, buildMarkDownContent(lc), MarkdownContentType.QUESTION).getComponent();
         JComponent solutionPanel = new SolutionEditor(project, file).getComponent();
         JComponent submissionPanel = new SubmissionEditor(project, file).getComponent();
 
-        tabbedPane.addTab("题目内容", contentPanel);
-        tabbedPane.addTab("题解", solutionPanel);
-        tabbedPane.addTab("提交记录", submissionPanel);
+        tabbedPane.addTab(BundleUtils.i18n("editor.focus.tab.question"), contentPanel);
+        tabbedPane.addTab(BundleUtils.i18n("editor.focus.tab.solution"), solutionPanel);
+        tabbedPane.addTab(BundleUtils.i18n("editor.focus.tab.submission"), submissionPanel);
 
         myComponent = tabbedPane;
     }

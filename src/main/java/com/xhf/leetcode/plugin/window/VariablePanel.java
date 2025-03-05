@@ -12,6 +12,7 @@ import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.listener.PopupMenuAdaptor;
 import com.xhf.leetcode.plugin.render.VariablesCellRender;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,7 +32,7 @@ public class VariablePanel extends JPanel {
      * 输入表达式的文本框
      */
     private final ExtendableTextField expressionField;
-    private final String defaultText = "计算表达式 (回车) 或添加监视";
+    private final String defaultText = BundleUtils.i18nHelper("计算表达式 (回车) 或添加监视", "Calculate (Enter) or add to watch");
 
     public VariablePanel() {
         // 设置垂直布局
@@ -72,7 +73,7 @@ public class VariablePanel extends JPanel {
         ExtendableTextComponent.Extension watchButton = ExtendableTextComponent.Extension.create(
                 AllIcons.Debugger.AddToWatch,
                 AllIcons.Debugger.AddToWatch,
-                "Add to Watch",
+                BundleUtils.i18nHelper("添加监视", "Add to Watch"),
                 () -> {
                     String exp = expressionField.getText();
                     InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.WATCH, exp));

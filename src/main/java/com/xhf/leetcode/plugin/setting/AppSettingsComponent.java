@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.security.NoSuchAlgorithmException;
 
 import static javax.swing.JOptionPane.OK_OPTION;
@@ -42,10 +43,33 @@ public class AppSettingsComponent {
   // file path
   private final TextFieldWithBrowseButton myFileBrowserBtn = new TextFieldWithBrowseButton();
 
-  private static final String LANG_TYPE_HELP_TEXT = "选择支持的编程语言类型, 该设置将决定后续创建,提交的代码类型. 此外, 语言类型将决定debug功能启动的执行器类型";
-  private static final String STORE_PATH_HELP_TEXT = "选择文件的存储路径. 该参数将影响后续代码文件创建的位置";
-  private static final String REPOSITION_HELP_TEXT = "选择reposition功能文件打开方式. 如果是'" + AppSettings.REPOSITION_DEFAULT + "', 重定位后系统将会依据文件代表的语言类型重新打开文件; 如果是'" + AppSettings.REPOSITION_SETTING + "', 重定位后系统将会依据设置中语言类型打开文件";
-  private static final String LANGUAGE_HELP_TEXT = "选择Leetcode-Runner显示的语言类型";
+  private static final String LANG_TYPE_HELP_TEXT = BundleUtils.i18nHelper(
+          "选择支持的编程语言类型, 该设置将决定后续创建,提交的代码类型. 此外, 语言类型将决定debug功能启动的执行器类型"
+          , "Select the programming language type, which will determine the type of code created and submitted subsequently. In addition, the language type will determine the execution environment of the debug function."
+  );
+
+  private static final String STORE_PATH_HELP_TEXT = BundleUtils.i18nHelper(
+          "选择文件的存储路径. 该参数将影响后续代码文件创建的位置"
+          ,"Select the storage path of the file. This parameter will affect the location of the code file created subsequently."
+  );
+
+  private static final String REPOSITION_HELP_TEXT = BundleUtils.i18nHelper(
+          "选择reposition功能文件打开方式. 如果是'"
+                  + AppSettings.REPOSITION_DEFAULT
+                  + "', 重定位后系统将会依据文件代表的语言类型重新打开文件; 如果是'"
+                  + AppSettings.REPOSITION_SETTING +
+                  "', 重定位后系统将会依据设置中语言类型打开文件",
+          "Select the reposition function file opening method. If it is '"
+                  + AppSettings.REPOSITION_DEFAULT
+                  + "', the system will re-open the file according to the language type represented by the file; if it is '"
+                  + AppSettings.REPOSITION_SETTING
+                  + "', the system will open the file according to the language type set in the setting."
+  );
+
+  private static final String LANGUAGE_HELP_TEXT = BundleUtils.i18nHelper(
+          "选择Leetcode-Runner显示的语言类型"
+          ,"Select the language type displayed by Leetcode-Runner"
+  );
 
   /*---------debug----------*/
   private final DebugPanel debugPanel = new DebugPanel();
@@ -60,17 +84,19 @@ public class AppSettingsComponent {
   public AppSettingsComponent() {
     initComponent();
     myMainPanel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(new JBLabel("Lang type "), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(myLangType).addHelp(LANG_TYPE_HELP_TEXT).getTargetComponent(), 1, false)
-            .addLabeledComponent(new JBLabel("Store path"), InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(STORE_PATH_HELP_TEXT).getTargetComponent(), 1, false)
+            .addLabeledComponent(new JBLabel(BundleUtils.i18nHelper("编程语言", "Lang  type")), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(myLangType).addHelp(LANG_TYPE_HELP_TEXT).getTargetComponent(), 1, false)
+            .addLabeledComponent(new JBLabel(BundleUtils.i18nHelper("存储路径", "Store path")), InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(STORE_PATH_HELP_TEXT).getTargetComponent(), 1, false)
             .addComponent((JComponent) Box.createVerticalStrut(10))
-            .addComponent(createSeparatorWithText("debug configuration"))
+//            .addComponent(createSeparatorWithText(BundleUtils.i18nHelper("debug 配置", "Debug configuration")))
+            .addComponent(createSeparatorWithText("Debug"))
             .addComponent((JComponent) Box.createVerticalStrut(5))
             .addComponent(debugPanel)
             .addComponent((JComponent) Box.createVerticalStrut(10))
-            .addComponent(createSeparatorWithText("others configuration"))
+//            .addComponent(createSeparatorWithText(BundleUtils.i18nHelper("通用配置", "General configuration")))
+            .addComponent(createSeparatorWithText("General"))
             .addComponent((JComponent) Box.createVerticalStrut(5))
-            .addLabeledComponent(new JBLabel("Reposition"), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(reposition).addHelp(REPOSITION_HELP_TEXT).getTargetComponent(), 1, false)
-            .addLabeledComponent(new JBLabel("Language  "), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(language).addHelp(LANGUAGE_HELP_TEXT).getTargetComponent(), 1, false)
+            .addLabeledComponent(new JBLabel(BundleUtils.i18nHelper("重定位", "Reposition")), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(reposition).addHelp(REPOSITION_HELP_TEXT).getTargetComponent(), 1, false)
+            .addLabeledComponent(new JBLabel(BundleUtils.i18nHelper("语言和地区", "Language  ")), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(language).addHelp(LANGUAGE_HELP_TEXT).getTargetComponent(), 1, false)
             .addComponent(createEncryptPanel())
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel();
@@ -192,8 +218,8 @@ public class AppSettingsComponent {
     myFileBrowserBtn.setText(AppSettings.getInstance().getFilePath());
     myFileBrowserBtn.setEditable(false);
 
-    reposition.addItem("按照文件代表的语言类型");
-    reposition.addItem("按照设置中的语言类型");
+    reposition.addItem(BundleUtils.i18nHelper(LanguageConvertor.REPOSITION_DEFAULT_ZH, LanguageConvertor.REPOSITION_DEFAULT_EN));
+    reposition.addItem(BundleUtils.i18nHelper(LanguageConvertor.REPOSITION_SETTING_ZH, LanguageConvertor.REPOSITION_SETTING_EN));
 
     language.addItem(I18nTypeEnum.ZH.getValue());
     language.addItem(I18nTypeEnum.EN.getValue());
@@ -201,7 +227,7 @@ public class AppSettingsComponent {
     language.addActionListener(e -> {
       String selectedItem = (String) language.getSelectedItem();
       if (StringUtils.isNotBlank(selectedItem) && !selectedItem.equals(AppSettings.getInstance().getLocale())) {
-        JOptionPane.showMessageDialog(null, "语言设置生效需要重启IDE, 请您保存设置并重启");
+        JOptionPane.showMessageDialog(null, BundleUtils.i18nHelper("语言设置生效需要重启IDE, 请您保存设置并重启", "Language settings take effect after restarting IDE, please save the settings and restart"));
       }
     });
   }
@@ -276,7 +302,13 @@ public class AppSettingsComponent {
       reposition.setItem(AppSettings.REPOSITION_DEFAULT);
       return;
     }
-    reposition.setItem(rePositionSetting);
+
+    I18nTypeEnum i18N = I18nTypeEnum.getI18N(AppSettings.getInstance().getLocale());
+    if (i18N == I18nTypeEnum.ZH) {
+      reposition.setItem(LanguageConvertor.toZh(rePositionSetting));
+    } else {
+      reposition.setItem(LanguageConvertor.toEn(rePositionSetting));
+    }
   }
 
   public String getReposition() {
@@ -317,5 +349,6 @@ public class AppSettingsComponent {
 
   public void setEncryptOrNot(boolean encryptOrNot) {
     onOffButton.setSelected(encryptOrNot);
+    onOffButton.dispatchEvent(new ActionEvent(onOffButton, ActionEvent.ACTION_PERFORMED, null));
   }
 }

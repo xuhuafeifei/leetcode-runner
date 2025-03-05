@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.debug.output;
 
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.setting.LanguageConvertor;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -13,15 +14,15 @@ public enum OutputType {
     /**
      * 标准输入读取
      */
-    STD_OUT("std_out", StdOutput.class, BundleUtils.i18nHelper("标准输出显示", "Std display")),
+    STD_OUT("std_out", StdOutput.class, BundleUtils.i18nHelper(LanguageConvertor.STD_OUTPUT_ZH, LanguageConvertor.STD_OUTPUT_EN)),
     /**
      * 命令行读取
      */
-    CONSOLE_OUT("console_out", ConsoleOutput.class, BundleUtils.i18nHelper("console显示", "Console display")),
+    CONSOLE_OUT("console_out", ConsoleOutput.class, BundleUtils.i18nHelper(LanguageConvertor.CONSOLE_OUTPUT_ZH, LanguageConvertor.CONSOLE_OUTPUT_EN)),
     /**
      * ui输入
      */
-    UI_OUT("ui_out", UIOutput.class, BundleUtils.i18nHelper("UI显示", "UI display"))
+    UI_OUT("ui_out", UIOutput.class, BundleUtils.i18nHelper(LanguageConvertor.UI_DISPLAY_ZH, LanguageConvertor.UI_DISPLAY_EN))
     ;
     private final Class<? extends Output> output;
     private String type;
@@ -65,22 +66,6 @@ public enum OutputType {
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static String convertToCN(String outputTypeName) {
-        if (outputTypeName == null) {
-            return null;
-        }
-        if (outputTypeName.equals("Std Display")) {
-            return "标准输出显示";
-        }
-        if (outputTypeName.equals("Console display")) {
-            return "console显示";
-        }
-        if (outputTypeName.equals("UI display")) {
-            return "UI显示";
-        }
-        return outputTypeName;
     }
 
     public String getType() {

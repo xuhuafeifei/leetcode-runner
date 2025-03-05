@@ -18,6 +18,7 @@ import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.model.GraphqlReqBody;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -130,7 +131,7 @@ public class QuestionService {
      */
     public void loadAllQuestionData(Project project) {
         LCEventBus.getInstance().post(new QLoadStartEvent(project));
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, BundleUtils.i18n("Loading"), false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 // query
@@ -152,7 +153,7 @@ public class QuestionService {
     @Deprecated
     public void loadAllQuestionData(Project project, MyList<Question> myList, Consumer<List<Question>> consumer) {
         // do not use another thread to get dataContext by DataManager
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, BundleUtils.i18n("Loading"), false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 // query
