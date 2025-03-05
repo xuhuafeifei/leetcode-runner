@@ -312,16 +312,22 @@ public final class LoginService {
                         if (count == total - 1) {
                             // login info exists!
                             if (cookieList.stream().anyMatch(c -> c.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION))) {
+                                LogUtils.simpleDebug("login info exists, do login success after...");
                                 // update cookies
                                 LeetcodeClient.getInstance(project).clearCookies();
                                 // store cookies
                                 LeetcodeClient.getInstance(project).setCookies(cookieList);
                                 loginSuccessAfter(project);
                                 new Thread(() -> {
-                                    // clear all cookies
-                                    cefCookieManager.deleteCookies("", "");
-                                    frame.setVisible(false);
-                                    frame.dispose();
+                                    try {
+                                        // clear all cookies
+                                        cefCookieManager.deleteCookies("", "");
+                                    } finally {
+                                        if (frame != null) {
+                                            frame.setVisible(false);
+                                            frame.dispose();
+                                        }
+                                    }
                                     // close jcef browser
                                     Disposer.dispose(jbcebrowser);
                                 }).start();

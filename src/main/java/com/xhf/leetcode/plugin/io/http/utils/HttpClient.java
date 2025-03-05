@@ -95,9 +95,9 @@ public class HttpClient {
     public HttpResponse executeGet(@NotNull HttpRequest httpRequest, @NotNull Project project) {
         HttpResponse httpResponse = executeGet(httpRequest);
         if (httpResponse == null) {
-            LogUtils.error("httpResponse为null, 可能是网络错误. url = " + httpRequest.getUrl());
-            ConsoleUtils.getInstance(project).showWaring("请求失败, 可能是网络错误! 请检查您是否接入网络!");
-            throw new RuntimeException("网络异常或请求url有误!");
+            LogUtils.error("httpResponse is null, possible network error. url = " + httpRequest.getUrl());
+            ConsoleUtils.getInstance(project).showWaring("request failed, possible network error! please check your network !", false, true);
+            throw new RuntimeException("network exception or request url error!");
         }
         return httpResponse;
     }
@@ -115,11 +115,11 @@ public class HttpClient {
     public HttpResponse executePost(@NotNull HttpRequest httpRequest, Project project) {
         HttpResponse httpResponse = executePost(httpRequest);
         if (httpResponse == null) {
-            LogUtils.error("httpResponse为null, 可能是网络错误. url = " + httpRequest.getUrl());
+            LogUtils.error("httpResponse is null, possible network error. url = " + httpRequest.getUrl());
             if (project != null) {
-                ConsoleUtils.getInstance(project).showWaring("请求失败, 可能是网络错误! 请检查您是否接入网络!", false, true);
+                ConsoleUtils.getInstance(project).showWaring("request failed, possible network error! please check your network !", false, true);
             }
-            throw new RuntimeException("网络异常或请求url有误!");
+            throw new RuntimeException("network exception or request url error!");
         }
         return httpResponse;
     }

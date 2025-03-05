@@ -22,7 +22,7 @@ public class VariablesCellRender extends DefaultListCellRenderer {
                 exp.contains(Constants.WATCH)
         )
         {
-            label.setFont(new Font(Constants.CN_FONT.getFontName(), Font.ITALIC + Font.BOLD, label.getFont().getSize()));
+            label.setFont(new Font(Constants.CN_FONT.getFontName(), Font.BOLD, label.getFont().getSize() + 2));
             label.setForeground(new JBColor(Gray._100,
                     Gray._180));
         }

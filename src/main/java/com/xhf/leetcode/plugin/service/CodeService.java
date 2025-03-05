@@ -501,7 +501,11 @@ public class CodeService {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, BundleUtils.i18n("action.leetcode.plugin.editor.RunCodeAction"), false){
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
+                // todo: 记得删除
+                LogUtils.simpleDebug("run code: " + runCode);
                 RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(runCode);
+                // todo: 记得删除
+                LogUtils.simpleDebug("rcr = " + rcr);
                 // show it
                 AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(runCode.getDataInput(), rcr, project);
                 boolean correctAnswer = rcrb.isCorrectAnswer();

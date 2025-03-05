@@ -495,6 +495,10 @@ public class LeetcodeClient {
         HttpResponse httpResponse = httpClient.executeGet(httpRequest, project);
 
         // check data
+    /*
+        持续调用checkLeetcodeReady方法, 如果该方法返回false, 则表示数据还未完成准备
+        循环调用, 直到Leetcode服务端将数据准备完成
+     */
         while (! checkLeetcodeReady(httpResponse)) {
             httpResponse = httpClient.executeGet(httpRequest, project);
         }
@@ -502,6 +506,12 @@ public class LeetcodeClient {
         return httpResponse.getBody();
     }
 
+    /**
+     * 检测leetcode服务端是否将数据准备完全, 如果准备完成, 则返回true, 否则返回false
+     *
+     * @param httpResponse
+     * @return leetcode服务端是否将数据准备完全
+     */
     private boolean checkLeetcodeReady(HttpResponse httpResponse) {
         String resp = httpResponse.getBody();
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
@@ -513,7 +523,14 @@ public class LeetcodeClient {
         if (state == null) {
             return true;
         }
-        return ! state.getAsString().equals("STARTED");
+        // 判断字段个数, 目前为止, 大于1就意味着数据准备完成
+        // todo:? 大于1, 就一定意味着数据准备完成吗?
+        int size = jsonObject.asMap().size();
+        if (size > 2) {
+            // 保险点, 大于2就认为返回的是真是的数据
+            return true;
+        }
+        return false;
     }
 
     public List<Solution> querySolutionList(String questionSlug) {

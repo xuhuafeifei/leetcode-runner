@@ -74,5 +74,14 @@ public class RunCodeResult extends BaseCodeResult {
         return correctAnswer;
     }
 
-
+    @Override
+    public String toString() {
+        return "RunCodeResult{" +
+                "codeAnswer=" + codeAnswer +
+                ", stdOutputList=" + stdOutputList +
+                ", expectedCodeAnswer=" + expectedCodeAnswer +
+                ", expectedStdOutputList=" + expectedStdOutputList +
+                ", correctAnswer=" + correctAnswer +
+                '}';
+    }
 }
