@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.listener;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,7 +34,7 @@ public class PopupMenuAdaptor<T> extends MouseAdapter {
     private JPopupMenu createPopupMenu() {
         JPopupMenu popupMenu = new JPopupMenu();
         // delete
-        JMenuItem deleteItem = new JMenuItem("Delete");
+        JMenuItem deleteItem = new JMenuItem(BundleUtils.i18nHelper("删除", "Delete"));
         deleteItem.addActionListener(e -> {
             int[] selectedIndices = variableList.getSelectedIndices();
             for (int selectedIndex : selectedIndices) {
@@ -53,7 +54,7 @@ public class PopupMenuAdaptor<T> extends MouseAdapter {
         });
         popupMenu.add(deleteItem);
         // copy
-        JMenuItem copyItem = new JMenuItem("Copy");
+        JMenuItem copyItem = new JMenuItem(BundleUtils.i18nHelper("复制", "Copy"));
         copyItem.addActionListener(e -> {
             int selectedIndex = variableList.getSelectedIndex();
             if (selectedIndex != -1) {

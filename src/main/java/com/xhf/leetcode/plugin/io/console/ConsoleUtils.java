@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.io.console;
 
-import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.Disposable;
@@ -12,10 +11,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
-import com.xhf.leetcode.plugin.utils.DataKeys;
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.Safe;
-import com.xhf.leetcode.plugin.utils.UnSafe;
+import com.xhf.leetcode.plugin.utils.*;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -26,10 +22,10 @@ import java.util.Date;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-@Service
+@Service(Service.Level.PROJECT)
 public final class ConsoleUtils implements Disposable {
 
-    private static final String LEETCODE_CODE_DIALOG_TITLE = "plugin info";
+    private static final String LEETCODE_CODE_DIALOG_TITLE = BundleUtils.i18nHelper("插件信息", "plugin info");
     private final Project project;
     private ConsoleView consoleView;
 

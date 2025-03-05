@@ -171,6 +171,7 @@ public class PythonDebugEnv extends AbstractDebugEnv {
                 .replace("{{log_dir}}", "\"" + this.logDir + "\"")
                 .replace("{{std_out_dir}}", "\"" + this.stdOutDir + "\"")
                 .replace("{{std_err_dir}}", "\"" + this.stdErrDir + "\"")
+                .replace("{{language_type}}", "\"" + AppSettings.getInstance().getI18nType().getValue() + "\"")
         ;
         // debug
         DebugUtils.simpleDebug("python服务端口确定: " + pyPort, project);

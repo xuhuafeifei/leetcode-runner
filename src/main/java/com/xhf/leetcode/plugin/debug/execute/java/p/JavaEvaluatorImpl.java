@@ -1234,7 +1234,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             if (! value.contain) {
                 value = takeValueByVName(vName, Env.takeStaticValues(pV));
                 if (! value.contain) {
-                    throw new ComputeError(pValue.preName + BundleUtils.i18n("debug.eval.not.exist") + vName + "!");
+                    throw new ComputeError(pValue.preName + " " + BundleUtils.i18n("debug.eval.not.exist") + " " + vName + "!");
                 }
             }
             return value.value;

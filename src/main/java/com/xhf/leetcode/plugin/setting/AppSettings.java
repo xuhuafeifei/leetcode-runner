@@ -147,18 +147,28 @@ public final class AppSettings
   }
   /**
    * 获取debug读取数据来源
+   * 在v3.6.8版本中, 引入了en/zh系统, 因此需要convert
    * @return
    */
   public String getReadTypeName() {
-    return myState.readTypeName;
+    if (I18nTypeEnum.getI18N(myState.locale) == I18nTypeEnum.EN) {
+      return LanguageConvertor.toEn(myState.readTypeName);
+    } else {
+      return LanguageConvertor.toZh(myState.readTypeName);
+    }
   }
 
   /**
    * 获取debug输出到什么地方
+   * 在v3.6.8版本中, 引入了en/zh系统, 因此需要convert
    * @return
    */
   public String getOutputTypeName() {
-    return myState.outputTypeName;
+    if (I18nTypeEnum.getI18N(myState.locale) == I18nTypeEnum.EN) {
+      return LanguageConvertor.toEn(myState.outputTypeName);
+    } else {
+      return LanguageConvertor.toZh(myState.outputTypeName);
+    }
   }
 
   /**
@@ -209,7 +219,11 @@ public final class AppSettings
     if (StringUtils.isBlank(rePositionSetting)) {
       rePositionSetting = REPOSITION_DEFAULT;
     }
-    return rePositionSetting;
+    if (isZh()) {
+      return LanguageConvertor.toZh(rePositionSetting);
+    } else {
+      return LanguageConvertor.toEn(rePositionSetting);
+    }
   }
 
   public String getSecretKey() {

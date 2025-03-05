@@ -62,7 +62,7 @@ def main():
     thread.start()
 
     solution = Solution()
-    trace_calls = Debugger({{methodName}}, {{read_type}}, log_out_helper, inst_source).trace_calls
+    trace_calls = Debugger({{methodName}}, {{read_type}}, log_out_helper, inst_source, {{language_type}}).trace_calls
     sys.settrace(trace_calls)
 {{callCode}}
     sys.settrace(None)  # 停止跟踪

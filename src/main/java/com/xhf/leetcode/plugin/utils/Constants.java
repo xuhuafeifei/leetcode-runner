@@ -42,10 +42,10 @@ public interface Constants {
 
     Border BORDER = JBUI.Borders.customLine(JBColor.border(), 1);
     // 别改, debug web端代码已经写死了, 改了容易出bug
-    String LOCAL_VARIABLE = "Local variable";
-    String STATIC_VARIABLE = "Static variable";
-    String MEMBER_VARIABLE = "Member variable";
-    String WATCH = "Watch variable";
+    String LOCAL_VARIABLE = BundleUtils.i18nHelper("局部变量", "Local variable");
+    String STATIC_VARIABLE = BundleUtils.i18nHelper("静态变量", "Static variable");
+    String MEMBER_VARIABLE = BundleUtils.i18nHelper("成员变量", "Member variable");
+    String WATCH = BundleUtils.i18nHelper("监视变量", "Watch variable");
 
 
     String PY_SERVER_DISCONNECT = "PY_SERVER_DISCONNECT";

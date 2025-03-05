@@ -61,7 +61,7 @@ def main():
     thread.start()
 
     solution = Solution()
-    trace_calls = Debugger('merge', 'std_in', log_out_helper, inst_source).trace_calls
+    trace_calls = Debugger('merge', 'std_in', log_out_helper, inst_source, "en").trace_calls
     sys.settrace(trace_calls)
     a0 = [1,2,3,0,0,0]
     a1 = 3

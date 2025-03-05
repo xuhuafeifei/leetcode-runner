@@ -6,12 +6,16 @@ from execute_result import ExecuteResult
 
 
 class Debugger:
-    def __init__(self, core_method_name, read_type, log_out_helper, inst_source):
+    def __init__(self, core_method_name, read_type, log_out_helper, inst_source, lang_type):
+        self.static_variable = "Static variable:\n" if lang_type == "en" else "静态变量:\n"
+        self.member_variable = "Member variable:\n" if lang_type == "en" else "成员变量:\n"
+        self.local_variable = "Local variable:\n" if lang_type == "en" else "局部变量:\n"
         self.inst_source = inst_source
         self.log = log_out_helper
         self.breakpoint_list = set()
         self.core_method_name = core_method_name
         self.call_stack = []
+        self.lang_type = lang_type
         # pre_option记录的是上一轮运行操作(R, N, STEP...)
         self.pre_option = 'R'
         self.pre_param = None
@@ -325,7 +329,7 @@ class Debugger:
             self.inst_source.store_output(r)
             return
         # 打印局部变量
-        res = "Local variable:\n"
+        res = self.local_variable
         # 遍历frame.f_locals, 同时将他存储到字符串中
         for key, value in frame.f_locals.items():
             if key == 'self':
@@ -342,7 +346,7 @@ class Debugger:
         # 打印静态变量（类变量）
         class_obj = frame.f_globals.get('Solution')  # 从全局变量中获取 Solution 类
         if class_obj:
-            res += "Static variable:\n"
+            res += self.static_variable
             for key, value in class_obj.__dict__.items():
                 if key == 'self':
                     continue
@@ -353,7 +357,7 @@ class Debugger:
                     res += f"{key}: {self.handle_value(value)}\n"
 
         # 打印成员变量（实例变量）
-        res += "Member variable:\n"
+        res += self.member_variable
         SELF = frame.f_locals.get('self', None)
         if SELF is not None:
             instance_vars = vars(SELF)  # 获取实例的属性

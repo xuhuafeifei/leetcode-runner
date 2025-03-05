@@ -28,6 +28,7 @@ public class QuestionCellRender extends DefaultListCellRenderer {
             // 兜底
             toStr = value.toString();
             int i = RandomUtils.nextInt(0, 2);
+            // 这个别国际化, 这玩意儿是系统内部使用的变量, 不会在UI处向用户呈现
             String[] s = {"EASY", "MEDIUM", "HARD"};
             difficulty = s[i];
         }

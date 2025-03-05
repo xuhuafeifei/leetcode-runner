@@ -130,7 +130,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         StringBuilder res = new StringBuilder();
         String[] watchPool = context.getWatchPool();
         if (watchPool.length != 0) {
-            res.append(Constants.WATCH + ":\n");
+            res.append(Constants.WATCH).append(":\n");
             for (String watch : watchPool) {
                 if (StringUtils.isBlank(watch)) {
                     continue;

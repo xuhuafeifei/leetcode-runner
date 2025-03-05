@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.render;
 
+import com.intellij.ui.Gray;
+import com.intellij.ui.JBColor;
 import com.xhf.leetcode.plugin.utils.Constants;
 
 import javax.swing.*;
@@ -20,7 +22,9 @@ public class VariablesCellRender extends DefaultListCellRenderer {
                 exp.contains(Constants.WATCH)
         )
         {
-            label.setFont(new Font(Constants.ENGLISH_FONT.getFontName(), Font.ITALIC + Font.BOLD, label.getFont().getSize()));
+            label.setFont(new Font(Constants.CN_FONT.getFontName(), Font.ITALIC + Font.BOLD, label.getFont().getSize()));
+            label.setForeground(new JBColor(Gray._100,
+                    Gray._180));
         }
         return label;
     }
