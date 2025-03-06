@@ -12,6 +12,7 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -104,8 +105,8 @@ public class JavaDebugEnv extends AbstractDebugEnv {
 
         int i = JOptionPane.showOptionDialog(
                 null,
-                myFileBrowserBtn,
-                "选择Java目录",
+                InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(BundleUtils.i18n("debug.leetcode.java.home.path.tip")).getTargetComponent(),
+                BundleUtils.i18nHelper("指定JAVA_HOME路径", "Specify JAVA_HOME path"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
@@ -191,7 +192,7 @@ public class JavaDebugEnv extends AbstractDebugEnv {
     private String getSolutionContent() {
         String content = ViewUtils.getContentOfCurrentOpenVFile(project);
         if (content == null) {
-            throw new DebugError("当前打开文件为空");
+            throw new DebugError(BundleUtils.i18nHelper("当前打开文件为空", "The current opened file is empty"));
         }
         // 替换含有package的那一行
         if (content.startsWith("package")) {

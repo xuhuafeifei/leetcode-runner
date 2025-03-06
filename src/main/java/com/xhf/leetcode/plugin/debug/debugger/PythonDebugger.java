@@ -138,12 +138,12 @@ public class PythonDebugger extends AbstractDebugger {
                 return;
             }
             if (!pR.isSuccess) {
-                LogUtils.simpleDebug("未知异常! debug 指令执行错误!");
+                LogUtils.simpleDebug(BundleUtils.i18nHelper("未知异常! debug 指令执行错误!", "unknown error! debug command execute error!"));
                 ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.unknown.error"), false, true);
                 continue;
             }
             if (Constants.PY_SERVER_DISCONNECT.equals(pR.r.getMoreInfo())) {
-                LogUtils.simpleDebug("python服务断开连接, debug结束!");
+                LogUtils.simpleDebug(BundleUtils.i18nHelper("python服务断开连接, debug结束!", "python server disconnect, debug end!"));
                 ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("debug.leetcode.debug.server.stop"), false, true);
                 break;
             }

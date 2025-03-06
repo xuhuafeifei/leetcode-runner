@@ -495,10 +495,10 @@ public class LeetcodeClient {
         HttpResponse httpResponse = httpClient.executeGet(httpRequest, project);
 
         // check data
-    /*
+        /*
         持续调用checkLeetcodeReady方法, 如果该方法返回false, 则表示数据还未完成准备
         循环调用, 直到Leetcode服务端将数据准备完成
-     */
+         */
         while (! checkLeetcodeReady(httpResponse)) {
             httpResponse = httpClient.executeGet(httpRequest, project);
         }
@@ -509,7 +509,7 @@ public class LeetcodeClient {
     /**
      * 检测leetcode服务端是否将数据准备完全, 如果准备完成, 则返回true, 否则返回false
      *
-     * @param httpResponse
+     * @param httpResponse resp
      * @return leetcode服务端是否将数据准备完全
      */
     private boolean checkLeetcodeReady(HttpResponse httpResponse) {

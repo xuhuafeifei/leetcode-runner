@@ -304,7 +304,9 @@ public class FileUtils {
      * @throws IOException exp
      */
     public static void removeFile(String path) throws IOException {
-        Files.delete(Paths.get(path));
+        if (fileExists(path)) {
+            Files.delete(Paths.get(path));
+        }
     }
 
 

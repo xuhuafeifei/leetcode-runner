@@ -10,7 +10,6 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DebugCheck;
 import com.xhf.leetcode.plugin.utils.LoginPass;
-import com.xhf.leetcode.plugin.utils.RatePass;
 
 /**
  * next
@@ -20,7 +19,7 @@ import com.xhf.leetcode.plugin.utils.RatePass;
  */
 @DebugCheck(DebugCheck.CheckType.STATUS)
 @LoginPass
-@RatePass
+//@RatePass
 public class DebugNAction extends AbstractAction {
 
     public DebugNAction() {

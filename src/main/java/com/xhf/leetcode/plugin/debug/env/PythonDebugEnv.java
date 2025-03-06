@@ -13,6 +13,7 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
@@ -115,8 +116,8 @@ public class PythonDebugEnv extends AbstractDebugEnv {
 
         int i = JOptionPane.showOptionDialog(
                 null,
-                myFileBrowserBtn,
-                "选择python解释器的路径",
+                InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(BundleUtils.i18n("debug.leetcode.python.home.path.tip")).getTargetComponent(),
+                BundleUtils.i18nHelper("设置PYTHON_HOME", "Set PYTHON_HOME"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
@@ -156,12 +157,16 @@ public class PythonDebugEnv extends AbstractDebugEnv {
 
         // 清空文件
         try {
+            FileUtils.removeFile(this.logDir);
+            FileUtils.removeFile(this.stdOutDir);
+            FileUtils.removeFile(this.stdErrDir);
+
             FileUtils.createAndWriteFile(this.logDir, "");
             FileUtils.createAndWriteFile(this.stdOutDir, "");
             FileUtils.createAndWriteFile(this.stdErrDir, "");
         } catch (IOException e) {
             LogUtils.error(e);
-            throw new DebugError("python日志文件创建错误!" + e.toString());
+            throw new DebugError(BundleUtils.i18nHelper("python日志文件创建错误!", "Failed to create python log files!") + e);
         }
 
         mainContent = mainContent.replace("{{callCode}}", callCode)
@@ -174,9 +179,9 @@ public class PythonDebugEnv extends AbstractDebugEnv {
                 .replace("{{language_type}}", "\"" + AppSettings.getInstance().getI18nType().getValue() + "\"")
         ;
         // debug
-        DebugUtils.simpleDebug("python服务端口确定: " + pyPort, project);
-        DebugUtils.simpleDebug("核心调用代码: \n" + callCode, project);
-        DebugUtils.simpleDebug("methodName: " + methodName, project);
+        DebugUtils.simpleDebug(BundleUtils.i18nHelper("python服务端口确定: ", "python service port determined: ") + pyPort, project);
+        DebugUtils.simpleDebug(BundleUtils.i18nHelper("核心调用代码: \n", "core call code: \n") + callCode, project);
+        DebugUtils.simpleDebug(BundleUtils.i18nHelper("方法名: ", "methodName: ") + methodName, project);
         // 存储文件
         StoreService.getInstance(project).writeFile(mainPath, mainContent);
         return true;
@@ -206,7 +211,7 @@ public class PythonDebugEnv extends AbstractDebugEnv {
     private String getSolutionContent() {
         String content = ViewUtils.getContentOfCurrentOpenVFile(project);
         if (content == null) {
-            throw new DebugError("当前打开文件为空");
+            throw new DebugError(BundleUtils.i18nHelper("当前打开文件为空", "Current open file is empty!"));
         }
         // 替换含有package的那一行为空, 只留下换行符
         if (content.startsWith("package")) {

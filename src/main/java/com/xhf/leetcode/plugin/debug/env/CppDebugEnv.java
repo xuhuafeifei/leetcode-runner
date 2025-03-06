@@ -152,7 +152,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
         int i = JOptionPane.showOptionDialog(
                 null,
                 targetComponent,
-                "选择MinGW目录",
+                BundleUtils.i18nHelper("选择MinGW目录", "choose MinGW directory"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
@@ -281,7 +281,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
     private String getSolutionContent() {
         String content = ViewUtils.getContentOfCurrentOpenVFile(project);
         if (content == null) {
-            throw new DebugError("当前打开文件为空");
+            throw new DebugError(BundleUtils.i18nHelper("当前打开文件为空", "current file is empty"));
         }
         String include = "#include \"leetcode.h\"";
         // 目前不需要增加偏移量
@@ -299,7 +299,13 @@ public class CppDebugEnv extends AbstractDebugEnv {
         private Process process;
 
         public MyTask(Project project, String combineCmd) {
-            super(project, "debug服务编译中, 需要一点时间, 这个时候, 您可以打开手机, 原生, 启动!", true);
+            super(project,
+                    BundleUtils.i18nHelper(
+                            "debug服务编译中, 需要一点时间, 这个时候, 您可以打开手机, 原生, 启动!",
+                            "debug service is compiling, please wait a moment, you can open the mobile phone, 原生, start!"
+                    )
+                    , true
+            );
             this.combinedCmd = combineCmd;
         }
 
@@ -355,7 +361,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
             if (i == null) {
                 LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.compile.cancel"));
-                ConsoleUtils.getInstance(project).showError("取消编译!", false, true);
+                ConsoleUtils.getInstance(project).showError(BundleUtils.i18nHelper("取消编译!", "cancel compile!"), false, true);
                 return false;
             }
 
