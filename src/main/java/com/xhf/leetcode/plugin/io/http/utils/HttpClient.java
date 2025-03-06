@@ -1,9 +1,11 @@
 package com.xhf.leetcode.plugin.io.http.utils;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.HttpRequest;
 import com.xhf.leetcode.plugin.model.HttpResponse;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -48,9 +50,12 @@ public class HttpClient {
     private final CloseableHttpClient httpClient = HttpClientBuilder.create()
             .setDefaultRequestConfig(RequestConfig.custom()
                     .setCookieSpec(CookieSpecs.STANDARD) // 使用宽松的 cookie 解析策略
+                    .setConnectTimeout(3000) // 设置连接超时时间
+                    .setSocketTimeout(2000) // 设置读取超时时间
                     .build())
             .setDefaultCookieStore(cookieStore) // 使用自定义的 CookieStore
             .build();
+
 
     // 忘了之前为啥把这个方法deprecated了
     // @Deprecated
@@ -86,7 +91,11 @@ public class HttpClient {
             }
         } catch (IOException e) {
             // todo: 修改为弹窗提示
-            throw new RuntimeException("GET request failed: " + e.getMessage(), e);
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            return null;
+        }
+        if (httpResponse.getBody() != null) {
+            LogUtils.info("response body: " + httpResponse.getBody());
         }
 
         return httpResponse;
@@ -96,7 +105,7 @@ public class HttpClient {
         HttpResponse httpResponse = executeGet(httpRequest);
         if (httpResponse == null) {
             LogUtils.error("httpResponse is null, possible network error. url = " + httpRequest.getUrl());
-            ConsoleUtils.getInstance(project).showWaring("request failed, possible network error! please check your network !", false, true);
+            ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("network.error"), false, true);
             throw new RuntimeException("network exception or request url error!");
         }
         return httpResponse;
@@ -117,7 +126,7 @@ public class HttpClient {
         if (httpResponse == null) {
             LogUtils.error("httpResponse is null, possible network error. url = " + httpRequest.getUrl());
             if (project != null) {
-                ConsoleUtils.getInstance(project).showWaring("request failed, possible network error! please check your network !", false, true);
+                ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("network.error"), false, true);
             }
             throw new RuntimeException("network exception or request url error!");
         }
@@ -166,8 +175,11 @@ public class HttpClient {
         } catch (IOException e) {
             // todo: 修改为弹窗提示
             // throw new RuntimeException("POST request failed: " + e.getMessage(), e);
-            LogUtils.info(e.toString());
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
             return null;
+        }
+        if (httpResponse.getBody() != null) {
+            LogUtils.info("response body: " + httpResponse.getBody());
         }
 
         return httpResponse;
