@@ -23,11 +23,23 @@ public class GsonUtils {
     }
 
     public static <T> T fromJson(String json, Class<T> clazz) {
-        return gson.fromJson(json, clazz);
+        try {
+            return gson.fromJson(json, clazz);
+        } catch (Exception e) {
+            LogUtils.warn("fromJson error, json = " + json + ", clazz = " + clazz.getName());
+            LogUtils.error(e);
+            return null;
+        }
     }
 
     public static <T> T fromJson(JsonElement jsonEle, Class<T> clazz) {
-        return gson.fromJson(jsonEle, clazz);
+        try {
+            return gson.fromJson(jsonEle, clazz);
+        } catch (Exception e) {
+            LogUtils.warn("fromJson error, jsonEle = " + jsonEle + ", clazz = " + clazz.getName());
+            LogUtils.error(e);
+            return null;
+        }
     }
 
     public static <T> List<T> fromJsonToList(String json, Class<T> clazz) {

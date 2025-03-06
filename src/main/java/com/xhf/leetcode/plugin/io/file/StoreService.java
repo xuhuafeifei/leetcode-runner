@@ -214,7 +214,7 @@ public final class StoreService implements Disposable {
             5, // 最大线程数
             1, // 线程存活时间
             TimeUnit.MINUTES,
-            new LinkedBlockingQueue<>(), // 无界阻塞队列
+            new LinkedBlockingQueue<>(3), // 无界阻塞队列
             new ThreadPoolExecutor.CallerRunsPolicy() // 拒绝策略：CallerRunsPolicy
     );
 
