@@ -73,7 +73,7 @@ public class CodeEditor extends CopyToolBarEditor {
                 String curContent = ViewUtils.getContentOfCurrentOpenVFile(project);
                 boolean flag = ViewUtils.writeContentToCurrentVFile(project, Question.replaceCodeSnippets(curContent, content));
                 if (flag) {
-                    instance.showInfoWithoutConsole(BundleUtils.i18n("action.leetcode.code.switch.success"), false, true);
+                    // instance.showInfoWithoutConsole(BundleUtils.i18n("action.leetcode.code.switch.success"), false, true);
                 }else {
                     instance.showWaringWithoutConsole(BundleUtils.i18n("action.leetcode.code.switch.failure"), false, true);
                 }

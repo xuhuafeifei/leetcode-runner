@@ -129,7 +129,7 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
                 // 更新cache
                 boolean flag = ViewUtils.updateLeetcodeEditorByCurrentVFile(project, lc);
                 if (flag) {
-                    ConsoleUtils.getInstance(project).showInfoWithoutConsole(BundleUtils.i18n("editor.error.info.add.success"), false, true);
+//                    ConsoleUtils.getInstance(project).showInfoWithoutConsole(BundleUtils.i18n("editor.error.info.add.success"), false, true);
                 } else {
                     ConsoleUtils.getInstance(project).showInfoWithoutConsole(BundleUtils.i18n("editor.error.info.add.failure"), false, true);
                 }

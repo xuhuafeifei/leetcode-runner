@@ -13,6 +13,8 @@ import com.intellij.ui.components.OnOffButton;
 import com.intellij.util.ui.FormBuilder;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.NoLanguageError;
 import com.xhf.leetcode.plugin.model.I18nTypeEnum;
 import com.xhf.leetcode.plugin.utils.*;
 import org.apache.commons.lang3.StringUtils;
@@ -305,9 +307,19 @@ public class AppSettingsComponent {
 
     I18nTypeEnum i18N = I18nTypeEnum.getI18N(AppSettings.getInstance().getLocale());
     if (i18N == I18nTypeEnum.ZH) {
-      reposition.setItem(LanguageConvertor.toZh(rePositionSetting));
+      try {
+        reposition.setItem(LanguageConvertor.toZh(rePositionSetting));
+      } catch (NoLanguageError e) {
+        LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+        reposition.setSelectedIndex(reposition.getItemCount() - 1);
+      }
     } else {
-      reposition.setItem(LanguageConvertor.toEn(rePositionSetting));
+      try {
+        reposition.setItem(LanguageConvertor.toEn(rePositionSetting));
+      } catch (NoLanguageError e) {
+        LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+        reposition.setSelectedIndex(reposition.getItemCount() - 1);
+      }
     }
   }
 

@@ -291,7 +291,7 @@ public class MarkDownEditor implements FileEditor {
             // handle html
             return html;
         } catch (Exception e) {
-            LogUtils.warn("load Markdown content error!!\n" + "content = " + GsonUtils.toJsonStr(content) + "\n\r" +
+            LogUtils.warn("load Markdown content error!!\n" + "content = " + com.xhf.leetcode.plugin.utils.MapUtils.toString(content) + "\n\r" +
                     "contentType = " + contentType.toString() + "\n\r" + "serverPath = " + serverPath);
             LogUtils.error(BundleUtils.i18n("editor.focus.load.error"), e);
             ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("editor.focus.load.error") + "\n" + DebugUtils.getStackTraceAsString(e), false, true);

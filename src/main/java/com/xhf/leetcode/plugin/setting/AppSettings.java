@@ -9,10 +9,13 @@ import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.NoLanguageError;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.I18nTypeEnum;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -85,7 +88,7 @@ public final class AppSettings
    * <p>
    * this method will keep the cache file exists one no matter how the filePath is change
    *
-   * @return
+   * @return string
    */
   public String getCoreFilePath() {
     if (myState.filePath.equals(EMPTY_FILE_PATH)) {
@@ -148,32 +151,52 @@ public final class AppSettings
   /**
    * 获取debug读取数据来源
    * 在v3.6.8版本中, 引入了en/zh系统, 因此需要convert
-   * @return
+   * @return 返回readType. 如果中英文转换出现异常, 则返回空串
    */
   public String getReadTypeName() {
     if (I18nTypeEnum.getI18N(myState.locale) == I18nTypeEnum.EN) {
-      return LanguageConvertor.toEn(myState.readTypeName);
+      try {
+        return LanguageConvertor.toEn(myState.readTypeName);
+      } catch (NoLanguageError e) {
+        LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+        return "";
+      }
     } else {
-      return LanguageConvertor.toZh(myState.readTypeName);
+      try {
+        return LanguageConvertor.toZh(myState.readTypeName);
+      } catch (NoLanguageError e) {
+        LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+        return "";
+      }
     }
   }
 
   /**
    * 获取debug输出到什么地方
    * 在v3.6.8版本中, 引入了en/zh系统, 因此需要convert
-   * @return
+   * @return 返回outputType. 如果中英文转换出现异常, 则返回空串
    */
   public String getOutputTypeName() {
     if (I18nTypeEnum.getI18N(myState.locale) == I18nTypeEnum.EN) {
-      return LanguageConvertor.toEn(myState.outputTypeName);
+      try {
+        return LanguageConvertor.toEn(myState.outputTypeName);
+      } catch (NoLanguageError e) {
+        LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+        return "";
+      }
     } else {
-      return LanguageConvertor.toZh(myState.outputTypeName);
+      try {
+        return LanguageConvertor.toZh(myState.outputTypeName);
+      } catch (NoLanguageError e) {
+        LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+        return "";
+      }
     }
   }
 
   /**
    * get file suffix, for example, java file suffix is .java, python file suffix is .py
-   * @return
+   * @return string
    */
   public String getFileTypeSuffix() {
     for (LangType langType : LangType.values()) {
@@ -220,9 +243,18 @@ public final class AppSettings
       rePositionSetting = REPOSITION_DEFAULT;
     }
     if (isZh()) {
-      return LanguageConvertor.toZh(rePositionSetting);
+      try {
+        return LanguageConvertor.toZh(rePositionSetting);
+      } catch (NoLanguageError e) {
+        LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+        return LanguageConvertor.REPOSITION_DEFAULT_ZH;
+      }
     } else {
-      return LanguageConvertor.toEn(rePositionSetting);
+      try {
+        return LanguageConvertor.toEn(rePositionSetting);
+      } catch (NoLanguageError e) {
+        return LanguageConvertor.REPOSITION_DEFAULT_EN;
+      }
     }
   }
 

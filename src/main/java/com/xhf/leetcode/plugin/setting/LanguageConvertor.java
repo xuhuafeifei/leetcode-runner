@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.setting;
 
+import com.xhf.leetcode.plugin.exception.NoLanguageError;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -53,7 +54,13 @@ public class LanguageConvertor {
             REPOSITION_SETTING_ZH
     };
 
-    public static String toEn(String zh) {
+    /**
+     * 通过zh转换为en. 干, 还不是因为国际化引入的丑需求
+      * @param zh zh language string
+     * @return en language string
+     * @throws NoLanguageError No match language found. 这里必须要抛出异常, 交由调用方捕获处理. 否则会出现一堆操蛋bug
+     */
+    public static String toEn(String zh) throws NoLanguageError {
         for (int i = 0; i < zhList.length; i++) {
             if (StringUtils.equals(zh, zhList[i]) ||
                     StringUtils.equals(zh, enList[i]) // 已经是英文
@@ -61,10 +68,16 @@ public class LanguageConvertor {
                 return enList[i];
             }
         }
-        throw new IllegalArgumentException("No match language found.");
+        throw new NoLanguageError("No match language found.");
     }
 
-    public static String toZh(String en) {
+    /**
+     * 通过en转换为zh. 干, 还不是因为国际化引入的丑需求
+     * @param  en language string
+     * @return zh zh language string
+     * @throws NoLanguageError No match language found. 这里必须要抛出异常, 交由调用方捕获处理. 否则会出现一堆操蛋bug
+     */
+    public static String toZh(String en) throws NoLanguageError {
         for (int i = 0; i < enList.length; i++) {
             if (StringUtils.equals(en, enList[i]) ||
                     StringUtils.equals(en, zhList[i]) // 已经是中文
@@ -72,10 +85,14 @@ public class LanguageConvertor {
                 return zhList[i];
             }
         }
-        throw new IllegalArgumentException("No match language found.");
+        throw new NoLanguageError("No match language found.");
     }
 
     public static boolean isEqual(String s1, String s2) {
-        return StringUtils.equals(toEn(s1), toEn(s2));
+        try {
+            return StringUtils.equals(toEn(s1), toEn(s2));
+        } catch (NoLanguageError e) {
+            return false;
+        }
     }
 }

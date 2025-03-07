@@ -26,4 +26,14 @@ public class MapUtils {
     public static Map<String, Value> emptyMap() {
         return new HashMap<>();
     }
+
+    public static String toString(Map<String, Object> content) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Object> entry : content.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(GsonUtils.toJsonStr(
+                    entry.getValue().toString()
+            )).append("\n");
+        }
+        return sb.toString();
+    }
 }
