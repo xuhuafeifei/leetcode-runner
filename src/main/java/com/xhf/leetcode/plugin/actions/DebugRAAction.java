@@ -11,6 +11,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LoginPass;
+import com.xhf.leetcode.plugin.utils.RatePass;
 
 /**
  * remove all break points
@@ -20,7 +21,7 @@ import com.xhf.leetcode.plugin.utils.LoginPass;
  */
 // @DebugCheck 允许在不处于debug状态下, 移除文件的所有断点
 @LoginPass
-//@RatePass
+@RatePass
 public class DebugRAAction extends AbstractAction {
 
     public DebugRAAction() {
