@@ -136,7 +136,13 @@ public abstract class AbstractDebugger implements Debugger{
         }
         // 设置上下文
         r.setContext(this.basicContext);
-        this.output.output(r);
+        try {
+            this.output.output(r);
+        } catch (Exception e) {
+            DebugUtils.simpleDebug("输出异常: " + e, project);
+            LogUtils.error(e);
+            return new ProcessResult(false, true, false, inst, null);
+        }
         if (! r.isSuccess()) {
             // 错误结果日志记录
             LogUtils.simpleDebug(r.getMsg());

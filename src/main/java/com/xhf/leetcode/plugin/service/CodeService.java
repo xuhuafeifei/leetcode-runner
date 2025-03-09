@@ -778,11 +778,7 @@ public class CodeService {
                 sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" ms ").append(" 💽: ").append(cr.getStatusMemory()).append("\n");
                 sb.append(BundleUtils.i18nHelper("全部的测试案例数量", "total test cases number")).append(": ").append(cr.getTotalTestcases()).append("\n");
                 sb.append(BundleUtils.i18nHelper("通过的测试案例数量", "total ac   cases number")).append(": ").append(cr.getTotalCorrect()).append("\n");
-                LCEventBus.getInstance().post(new TimeStopEvent());
-                TimerWindow timerWindow = ActionUtils.getTimerWindow();
-                if (timerWindow != null) {
-                    sb.append(BundleUtils.i18nHelper("解题花费时间: ", "solve time: ")).append(timerWindow.getTime());
-                }
+                appendToCorrectHeadAfter();
             } else {
                 boolean runSuccess = cr.getRunSuccess();
                 if (runSuccess) {
@@ -807,6 +803,13 @@ public class CodeService {
                     }
                 }
             }
+        }
+
+        /**
+         * 在答案正确的工况下, 将内容添加到head尾部. 在父类添加方法中, 会自动判断是否存在换行符. 如果没有, 父类会添加
+         */
+        protected void appendToCorrectHeadAfter() {
+
         }
 
         /**
@@ -984,6 +987,15 @@ public class CodeService {
                 extractAnswer();
                 // extract expected answer
                 extractExpectedAnswer();
+            }
+
+            @Override
+            protected void appendToCorrectHeadAfter() {
+                LCEventBus.getInstance().post(new TimeStopEvent());
+                TimerWindow timerWindow = ActionUtils.getTimerWindow();
+                if (timerWindow != null) {
+                    sb.append(BundleUtils.i18nHelper("解题花费时间: ", "solve time: ")).append(timerWindow.getTime()).append("\n");
+                }
             }
 
             private void extractExpectedAnswer() {
