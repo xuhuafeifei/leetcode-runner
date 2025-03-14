@@ -76,6 +76,7 @@ public class CodeService {
     public void openCodeEditor(Question question) {
         // 判断题目是否付费，以及用户VIP身份
         if(question.getIsPaidOnly() && !LoginService.getInstance(project).isPremium()) {
+            ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("vip.question"), false, true);
             return;
         }
         QuestionService.getInstance(project).fillQuestion(question, project);
