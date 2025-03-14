@@ -15,6 +15,7 @@ public class AddCommentAction extends AbstractAction{
     protected void doActionPerformed(Project project, AnActionEvent e) {
         // 获取当前代码内容
         String content = ViewUtils.getContentOfCurrentOpenVFile(project);
+        content = Question.removeComment(content);
         content = Question.addComment(content);
         ViewUtils.writeContentToCurrentVFile(project, content);
         // ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("action.leetcode.actions.comment.info"), false, true);
