@@ -257,19 +257,25 @@ public class QuestionService {
         JsonObject questionJsonObj = jsonObject.getAsJsonObject("data").getAsJsonObject("question");
 
         String translatedTitle = questionJsonObj.get("translatedTitle").getAsString();
-        String translatedContent = questionJsonObj.get("translatedContent").getAsString().replaceAll("\n\n", "");
+        // translatedContent = "null",解决报错
+        String translatedContent = "";
+        if(!questionJsonObj.get("translatedContent").isJsonNull()) {
+            translatedContent = questionJsonObj.get("translatedContent").getAsString().replaceAll("\n\n", "");
+        }
         String questionId = questionJsonObj.get("questionId").getAsString();
         String exampleTestcases = questionJsonObj.get("exampleTestcases").getAsString();
         String codeSnippets = null;
 
-        for (JsonElement item : questionJsonObj.getAsJsonArray("codeSnippets")) {
-            JsonObject obj = item.getAsJsonObject();
-            String lang = GsonUtils.fromJson(obj.get("lang"), String.class);
-            if (lt.has(lang)) {
+        if(!questionJsonObj.get("codeSnippets").isJsonNull()) {
+            for (JsonElement item : questionJsonObj.getAsJsonArray("codeSnippets")) {
+                JsonObject obj = item.getAsJsonObject();
+                String lang = GsonUtils.fromJson(obj.get("lang"), String.class);
+                if (lt.has(lang)) {
 //            }
 //            if (.equalsIgnoreCase(langType)) {
-                codeSnippets = Question.handleCodeSnippets(obj.get("code").getAsString(), langType);
-                break;
+                    codeSnippets = Question.handleCodeSnippets(obj.get("code").getAsString(), langType);
+                    break;
+                }
             }
         }
 

@@ -74,6 +74,10 @@ public class CodeService {
      * @param question question
      */
     public void openCodeEditor(Question question) {
+        // 判断题目是否付费，以及用户VIP身份
+        if(question.getIsPaidOnly() && !LoginService.getInstance(project).isPremium()) {
+            return;
+        }
         QuestionService.getInstance(project).fillQuestion(question, project);
 
         var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null);

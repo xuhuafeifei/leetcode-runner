@@ -132,10 +132,37 @@ public class LeetcodeClient {
         }
     }
 
+    /**
+     * 判断登录状态
+     * @return boolean
+     */
     public boolean isLogin() {
+        UserStatus userStatus = queryUserStatus();
+        if(userStatus == null) {
+            return false;
+        }
+        return userStatus.getIsSignedIn();
+    }
+
+    /**
+     * 判断用户是否是VIP会员
+     */
+    public boolean isPremium() {
+        UserStatus userStatus = queryUserStatus();
+        if(userStatus == null) {
+            return false;
+        }
+        return userStatus.getIsPremium();
+    }
+
+    /**
+     * 查询用户状态信息
+     * @return UserStatus
+     */
+    public UserStatus queryUserStatus() {
         // check LEETCODE_SESSION
         if (! httpClient.containsCookie(LeetcodeApiUtils.LEETCODE_SESSION)) {
-            return Boolean.FALSE;
+            return null;
         }
 
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
@@ -157,11 +184,11 @@ public class LeetcodeClient {
             JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
             JsonObject dataObject = jsonObject.getAsJsonObject("data");
             JsonObject userStatusObject = dataObject.getAsJsonObject("userStatus");
-            // extract isSignedIn
-            return userStatusObject.get("isSignedIn").getAsBoolean();
+            UserStatus userStatus = GsonUtils.fromJson(userStatusObject, UserStatus.class);
+            return userStatus;
         } catch (Exception e) {
             LogUtils.error(e);
-            return false;
+            return null;
         }
     }
 
@@ -219,6 +246,7 @@ public class LeetcodeClient {
      */
     public List<Question> getTotalQuestion() {
         // load cache
+        // TODO 增加抖动搜索
         List<Question> ans = loadQuestionCache();
         if (ans != null) {
             return ans;

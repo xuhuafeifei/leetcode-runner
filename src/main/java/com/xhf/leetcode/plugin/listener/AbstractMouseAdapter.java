@@ -17,7 +17,7 @@ public abstract class AbstractMouseAdapter extends MouseAdapter {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) {
+        if (e.getClickCount() == 2) { // TODO 检测是否为双击，存在魔法数值
             doubleClicked(e);
         }
     }

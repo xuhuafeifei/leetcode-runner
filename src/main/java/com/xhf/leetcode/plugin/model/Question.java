@@ -30,6 +30,16 @@ public class Question implements DeepCodingQuestion {
     private String difficulty;
 
     /**
+     * 是否付费
+     */
+    private boolean paidOnly;
+
+    /**
+     * 是否解锁，默认解锁
+     */
+    private boolean isLock = false;
+
+    /**
      * AC
      * TRIED
      * NOT_STARTED
@@ -352,6 +362,22 @@ public class Question implements DeepCodingQuestion {
 
     public String getFileName() {
         return  "[" + getFrontendQuestionId() + "]" + getTitleSlug();
+    }
+
+    public boolean getIsPaidOnly() {
+        return paidOnly;
+    }
+
+    public void setPaidOnly(boolean paidOnly) {
+        this.paidOnly = paidOnly;
+    }
+
+    public boolean getIsLock() {
+        return isLock;
+    }
+
+    public void setLock(boolean lock) {
+        isLock = lock;
     }
 
     private static final Pattern pattern = Pattern.compile("\\[(.*?)]");

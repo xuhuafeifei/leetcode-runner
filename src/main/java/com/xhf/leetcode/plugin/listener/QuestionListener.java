@@ -26,9 +26,9 @@ public class QuestionListener extends AbstractMouseAdapter {
      */
     @Override
     protected void doubleClicked(MouseEvent e) {
-        Point point = e.getPoint();
-        int idx = questionList.locationToIndex(point);
-        Question question = questionList.getModel().getElementAt(idx);
-        CodeService.getInstance(project).openCodeEditor(question);
+        Point point = e.getPoint(); // 获取鼠标双击坐标
+        int idx = questionList.locationToIndex(point); // 将坐标转换为列表索引
+        Question question = questionList.getModel().getElementAt(idx);  // 获取对应题目数据
+        CodeService.getInstance(project).openCodeEditor(question); // 打开代码编辑器
     }
 }

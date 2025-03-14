@@ -56,6 +56,7 @@ public final class LoginService {
             return;
         }
 
+        // 尝试 JCEF 登录
         JcefLoginWindow jcefLoginWindow = new JcefLoginWindow(project);
         try {
             jcefLoginWindow.start();
@@ -64,6 +65,7 @@ public final class LoginService {
                     "JCEF login failed, the reason is: " + e.getMessage() + "\nPlease try to restart idea, otherwise the system will use cookie login");
             ConsoleUtils.getInstance(project).showInfo(msg);
             LogUtils.error("JCEF Login Failed, Start Cookie Login...", e);
+            // 失败则启动 Cookie 登录
             startCookieLogin(project);
         }
     }
@@ -116,9 +118,19 @@ public final class LoginService {
         return login;
     }
 
+    /**
+     * TODO 待优化判断用户身份
+     */
+    public boolean isPremium() {
+        boolean isPremium = LeetcodeClient.getInstance(project).isPremium();
+        return isPremium;
+    }
+
     abstract static class BasicWindow {
         protected Project project;
+//This is a constructor for the BasicWindow class that takes a Project object as a parameter
         public BasicWindow(Project project) {
+            //This line assigns the parameter project to the instance variable project
             this.project = project;
         }
 
@@ -335,7 +347,7 @@ public final class LoginService {
                                 cookieList.clear();
                             }
                         }
-                        return Boolean.TRUE;
+                            return Boolean.TRUE;
                     });
                 }
             }, jbcebrowser.getCefBrowser());

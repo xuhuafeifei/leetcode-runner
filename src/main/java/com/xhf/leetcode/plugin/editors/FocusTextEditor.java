@@ -25,6 +25,7 @@ import java.util.Map;
  * @email 2508020102@qq.com
  */
 public class FocusTextEditor implements FileEditor {
+
     /**
      * idea项目对象
      */
