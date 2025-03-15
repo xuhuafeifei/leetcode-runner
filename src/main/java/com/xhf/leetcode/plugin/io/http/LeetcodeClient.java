@@ -34,6 +34,7 @@ public class LeetcodeClient {
 
     private Project project;
     private final HttpClient httpClient;
+    private UserStatus userStatus;
     private static boolean first = true;
     private static volatile LeetcodeClient instance;
 
@@ -165,6 +166,12 @@ public class LeetcodeClient {
             return null;
         }
 
+        // 不考虑用户刷题刷到一半, 给leetcode充钱变成vip的情况
+        // todo: 后续新增的用户信息展示功能, 在提供userStatues改变接口
+        if (userStatus != null) {
+            return userStatus;
+        }
+
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_STATUS_QUERY);
@@ -184,7 +191,7 @@ public class LeetcodeClient {
             JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
             JsonObject dataObject = jsonObject.getAsJsonObject("data");
             JsonObject userStatusObject = dataObject.getAsJsonObject("userStatus");
-            UserStatus userStatus = GsonUtils.fromJson(userStatusObject, UserStatus.class);
+            userStatus = GsonUtils.fromJson(userStatusObject, UserStatus.class);
             return userStatus;
         } catch (Exception e) {
             LogUtils.error(e);

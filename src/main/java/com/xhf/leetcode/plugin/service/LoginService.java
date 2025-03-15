@@ -128,7 +128,7 @@ public final class LoginService {
 
     abstract static class BasicWindow {
         protected Project project;
-//This is a constructor for the BasicWindow class that takes a Project object as a parameter
+        //This is a constructor for the BasicWindow class that takes a Project object as a parameter
         public BasicWindow(Project project) {
             //This line assigns the parameter project to the instance variable project
             this.project = project;
