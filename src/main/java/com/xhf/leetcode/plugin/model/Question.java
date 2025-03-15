@@ -330,7 +330,12 @@ public class Question implements DeepCodingQuestion {
         sb.append("[")
                 .append(frontendQuestionId)
                 .append("]")
-                .append(" ").append(getTitleCn())
+                .append(" ").append(getTitleCn());
+        
+        // 添加 VIP 标记
+        if (paidOnly) {
+            sb.append(" 【👑 vip】");
+        }
 //                .append(AppSettings.getInstance().isZh() ? " " + getTitleCn() : " " + getTitle())
         ;
         return sb.toString();

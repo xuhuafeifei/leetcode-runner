@@ -1,0 +1,7 @@
+{
+    // "java.dependency.syncWithFolderExplorer": true,
+    "java.jdt.ls.java.home": "E:/finalShell/jdk11",
+    "java.import.gradle.java.home": "E:/finalShell/jdk11",
+    "java.import.gradle.home": "E:/graddle-8.0/gradle-8.0" ,
+    "java.import.gradle.user.home": "E:/graddle-home"
+}
