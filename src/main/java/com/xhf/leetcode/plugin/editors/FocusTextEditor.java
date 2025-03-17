@@ -89,6 +89,7 @@ public class FocusTextEditor implements FileEditor {
         map.put(Constants.QUESTION_CONTENT, lc.getMarkdownContent());
         map.put(Constants.VFILE, this.file);
         map.put(Constants.STATUS, lc.getStatus());
+        map.put(Constants.IS_PAID_ONLY, lc.getIsPaidOnly());
         return map;
     }
 

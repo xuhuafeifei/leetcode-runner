@@ -11,12 +11,14 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.AESUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -209,6 +211,7 @@ public final class StoreService implements Disposable {
         this.persistCache(async);
     }
 
+    @Deprecated
     private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
             5, // 核心线程数
             5, // 最大线程数
@@ -220,7 +223,7 @@ public final class StoreService implements Disposable {
 
 
     private void frequentLog(final String info) {
-        executor.execute(() -> {
+        TaskCenter.getInstance().createTask(() -> {
             lock.lock();
             try {
                 long now = System.currentTimeMillis();
@@ -234,9 +237,8 @@ public final class StoreService implements Disposable {
             } finally {
                 lock.unlock();
             }
-        });
+        }).invokeLater();
     }
-
 
     public boolean contains(String key) {
         return StringUtils.isNotBlank(getCacheJson(key));
@@ -353,7 +355,7 @@ public final class StoreService implements Disposable {
 
 
     /*------------------------------disk---------------------------------*/
-    private ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
 
 
     /**
@@ -362,7 +364,7 @@ public final class StoreService implements Disposable {
      */
     private void persistCache(boolean async) {
         if (async) {
-            executor.execute(this::persistCache);
+            TaskCenter.getInstance().createTask(this::persistCache).invokeLater();
         } else {
             this.persistCache();
         }
@@ -393,7 +395,7 @@ public final class StoreService implements Disposable {
         Properties properties = FileUtils.readPropertiesFileContent(getCacheFilePath());
         properties.forEach((k, v) -> {
             try {
-                durableCache.put((String) k, GsonUtils.fromJson((String) v, StoreContent.class));
+                durableCache.put((String) k, Objects.requireNonNull(GsonUtils.fromJson((String) v, StoreContent.class)));
             } catch (Exception e) {
                 LogUtils.warn("some exception happen during the cache loading...\nthe property key is " + k + " and the value is " + v
                 + "\nthe key will be removed by system soon if exists");

@@ -286,6 +286,7 @@ public class CodeService {
         le.setDifficulty(question.getDifficulty());
         le.setDebugTestcase(question.getExampleTestcases());
         le.setStatus(question.getStatus());
+        le.setPaidOnly(question.getIsPaidOnly());
         return le;
     }
 

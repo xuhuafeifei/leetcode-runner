@@ -32,6 +32,7 @@ public class LeetcodeEditor {
     private DeepCodingInfo deepCodingInfo;
     // 题目解决状态
     private String status;
+    private boolean isPaidOnly;
 
     public String getTopicId() {
         return topicId;
@@ -170,5 +171,13 @@ public class LeetcodeEditor {
 
     public String getStatus() {
         return status;
+    }
+
+    public boolean getIsPaidOnly() {
+        return isPaidOnly;
+    }
+
+    public void setPaidOnly(boolean paidOnly) {
+        isPaidOnly = paidOnly;
     }
 }

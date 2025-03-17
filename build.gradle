@@ -20,9 +20,9 @@ test {
 }
 
 // Solve the problem when garble build, the console will output messy character
-tasks.withType(JavaExec){
-    jvmArgs = ['-Xmx512m', '-Dfile.encoding=UTF-8', '-Dsun.stdout.encoding=UTF-8', '-Dsun.stderr.encoding=UTF-8']
-}
+//tasks.withType(JavaExec){
+//    jvmArgs = ['-Xmx512m', '-Dfile.encoding=UTF-8', '-Dsun.stdout.encoding=UTF-8', '-Dsun.stderr.encoding=UTF-8']
+//}
 
 group 'com.xhf'
 version '3.6.8'

@@ -179,7 +179,15 @@ public class HttpClient {
             return null;
         }
         if (httpResponse.getBody() != null) {
-            LogUtils.info("response body: " + httpResponse.getBody());
+            if (httpResponse.getBody().length() < 10000) {
+                LogUtils.info("response body: " + httpResponse.getBody());
+            } else {
+                try {
+                    LogUtils.info("response body is too large. system will record part of it : " + httpResponse.getBody().substring(0, 1000));
+                } catch (Exception e) {
+                    LogUtils.error("unknown error happened! ", e);
+                }
+            }
         }
 
         return httpResponse;

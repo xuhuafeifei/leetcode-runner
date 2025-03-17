@@ -12,7 +12,7 @@ import java.util.concurrent.*;
  */
 public class TaskCenter {
     // 创建线程池
-    private final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 20, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10));
+    private final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(4, 8, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10), new ThreadPoolExecutor.CallerRunsPolicy());
     // 单例
     private static volatile TaskCenter instance;
     private TaskCenter() {

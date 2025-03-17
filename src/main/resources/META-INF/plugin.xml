@@ -77,12 +77,6 @@
 
         <!-- http request -->
         <httpRequestHandler implementation="com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler"/>
-
-        <!-- 注册复习计划工具窗口 -->
-        <toolWindow id="LeetCode 复习计划"
-                   icon="/icons/review.svg"
-                   anchor="right"
-                   factoryClass="com.xhf.leetcode.plugin.review.ui.ReviewPlanToolWindow"/>
     </extensions>
 
     <actions resource-bundle="messages.info">
@@ -204,14 +198,6 @@
                     icon="/icons/addComment.svg">
             </action>
         </group>
-
-        <!-- 添加复习计划功能入口 -->
-        <action id="leetcode.review.plan"
-                class="com.xhf.leetcode.plugin.actions.ReviewPlanAction"
-                text="LeetCode 复习计划"
-                description="打开 LeetCode 复习计划工具窗口">
-            <add-to-group group-id="leetcode.menu" anchor="last"/>
-        </action>
     </actions>
 
 </idea-plugin>

@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.io.file.utils;
 
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -51,7 +52,8 @@ public class FileUtils {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.warn("read content from file error!");
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
         return content.toString();
     }
@@ -72,7 +74,8 @@ public class FileUtils {
                 content.append(line).append("\n");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.warn("read content from file error!");
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
         return content.toString();
     }
@@ -98,7 +101,9 @@ public class FileUtils {
 
         try (FileOutputStream fos = new FileOutputStream(path)) {
             // write properties to file
+            long start = System.currentTimeMillis();
             properties.store(fos, "persist content");
+            LogUtils.simpleDebug("write duration: " + (System.currentTimeMillis() - start) + "ms");
         }
     }
 

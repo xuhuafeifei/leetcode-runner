@@ -39,6 +39,7 @@ public interface Constants {
     String SUBMISSION_ID = "SUBMISSION_ID";
     String QUESTION_CONTENT = "QUESTION_CONTENT";
     String ARTICLE_URL = "ARTICLE_URL";
+    String IS_PAID_ONLY = "isPaidOnly";
 
     Border BORDER = JBUI.Borders.customLine(JBColor.border(), 1);
     // 别改, debug web端代码已经写死了, 改了容易出bug
