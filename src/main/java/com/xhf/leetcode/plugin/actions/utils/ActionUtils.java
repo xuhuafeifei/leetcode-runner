@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.actions.utils;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.review.front.ReviewWindow;
 import com.xhf.leetcode.plugin.window.TimerWindow;
 
 import java.util.concurrent.TimeUnit;
@@ -32,6 +34,24 @@ public class ActionUtils {
         if (windowInstance != null) {
             windowInstance.dispose();
             windowInstance = null;
+        }
+    }
+
+    private static ReviewWindow reviewWindow;
+
+    public static void createReviewWindow(Project project) {
+        if (reviewWindow == null) {
+            reviewWindow = new ReviewWindow(project);
+            reviewWindow.setVisible(true);
+        } else {
+            disposeReviewWindow();
+        }
+    }
+
+    public static void disposeReviewWindow() {
+        if (reviewWindow != null) {
+            reviewWindow.dispose();
+            reviewWindow = null;
         }
     }
 }

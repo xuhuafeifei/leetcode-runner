@@ -197,6 +197,10 @@
             <action id="leetcode.plugin.AddCommentAction" class="com.xhf.leetcode.plugin.actions.AddCommentAction"
                     icon="/icons/addComment.svg">
             </action>
+            <separator/>
+            <action id="leetcode.plugin.ReviewAction" class="com.xhf.leetcode.plugin.actions.ReviewAction"
+                    icon="AllIcons.Actions.Annotate">
+            </action>
         </group>
     </actions>
 
