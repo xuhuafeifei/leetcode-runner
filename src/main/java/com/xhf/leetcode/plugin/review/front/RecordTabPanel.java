@@ -1,15 +1,13 @@
 package com.xhf.leetcode.plugin.review.front;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.components.JBScrollPane;
+import com.intellij.openapi.util.IconLoader;
 import com.xhf.leetcode.plugin.review.backend.model.QueryDimModel;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
-import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.util.List;
 
@@ -20,6 +18,7 @@ import java.util.List;
 public class RecordTabPanel extends JPanel {
     private final Project project;
     private final ReviewQuestionService service;
+    private List<ReviewQuestion> totalReviewQuestion;
 
     public RecordTabPanel(Project project) {
         this.project = project;
@@ -28,13 +27,47 @@ public class RecordTabPanel extends JPanel {
         loadContent();
     }
 
+    int cursor = -1;
+
     private void loadContent() {
-        List<ReviewQuestion> totalReviewQuestion = service.getTotalReviewQuestion(new QueryDimModel());
+        this.totalReviewQuestion = service.getTotalReviewQuestion(new QueryDimModel());
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-//        for (ReviewQuestion rq : totalReviewQuestion) {
-//            panel.add(createLine(rq));
-//        }
+        panel.setLayout(new BorderLayout());
+
+        if (! totalReviewQuestion.isEmpty()) {
+            Component questionCard = createQuestionCard(totalReviewQuestion.get(++cursor));
+            panel.add(questionCard, BorderLayout.CENTER);
+        }
+
+        var lef = new JButton(IconLoader.getIcon("/icons/left-btn.svg", this.getClass()));
+        lef.setBorder(BorderFactory.createEmptyBorder());
+        lef.setContentAreaFilled(false);
+        lef.addActionListener(e -> {
+           if (cursor > 0) {
+               panel.add(createQuestionCard(totalReviewQuestion.get(--cursor)), BorderLayout.CENTER);
+               panel.revalidate();
+               panel.repaint();
+           }
+        });
+
+        var rig = new JButton(IconLoader.getIcon("/icons/right-btn.svg", this.getClass()));
+        rig.setBorder(BorderFactory.createEmptyBorder());
+        rig.setContentAreaFilled(false);
+        rig.addActionListener(e -> {
+            if (cursor < totalReviewQuestion.size() - 1) {
+                panel.add(createQuestionCard(totalReviewQuestion.get(++cursor)), BorderLayout.CENTER);
+                panel.revalidate();
+                panel.repaint();
+            }
+        });
+
+        panel.add(lef, BorderLayout.WEST);
+        panel.add(rig, BorderLayout.EAST);
+
+        add(panel);
+    }
+
+    private Component createQuestionCard(ReviewQuestion rq) {
         // 未开始
         // 题目编号
         // 题目名称
@@ -43,36 +76,16 @@ public class RecordTabPanel extends JPanel {
         // 复习时间
         var editorPane = new JTextPane();
         editorPane.setContentType("text/html");
-        editorPane.setText(new CssBuilder()
-                .addStatus("逾期")
-                .addTitle("[8] 两数之和", "EASY")
-                .addUserRate("很难")
-                .lastModify("2023/03/17")
-                .nextReview("2023/03/18")
+        editorPane.setText(
+                new CssBuilder()
+                .addStatus(rq.getStatus())
+                .addTitle(rq.getTitle(), rq.getDifficulty())
+                .addUserRate(rq.getUserRate())
+                .lastModify(rq.getLastModify())
+                .nextReview(rq.getNextReview())
                 .build()
         );
-        panel.add(editorPane);
 
-        // 为panel添加滚轮
-        var scrollPane = new JBScrollPane(panel);
-        add(scrollPane);
-    }
-
-    private Component createLine(ReviewQuestion rq) {
-        JPanel jPanel = new JPanel();
-        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
-        JEditorPane editorPane = new JEditorPane();
-        editorPane.setContentType("text/html");
-        editorPane.setText("Hello, <font color='red'>World!</font>");
-        editorPane.setEditable(false);
-
-        Border innerBorder = BorderFactory.createLineBorder(new Color(10, 20, 23), 1);
-        Border padding = BorderFactory.createEmptyBorder(1, 6, 1, 6);
-        editorPane.setBorder(BorderFactory.createCompoundBorder(padding, innerBorder));
-
-        jPanel.add(editorPane);
-        jPanel.add(new JButton(BundleUtils.i18n("action.leetcode.review.delete")));
-        jPanel.add(new JButton(BundleUtils.i18n("action.leetcode.review.continue")));
-        return jPanel;
+        return editorPane;
     }
 }
