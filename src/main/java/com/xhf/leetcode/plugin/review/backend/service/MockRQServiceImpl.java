@@ -17,12 +17,14 @@ public class MockRQServiceImpl implements ReviewQuestionService {
     private static MockRQServiceImpl instance = null;
     private MockRQServiceImpl() {
     }
+
     public static MockRQServiceImpl getInstance() {
         if (instance == null) {
             instance = new MockRQServiceImpl();
         }
         return instance;
     }
+
     @Override
     public int getTotalCnt(QueryDim queryDim) {
         return 0;
