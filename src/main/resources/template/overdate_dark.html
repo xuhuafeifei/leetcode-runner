@@ -1,0 +1,28 @@
+<style>
+    .card {
+        width: 230px;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(255, 0, 0, 0.4); /* 红色阴影 */
+        background-color: #2b2b2b; /* 深色背景 */
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid #ff0000; /* 红色边框 */
+    }
+
+    .card p {
+        margin: 10px 0;
+        color: #ff0000; /* 纯红色字体 */
+        font-weight: bold;
+        text-decoration: underline wavy red; /* 波浪红色下划线，类似 IDEA 语法错误 */
+    }
+
+</style>
+<div class="card">
+    <p class="status">{{status-content}}</p>
+    <p class="{{title-css}}">{{title-content}}</p>
+    <p class="{{difficulty-css}}">{{difficulty-content}}</p>
+    <p class="date">{{lastModify-content}}</p>
+    <p class="date">{{nextReview-content}}</p>
+</div>

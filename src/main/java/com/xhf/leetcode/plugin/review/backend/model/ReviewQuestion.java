@@ -5,4 +5,10 @@ package com.xhf.leetcode.plugin.review.backend.model;
  * @email 2508020102@qq.com
  */
 public interface ReviewQuestion {
+    String getStatus();
+    String getTitle();
+    String getUserRate();
+    String getLastModify();
+    String getNextReview();
+    String getDifficulty();
 }

@@ -94,8 +94,8 @@ public class TimerWindow extends JWindow {
 
     private JPanel createMainPanel() {
         JPanel mainPanel = new JPanel(new BorderLayout());
-        // mainPanel.setBorder(BorderFactory.createLineBorder(JBColor.border(), 1));
-        mainPanel.setBackground(JBColor.background());
+        // 不要增加这行代码, 会导致在old UI渲染时, 颜色冲突
+        // mainPanel.setBackground(JBColor.background());
         mainPanel.setOpaque(true); // 确保背景不透明
 
         // 标题栏
@@ -103,19 +103,15 @@ public class TimerWindow extends JWindow {
 
         // 时间显示
         JPanel timePanel = new JPanel(new BorderLayout());
-        // timePanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
-        timePanel.setBackground(JBColor.background());
+        // 不要增加这行代码, 会导致在old UI渲染时, 颜色冲突
+        // timePanel.setBackground(JBColor.background());
 
         timeLabel = new JBLabel("00:00:00", SwingConstants.CENTER);
         timeLabel.setFont(new Font("Arial", Font.BOLD, 24));
         timePanel.add(timeLabel, BorderLayout.CENTER);
-        // timePanel.add(InnerHelpTooltip.FlowLayout(FlowLayout.CENTER, 0, -5).add(timeLabel).addHelp(this.HELP_CONTENT).getTargetComponent(), BorderLayout.CENTER);
 
         mainPanel.add(timePanel, BorderLayout.CENTER);
 
-        // 控制按钮
-        // JPanel controlPanel = createControlPanel();
-        // controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 15, 0));
         mainPanel.add(createControlPanel(), BorderLayout.SOUTH);
 
         return mainPanel;
@@ -123,7 +119,8 @@ public class TimerWindow extends JWindow {
 
     private JPanel createTitleBar() {
         JPanel titleBar = new JPanel(new BorderLayout());
-        titleBar.setBackground(JBColor.background());
+        // 不要增加这行代码, 会导致在old UI渲染时, 颜色冲突
+        // titleBar.setBackground(JBColor.background());
         titleBar.setPreferredSize(new Dimension(0, 30));
 
         // 关闭按钮
@@ -160,8 +157,7 @@ public class TimerWindow extends JWindow {
     }
 
     private JButton createIconButton(Icon icon, ActionListener listener) {
-        JButton btn = new JButton(icon);
-        // btn.setBorder(BorderFactory.createEmptyBorder(4, 12 / 2, 8, 12 / 2));
+        var btn = new JButton(icon);
         btn.setBorder(BorderFactory.createEmptyBorder());
         btn.setContentAreaFilled(false);
         btn.addActionListener(listener);

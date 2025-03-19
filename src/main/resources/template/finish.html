@@ -1,0 +1,26 @@
+<style>
+    .card {
+        width: 230px;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid #bcb6b6;
+    }
+
+    .card p {
+        margin: 10px 0;
+        text-decoration: line-through;
+        color: #aaa;
+    }
+</style>
+<div class="card">
+    <p class="status">{{status-content}}</p>
+    <p class="{{title-css}}">{{title-content}}</p>
+    <p class="{{difficulty-css}}">{{difficulty-content}}</p>
+    <p class="date">{{lastModify-content}}</p>
+    <p class="date">{{nextReview-content}}</p>
+</div>
