@@ -1,22 +1,29 @@
 package com.xhf.leetcode.plugin.review.front;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Painter;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.wm.IdeGlassPane;
 import com.xhf.leetcode.plugin.review.backend.model.QueryDimModel;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.List;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class RecordTabPanel extends JPanel {
+public class RecordTabPanel extends JPanel implements IdeGlassPane {
     private final Project project;
     private final ReviewQuestionService service;
     private List<ReviewQuestion> totalReviewQuestion;
@@ -113,5 +120,25 @@ public class RecordTabPanel extends JPanel {
         jPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         return jPanel;
+    }
+
+    @Override
+    public void addMousePreprocessor(@NotNull MouseListener listener, @NotNull Disposable parent) {
+
+    }
+
+    @Override
+    public void addMouseMotionPreprocessor(@NotNull MouseMotionListener listener, @NotNull Disposable parent) {
+
+    }
+
+    @Override
+    public void addPainter(@Nullable Component component, @NotNull Painter painter, @NotNull Disposable parent) {
+
+    }
+
+    @Override
+    public void setCursor(@Nullable Cursor cursor, @NotNull Object requestor) {
+
     }
 }

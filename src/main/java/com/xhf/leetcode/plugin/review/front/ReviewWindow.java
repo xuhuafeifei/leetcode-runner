@@ -3,10 +3,10 @@ package com.xhf.leetcode.plugin.review.front;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.openapi.wm.IdeFocusManager;
+import com.intellij.openapi.wm.impl.IdeGlassPaneImpl;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.tabs.TabInfo;
-import com.intellij.ui.tabs.impl.JBEditorTabs;
+import com.intellij.ui.tabs.impl.JBTabsImpl;
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
 import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
@@ -23,9 +23,10 @@ import java.awt.event.MouseEvent;
 public class ReviewWindow extends JWindow implements Disposable {
     private final Project project;
     /**
-     * 命令行选项卡, 用于呈现Console 和 Variables 选项卡
+     * 命令行选项卡
+     * todo: 改了, 不要用JBEditorTabs, 老是报错, tmd
      */
-    private final JBEditorTabs tabs;
+    private final JBTabsImpl tabs;
 
     // UI组件
     private Point dragPoint;
@@ -38,11 +39,15 @@ public class ReviewWindow extends JWindow implements Disposable {
 
     public ReviewWindow(Project project) {
         this.project = project;
-        this.tabs    = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
+        // this.tabs    = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
+//        this.tabs    = new JBTabsImpl(project);
+        this.tabs = new JBTabsImpl(project);
+
         // 窗口配置
         setAlwaysOnTop(true);
         setBackground(new JBColor(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0)));
         setContentPane(createMainPanel());
+        setGlassPane(new IdeGlassPaneImpl(new JRootPane()));
         pack();
         int initHeight = 350;
         setSize((int) (initHeight * radio), initHeight);
@@ -86,7 +91,8 @@ public class ReviewWindow extends JWindow implements Disposable {
     }
 
     private JPanel createMainPanel() {
-        JPanel mainPanel = new JPanel(new BorderLayout());
+        var mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createLineBorder(JBColor.border(), 1));
         mainPanel.setBackground(JBColor.background());
         mainPanel.setOpaque(true); // 确保背景不透明

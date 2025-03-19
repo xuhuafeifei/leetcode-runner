@@ -1,6 +1,9 @@
 package com.xhf.leetcode.plugin.review.front;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Painter;
+import com.intellij.openapi.wm.IdeGlassPane;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.xhf.leetcode.plugin.review.backend.model.QueryDimModel;
@@ -8,9 +11,13 @@ import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.List;
 
 /**
@@ -18,7 +25,7 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class DailyPlanTabPanel extends JPanel {
+public class DailyPlanTabPanel extends JPanel implements IdeGlassPane {
     private final Project project;
     private final ReviewQuestionService service;
     public DailyPlanTabPanel(Project project) {
@@ -47,5 +54,25 @@ public class DailyPlanTabPanel extends JPanel {
         jPanel.add(new JButton(BundleUtils.i18n("action.leetcode.review.done")));
         jPanel.add(new JButton(BundleUtils.i18n("action.leetcode.review.continue")));
         return jPanel;
+    }
+
+    @Override
+    public void addMousePreprocessor(@NotNull MouseListener listener, @NotNull Disposable parent) {
+
+    }
+
+    @Override
+    public void addMouseMotionPreprocessor(@NotNull MouseMotionListener listener, @NotNull Disposable parent) {
+
+    }
+
+    @Override
+    public void addPainter(@Nullable Component component, @NotNull Painter painter, @NotNull Disposable parent) {
+
+    }
+
+    @Override
+    public void setCursor(@Nullable Cursor cursor, @NotNull Object requestor) {
+
     }
 }
