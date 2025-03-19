@@ -24,7 +24,6 @@ public class ReviewWindow extends JWindow implements Disposable {
     private final Project project;
     /**
      * 命令行选项卡
-     * todo: 改了, 不要用JBEditorTabs, 老是报错, tmd
      */
     private final JBTabsImpl tabs;
 
@@ -39,8 +38,6 @@ public class ReviewWindow extends JWindow implements Disposable {
 
     public ReviewWindow(Project project) {
         this.project = project;
-        // this.tabs    = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
-//        this.tabs    = new JBTabsImpl(project);
         this.tabs = new JBTabsImpl(project);
 
         // 窗口配置
