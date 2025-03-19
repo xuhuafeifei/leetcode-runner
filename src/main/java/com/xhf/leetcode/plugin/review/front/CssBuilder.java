@@ -1,8 +1,12 @@
 package com.xhf.leetcode.plugin.review.front;
 
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.ui.ColorUtil;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
+import java.awt.*;
 import java.util.Objects;
 
 /**
@@ -12,73 +16,14 @@ import java.util.Objects;
  * @email 2508020102@qq.com
  */
 public class CssBuilder {
-    private String res;
-    private String template = "<style>\n" +
-            "    {{problem-info}}\n" +
-            "    {{problem-info-p}}\n" +
-            "\n" +
-            "    .status {\n" +
-            "        background-color: {{status-background}};\n" +
-            "        color: rgba(25, 118, 210, {{opacity}});\n" +
-            "        font-weight: bold;\n" +
-            "    }\n" +
-            "\n" +
-            "    .problem-easy {\n" +
-            "        background-color: #e8f5e9;\n" +
-            "        color: rgba(46, 125, 50, {{opacity}});\n" +
-            "        font-size: 1.1em;\n" +
-            "        font-weight: bold;\n" +
-            "    }\n" +
-            "    \n" +
-            "    .problem-medium {\n" +
-            "        background-color: #fff3e0;\n" +
-            "        color: rgba(240, 182, 35, {{opacity}});\n" +
-            "        font-size: 1.1em;\n" +
-            "        font-weight: bold;\n" +
-            "    }\n" +
-            "\n" +
-            "    .problem-hard {\n" +
-            "        background-color: #fff3e0;\n" +
-            "        color: rgba(247, 6, 6, {{opacity}});\n" +
-            "        font-size: 1.1em;\n" +
-            "        font-weight: bold;\n" +
-            "    }\n" +
-            "\n" +
-            "    .user-easy {\n" +
-            "        background-color: #e8f5e9;\n" +
-            "        color: rgba(46, 125, 50, {{opacity}});\n" +
-            "    }\n" +
-            "\n" +
-            "    .user-medium {\n" +
-            "        background-color: #fff3e0;\n" +
-            "        color: rgba(245, 124, 0, {{opacity}});\n" +
-            "    }\n" +
-            "\n" +
-            "    .user-hard {\n" +
-            "        background-color: #f3e5f5;\n" +
-            "        color: rgba(255, 0, 0, {{opacity}});\n" +
-            "    }\n" +
-            "\n" +
-            "    .last-review {\n" +
-            "        background-color: #f3e5f5;\n" +
-            "        color: rgba(242, 55, 217, {{opacity}});\n" +
-            "    }\n" +
-            "\n" +
-            "    .next-review {\n" +
-            "        background-color: #e8eaf6;\n" +
-            "        color: rgba(63, 81, 181, {{opacity}});\n" +
-            "    }" +
-            "\n" +
-            "<div class=\"problem-info\">\n" +
-            "    <p class=\"status\">{{status}}</p>\n" +
-            "    <p class=\"{{problem-title}}\">{{title}}</p>\n" +
-            "    <p class=\"{{user-rate}}\">{{rate}}</p>\n" +
-            "    <p class=\"last-review\">{{last-modify}}</p>\n" +
-            "    <p class=\"next-review\">{{next-review}}</p>\n" +
-            "</div> ";
+    private String status = "";
+    private String title = "";
+    private String difficulty = "";
+    private String userRate = "";
+    private String lastModify = "";
+    private String nextReview = "";
 
     public CssBuilder() {
-        res = template;
     }
 
     /**
@@ -88,72 +33,10 @@ public class CssBuilder {
      * @return
      */
     public CssBuilder addStatus(String status) {
-        if (Objects.equals(status, "未开始") || Objects.equals(status, "not start")) {
-            // 普通正常颜色
-            res = res.replace("{{problem-info}}", "    .problem-info {\n" +
-                    "        color: #333;\n" +
-                    "        background-color: #f9f9f9;\n" +
-                    "        border: 1px solid #ddd;\n" +
-                    "        padding: 15px;\n" +
-                    "        border-radius: 8px;\n" +
-                    "        box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n" +
-                    "    } ");
-            res = res.replace("{{problem-info-p}}", "    .problem-info p {\n" +
-                    "        margin: 8px 0;\n" +
-                    "        padding: 5px 10px;\n" +
-                    "        border-radius: 4px;\n" +
-                    "    }");
-            // 透明度为1
-            res = res.replace("{{opacity}}", "1");
-            // status正常背景色
-            res = res.replace("{{status-background}}", "rgb(227, 242, 253)");
-        } else if (Objects.equals(status, "逾期") || Objects.equals(status, "over time")) {
-            // 普通正常颜色
-            res = res.replace("{{problem-info}}", "    .problem-info {\n" +
-                    "        color: #333;\n" +
-                    "        background-color: #f9f9f9;\n" +
-                    "        border: 1px solid #ddd;\n" +
-                    "        padding: 15px;\n" +
-                    "        border-radius: 8px;\n" +
-                    "        box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n" +
-                    "    }");
-            // 增加下划线
-            res = res.replace("{{problem-info-p}}", "    .problem-info p {\n" +
-                    "        margin: 8px 0;\n" +
-                    "        padding: 5px 10px;\n" +
-                    "        border-radius: 4px;\n" +
-                    "        text-decoration: underline;\n" +
-                    "        text-decoration-style: wavy;\n" +
-                    "        text-decoration-color: red;\n" +
-                    "    } ");
-            // 透明度为1
-            res = res.replace("{{opacity}}", "1");
-            // status背景色设置为红色
-            res = res.replace("{{status-background}}", "rgb(239, 68, 68)");
-        } else if (Objects.equals(status, "已完成") || Objects.equals(status, "done")) {
-            // 灰色背景色
-            res = res.replace("{{problem-info}}", "    .problem-info {\n" +
-                    "        color: #888;\n" +
-                    "        text-decoration: line-through;\n" +
-                    "        text-decoration-color: #171717;\n" +
-                    "        background-color: #c6c3c3;\n" +
-                    "        border: 5px solid #ddd;\n" +
-                    "        padding: 15px;\n" +
-                    "        border-radius: 8px;\n" +
-                    "        box-shadow: 0 8px 8px rgba(0,0,0,0.4);\n" +
-                    "        position: relative;\n" +
-                    "    }");
-            res = res.replace("{{problem-info-p}}", "    .problem-info p {\n" +
-                    "        margin: 8px 0;\n" +
-                    "        padding: 5px 10px;\n" +
-                    "        border-radius: 4px;\n" +
-                    "    }");
-            // 透明度为0.2
-            res = res.replace("{{opacity}}", "0.2");
-            // status正常背景色
-            res = res.replace("{{status-background}}", "rgb(227, 242, 253)");
+        if (status == null) {
+            return this;
         }
-        res = res.replace("{{status}}", status);
+        this.status = status;
         return this;
     }
 
@@ -163,18 +46,12 @@ public class CssBuilder {
          * MEDIUM
          * HARD
          */
-        if (Objects.equals(difficulty, "EASY")) {
-            res = res.replace("{{problem-title}}", "problem-easy");
-        } else if (Objects.equals(difficulty, "MEDIUM")) {
-            res = res.replace("{{problem-title}}", "problem-medium");
-        } else if (Objects.equals(difficulty, "HARD")) {
-            res = res.replace("{{problem-title}}", "problem-hard");
-        } else {
-            res = res.replace("{{problem-title}}", "problem-easy");
-            LogUtils.warn("error! difficulty not recognized by CssBuilder! difficulty = " + difficulty);
+        if (this.title != null) {
+            this.title = title;
         }
-
-        res = res.replace("{{title}}", title);
+        if (this.difficulty != null) {
+            this.difficulty = difficulty;
+        }
         return this;
     }
 
@@ -182,40 +59,385 @@ public class CssBuilder {
      * 很难/一般般/很轻松
      * very hard/average/very easy
      *
-     * @param userRate
-     * @return
+     * @param userRate 用户评价
+     * @return this
      */
     public CssBuilder addUserRate(String userRate) {
-        if (Objects.equals(userRate, "很难") || Objects.equals(userRate, "very hard")) {
-            res = res.replace("{{user-rate}}", "user-hard");
-        } else if (Objects.equals(userRate, "一般般") || Objects.equals(userRate, "average")) {
-            res = res.replace("{{user-rate}}", "user-medium");
-        } else if (Objects.equals(userRate, "很轻松") || Objects.equals(userRate, "very easy")) {
-            res = res.replace("{{user-rate}}", "user-easy");
-        } else {
-            res = res.replace("{{user-rate}}", "user-easy");
-            LogUtils.warn("error! userRate not recognized by CssBuilder! userRate = " + userRate);
+        if (userRate == null) {
+            return this;
         }
-        res = res.replace("{{rate}}", userRate);
-
+        this.userRate = userRate;
         return this;
     }
 
     public CssBuilder lastModify(String lastModify) {
-        res = res.replace("{{last-modify}}", BundleUtils.i18nHelper("上一次做题时间: ", "Last time meet the question: ") + lastModify);
+        if (lastModify == null) {
+            return this;
+        }
+        this.lastModify = lastModify;
         return this;
     }
 
     public CssBuilder nextReview(String nextReview) {
-        res = res.replace("{{next-review}}", BundleUtils.i18nHelper("下一次复习时间: ", "Next time review the question: ") + nextReview);
+        if (nextReview == null) {
+            return this;
+        }
+        this.nextReview = nextReview;
         return this;
     }
 
     public String toString() {
-        return res;
+        return build();
     }
 
     public String build() {
-        return res;
+        String template = createTemplate(status);
+        template = handleTitle(template);
+        template = handleUserRate(template);
+        template = handleLastModify(template);
+        template = handleNextReview(template);
+        return template;
+    }
+
+    private String handleNextReview(String template) {
+        return template.replace("{{nextReview-content}}", BundleUtils.i18nHelper("下一次复习时间: ", "next review time: ") + nextReview);
+    }
+
+    private String handleLastModify(String template) {
+        return template.replace("{{lastModify-content}}", BundleUtils.i18nHelper("上一次做题时间: ", "last handle time: ") + lastModify);
+    }
+
+    private String handleUserRate(String template) {
+        if (Objects.equals(this.userRate, "很难") || Objects.equals(this.userRate, "very hard")) {
+            template = template.replace("{{difficulty-css}}", "difficulty-hard");
+        } else if (Objects.equals(this.userRate, "一般般") || Objects.equals(this.userRate, "average")) {
+            template = template.replace("{{difficulty-css}}", "difficulty-medium");
+        } else if (Objects.equals(this.userRate, "很轻松") || Objects.equals(this.userRate, "very easy")) {
+            template = template.replace("{{difficulty-css}}", "difficulty-easy");
+        } else {
+            LogUtils.warn("unknown userRate! this.userRate = " + this.userRate);
+            template = template.replace("{{difficulty-css}}", "difficulty-easy");
+        }
+        return template.replace("{{difficulty-content}}", this.userRate);
+    }
+
+    private String handleTitle(String template) {
+        if (Objects.equals(this.difficulty, "EASY")) {
+            template = template.replace("{{title-css}}", "title-easy");
+        } else if (Objects.equals(this.difficulty, "MEDIUM")) {
+            template = template.replace("{{title-css}}", "title-medium");
+        } else if (Objects.equals(this.difficulty, "HARD")) {
+            template = template.replace("{{title-css}}", "title-hard");
+        } else {
+            LogUtils.warn("unknown difficulty! this.difficulty = " + this.difficulty);
+            template = template.replace("{{title-css}}", "title-easy");
+        }
+        template = template.replace("{{title-content}}", this.title);
+        return template;
+    }
+
+    private String createTemplate(String status) {
+        String tmp;
+        String theme = getTheme();
+        if (Objects.equals(status, "未开始") || Objects.equals(status, "not start")) {
+            tmp = Objects.equals(theme, "light") ? getCommon() : getCommonDark();
+        } else if (Objects.equals(status, "逾期") || Objects.equals(status, "over time")) {
+            tmp = Objects.equals(theme, "light") ? getOvertime() : getOvertimeDark();
+        } else if (Objects.equals(status, "已完成") || Objects.equals(status, "done")) {
+            tmp = Objects.equals(theme, "light") ? getDone() : getDoneDark();
+        } else {
+            tmp = Objects.equals(theme, "light") ? getCommon() : getCommonDark();
+        }
+        return tmp.replace("{{status-content}}", status);
+    }
+
+    public String getDone() {
+        return "<style>\n" +
+                "    .card {\n" +
+                "        width: 230px;\n" +
+                "        padding: 12px;\n" +
+                "        border-radius: 8px;\n" +
+                "        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);\n" +
+                "        background-color: #fff;\n" +
+                "        font-family: Arial, sans-serif;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        border: 2px solid #bcb6b6;\n" +
+                "    }\n" +
+                "\n" +
+                "    .card p {\n" +
+                "        margin: 10px 0;\n" +
+                "        text-decoration: line-through;\n" +
+                "        color: #aaa;\n" +
+                "    }\n" +
+                "</style>\n" +
+                "<div class=\"card\">\n" +
+                "    <p class=\"status\">{{status-content}}</p>\n" +
+                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
+                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
+                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
+                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
+                "</div>";
+    }
+
+    public String getDoneDark() {
+        return "<style>\n" +
+                "    .card {\n" +
+                "        width: 230px;\n" +
+                "        padding: 12px;\n" +
+                "        border-radius: 8px;\n" +
+                "        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);\n" +
+                "        background-color: #2b2b2b;\n" +
+                "        font-family: Arial, sans-serif;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        border: 2px solid #555;\n" +
+                "    }\n" +
+                "\n" +
+                "    .card p {\n" +
+                "        margin: 10px 0;\n" +
+                "        text-decoration: line-through;\n" +
+                "        color: #777;\n" +
+                "    }\n" +
+                "</style>\n" +
+                "<div class=\"card\">\n" +
+                "    <p class=\"status\">{{status-content}}</p>\n" +
+                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
+                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
+                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
+                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
+                "</div>";
+    }
+
+    private String getOvertime() {
+        return "<style>\n" +
+                "    .card {\n" +
+                "        width: 230px;\n" +
+                "        padding: 12px;\n" +
+                "        border-radius: 8px;\n" +
+                "        box-shadow: 0 2px 6px rgba(255, 0, 0, 0.4); /* 红色阴影 */\n" +
+                "        background-color: #fff5f5; /* 浅红背景 */\n" +
+                "        font-family: Arial, sans-serif;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        border: 2px solid #ff0000; /* 红色边框 */\n" +
+                "    }\n" +
+                "\n" +
+                "    .card p {\n" +
+                "        margin: 10px 0;\n" +
+                "        color: #ff0000; /* 纯红色字体 */\n" +
+                "        font-weight: bold;\n" +
+                "        text-decoration: underline wavy red; /* 波浪红色下划线，类似 IDEA 语法错误 */\n" +
+                "    }\n" +
+                "</style>\n" +
+                "<div class=\"card\">\n" +
+                "    <p class=\"status\">{{status-content}}</p>\n" +
+                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
+                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
+                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
+                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
+                "</div>";
+    }
+
+    private String getOvertimeDark() {
+        return "<style>\n" +
+                "    .card {\n" +
+                "        width: 230px;\n" +
+                "        padding: 12px;\n" +
+                "        border-radius: 8px;\n" +
+                "        box-shadow: 0 2px 6px rgba(255, 0, 0, 0.4); /* 红色阴影 */\n" +
+                "        background-color: #2b2b2b; /* 深色背景 */\n" +
+                "        font-family: Arial, sans-serif;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        border: 2px solid #ff0000; /* 红色边框 */\n" +
+                "    }\n" +
+                "\n" +
+                "    .card p {\n" +
+                "        margin: 10px 0;\n" +
+                "        color: #ff0000; /* 纯红色字体 */\n" +
+                "        font-weight: bold;\n" +
+                "        text-decoration: underline wavy red; /* 波浪红色下划线，类似 IDEA 语法错误 */\n" +
+                "    }\n" +
+                "\n" +
+                "</style>\n" +
+                "<div class=\"card\">\n" +
+                "    <p class=\"status\">{{status-content}}</p>\n" +
+                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
+                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
+                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
+                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
+                "</div>";
+    }
+
+    private String getCommon() {
+        return "<style>\n" +
+                "    .card {\n" +
+                "        width: 230px;\n" +
+                "        padding: 12px;\n" +
+                "        border-radius: 8px;\n" +
+                "        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);\n" +
+                "        background-color: #fff;\n" +
+                "        font-family: Arial, sans-serif;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        border: 2px solid #bcb6b6;\n" +
+                "    }\n" +
+                "\n" +
+                "    .card p {\n" +
+                "        margin: 10px 0;\n" +
+                "    }\n" +
+                "\n" +
+                "    .status {\n" +
+                "        color: rgb(71, 157, 255);\n" +
+                "        font-weight: bold;\n" +
+                "    }\n" +
+                "\n" +
+                "    .title {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(51, 51, 51);\n" +
+                "    }\n" +
+                "\n" +
+                "    .title-easy {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(92, 184, 92);\n" +
+                "    }\n" +
+                "\n" +
+                "    .title-medium {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(240, 173, 78);\n" +
+                "    }\n" +
+                "\n" +
+                "    .title-medium {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(217, 83, 79);\n" +
+                "    }\n" +
+                "\n" +
+                "    .difficulty {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(255, 165, 2);\n" +
+                "    }\n" +
+                "\n" +
+                "    .difficulty-easy {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(92, 184, 92);\n" +
+                "    }\n" +
+                "\n" +
+                "    .difficulty-medium {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(240, 173, 78);\n" +
+                "    }\n" +
+                "\n" +
+                "    .difficulty-hard {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(217, 83, 79);\n" +
+                "    }\n" +
+                "\n" +
+                "    .date {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(102, 102, 102);\n" +
+                "    }\n" +
+                "</style>\n" +
+                "<div class=\"card\">\n" +
+                "    <p class=\"status\">{{status-content}}</p>\n" +
+                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
+                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
+                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
+                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
+                "</div>";
+    }
+
+    private String getCommonDark() {
+        return "<style>\n" +
+                "    .card {\n" +
+                "        width: 230px;\n" +
+                "        padding: 12px;\n" +
+                "        border-radius: 8px;\n" +
+                "        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);\n" +
+                "        background-color: #2b2b2b;\n" +
+                "        font-family: Arial, sans-serif;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        border: 2px solid #555;\n" +
+                "    }\n" +
+                "\n" +
+                "    .card p {\n" +
+                "        margin: 10px 0;\n" +
+                "    }\n" +
+                "\n" +
+                "    .status {\n" +
+                "        color: rgb(97, 175, 239);\n" +
+                "        font-weight: bold;\n" +
+                "    }\n" +
+                "\n" +
+                "    .title {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(220, 220, 220);\n" +
+                "    }\n" +
+                "\n" +
+                "    .title-easy {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(92, 184, 92);\n" +
+                "    }\n" +
+                "\n" +
+                "    .title-medium {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(240, 173, 78);\n" +
+                "    }\n" +
+                "\n" +
+                "    .title-hard {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(217, 83, 79);\n" +
+                "    }\n" +
+                "\n" +
+                "    .difficulty {\n" +
+                "        color: rgb(255, 165, 2);\n" +
+                "    }\n" +
+                "\n" +
+                "    .difficulty-easy {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(92, 184, 92);\n" +
+                "    }\n" +
+                "\n" +
+                "    .difficulty-medium {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(240, 173, 78);\n" +
+                "    }\n" +
+                "\n" +
+                "    .difficulty-hard {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(217, 83, 79);\n" +
+                "    }\n" +
+                "\n" +
+                "    .date {\n" +
+                "        font-weight: bold;\n" +
+                "        color: rgb(232, 228, 228);\n" +
+                "    }\n" +
+                "\n" +
+                "</style>\n" +
+                "<div class=\"card\">\n" +
+                "    <p class=\"status\">{{status-content}}</p>\n" +
+                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
+                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
+                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
+                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
+                "</div>";
+    }
+
+    public String getTheme() {
+        // 获取当前编辑器的颜色方案
+        EditorColorsScheme globalScheme = EditorColorsManager.getInstance().getGlobalScheme();
+
+        // 直接获取默认背景颜色
+        Color defaultBackground = globalScheme.getDefaultBackground();
+
+        // 判断主题类型
+        String vditorTheme;
+        if (ColorUtil.isDark(defaultBackground)) {
+            vditorTheme = "dark";
+        } else {
+            vditorTheme = "light";
+        }
+        return vditorTheme;
     }
 }

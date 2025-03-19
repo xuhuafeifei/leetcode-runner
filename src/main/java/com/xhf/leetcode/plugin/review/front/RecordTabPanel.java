@@ -19,6 +19,7 @@ public class RecordTabPanel extends JPanel {
     private final Project project;
     private final ReviewQuestionService service;
     private List<ReviewQuestion> totalReviewQuestion;
+    private Component questionCard;
 
     public RecordTabPanel(Project project) {
         this.project = project;
@@ -35,8 +36,8 @@ public class RecordTabPanel extends JPanel {
         panel.setLayout(new BorderLayout());
 
         if (! totalReviewQuestion.isEmpty()) {
-            Component questionCard = createQuestionCard(totalReviewQuestion.get(++cursor));
-            panel.add(questionCard, BorderLayout.CENTER);
+            this.questionCard = createQuestionCard(totalReviewQuestion.get(++cursor));
+            panel.add(this.questionCard, BorderLayout.CENTER);
         }
 
         var lef = new JButton(IconLoader.getIcon("/icons/left-btn.svg", this.getClass()));
@@ -44,7 +45,11 @@ public class RecordTabPanel extends JPanel {
         lef.setContentAreaFilled(false);
         lef.addActionListener(e -> {
            if (cursor > 0) {
-               panel.add(createQuestionCard(totalReviewQuestion.get(--cursor)), BorderLayout.CENTER);
+               if (this.questionCard != null) {
+                   panel.remove(this.questionCard);
+               }
+               this.questionCard = createQuestionCard(totalReviewQuestion.get(--cursor));
+               panel.add(this.questionCard, BorderLayout.CENTER);
                panel.revalidate();
                panel.repaint();
            }
@@ -55,7 +60,11 @@ public class RecordTabPanel extends JPanel {
         rig.setContentAreaFilled(false);
         rig.addActionListener(e -> {
             if (cursor < totalReviewQuestion.size() - 1) {
-                panel.add(createQuestionCard(totalReviewQuestion.get(++cursor)), BorderLayout.CENTER);
+                if (this.questionCard != null) {
+                    panel.remove(this.questionCard);
+                }
+                this.questionCard = createQuestionCard(totalReviewQuestion.get(++cursor));
+                panel.add(this.questionCard, BorderLayout.CENTER);
                 panel.revalidate();
                 panel.repaint();
             }

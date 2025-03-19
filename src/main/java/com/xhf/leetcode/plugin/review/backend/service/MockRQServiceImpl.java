@@ -48,7 +48,7 @@ public class MockRQServiceImpl implements ReviewQuestionService {
         m2.setDifficulty("困难");
         m2.setUserRate("很难");
         m2.setLastModify("2023/02/13");
-        m2.setLastModify("2023/02/18");
+        m2.setNextReview("2023/02/18");
         res.add(m2);
 
         ReviewQuestionModel m3 = new ReviewQuestionModel();
