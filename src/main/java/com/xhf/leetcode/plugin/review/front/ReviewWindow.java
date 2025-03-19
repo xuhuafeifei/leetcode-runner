@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.review.front;
 
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.impl.IdeGlassPaneImpl;
@@ -20,7 +19,7 @@ import java.awt.event.MouseEvent;
 /**
  * @author feigebuge
  */
-public class ReviewWindow extends JWindow implements Disposable {
+public class ReviewWindow extends JWindow {
     private final Project project;
     /**
      * 命令行选项卡
@@ -106,14 +105,14 @@ public class ReviewWindow extends JWindow implements Disposable {
     }
 
     private TabInfo createRecordTabInfo() {
-        JPanel panel  = new RecordTabPanel(project);
+        JPanel panel  = new DailyPlanTabPanel(project);
         TabInfo tabInfo = new TabInfo(panel);
         tabInfo.setText(BundleUtils.i18n("action.leetcode.review.recordTxt"));
         return tabInfo;
     }
 
     private TabInfo createReviewTabInfo() {
-        JPanel panel  = new DailyPlanTabPanel(project);
+        JPanel panel  = new ReviewTabPanel(project);
         TabInfo tabInfo = new TabInfo(panel);
         tabInfo.setText(BundleUtils.i18n("action.leetcode.review.reviewTxt"));
         return tabInfo;
@@ -173,10 +172,5 @@ public class ReviewWindow extends JWindow implements Disposable {
                 (screen.width - getWidth()) / 2,
                 (screen.height - getHeight()) / 4
         );
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
     }
 }
