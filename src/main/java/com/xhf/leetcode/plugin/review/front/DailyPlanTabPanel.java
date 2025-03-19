@@ -14,13 +14,14 @@ import java.awt.*;
 import java.util.List;
 
 /**
+ * 每日复习计划tab
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class ReviewTabPanel extends JPanel {
+public class DailyPlanTabPanel extends JPanel {
     private final Project project;
     private final ReviewQuestionService service;
-    public ReviewTabPanel(Project project) {
+    public DailyPlanTabPanel(Project project) {
         this.project = project;
         this.service = MockRQServiceImpl.getInstance();
 

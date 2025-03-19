@@ -110,7 +110,7 @@ public class ReviewWindow extends JWindow implements Disposable {
     }
 
     private TabInfo createReviewTabInfo() {
-        JPanel panel  = new ReviewTabPanel(project);
+        JPanel panel  = new DailyPlanTabPanel(project);
         TabInfo tabInfo = new TabInfo(panel);
         tabInfo.setText(BundleUtils.i18n("action.leetcode.review.reviewTxt"));
         return tabInfo;
@@ -118,7 +118,6 @@ public class ReviewWindow extends JWindow implements Disposable {
 
     private JPanel createTitleBar() {
         JPanel titleBar = new JPanel(new BorderLayout());
-        titleBar.setBackground(JBColor.background());
         titleBar.setPreferredSize(new Dimension(0, 30));
 
         // 关闭按钮
@@ -140,8 +139,8 @@ public class ReviewWindow extends JWindow implements Disposable {
     }
 
     private JButton createIconButton(Icon icon, ActionListener listener) {
-        JButton btn = new JButton(icon);
-        // btn.setBorder(BorderFactory.createEmptyBorder(4, 12 / 2, 8, 12 / 2));
+        var btn = new JButton(icon);
+        btn.setBorder(BorderFactory.createEmptyBorder(4, 12 / 2, 8, 12 / 2));
         btn.setBorder(BorderFactory.createEmptyBorder());
         btn.setContentAreaFilled(false);
         btn.addActionListener(listener);

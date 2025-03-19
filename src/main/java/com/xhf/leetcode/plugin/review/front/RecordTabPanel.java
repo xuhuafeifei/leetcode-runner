@@ -6,6 +6,7 @@ import com.xhf.leetcode.plugin.review.backend.model.QueryDimModel;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -77,6 +78,9 @@ public class RecordTabPanel extends JPanel {
     }
 
     private Component createQuestionCard(ReviewQuestion rq) {
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new BorderLayout());
+
         // 未开始
         // 题目编号
         // 题目名称
@@ -95,6 +99,19 @@ public class RecordTabPanel extends JPanel {
                 .build()
         );
 
-        return editorPane;
+        jPanel.add(editorPane, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel();
+        // 掌握button
+        JButton masterBtn = new JButton(BundleUtils.i18nHelper("掌握", "master"));
+        // 继续学习button
+        JButton continueBtn = new JButton(BundleUtils.i18nHelper("继续学习", "continue"));
+
+        bottomPanel.add(masterBtn);
+        bottomPanel.add(continueBtn);
+
+        jPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        return jPanel;
     }
 }
