@@ -1,17 +1,23 @@
 package com.xhf.leetcode.plugin.window;
 
 import com.google.common.eventbus.Subscribe;
+import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.DataProvider;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.xhf.leetcode.plugin.bus.DeepCodingEvent;
 import com.xhf.leetcode.plugin.bus.DeepCodingTabChooseEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.window.deepcoding.DeepCodingPanel;
 import org.jetbrains.annotations.NonNls;
@@ -38,7 +44,13 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
 
         final ActionManager actionManager = ActionManager.getInstance();
 
-        init();
+        try {
+            init();
+        } catch (Exception e) {
+            DebugUtils.simpleDebug(BundleUtils.i18nHelper("Leetcode-Runner 初始化异常!", "Leetcode-Runner init error!"),
+                    project, ConsoleViewContentType.ERROR_OUTPUT, true
+                    );
+        }
 
         // get action toolbar
         DefaultActionGroup dag = (DefaultActionGroup) actionManager.getAction("leetcode.plugin.lcActionsToolbar");

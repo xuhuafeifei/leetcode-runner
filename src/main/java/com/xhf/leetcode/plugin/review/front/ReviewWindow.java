@@ -4,7 +4,6 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.IdeFocusManager;
-import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.tabs.TabInfo;
 import com.intellij.ui.tabs.impl.JBEditorTabs;
@@ -32,8 +31,8 @@ public class ReviewWindow extends JWindow implements Disposable {
     private Point dragPoint;
 
     // jwindow的长/宽比
-    private final float radio = 1.5f;
-    private final int miniHeight = 420;
+    private final float radio = 1.2f;
+    private final int miniHeight = 350;
 
     private final String HELP_CONTENT = BundleUtils.i18n("action.leetcode.review.help");
 
@@ -45,7 +44,7 @@ public class ReviewWindow extends JWindow implements Disposable {
         setBackground(new JBColor(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0)));
         setContentPane(createMainPanel());
         pack();
-        int initHeight = 420;
+        int initHeight = 350;
         setSize((int) (initHeight * radio), initHeight);
 
         // 交互功能
@@ -127,13 +126,10 @@ public class ReviewWindow extends JWindow implements Disposable {
 
         // 标题文本
         JLabel title = new JLabel(BundleUtils.i18n("action.leetcode.review.title"));
-        title.setBackground(Gray._255);
         title.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
         titleBar.add(InnerHelpTooltip.FlowLayout(FlowLayout.LEADING).add(title).addHelp(this.HELP_CONTENT).getTargetComponent(), BorderLayout.WEST);
         titleBar.add(closeBtn, BorderLayout.EAST);
-        titleBar.setBackground(Gray._255);
-        titleBar.setForeground(Gray._255);
 
         return titleBar;
     }
