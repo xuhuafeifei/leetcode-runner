@@ -5,10 +5,13 @@ import com.intellij.openapi.wm.impl.IdeGlassPaneImpl;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.tabs.TabInfo;
 import com.intellij.ui.tabs.impl.JBTabsImpl;
+import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * @author feigebuge
@@ -21,7 +24,8 @@ public class ReviewWindow extends JFrame {
     private final JBTabsImpl tabs;
 
     // jwindow的长/宽比
-    private final float radio = 1.2f;
+    public final static float radio = 1.2f;
+    public final static int initHeight = 380;
 
     public ReviewWindow(Project project) {
         this.project = project;
@@ -33,10 +37,22 @@ public class ReviewWindow extends JFrame {
         setContentPane(createMainPanel());
         setGlassPane(new IdeGlassPaneImpl(new JRootPane()));
         pack();
-        int initHeight = 380;
         setSize((int) (initHeight * radio), initHeight);
 
         centerWindow();
+
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        
+        // 添加窗口监听器
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // 调用原有的关闭逻辑
+                ActionUtils.disposeReviewWindow();
+                // 关闭窗口
+                dispose();
+            }
+        });
 
         this.setVisible(true);
     }

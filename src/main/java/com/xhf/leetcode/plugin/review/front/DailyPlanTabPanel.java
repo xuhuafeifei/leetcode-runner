@@ -2,6 +2,8 @@ package com.xhf.leetcode.plugin.review.front;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.ui.JBColor;
+import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.review.backend.model.QueryDimModel;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
@@ -9,6 +11,7 @@ import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import java.awt.*;
 import java.util.List;
 
@@ -21,14 +24,13 @@ public class DailyPlanTabPanel extends JPanel {
     private final ReviewQuestionService service;
     private List<ReviewQuestion> totalReviewQuestion;
     private Component questionCard;
-    private boolean isShowingSolution = false;  // 添加状态标记
-    private Component currentEditor; // 当前编辑器组件
-    private JPanel contentPanel; // 内容面板
+    private boolean isShowingSolution = true;
+    private JPanel contentPanel;
+    private Component currentCard;
 
     public DailyPlanTabPanel(Project project) {
         this.project = project;
         this.service = MockRQServiceImpl.getInstance();
-
         loadContent();
     }
 
@@ -80,17 +82,16 @@ public class DailyPlanTabPanel extends JPanel {
         add(panel);
     }
 
+    private Dimension globalSize;
+
     private Component createQuestionCard(ReviewQuestion rq) {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BorderLayout());
 
         // 创建内容面板容器
         contentPanel = new JPanel(new BorderLayout());
-        currentEditor = createEditorPane(rq, true);
-        isShowingSolution = !isShowingSolution;
-
-        contentPanel.add(currentEditor, BorderLayout.CENTER);
-
+        this.currentCard = createEditorComponent(rq);  // 保存引用
+        contentPanel.add(this.currentCard, BorderLayout.CENTER);
         jPanel.add(contentPanel, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel();
@@ -103,18 +104,24 @@ public class DailyPlanTabPanel extends JPanel {
 
         // 添加反转按钮的点击事件
         flipButton.addActionListener(e -> {
+            // 获取当前Question面板的大小
+            if (isShowingSolution) {
+                // isShowingSolution为true, 表示此时面板是显示题解, 需要记录此时的大小
+                globalSize = this.currentCard.getSize();
+            }
+
             isShowingSolution = !isShowingSolution;
             // 更新按钮文字
             flipButton.setText(BundleUtils.i18nHelper(
-                    isShowingSolution ? "查看题目" : "查看题解",
-                    isShowingSolution ? "question" : "solution"
+                isShowingSolution ? "查看题目" : "查看题解",
+                isShowingSolution ? "question" : "solution"
             ));
+            
 
-            // 移除当前编辑器
+            // 替换编辑器组件
             contentPanel.removeAll();
-
-            // 创建并添加新编辑器
-            contentPanel.add(createEditorPane(rq, isShowingSolution), BorderLayout.CENTER);
+            this.currentCard = createEditorComponent(rq);
+            contentPanel.add(this.currentCard, BorderLayout.CENTER);
             contentPanel.revalidate();
             contentPanel.repaint();
         });
@@ -128,8 +135,9 @@ public class DailyPlanTabPanel extends JPanel {
         return jPanel;
     }
 
-    private Component createEditorPane(ReviewQuestion rq, boolean isSolution) {
-        if (!isSolution) {
+
+    private Component createEditorComponent(ReviewQuestion rq) {
+        if (isShowingSolution) {
             // 题目模式 - 使用JEditorPane
             JEditorPane editorPane = new JEditorPane();
             editorPane.setContentType("text/html");
@@ -143,22 +151,43 @@ public class DailyPlanTabPanel extends JPanel {
                     .nextReview(rq.getNextReview())
                     .build()
             );
+
             return editorPane;
         } else {
             // 题解模式 - 使用JTextArea
-            var textArea = new JTextField();
+            var textArea = new JTextArea();
             textArea.setText(rq.getUserSolution());
-            textArea.setEnabled(true);
             textArea.setEditable(true);
-
-            // 添加焦点监听器，在失去焦点时保存
+            textArea.setRows(13);
+            textArea.setWrapStyleWord(true);
+            textArea.setLineWrap(true);
+            
+            // 设置边框和内边距
+            textArea.setBorder(new CompoundBorder(
+                JBUI.Borders.customLine(JBColor.border(), 1),  // 外边框
+                JBUI.Borders.empty(8)  // 内边距
+            ));
+            
+            // 设置背景色为稍微淡一点的主题色
+            textArea.setBackground(JBColor.background().brighter());
+            
+            // 添加焦点监听器
             textArea.addFocusListener(new java.awt.event.FocusAdapter() {
+                @Override
+                public void focusGained(java.awt.event.FocusEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        textArea.setCaretPosition(textArea.getText().length());
+                    });
+                }
+
                 @Override
                 public void focusLost(java.awt.event.FocusEvent e) {
                     String newSolution = textArea.getText();
-                    System.out.println("Saving solution: " + newSolution);
+                    // TODO: 在这里实现保存逻辑
+                    System.out.println("Save solution: " + newSolution);
                 }
             });
+            textArea.setSize(globalSize);
 
             return textArea;
         }

@@ -122,6 +122,9 @@
         <action id="leetcode.plugin.StarAction" class="com.xhf.leetcode.plugin.actions.StarAction"
                 icon="/icons/star.svg">
         </action>
+        <action id="leetcode.plugin.ReviewAction" class="com.xhf.leetcode.plugin.actions.ReviewAction"
+                icon="/icons/review.svg">
+        </action>
 
         <group id="leetcode.plugin.lcActionsToolbar">
             <reference id="leetcode.plugin.LoginAction"/>
@@ -138,6 +141,8 @@
             <reference id="leetcode.plugin.DeepCoding"/>
             <separator/>
             <reference id="leetcode.plugin.StarAction"/>
+            <separator/>
+            <reference id="leetcode.plugin.ReviewAction"/>
         </group>
 
         <group id="leetcode.plugin.consoleToolbar">
@@ -198,9 +203,7 @@
                     icon="/icons/addComment.svg">
             </action>
             <separator/>
-            <action id="leetcode.plugin.ReviewAction" class="com.xhf.leetcode.plugin.actions.ReviewAction"
-                    icon="AllIcons.Actions.Annotate">
-            </action>
+            <reference id="leetcode.plugin.ReviewAction"/>
         </group>
     </actions>
 
