@@ -9,7 +9,6 @@ import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
-import com.intellij.ui.JBColor;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -99,18 +98,29 @@ public class ReviewTabPanel extends JPanel {
         
         // 设置复习时间的颜色渲染器
         reviewTable.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
-            // 使用JBColor适配深浅主题：浅色主题使用深蓝色，深色主题使用浅蓝色
-            private final JBColor TIME_COLOR = new JBColor(
-                new Color(33, 111, 189),  // 深蓝色 - 浅色主题
-                new Color(136, 161, 229)  // 浅蓝色 - 深色主题
-            );
+            private final Color URGENT_COLOR = new Color(255, 69, 0);  // 红橙色
+            private final Color SOON_COLOR = new Color(255, 140, 0);   // 深橙色
+            private final Color NORMAL_COLOR = new Color(0, 128, 0);   // 深绿色
+            private final Color FUTURE_COLOR = new Color(30, 144, 255); // 道奇蓝
 
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 
                 if (!isSelected) {
-                    c.setForeground(TIME_COLOR);
+                    String nextReview = (String) value;
+                    // 这里可以根据实际的日期格式进行解析和判断
+                    // 目前简单根据字符串包含的关键词来设置颜色
+                    if (nextReview.contains("今天") || nextReview.contains("today")) {
+                        c.setForeground(URGENT_COLOR);
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    } else if (nextReview.contains("明天") || nextReview.contains("tomorrow")) {
+                        c.setForeground(SOON_COLOR);
+                    } else if (nextReview.contains("后天") || nextReview.contains("day after tomorrow")) {
+                        c.setForeground(NORMAL_COLOR);
+                    } else {
+                        c.setForeground(FUTURE_COLOR);
+                    }
                 }
                 
                 return c;
