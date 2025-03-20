@@ -2,7 +2,9 @@ package com.xhf.leetcode.plugin.review.backend.test;
 
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardScheduler;
+import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,14 +15,17 @@ import java.util.UUID;
 public class TestAlgorithmApp {
 
     private static TestAlgorithmApp instance;
-    private Map<UUID, QuestionCard> cards;
+    private Map<Integer, QuestionCard> cards;
     private QuestionCardScheduler cardScheduler;
+    private DatabaseAdapter databaseAdapter;
 
     /**
      * 实例化 SpacedRepetitionApp。在这里执行启动应用程序所需的重要步骤
      */
     protected TestAlgorithmApp() {
         instance = this;
+        // 实例化数据库
+        this.databaseAdapter = new DatabaseAdapter();
         // 实例化 HashMap，用于存储从数据库加载的卡片
         this.cards = new HashMap<>();
         this.loadCards();
@@ -32,20 +37,16 @@ public class TestAlgorithmApp {
      * 卡片将存储在类的 HashMap "cards" 中
      */
     public void loadCards() {
-        // TODO 本地加载题目卡片信息
-        for(int i = 0; i < 10; i++) {
-            String card_uuid = UUID.randomUUID().toString();
-            String front = "1" + i;
-            String back = "1" + i;
-            Long created = 1L;
-            new QuestionCard(UUID.fromString(card_uuid), front, back, created);
-            System.out.println("[Cards] Sucessfully loaded card " + card_uuid);
-        }
-        String card_uuid = "3d7157cc-6375-4432-923f-37cc14c9efa0";
-        String front = "1";
-        String back = "1";
-        Long created = 1L;
-        new QuestionCard(UUID.fromString(card_uuid), front, back, created);
+        this.databaseAdapter.getSqlite().query("SELECT * FROM cards", resultSet -> {
+            try {
+                while (resultSet.next()) {
+                    new QuestionCard(resultSet.getInt("card_id"), resultSet.getString("front"), resultSet.getString("back"), resultSet.getLong("created"));
+                    System.out.println("[Cards] Sucessfully loaded card " + resultSet.getInt("card_id"));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     /**
@@ -58,9 +59,9 @@ public class TestAlgorithmApp {
 
     /**
      * 获取存储从数据库加载的卡片的 HashMap
-     * @return 存储卡片的 HashMap，可以通过 UUID 获取卡片
+     * @return 存储卡片的 HashMap，可以通过 ID 获取卡片
      */
-    public Map<UUID, QuestionCard> getCards() {
+    public Map<Integer, QuestionCard> getCards() {
         return this.cards;
     }
 
@@ -70,5 +71,13 @@ public class TestAlgorithmApp {
      */
     public QuestionCardScheduler getCardScheduler() {
         return this.cardScheduler;
+    }
+
+    /**
+     * Erhalten des DatabaseAdapters, der dazu dient, um mit der MySQL-Datenbank zu interagieren
+     * @return der DatabaseAdapter
+     */
+    public DatabaseAdapter getDatabaseAdapter() {
+        return this.databaseAdapter;
     }
 }

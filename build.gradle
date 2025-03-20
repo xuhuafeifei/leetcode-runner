@@ -56,4 +56,6 @@ dependencies {
     implementation 'org.jgrapht:jgrapht-core:1.5.1'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
     implementation group: 'org.apache.commons', name: 'commons-jexl3', version: '3.2.1'
+    // 核心SQLite依赖
+    implementation 'org.xerial:sqlite-jdbc:3.8.11.2'
 }
