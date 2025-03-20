@@ -7,12 +7,22 @@ import java.util.concurrent.TimeUnit;
  * @author 文艺倾年
  */
 public class SchedulingCard {
-    private long dueTime, lastReview;
-    private float stability, difficulty;
-    private int elapsedDays, scheduledDays, repetitions;
-    private FSRSState state;
+    // 核心时间参数（毫秒级）
+    private long dueTime;       // 下次复习截止时间
+    private long lastReview;    // 上次复习时间戳
 
-    private HashMap<FSRSRating, SchedulingCard> ratingToCard;
+    // 动态参数（算法核心指标）
+    private float stability;     // 稳定性（0.1-∞）
+    private float difficulty;    // 难度（1-10）
+
+    // 时间跟踪参数
+    private int elapsedDays;    // 已过天数（上次复习至今）
+    private int scheduledDays;   // 计划间隔天数
+    private int repetitions;     // 复习总次数
+
+    // 状态管理
+    private FSRSState state;      // 当前卡片状态
+    private HashMap<FSRSRating, SchedulingCard> ratingToCard;  // 评分等级映射表
 
     /**
      * 构造函数

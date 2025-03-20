@@ -25,7 +25,7 @@ public class QuestionCard {
         this.front = front;
         this.back = back;
         this.created = created;
-
+        // 每次实例化后，自动插入到Map中
         TestAlgorithmApp.getInstance().getCards().put(uuid, this);
     }
 
@@ -34,7 +34,7 @@ public class QuestionCard {
      * 获取唯一标识符
      * @return 唯一标识符
      */
-    public UUID getUuid() {
+    public UUID getUUID() {
         return uuid;
     }
 
@@ -42,7 +42,7 @@ public class QuestionCard {
      * 设置唯一标识符
      * @param uuid 唯一标识符
      */
-    public void setUuid(UUID uuid) {
+    public void setUUID(UUID uuid) {
         this.uuid = uuid;
     }
 
@@ -72,6 +72,16 @@ public class QuestionCard {
      */
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    /**
+     * Erhalten einer Karteikarte über ihre UUID
+     * @param uuid die UUID der Karteikarte
+     * @return geladenes Card-Objekt
+     */
+    public static QuestionCard getByUUID(UUID uuid) {
+        // Erhalte die Karteikarte (Card) aus der HashMap per UUID
+        return TestAlgorithmApp.getInstance().getCards().get(uuid);
     }
 
     /**

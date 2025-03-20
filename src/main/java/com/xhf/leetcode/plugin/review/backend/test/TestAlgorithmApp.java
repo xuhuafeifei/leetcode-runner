@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.review.backend.test;
 
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardScheduler;
-import com.xhf.leetcode.plugin.review.backend.util.AlgorithmType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +13,6 @@ import java.util.UUID;
 public class TestAlgorithmApp {
 
     private static TestAlgorithmApp instance;
-
     private Map<UUID, QuestionCard> cards;
     private QuestionCardScheduler cardScheduler;
 
@@ -26,8 +24,7 @@ public class TestAlgorithmApp {
         // 实例化 HashMap，用于存储从数据库加载的卡片
         this.cards = new HashMap<>();
         this.loadCards();
-        // 默认的 CardScheduler 使用 FSRS 算法，该算法默认在 LearnView 的 ComboBox 中被选中
-        this.cardScheduler = new QuestionCardScheduler(AlgorithmType.FREE_SPACED_REPETITION_SCHEDULER);
+        this.cardScheduler = new QuestionCardScheduler();
     }
 
     /**
@@ -36,7 +33,19 @@ public class TestAlgorithmApp {
      */
     public void loadCards() {
         // TODO 本地加载题目卡片信息
-        // new QuestionCard();
+        for(int i = 0; i < 10; i++) {
+            String card_uuid = UUID.randomUUID().toString();
+            String front = "1" + i;
+            String back = "1" + i;
+            Long created = 1L;
+            new QuestionCard(UUID.fromString(card_uuid), front, back, created);
+            System.out.println("[Cards] Sucessfully loaded card " + card_uuid);
+        }
+        String card_uuid = "3d7157cc-6375-4432-923f-37cc14c9efa0";
+        String front = "1";
+        String back = "1";
+        Long created = 1L;
+        new QuestionCard(UUID.fromString(card_uuid), front, back, created);
     }
 
     /**
@@ -61,13 +70,5 @@ public class TestAlgorithmApp {
      */
     public QuestionCardScheduler getCardScheduler() {
         return this.cardScheduler;
-    }
-
-    /**
-     * 设置管理待复习卡片的 CardScheduler（例如，当算法更改时，Scheduler 需要相应地调整以适应新算法）
-     * @param cardScheduler 新的 CardScheduler
-     */
-    public void setCardScheduler(QuestionCardScheduler cardScheduler) {
-        this.cardScheduler = cardScheduler;
     }
 }
