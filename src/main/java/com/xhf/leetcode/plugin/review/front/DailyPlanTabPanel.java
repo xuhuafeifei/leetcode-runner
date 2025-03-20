@@ -21,6 +21,9 @@ public class DailyPlanTabPanel extends JPanel {
     private final ReviewQuestionService service;
     private List<ReviewQuestion> totalReviewQuestion;
     private Component questionCard;
+    private boolean isShowingSolution = false;  // 添加状态标记
+    private Component currentEditor; // 当前编辑器组件
+    private JPanel contentPanel; // 内容面板
 
     public DailyPlanTabPanel(Project project) {
         this.project = project;
@@ -81,37 +84,83 @@ public class DailyPlanTabPanel extends JPanel {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BorderLayout());
 
-        // 未开始
-        // 题目编号
-        // 题目名称
-        // 题目难度 + 用户评价
-        // 上次做题时间
-        // 复习时间
-        var editorPane = new JTextPane();
-        editorPane.setContentType("text/html");
-        editorPane.setText(
-                new CssBuilder()
-                .addStatus(rq.getStatus())
-                .addTitle(rq.getTitle(), rq.getDifficulty())
-                .addUserRate(rq.getUserRate())
-                .lastModify(rq.getLastModify())
-                .nextReview(rq.getNextReview())
-                .build()
-        );
+        // 创建内容面板容器
+        contentPanel = new JPanel(new BorderLayout());
+        currentEditor = createEditorPane(rq, true);
+        isShowingSolution = !isShowingSolution;
 
-        jPanel.add(editorPane, BorderLayout.CENTER);
+        contentPanel.add(currentEditor, BorderLayout.CENTER);
+
+        jPanel.add(contentPanel, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel();
         // 掌握button
         JButton masterBtn = new JButton(BundleUtils.i18nHelper("掌握", "master"));
         // 继续学习button
         JButton continueBtn = new JButton(BundleUtils.i18nHelper("继续学习", "continue"));
+        // 反转button
+        JButton flipButton = new JButton(BundleUtils.i18nHelper("查看题解", "solution"));
+
+        // 添加反转按钮的点击事件
+        flipButton.addActionListener(e -> {
+            isShowingSolution = !isShowingSolution;
+            // 更新按钮文字
+            flipButton.setText(BundleUtils.i18nHelper(
+                    isShowingSolution ? "查看题目" : "查看题解",
+                    isShowingSolution ? "question" : "solution"
+            ));
+
+            // 移除当前编辑器
+            contentPanel.removeAll();
+
+            // 创建并添加新编辑器
+            contentPanel.add(createEditorPane(rq, isShowingSolution), BorderLayout.CENTER);
+            contentPanel.revalidate();
+            contentPanel.repaint();
+        });
 
         bottomPanel.add(masterBtn);
         bottomPanel.add(continueBtn);
+        bottomPanel.add(flipButton);
 
         jPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         return jPanel;
+    }
+
+    private Component createEditorPane(ReviewQuestion rq, boolean isSolution) {
+        if (!isSolution) {
+            // 题目模式 - 使用JEditorPane
+            JEditorPane editorPane = new JEditorPane();
+            editorPane.setContentType("text/html");
+            editorPane.setEditable(false);
+            editorPane.setText(
+                new CssBuilder()
+                    .addStatus(rq.getStatus())
+                    .addTitle(rq.getTitle(), rq.getDifficulty())
+                    .addUserRate(rq.getUserRate())
+                    .lastModify(rq.getLastModify())
+                    .nextReview(rq.getNextReview())
+                    .build()
+            );
+            return editorPane;
+        } else {
+            // 题解模式 - 使用JTextArea
+            var textArea = new JTextField();
+            textArea.setText(rq.getUserSolution());
+            textArea.setEnabled(true);
+            textArea.setEditable(true);
+
+            // 添加焦点监听器，在失去焦点时保存
+            textArea.addFocusListener(new java.awt.event.FocusAdapter() {
+                @Override
+                public void focusLost(java.awt.event.FocusEvent e) {
+                    String newSolution = textArea.getText();
+                    System.out.println("Saving solution: " + newSolution);
+                }
+            });
+
+            return textArea;
+        }
     }
 }

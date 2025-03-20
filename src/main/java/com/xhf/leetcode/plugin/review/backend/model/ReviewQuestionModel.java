@@ -11,6 +11,7 @@ public class ReviewQuestionModel implements ReviewQuestion {
     private String lastModify;
     private String nextReview;
     private String difficulty;
+    private String userSolution;
 
     public void setStatus(String status) {
         this.status = status;
@@ -64,5 +65,14 @@ public class ReviewQuestionModel implements ReviewQuestion {
     @Override
     public String getDifficulty() {
         return this.difficulty;
+    }
+
+    public void setUserSolution(String userSolution) {
+        this.userSolution = userSolution;
+    }
+
+    @Override
+    public String getUserSolution() {
+        return this.userSolution;
     }
 }

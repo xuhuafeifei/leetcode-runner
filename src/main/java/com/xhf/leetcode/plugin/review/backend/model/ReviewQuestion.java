@@ -11,4 +11,5 @@ public interface ReviewQuestion {
     String getLastModify();
     String getNextReview();
     String getDifficulty();
+    String getUserSolution();
 }

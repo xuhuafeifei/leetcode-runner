@@ -40,6 +40,7 @@ public class MockRQServiceImpl implements ReviewQuestionService {
         m1.setUserRate("一般般");
         m1.setLastModify("2024/03/11");
         m1.setNextReview("2024/03/18");
+        m1.setUserSolution("<p>第一题</p>");
         res.add(m1);
 
         ReviewQuestionModel m2 = new ReviewQuestionModel();
@@ -49,6 +50,7 @@ public class MockRQServiceImpl implements ReviewQuestionService {
         m2.setUserRate("很难");
         m2.setLastModify("2023/02/13");
         m2.setNextReview("2023/02/18");
+        m2.setUserSolution("<p>第二题</p>");
         res.add(m2);
 
         ReviewQuestionModel m3 = new ReviewQuestionModel();
@@ -58,6 +60,7 @@ public class MockRQServiceImpl implements ReviewQuestionService {
         m3.setUserRate("很轻松");
         m3.setLastModify("2011/04/11");
         m3.setNextReview("2011/04/22");
+        m3.setUserSolution("<p>第三题</p>");
         res.add(m3);
 
         return res;
