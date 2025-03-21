@@ -95,9 +95,6 @@
         <action id="leetcode.plugin.LoginAction" class="com.xhf.leetcode.plugin.actions.loginAction"
                 icon="/icons/login.svg">
         </action>
-        <action id="leetcode.plugin.DemoAction" class="com.xhf.leetcode.plugin.actions.DemoAction"
-                icon="/icons/clean.svg">
-        </action>
         <action id="leetcode.plugin.PickOneAction" class="com.xhf.leetcode.plugin.actions.PickOneAction"
                 icon="/icons/random.svg">
         </action>
