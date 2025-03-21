@@ -13,6 +13,7 @@ public class DatabaseAdapter {
      */
     public DatabaseAdapter() {
         // 从配置文件中读取数据库连接数据
+        // TODO 默认存储到IDEA设置中的目录
         this.dbFolder  = "E:/data";
         this.dbName = "memory.db";
 

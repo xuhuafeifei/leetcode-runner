@@ -1,6 +1,6 @@
 package com.xhf.leetcode.plugin.review.backend.card;
 
-import com.xhf.leetcode.plugin.review.backend.test.TestAlgorithmApp;
+import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -27,7 +27,7 @@ public class QuestionCard {
         this.back = back;
         this.created = created;
         // 每次实例化后，自动插入到Map中
-        TestAlgorithmApp.getInstance().getCards().put(id, this);
+        AlgorithmApp.getInstance().getCards().put(id, this);
     }
 
 
@@ -82,7 +82,7 @@ public class QuestionCard {
      */
     public static QuestionCard getById(Integer id) {
         // 根据ID从HashMap中获取卡片对象
-        return TestAlgorithmApp.getInstance().getCards().get(id);
+        return AlgorithmApp.getInstance().getCards().get(id);
     }
 
     /**
@@ -92,11 +92,11 @@ public class QuestionCard {
      * @param back 卡片的背面文本
      */
     public static void create(Integer id, String front, String back) {
-        // TODO 增加条件判断
+        // TODO 增加条件判断，若数据已经存在，则执行更新。
         Long created = System.currentTimeMillis(); // 当前时间作为创建时间
         // 插入数据库
         try {
-            PreparedStatement ps = TestAlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("INSERT INTO cards (card_id, front, back, created) VALUES (?, ?, ?, ?)");
+            PreparedStatement ps = AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("INSERT INTO cards (card_id, front, back, created) VALUES (?, ?, ?, ?)");
             ps.setInt(1, id);
             ps.setString(2, front);
             ps.setString(3, back);
@@ -111,11 +111,11 @@ public class QuestionCard {
     }
 
     /**
-     * 通过从数据库和TestAlgorithmApp中的HashMap "cards" 删除来删除卡片
+     * 通过从数据库和AlgorithmApp中的HashMap "cards" 删除来删除卡片
      */
     public void delete() {
-        TestAlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().update("DELETE FROM cards WHERE card_id = '" + this.id + "'");
-        TestAlgorithmApp.getInstance().getCards().remove(this.id, this);
+        AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().update("DELETE FROM cards WHERE card_id = '" + this.id + "'");
+        AlgorithmApp.getInstance().getCards().remove(this.id, this);
         // 数据库操作
         System.out.println("[Cards] 成功删除卡片 " + this.id);
     }

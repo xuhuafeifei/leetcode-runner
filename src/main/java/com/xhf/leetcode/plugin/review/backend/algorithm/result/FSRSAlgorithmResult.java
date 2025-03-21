@@ -6,7 +6,9 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.constant.SchedulingCard;
 /**
  * @author 文艺倾年
  */
-public class FSRSAlgorithmResult extends AlgorithmResult {
+public class FSRSAlgorithmResult{
+
+    private int interval;
 
     private long dueTime, lastReview;
     private float stability, difficulty;
@@ -18,7 +20,7 @@ public class FSRSAlgorithmResult extends AlgorithmResult {
      * @param card 包含新计算属性的卡片
      */
     public FSRSAlgorithmResult(SchedulingCard card) {
-        super(card.getScheduledDays());
+        this.interval = card.getScheduledDays();
         this.dueTime = card.getDueTime();
         this.lastReview = card.getLastReview();
         this.stability = card.getStability();
@@ -26,6 +28,27 @@ public class FSRSAlgorithmResult extends AlgorithmResult {
         this.elapsedDays = card.getElapsedDays();
         this.repetitions = card.getRepetitions();
         this.state = card.getState();
+    }
+
+//    /**
+//     * 计算下一次复习的时间点（以毫秒为单位）
+//     * @return 下一次复习的时间点（毫秒）
+//     */
+//    public long getNextRepetitionTime() {
+//        // 一天的毫秒数
+//        long dayMillis = 60 * 60 * 24 * 1000;
+//        // 当前时间的毫秒数
+//        long currentMillis = System.currentTimeMillis();
+//
+//        return currentMillis + (dayMillis * interval);
+//    }
+
+    /**
+     * 获取计算出的新复习间隔（以天为单位）
+     * @return 新的复习间隔（天）
+     */
+    public int getInterval() {
+        return this.interval;
     }
 
     /**

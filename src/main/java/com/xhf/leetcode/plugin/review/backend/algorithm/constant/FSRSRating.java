@@ -25,17 +25,17 @@ public enum FSRSRating {
      * 构造函数
      * @param id 评分的ID（0-3）
      */
-    FSRSRating(int id) {
+    FSRSRating(Integer id) {
         this.id = id;
     }
 
-    private int id;
+    private Integer id;
 
     /**
      * 获取评分的整数值
      * @return 评分的ID
      */
-    public int toInt() {
+    public Integer toInt() {
         return this.id;
     }
 }

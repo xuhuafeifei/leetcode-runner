@@ -4,8 +4,7 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.FSRSAlgorithm;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSState;
 import com.xhf.leetcode.plugin.review.backend.algorithm.result.FSRSAlgorithmResult;
-import com.xhf.leetcode.plugin.review.backend.test.TestAlgorithmApp;
-import com.xhf.leetcode.plugin.review.backend.util.Queue;
+import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,7 +34,7 @@ public class QuestionCardScheduler {
             this.queue.dequeue();
         }
         // 数据库中查询
-        TestAlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().syncQuery("SELECT * FROM cards" + " WHERE next_repetition <= " + System.currentTimeMillis(), resultSet -> {
+        AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().syncQuery("SELECT * FROM cards" + " WHERE next_repetition <= " + System.currentTimeMillis(), resultSet -> {
             try {
                 while (resultSet.next()) {
                     QuestionCard dueCard = QuestionCard.getById(resultSet.getInt("card_id"));
@@ -63,7 +62,7 @@ public class QuestionCardScheduler {
         if (ratedCard != null) {
             try {
                 // 1.查询数据库
-                PreparedStatement ps = TestAlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("SELECT * FROM cards" + " WHERE card_id = ?");
+                PreparedStatement ps = AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("SELECT * FROM cards" + " WHERE card_id = ?");
                 ps.setInt(1, ratedCard.getId());
                 ResultSet rs = ps.executeQuery();
                 rs.next();
@@ -81,7 +80,7 @@ public class QuestionCardScheduler {
                 FSRSAlgorithmResult result = algorithm.calc();
 
                 // 3.更新数据库
-                PreparedStatement db = TestAlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("UPDATE cards SET repetitions = ?, difficulty = ?, stability = ?, elapsed_days = ?, state = ?, day_interval = ?, next_repetition = ?, last_review = ? WHERE card_id = ?");
+                PreparedStatement db = AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("UPDATE cards SET repetitions = ?, difficulty = ?, stability = ?, elapsed_days = ?, state = ?, day_interval = ?, next_repetition = ?, last_review = ? WHERE card_id = ?");
                 db.setLong(1, result.getRepetitions());
                 db.setFloat(2, result.getDifficulty());
                 db.setFloat(3, result.getStability());

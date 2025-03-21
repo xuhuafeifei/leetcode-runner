@@ -25,17 +25,17 @@ public enum FSRSState {
      * 构造器
      * @param id 状态的ID (0-3)
      */
-    FSRSState(int id) {
+    FSRSState(Integer id) {
         this.id = id;
     }
 
-    private int id;
+    private Integer id;
 
     /**
      * 获取状态的整数值
      * @return 状态的ID
      */
-    public int toInt() {
+    public Integer toInt() {
         return this.id;
     }
 }

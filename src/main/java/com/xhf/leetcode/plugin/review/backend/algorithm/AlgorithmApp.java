@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.review.backend.test;
+package com.xhf.leetcode.plugin.review.backend.algorithm;
 
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardScheduler;
@@ -7,22 +7,21 @@ import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author 文艺倾年
  */
-public class TestAlgorithmApp {
+public class AlgorithmApp {
 
-    private static TestAlgorithmApp instance;
+    private static AlgorithmApp instance;
     private Map<Integer, QuestionCard> cards;
     private QuestionCardScheduler cardScheduler;
     private DatabaseAdapter databaseAdapter;
 
     /**
-     * 实例化 SpacedRepetitionApp。在这里执行启动应用程序所需的重要步骤
+     * 实例化 AlgorithmApp。在这里执行启动应用程序所需的重要步骤
      */
-    protected TestAlgorithmApp() {
+    public AlgorithmApp() {
         instance = this;
         // 实例化数据库
         this.databaseAdapter = new DatabaseAdapter();
@@ -53,7 +52,7 @@ public class TestAlgorithmApp {
      * 获取类的实例
      * @return 该类的实例
      */
-    public static TestAlgorithmApp getInstance() {
+    public static AlgorithmApp getInstance() {
         return instance;
     }
 
@@ -74,8 +73,7 @@ public class TestAlgorithmApp {
     }
 
     /**
-     * Erhalten des DatabaseAdapters, der dazu dient, um mit der MySQL-Datenbank zu interagieren
-     * @return der DatabaseAdapter
+     * @return DatabaseAdapter
      */
     public DatabaseAdapter getDatabaseAdapter() {
         return this.databaseAdapter;

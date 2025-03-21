@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author 文艺倾年
  */
-public class FSRSAlgorithm implements Algorithm {
+public class FSRSAlgorithm{
     // 算法的标准值
     private final float REQUEST_RETENTION = 0.9F;
     private final int MAXIMUM_INTERVAL = 36500;
@@ -52,7 +52,6 @@ public class FSRSAlgorithm implements Algorithm {
      * 计算下一个复习时间、稳定性、难度等参数
      * @return 包含计算结果的FSRSAlgorithmResult对象
      */
-    @Override
     public FSRSAlgorithmResult calc() {
         this.card = new SchedulingCard(System.currentTimeMillis(), this.stability, this.difficulty, this.elapsedDays, this.scheduledDays, this.repetitions, this.state, this.lastReview);
         // 为每个评分枚举创建一张卡片
