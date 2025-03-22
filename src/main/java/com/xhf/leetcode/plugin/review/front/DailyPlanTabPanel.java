@@ -24,10 +24,21 @@ public class DailyPlanTabPanel extends JPanel {
     private final Project project;
     private final ReviewQuestionService service;
     private List<ReviewQuestion> totalReviewQuestion;
+    /**
+     * 卡片面板, 包含内容+底部button
+     */
     private Component questionCard;
     private boolean isShowingSolution = true;
     private JPanel contentPanel;
+    /**
+     * 当前面板, 只包含内容信息
+     */
     private Component currentCard;
+    private JPanel questionCardPanel;
+    /**
+     * 显示当前question card所在页数
+     */
+    private JLabel pageComp;
 
     // 掌握程度的枚举
     public enum MasteryLevel {
@@ -107,12 +118,12 @@ public class DailyPlanTabPanel extends JPanel {
 
     private void loadContent() {
         this.totalReviewQuestion = service.getTotalReviewQuestion(new QueryDimModel());
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
+        this.questionCardPanel = new JPanel();
+        questionCardPanel.setLayout(new BorderLayout());
 
         if (! totalReviewQuestion.isEmpty()) {
             this.questionCard = createQuestionCard(totalReviewQuestion.get(++cursor));
-            panel.add(this.questionCard, BorderLayout.CENTER);
+            questionCardPanel.add(this.questionCard, BorderLayout.CENTER);
         }
 
         var lef = new JButton(IconLoader.getIcon("/icons/left-btn.svg", this.getClass()));
@@ -121,12 +132,13 @@ public class DailyPlanTabPanel extends JPanel {
         lef.addActionListener(e -> {
            if (cursor > 0) {
                if (this.questionCard != null) {
-                   panel.remove(this.questionCard);
+                   questionCardPanel.remove(this.questionCard);
                }
                this.questionCard = createQuestionCard(totalReviewQuestion.get(--cursor));
-               panel.add(this.questionCard, BorderLayout.CENTER);
-               panel.revalidate();
-               panel.repaint();
+               updatePageComp();
+               questionCardPanel.add(this.questionCard, BorderLayout.CENTER);
+               questionCardPanel.revalidate();
+               questionCardPanel.repaint();
            }
         });
 
@@ -136,26 +148,42 @@ public class DailyPlanTabPanel extends JPanel {
         rig.addActionListener(e -> {
             if (cursor < totalReviewQuestion.size() - 1) {
                 if (this.questionCard != null) {
-                    panel.remove(this.questionCard);
+                    questionCardPanel.remove(this.questionCard);
                 }
                 this.questionCard = createQuestionCard(totalReviewQuestion.get(++cursor));
-                panel.add(this.questionCard, BorderLayout.CENTER);
-                panel.revalidate();
-                panel.repaint();
+                updatePageComp();
+                questionCardPanel.add(this.questionCard, BorderLayout.CENTER);
+                questionCardPanel.revalidate();
+                questionCardPanel.repaint();
             }
         });
 
-        panel.add(lef, BorderLayout.WEST);
-        panel.add(rig, BorderLayout.EAST);
+        questionCardPanel.add(lef, BorderLayout.WEST);
+        questionCardPanel.add(rig, BorderLayout.EAST);
 
-        add(panel);
+        add(questionCardPanel);
     }
 
     private Dimension globalSize;
 
+    /**
+     * 更新pageComp
+     */
+    private void updatePageComp() {
+        this.pageComp.setText(cursor + 1 + " / " + totalReviewQuestion.size());
+    }
+
     private Component createQuestionCard(ReviewQuestion rq) {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BorderLayout());
+
+        this.pageComp = new JLabel();
+        this.pageComp.setFont(Constants.ENGLISH_FONT);
+        this.pageComp.setHorizontalAlignment(SwingConstants.CENTER);
+        this.pageComp.setBorder(JBUI.Borders.empty(3, 0));
+        updatePageComp();
+
+        jPanel.add(this.pageComp, BorderLayout.NORTH);
 
         // 创建内容面板容器
         contentPanel = new JPanel(new BorderLayout());
@@ -170,6 +198,7 @@ public class DailyPlanTabPanel extends JPanel {
         
         // 继续学习button
         JButton deleteBtn = new JButton(BundleUtils.i18nHelper("删除", "delete"));
+        deleteBtn.addActionListener(e -> removeQuestion(rq));
         // 反转button
         JButton flipButton = new JButton(BundleUtils.i18nHelper("查看题解", "solution"));
 
@@ -198,7 +227,6 @@ public class DailyPlanTabPanel extends JPanel {
         });
 
 
-
         bottomPanel.add(masterBtn);
         bottomPanel.add(deleteBtn);
         bottomPanel.add(flipButton);
@@ -206,6 +234,26 @@ public class DailyPlanTabPanel extends JPanel {
         jPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         return jPanel;
+    }
+
+    private void removeQuestion(ReviewQuestion rq) {
+        // todo: 调用实际的后端服务删除题目
+
+        // 列表删除
+        if (cursor == totalReviewQuestion.size() - 1) {
+            // 最后一个题目, 游标指向前一个
+            cursor--;
+        }
+        totalReviewQuestion.remove(rq);
+        updatePageComp();
+        // 刷新UI
+        this.questionCardPanel.remove(this.questionCard);
+        if (cursor != -1) {
+            this.questionCard = createQuestionCard(totalReviewQuestion.get(cursor));
+            questionCardPanel.add(this.questionCard, BorderLayout.CENTER);
+        }
+        questionCardPanel.revalidate();
+        questionCardPanel.repaint();
     }
 
     /**

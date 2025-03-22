@@ -25,7 +25,7 @@ public class ReviewWindow extends JFrame {
 
     // jwindow的长/宽比
     public final static float radio = 1.2f;
-    public final static int initHeight = 380;
+    public final static int initHeight = 395;
 
     public ReviewWindow(Project project) {
         this.project = project;
