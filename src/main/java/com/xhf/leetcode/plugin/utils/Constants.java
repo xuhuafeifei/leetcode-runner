@@ -12,6 +12,7 @@ public interface Constants {
     Color BACKGROUND_COLOR = UIManager.getColor("Table.background");
     Font ENGLISH_FONT = new Font("DejaVu Sans Mono", Font.PLAIN, 15);
     Font CN_FONT = new Font("Monospaced", Font.PLAIN, 15);
+    Font CN_FONT_BOLD = new Font("Monospaced", Font.BOLD, 15);
     String SOLUTION_OPEN_ERROR = "提交记录显示功能的编辑器打开错误! 请重定位文件或关闭当前文件";
     String SOLUTION_CONTENT_NOT_SUPPORT = "当前题解暂不支持显示, 请选择其他题解";
 

@@ -23,14 +23,14 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class ReviewTabPanel extends JPanel {
+public class TotalReviewPlanTabPanel extends JPanel {
     private final Project project;
     private final ReviewQuestionService service;
     private JBTable reviewTable;
     private DefaultTableModel tableModel;
     private List<ReviewQuestion> reviewQuestions;
     
-    public ReviewTabPanel(Project project) {
+    public TotalReviewPlanTabPanel(Project project) {
         this.project = project;
         this.service = MockRQServiceImpl.getInstance();
         setLayout(new BorderLayout());

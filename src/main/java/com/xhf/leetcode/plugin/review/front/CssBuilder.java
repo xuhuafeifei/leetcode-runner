@@ -108,11 +108,11 @@ public class CssBuilder {
     }
 
     private String handleUserRate(String template) {
-        if (Objects.equals(this.userRate, "很难") || Objects.equals(this.userRate, "very hard")) {
+        if (Objects.equals(this.userRate, UserRate.VERY_HARD.getCnName()) || Objects.equals(this.userRate, UserRate.VERY_HARD.getEnName())) {
             template = template.replace("{{difficulty-css}}", "difficulty-hard");
-        } else if (Objects.equals(this.userRate, "一般般") || Objects.equals(this.userRate, "average")) {
+        } else if (Objects.equals(this.userRate, UserRate.AVERAGE.getCnName()) || Objects.equals(this.userRate, UserRate.AVERAGE.getEnName())) {
             template = template.replace("{{difficulty-css}}", "difficulty-medium");
-        } else if (Objects.equals(this.userRate, "很轻松") || Objects.equals(this.userRate, "very easy")) {
+        } else if (Objects.equals(this.userRate, UserRate.VERY_EASY.getCnName()) || Objects.equals(this.userRate, UserRate.VERY_EASY.getEnName())) {
             template = template.replace("{{difficulty-css}}", "difficulty-easy");
         } else {
             LogUtils.warn("unknown userRate! this.userRate = " + this.userRate);
@@ -139,11 +139,11 @@ public class CssBuilder {
     private String createTemplate(String status) {
         String tmp;
         String theme = getTheme();
-        if (Objects.equals(status, "未开始") || Objects.equals(status, "not start")) {
+        if (Objects.equals(status, ReviewStatus.NOT_START.getCnName()) || Objects.equals(status, ReviewStatus.NOT_START.getEnName())) {
             tmp = Objects.equals(theme, "light") ? getCommon() : getCommonDark();
-        } else if (Objects.equals(status, "逾期") || Objects.equals(status, "over time")) {
+        } else if (Objects.equals(status, ReviewStatus.OVER_TIME.getCnName()) || Objects.equals(status, ReviewStatus.OVER_TIME.getEnName())) {
             tmp = Objects.equals(theme, "light") ? getOvertime() : getOvertimeDark();
-        } else if (Objects.equals(status, "已完成") || Objects.equals(status, "done")) {
+        } else if (Objects.equals(status, ReviewStatus.DONE.getCnName()) || Objects.equals(status, ReviewStatus.DONE.getEnName())) {
             tmp = Objects.equals(theme, "light") ? getDone() : getDoneDark();
         } else {
             tmp = Objects.equals(theme, "light") ? getCommon() : getCommonDark();

@@ -66,25 +66,25 @@ public class ReviewWindow extends JFrame {
         mainPanel.setOpaque(true); // 确保背景不透明
 
         // tabs
-        tabs.addTab(createReviewTabInfo());
-        tabs.addTab(createRecordTabInfo());
+        tabs.addTab(createDailyPlanTabInfo());
+        tabs.addTab(createTotalReviewPlanTabInfo());
 
         mainPanel.add(tabs, BorderLayout.CENTER);
 
         return mainPanel;
     }
 
-    private TabInfo createRecordTabInfo() {
+    private TabInfo createDailyPlanTabInfo() {
         JPanel panel  = new DailyPlanTabPanel(project);
         TabInfo tabInfo = new TabInfo(panel);
-        tabInfo.setText(BundleUtils.i18n("action.leetcode.review.recordTxt"));
+        tabInfo.setText(BundleUtils.i18n("action.leetcode.review.dailyPlan"));
         return tabInfo;
     }
 
-    private TabInfo createReviewTabInfo() {
-        JPanel panel  = new ReviewTabPanel(project);
+    private TabInfo createTotalReviewPlanTabInfo() {
+        JPanel panel  = new TotalReviewPlanTabPanel(project);
         TabInfo tabInfo = new TabInfo(panel);
-        tabInfo.setText(BundleUtils.i18n("action.leetcode.review.reviewTxt"));
+        tabInfo.setText(BundleUtils.i18n("action.leetcode.review.totalReview"));
         return tabInfo;
     }
 

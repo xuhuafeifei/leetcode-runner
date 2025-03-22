@@ -127,7 +127,6 @@
             <reference id="leetcode.plugin.LoginAction"/>
             <reference id="leetcode.plugin.Reload"/>
             <separator/>
-            <reference id="leetcode.plugin.DemoAction"/>
             <reference id="leetcode.plugin.PickOneAction"/>
             <reference id="leetcode.plugin.TodayQuestionAction"/>
             <separator/>
