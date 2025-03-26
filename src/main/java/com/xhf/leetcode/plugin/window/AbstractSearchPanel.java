@@ -19,6 +19,7 @@ import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.window.filter.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryParser.ParseException;
@@ -28,10 +29,13 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -75,6 +79,11 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
     protected abstract SearchEngine<T> getSearchEngine();
 
     protected abstract FilterChain<T> getFilterChain();
+
+//    // 防抖相关变量
+//    private Timer debounceTimer;
+//    private AtomicBoolean isDebouncing =  new AtomicBoolean(false);
+//    private static final int DEBOUNCE_DELAY = 500; // 300毫秒防抖延迟
 
     /**
      * 子类必须调用, 否则父类的UI界面无法正常显示
@@ -396,8 +405,43 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
      */
     protected abstract List<T> getUpdateData();
 
-    // 更新文本
+    // 更新文本 + 防抖
     protected final void updateText() {
+        performSearch();
+//        // 双重锁定检查：防止并发修改和重复触发
+//        if (lock || isDebouncing.get()) return;
+//        // 重置现有定时器并创建新定时器
+//        resetDebounceTimer();
+//        // 启动防抖计时器
+//        debounceTimer.addActionListener(e -> {
+//            try {
+//                // 执行实际的搜索逻辑
+//                performSearch();
+//                LogUtils.info("action performSearch once!");
+//            } finally {
+//                // 确保防抖状态重置
+//                isDebouncing.compareAndSet(true, false);
+//            }
+//        });
+//        debounceTimer.start();
+    }
+
+    /**
+     * 重置防抖定时器
+     */
+    private void resetDebounceTimer() {
+//        // 清理旧定时器，防止内存泄露
+//        if (debounceTimer != null) {
+//            debounceTimer.stop();
+//        }
+//        debounceTimer = new Timer(DEBOUNCE_DELAY, null);
+//        isDebouncing.compareAndSet(false, true);
+    }
+
+    /**
+     * 实际执行搜索的逻辑
+     */
+    private void performSearch() {
         // 如果处于锁定状态, 则直接返回
         if (lock) return;
         String searchText = searchField.getText();
