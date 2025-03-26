@@ -91,11 +91,11 @@ public class QuestionCard {
 
     /**
      * 使用给定的数据创建一张卡片
-     * @param id 需要传入卡片ID
-     * @param front 卡片的正面文本
-     * @param back 卡片的背面文本
      */
-    public static void create(Integer id, QuestionFront front, String back) {
+    public static void create(QuestionCardReq questionCardReq) {
+        Integer id = questionCardReq.getId();
+        QuestionFront front = questionCardReq.getFront();
+        String back = questionCardReq.getBack();
         String strFront = GsonUtils.toJsonStr(front);
         // TODO 增加条件判断，若数据已经存在，则执行更新。
         Long created = System.currentTimeMillis(); // 当前时间作为创建时间
