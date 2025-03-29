@@ -19,8 +19,13 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -406,5 +411,17 @@ public class Context extends AbstractExecuteContext {
         List<String> arr = watchPool.stream().filter(e -> !e.trim().startsWith(split[0])).collect(Collectors.toList());
         watchPool.clear();
         watchPool.addAll(arr);
+    }
+
+    public @Nullable Value methodInvokeHelper(Callable<Value> callable) {
+        this.invokeMethodStart();
+        try {
+            return callable.call();
+        } catch (Exception e) {
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+        } finally {
+            this.invokeMethodDone();
+        }
+        return null;
     }
 }

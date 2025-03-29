@@ -8,6 +8,12 @@ import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertTrue;
 
 public class JavaEvaluatorImplTest {
@@ -157,6 +163,92 @@ public class JavaEvaluatorImplTest {
         assert tokenFactory.parseToToken("invoke(1 + 2, c, d).arr[0] + 1").getToken().equals("invoke(1 + 2, c, d).arr[0] + 1");
 
         assert tokenFactory.parseToToken("[1][2]") instanceof JavaEvaluatorImpl.ArrayTokenChain; // [1][2]只有可能在处理链式调用时出现
+    }
+
+    @Test
+    public void testNPR() {
+        List<JavaEvaluatorImpl.EvalToken.Type> rpn = JavaEvaluatorImpl.EvalToken.ExpressionConverter.toRPN(Arrays.asList(
+                new JavaEvaluatorImpl.EvalToken.Type(JavaEvaluatorImpl.EvalToken.TypeEnum.NUMBER, "1"),
+                new JavaEvaluatorImpl.EvalToken.Type(JavaEvaluatorImpl.EvalToken.TypeEnum.OPERATOR, "+"),
+                new JavaEvaluatorImpl.EvalToken.Type(JavaEvaluatorImpl.EvalToken.TypeEnum.QUOTE_LEFT, "("),
+                new JavaEvaluatorImpl.EvalToken.Type(JavaEvaluatorImpl.EvalToken.TypeEnum.NUMBER, "2"),
+                new JavaEvaluatorImpl.EvalToken.Type(JavaEvaluatorImpl.EvalToken.TypeEnum.OPERATOR, "*"),
+                new JavaEvaluatorImpl.EvalToken.Type(JavaEvaluatorImpl.EvalToken.TypeEnum.NUMBER, "3"),
+                new JavaEvaluatorImpl.EvalToken.Type(JavaEvaluatorImpl.EvalToken.TypeEnum.QUOTE_RIGHT, ")")
+        ));
+        assert Objects.equals(rpn.stream().map(e -> e.token).collect(Collectors.joining(",")), "1,2,3,*,+");
+    }
+
+    @Test
+    public void testOperatorRule() {
+        var matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("+");
+        assert matcher.find();
+        assert matcher.end() == 1;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("-");
+        assert matcher.find();
+        assert matcher.end() == 1;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("*");
+        assert matcher.find();
+        assert matcher.end() == 1;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("/");
+        assert matcher.find();
+        assert matcher.end() == 1;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("%");
+        assert matcher.find();
+        assert matcher.end() == 1;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("&");
+        assert matcher.find();
+        assert matcher.end() == 1;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("|");
+        assert matcher.find();
+        assert matcher.end() == 1;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("^");
+        assert matcher.find();
+        assert matcher.end() == 1;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("~");
+        assert matcher.find();
+        assert matcher.end() == 1;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("<<");
+        assert matcher.find();
+        assert matcher.end() == 2;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher(">>");
+        assert matcher.find();
+        assert matcher.end() == 2;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("==");
+        assert matcher.find();
+        assert matcher.end() == 2;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("!=");
+        assert matcher.find();
+        assert matcher.end() == 2;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("&&");
+        assert matcher.find();
+        assert matcher.end() == 2;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("||");
+        assert matcher.find();
+        assert matcher.end() == 2;
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("%+");
+        assert !matcher.find();
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("%-");
+        assert !matcher.find();
+
+        matcher = JavaEvaluatorImpl.TokenFactory.AbstractRule.operatorPattern.matcher("%*");
+        assert ! matcher.find();
     }
 
     @Test

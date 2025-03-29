@@ -545,36 +545,286 @@ public class JavaEvaluatorImpl implements Evaluator {
             add('\t');
             add('\r');
             add('\n');
-            add('(');
-            add(')');
+//            add('(');
+//            add(')');
         }};
+
+        public enum TypeEnum {
+            OPERATOR,
+            NUMBER,
+            STRING,
+            QUOTE_LEFT,
+            QUOTE_RIGHT,
+            OBJECT, BOOLEAN,
+            ;
+
+            public Type toType() {
+                return new Type(this, "");
+            }
+        }
+
+        public static class Type {
+            // 类型
+            public TypeEnum typeEnum;
+            // token
+            public String token;
+
+            public Type(TypeEnum typeEnum, String token) {
+                this.typeEnum = typeEnum;
+                this.token    = token;
+            }
+        }
+
+        public static class TypeChecker {
+            /**
+             * 定义操作符支持的类型规则
+             */
+            private static final Map<String, List<List<TypeEnum>>> operatorTypeRules = new HashMap<>();
+
+            static {
+                // 加法支持：NUMBER + NUMBER 或 STRING + ANY
+                // List的最后一个元素表示最终的计算结果
+                operatorTypeRules.put("+", Arrays.asList(
+                        (Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER)),
+                        (Arrays.asList(TypeEnum.STRING, TypeEnum.NUMBER, TypeEnum.STRING)),
+                        (Arrays.asList(TypeEnum.STRING, TypeEnum.STRING, TypeEnum.STRING))
+                ));
+
+                // 减法、乘法、除法、取模仅支持：NUMBER + NUMBER
+                operatorTypeRules.put("-", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER))));
+                operatorTypeRules.put("*", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER))));
+                operatorTypeRules.put("/", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER))));
+                operatorTypeRules.put("%", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER))));
+
+                // 位运算符支持：NUMBER + NUMBER
+                operatorTypeRules.put("<<", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER))));
+                operatorTypeRules.put(">>", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER))));
+                operatorTypeRules.put("&", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER))));
+                operatorTypeRules.put("|", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER))));
+                operatorTypeRules.put("^", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.NUMBER))));
+                operatorTypeRules.put("~", Collections.singletonList((List.of(TypeEnum.NUMBER, TypeEnum.NUMBER)))); // 单目运算符
+
+                // 关系运算符支持：NUMBER + NUMBER 或 STRING + STRING
+                operatorTypeRules.put("==", Arrays.asList(
+                        (Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.BOOLEAN)),
+                        (Arrays.asList(TypeEnum.STRING, TypeEnum.STRING, TypeEnum.BOOLEAN)),
+                        (Arrays.asList(TypeEnum.OBJECT, TypeEnum.OBJECT, TypeEnum.BOOLEAN))
+                ));
+                operatorTypeRules.put("!=", Arrays.asList(
+                        (Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.BOOLEAN)),
+                        (Arrays.asList(TypeEnum.STRING, TypeEnum.STRING, TypeEnum.BOOLEAN))
+                ));
+                operatorTypeRules.put("<", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.BOOLEAN))));
+                operatorTypeRules.put(">", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.BOOLEAN))));
+                operatorTypeRules.put("<=", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.BOOLEAN))));
+                operatorTypeRules.put(">=", Collections.singletonList((Arrays.asList(TypeEnum.NUMBER, TypeEnum.NUMBER, TypeEnum.BOOLEAN))));
+
+                // 逻辑运算符支持：BOOLEAN + BOOLEAN
+                operatorTypeRules.put("&&", Collections.singletonList((Arrays.asList(TypeEnum.BOOLEAN, TypeEnum.BOOLEAN, TypeEnum.BOOLEAN))));
+                operatorTypeRules.put("||", Collections.singletonList((Arrays.asList(TypeEnum.BOOLEAN, TypeEnum.BOOLEAN, TypeEnum.BOOLEAN))));
+                operatorTypeRules.put("!", Collections.singletonList(List.of(TypeEnum.BOOLEAN, TypeEnum.BOOLEAN))); // 单目运算符
+            }
+
+            /**
+             * 判断表达式类型是否合法, 如果不合法, 抛出异常
+             *
+             * @param typeList typeList
+             * @throws ComputeError 异常
+             */
+            public static void check(List<Type> typeList) throws ComputeError {
+                Stack<Type> operandStack = new Stack<>();
+
+                for (Type type : typeList) {
+                    if (type.typeEnum == TypeEnum.OPERATOR) {
+                        // 操作符：从栈中弹出两个操作数并检查类型
+                        if (operandStack.size() < 2 && !isUnaryOperator(type.token)) {
+                            throw new ComputeError(BundleUtils.i18nHelper("操作数不足", "Insufficient operands for operator: ") + type.token);
+                        }
+
+                        if (isUnaryOperator(type.token)) {
+                            // 单目运算符：只需一个操作数
+                            Type right = operandStack.pop();
+                            List<TypeEnum> validOperation = isValidOperation(type.token, right.typeEnum);
+                            if (validOperation == null) {
+                                throw new ComputeError(BundleUtils.i18nHelper("类型不匹配", "Invalid types for operator '")
+                                        + type.token + "': " + right.typeEnum);
+                            }
+                            operandStack.push(validOperation.get(validOperation.size() - 1).toType()); // 压回占位值
+                        } else {
+                            // 双目运算符：需要两个操作数
+                            Type right = operandStack.pop();
+                            Type left = operandStack.pop();
+
+                            List<TypeEnum> validOperation = isValidOperation(type.token, left.typeEnum, right.typeEnum);
+                            if (validOperation == null) {
+                                throw new ComputeError(BundleUtils.i18nHelper(
+                                        String.format("类型不匹配, 运算符'%s'不支持操作类型'%s'和'%s'", type.token, left.typeEnum, right.typeEnum),
+                                        String.format("Invalid types for operator '%s': %s and %s", type.token, left.typeEnum, right.typeEnum)
+                                ));
+                            }
+                            operandStack.push(validOperation.get(validOperation.size() - 1).toType()); // 压回占位值
+                        }
+                    } else {
+                        // 操作数直接压入栈
+                        operandStack.push(type);
+                    }
+                }
+
+                // 检查主表达式的类型
+                checkSubExpression(operandStack);
+            }
+
+            // 检查子表达式的类型
+            private static void checkSubExpression(Stack<Type> operandStack) throws ComputeError {
+                if (operandStack.size() != 1) {
+                    throw new ComputeError(BundleUtils.i18nHelper("表达式无效", "Invalid expression: too many operands"));
+                }
+            }
+
+            // 检查操作符和操作数的类型是否合法
+            private static List<TypeEnum> isValidOperation(String operator, TypeEnum left, TypeEnum right) {
+                List<List<TypeEnum>> rules = operatorTypeRules.get(operator);
+                if (rules == null) {
+                    throw new ComputeError(BundleUtils.i18nHelper("操作符不支持", "Unsupported operator: ") + operator);
+                }
+
+                for (List<TypeEnum> rule : rules) {
+                    if (rule.contains(left) && rule.contains(right)) {
+                        return rule;
+                    }
+                }
+
+                return null;
+            }
+
+            // 检查单目运算符的类型是否合法
+            private static List<TypeEnum> isValidOperation(String operator, TypeEnum operand) {
+                List<List<TypeEnum>> rules = operatorTypeRules.get(operator);
+                if (rules == null) {
+                    throw new ComputeError(BundleUtils.i18nHelper("操作符不支持", "Unsupported operator: ") + operator);
+                }
+
+                for (List<TypeEnum> rule : rules) {
+                    if (rule.contains(operand)) {
+                        return rule;
+                    }
+                }
+
+                return null;
+            }
+
+            // 判断是否为单目运算符
+            private static boolean isUnaryOperator(String operator) {
+                return operator.equals("~") || operator.equals("!");
+            }
+        }
+
+        public static class ExpressionConverter {
+
+            // 操作符优先级映射，使用 Map.ofEntries 兼容 JDK 11
+            static final Map<String, Integer> OPERATOR_PRECEDENCE = Map.ofEntries(
+                    Map.entry("||", 1), Map.entry("&&", 2),      // 逻辑运算符
+                    Map.entry("==", 3), Map.entry("!=", 3),      // 关系运算符
+                    Map.entry("<", 4), Map.entry("<=", 4), Map.entry(">", 4), Map.entry(">=", 4),
+                    Map.entry("+", 5), Map.entry("-", 5),        // 加减
+                    Map.entry("*", 6), Map.entry("/", 6), Map.entry("%", 6), // 乘除取模
+                    Map.entry("<<", 7), Map.entry(">>", 7),      // 位移
+                    Map.entry("&", 8), Map.entry("|", 8), Map.entry("^", 8), // 位运算
+                    Map.entry("~", 9), Map.entry("!", 9)         // 单目运算符
+            );
+
+            /**
+             * 将中缀表达式转换为逆波兰表达式（RPN）。
+             *
+             * @param infix 输入的中缀表达式列表，包含操作数和操作符
+             * @return 转换后的逆波兰表达式列表
+             */
+            public static List<Type> toRPN(List<Type> infix) {
+                // 输出列表，保存最终的逆波兰表达式
+                List<Type> output = new ArrayList<>();
+                // 运算符栈，临时存储运算符和括号
+                Deque<Type> operatorStack = new ArrayDeque<>();
+
+                // 遍历输入的中缀表达式列表
+                for (Type type : infix) {
+                    switch (type.typeEnum) {
+                        // 如果是操作数（数字、字符串、布尔值、对象），直接添加到输出列表
+                        case NUMBER:
+                        case STRING:
+                        case BOOLEAN:
+                        case OBJECT:
+                            output.add(type);
+                            break;
+
+                        // 如果是操作符，处理操作符优先级
+                        case OPERATOR:
+                            // 将栈中优先级不低于当前操作符的全部弹出并添加到输出列表
+                            while (!operatorStack.isEmpty() &&
+                                    precedence(operatorStack.peek()) >= precedence(type)) {
+                                output.add(operatorStack.pop());
+                            }
+                            // 当前操作符入栈
+                            operatorStack.push(type);
+                            break;
+
+                        // 左括号直接入栈
+                        case QUOTE_LEFT:
+                            operatorStack.push(type);
+                            break;
+
+                        // 右括号：弹出直到遇到左括号为止
+                        case QUOTE_RIGHT:
+                            while (!operatorStack.isEmpty() && operatorStack.peek().typeEnum != TypeEnum.QUOTE_LEFT) {
+                                output.add(operatorStack.pop());
+                            }
+                            // 如果栈为空或者栈顶不是左括号，说明括号不匹配
+                            if (operatorStack.isEmpty() || operatorStack.pop().typeEnum != TypeEnum.QUOTE_LEFT) {
+                                throw new IllegalArgumentException("Mismatched parentheses");
+                            }
+                            break;
+
+                        // 如果遇到未知类型，抛出异常
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + type.typeEnum);
+                    }
+                }
+
+                // 将栈中剩余的操作符全部弹出到输出列表
+                while (!operatorStack.isEmpty()) {
+                    Type top = operatorStack.pop();
+                    // 如果仍有未匹配的括号，抛出异常
+                    if (top.typeEnum == TypeEnum.QUOTE_LEFT || top.typeEnum == TypeEnum.QUOTE_RIGHT) {
+                        throw new IllegalArgumentException("Mismatched parentheses");
+                    }
+                    output.add(top);
+                }
+
+                return output; // 返回逆波兰表达式
+            }
+
+            /**
+             * 获取操作符的优先级。
+             *
+             * @param type 操作符类型
+             * @return 优先级值，如果未定义则返回 -1
+             */
+            private static int precedence(Type type) {
+                return OPERATOR_PRECEDENCE.getOrDefault(type.token, -1);
+            }
+        }
 
         @Override
         public Value getValue() {
             StringBuilder sb = new StringBuilder();
             char[] tokenChars = token.toCharArray(); // 将字符串转换为字符数组
-            int len = tokenChars.length;
-            for (int i = 0; i < len; i++) {
-                if (skip.contains(tokenChars[i])) {
-                    sb.append(tokenChars[i]);
-                } else {
-                    Token t = tf.parseToTokenFromStart(new String(tokenChars, i, len - i), ctx); // 使用字符数组创建子字符串
-                    Value v = t.getValue();
-                    if (t instanceof  OperatorToken) {
-                        // 运算符需要去除引号
-                        sb.append(DebugUtils.removeQuotes(Env.inspector.inspectValue(v)));
-                    } else {
-//                        if (!super.isNumberValue(v) && !(v instanceof StringReference) && !(v instanceof BooleanValue)) {
-//                            throw new ComputeError(t.getToken() + BundleUtils.i18n("debug.eval.result.not.support.calculate") + v.type().name());
-//                        }
-                        sb.append(Env.inspector.inspectValue(v));
-                    }
+            List<Type> typeList = new ArrayList<>();
 
-                    // skip已经匹配过的内容
-                    i += t.getToken().length() - 1; // -1是为了应对下一轮循环前的i++
-                }
-            }
-
+            // 遍历用户输入的表达式
+            traverseToken(sb, typeList, tokenChars);
+            // 判断类型
+            TypeChecker.check(
+                    ExpressionConverter.toRPN(typeList) // 逆波兰表达式
+            );
 
             Object execute = ComputeEngine.execute(sb.toString());
             /*
@@ -620,6 +870,111 @@ public class JavaEvaluatorImpl implements Evaluator {
             } catch (ClassNotLoadedException | IncompatibleThreadStateException | InvocationException |
                      InvalidTypeException e) {
                 throw new ComputeError(BundleUtils.i18n("debug.eval.primitive.to.wrapper.error") + e.getCause());
+            }
+        }
+
+        /**
+         * 遍历tokenChars, 同时赋值传入参数sb, typeList
+         * @param sb 存储最终的计算常量表达式
+         * @param typeList 存储token的类型, 用于后续的参数类型校验
+         * @param tokenChars 需要遍历的用户输入的表达式
+         */
+        private void traverseToken(StringBuilder sb, List<Type> typeList, char[] tokenChars)
+        // else if 太多了, 换个花括号对其方式
+        {
+            int len = tokenChars.length;
+
+            for (int i = 0; i < len; i++)
+            {
+                if (skip.contains(tokenChars[i]))
+                {
+                    sb.append(tokenChars[i]);
+                }
+                else if (tokenChars[i] == '(')
+                {
+                    typeList.add(new Type(TypeEnum.QUOTE_LEFT, "("));
+                    sb.append(tokenChars[i]);
+                }
+                else if (tokenChars[i] == ')')
+                {
+                    typeList.add(new Type(TypeEnum.QUOTE_RIGHT, ")"));
+                    sb.append(tokenChars[i]);
+                }
+                else
+                {
+                    Token t = tf.parseToTokenFromStart(new String(tokenChars, i, len - i), ctx); // 使用字符数组创建子字符串
+                    Value v = t.getValue();
+                    if (t instanceof  OperatorToken)
+                    {
+                        typeList.add(new Type(TypeEnum.OPERATOR, t.getToken()));
+                        // 运算符需要去除引号
+                        sb.append(DebugUtils.removeQuotes(Env.inspector.inspectValue(v)));
+                    }
+                    else
+                    {
+                        TypeEnum typeEnum =
+                                super.isNumberValue(v) ?
+                                        TypeEnum.NUMBER :
+                                v instanceof StringReference ?
+                                        TypeEnum.STRING :
+                                v instanceof BooleanValue ?
+                                        TypeEnum.BOOLEAN:
+                                        TypeEnum.OBJECT
+                                ;
+                        typeList.add(new Type(typeEnum, t.getToken()));
+                        /*
+                         * 对于对象类型, 写入地址.
+                         * 这里需要额外说明, 能够出现在EvalToken, 说明必然存在运算符号
+                         * 如果此时存在Object类型对象, 那么大概率是进行==, !=之类的判断运算符.
+                         * 对于这种情况, 我们需要将对象地址写入, 而不是对象的值, 因为在Java中,
+                         * 该类型运算符比较的是地址, 而不是值.
+                         *
+                         * 如果对象使用的不是!=, ==这类运算符, 那么会在后续的类型校验中进行检查.
+                         * 当前方法无需考虑
+                         *
+                         * 综上, 如果遇到Object类型, 则写入地址
+                         */
+                        if (typeEnum == TypeEnum.OBJECT) {
+                            sb.append(handleAddress(v));
+                        } else {
+                            sb.append(Env.inspector.inspectValue(v));
+                        }
+                    }
+
+                    // skip已经匹配过的内容
+                    i += t.getToken().length() - 1; // -1是为了应对下一轮循环前的i++
+                }
+            }
+        }
+
+        /**
+         * 获取v的地址
+         * @param v v
+         * @return string
+         */
+        private String handleAddress(Value v) {
+            // 写入地址
+            if (v instanceof ObjectReference) {
+                var objRef = (ObjectReference) v;
+                // 先获取hashCode
+                Value value = Env.ctx.methodInvokeHelper(() ->
+                        objRef.invokeMethod(
+                                Env.ctx.getThread(),
+                                objRef.referenceType().methodsByName("hashCode").get(0),
+                                Collections.emptyList(),
+                                ObjectReference.INVOKE_SINGLE_THREADED
+                        )
+                );
+                if (value == null) {
+                    // 计算失败, rollback降级
+                    return Env.inspector.inspectValue(v);
+                }
+                // 将hashCode通过inspector处理为字符串
+                return Env.inspector.inspectValue(value);
+            } else {
+                // 遇到了我不知道的情况, 打个日志记录一下
+                LogUtils.warn("unknown type: " + v.getClass().getName());
+                return Env.inspector.inspectValue(v);
             }
         }
     }
@@ -1715,7 +2070,60 @@ public class JavaEvaluatorImpl implements Evaluator {
             public static final Pattern evalPattern = Pattern.compile("<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!]");
 
             // 匹配只含有计算符号类型的Token
-            public static final Pattern operatorPattern = Pattern.compile("^(<<|>>|==|!=|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!])$");
+            // public static final Pattern operatorPattern = Pattern.compile("^(<<|>>|==|!=|[\\%&&\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!])$");
+            public static final MyPattern operatorPattern = s -> new MyMatcher() {
+
+                private final String token = s;
+                private int end = -1;
+
+                @Override
+                public boolean find() {
+                    // 如果字符串长度不在合法的范围内（最小2个字符，最大2个字符或者1个字符），直接返回false
+                    if (token.isEmpty() || token.length() > 2) {
+                        return false;
+                    }
+
+                    // 处理2字符长的运算符（优先处理）
+                    if (token.length() == 2) {
+                        // 优先匹配两个字符长的运算符
+                        if (token.equals("&&") || token.equals("||") || token.equals("<<") || token.equals(">>") ||
+                                token.equals("==") || token.equals("!=") || token.equals("<=") || token.equals(">=")) {
+                            end = 2;
+                            return true;
+                        }
+                    }
+
+                    // 处理1字符长的运算符
+                    if (token.length() == 1) {
+                        // 匹配1个字符的运算符
+                        if ("+-*/%&|^~<>!".contains(token)) {
+                            end = 1;
+                            return true;
+                        }
+                    }
+
+                    // 没有找到匹配
+                    end = -1;
+                    return false;
+                }
+
+                @Override
+                public int start() {
+                    if (end == -1) {
+                        throw new IllegalStateException("No match available");
+                    }
+                    return 0; // 因为运算符是从头开始匹配的，所以起始位置是0
+                }
+
+                @Override
+                public int end() {
+                    if (end == -1) {
+                        throw new IllegalStateException("No match available");
+                    }
+                    return end; // 返回匹配的运算符长度
+                }
+            };
+
 
             /*
                 匹配invoke类型的Token [正则只会匹配一组方法调用]
@@ -1959,7 +2367,7 @@ public class JavaEvaluatorImpl implements Evaluator {
                 for (int len = 2; len > 0; len--) {
                     String tmp = (start + len) > s.length() ? s.substring(start) : s.substring(start, start + len);
                     // 匹配s
-                    Matcher m = operatorPattern.matcher(tmp);
+                    var m = operatorPattern.matcher(tmp);
                     if (m.find()) {
                         return tmp;
                     }
