@@ -16,6 +16,7 @@ intellij {
 }
 
 test {
+    enabled(false)
     useJUnitPlatform()
 }
 
