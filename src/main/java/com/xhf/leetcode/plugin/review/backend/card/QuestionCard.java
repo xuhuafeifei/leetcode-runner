@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.review.backend.card;
 
 import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
+import com.xhf.leetcode.plugin.utils.GsonUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -11,7 +12,10 @@ import java.sql.SQLException;
 public class QuestionCard {
 
     private Integer id; // 卡片ID
-    private String front, back; // 问题内容
+
+    private QuestionFront front; // 卡片前面题目
+    private String back; // 背部答案
+
     private Long created; // 创建时间
 
     /**
@@ -21,7 +25,7 @@ public class QuestionCard {
      * @param back 卡片的背面文本
      * @param created 卡片的创建时间
      */
-    public QuestionCard(Integer id, String front, String back, Long created) {
+    public QuestionCard(Integer id, QuestionFront front, String back, Long created) {
         this.id = id;
         this.front = front;
         this.back = back;
@@ -51,7 +55,7 @@ public class QuestionCard {
      * 获取问题内容
      * @return 问题内容
      */
-    public String getFront() {
+    public QuestionFront getFront() {
         return this.front;
     }
 
@@ -87,18 +91,19 @@ public class QuestionCard {
 
     /**
      * 使用给定的数据创建一张卡片
-     * @param id 需要传入卡片ID
-     * @param front 卡片的正面文本
-     * @param back 卡片的背面文本
      */
-    public static void create(Integer id, String front, String back) {
+    public static void create(QuestionCardReq questionCardReq) {
+        Integer id = questionCardReq.getId();
+        QuestionFront front = questionCardReq.getFront();
+        String back = questionCardReq.getBack();
+        String strFront = GsonUtils.toJsonStr(front);
         // TODO 增加条件判断，若数据已经存在，则执行更新。
         Long created = System.currentTimeMillis(); // 当前时间作为创建时间
         // 插入数据库
         try {
             PreparedStatement ps = AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("INSERT INTO cards (card_id, front, back, created) VALUES (?, ?, ?, ?)");
             ps.setInt(1, id);
-            ps.setString(2, front);
+            ps.setString(2, strFront);
             ps.setString(3, back);
             ps.setString(4, created.toString());
             ps.executeUpdate();

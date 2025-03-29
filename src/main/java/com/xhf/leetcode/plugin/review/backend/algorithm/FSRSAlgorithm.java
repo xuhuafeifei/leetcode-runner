@@ -12,11 +12,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class FSRSAlgorithm{
     // 算法的标准值
-    private final float REQUEST_RETENTION = 0.9F;
-    private final int MAXIMUM_INTERVAL = 36500;
-    private final float EASY_BONUS = 1.3F;
-    private final float HARD_FACTOR = 1.2F;
-    private final float[] WEIGHTS = new float[]{1F, 1F, 5F, -1F, -1F, 0.1F, 1.5F, -0.2F, 0.8F, 2, -0.2F, 0.2F, 1F};
+    private final float REQUEST_RETENTION = 0.9F; // 目标记忆保留率（90%）
+    private final int MAXIMUM_INTERVAL = 36500; // 最大复习间隔（365天）
+    private final float EASY_BONUS = 1.3F; // 容易卡片间隔奖励系数
+    private final float HARD_FACTOR = 1.2F; // 困难卡片难度系数
+    private final float[] WEIGHTS = new float[]{1F, 1F, 5F, -1F, -1F, 0.1F, 1.5F, -0.2F, 0.8F, 2, -0.2F, 0.2F, 1F}; /* 各参数权重配置 */
 
     private FSRSRating rating;
     private SchedulingCard card;

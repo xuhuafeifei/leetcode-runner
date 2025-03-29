@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.review.backend.database;
 
+import com.intellij.openapi.application.PathManager;
+
 /**
  * @author 文艺倾年
  */
@@ -12,9 +14,8 @@ public class DatabaseAdapter {
      * 此外，还会创建所有必要的表。
      */
     public DatabaseAdapter() {
-        // 从配置文件中读取数据库连接数据
-        // TODO 默认存储到IDEA设置中的目录
         this.dbFolder  = "E:/data";
+//        this.dbFolder  = PathManager.getSystemPath();
         this.dbName = "memory.db";
 
         // 使用加载的数据创建MySQL对象
@@ -27,9 +28,9 @@ public class DatabaseAdapter {
     /**
      * 数据库：Sqlite
      * 如果表不存在，则在数据库中创建应用程序所需的所有表。
-     * 创建卡片表：card_id, front, back, created, stability, difficulty, elapsed_days, repetitions, state, day_interval, next_repetition, last_review
+     * 创建卡片表：
      * card_id: 类型为 int，卡片ID，主键
-     * front: 类型为 VARCHAR(100)，卡片正面内容，不能为空
+     * front: 类型为 TEXT，卡片正面内容，不能为空
      * back: 类型为 TEXT，卡片背面内容，写自己的题解，可以为空
      * created: 类型为 BIGINT，卡片的创建时间戳（以毫秒为单位），不能为空
      * stability: 类型为 FLOAT，表示卡片的记忆稳定性，默认值为 0。
@@ -57,7 +58,7 @@ public class DatabaseAdapter {
      */
     private void createTables() {
         // 重新生成对应的语句
-        this.sqlite.queryUpdate("CREATE TABLE IF NOT EXISTS cards (card_id int NOT NULL, front VARCHAR(100), back TEXT, created BIGINT NOT NULL, stability FLOAT DEFAULT 0, difficulty FLOAT DEFAULT 0, elapsed_days INT DEFAULT 0, repetitions INT DEFAULT 0, day_interval INT DEFAULT 0, state INT DEFAULT 0, next_repetition BIGINT DEFAULT 0, last_review BIGINT DEFAULT 0, PRIMARY KEY (card_id))");
+        this.sqlite.queryUpdate("CREATE TABLE IF NOT EXISTS cards (card_id int NOT NULL, front TEXT, back TEXT, created BIGINT NOT NULL, stability FLOAT DEFAULT 0, difficulty FLOAT DEFAULT 0, elapsed_days INT DEFAULT 0, repetitions INT DEFAULT 0, day_interval INT DEFAULT 0, state INT DEFAULT 0, next_repetition BIGINT DEFAULT 0, last_review BIGINT DEFAULT 0, PRIMARY KEY (card_id))");
    }
 
     /**

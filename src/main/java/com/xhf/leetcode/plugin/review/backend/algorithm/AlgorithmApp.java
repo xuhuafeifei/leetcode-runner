@@ -2,7 +2,9 @@ package com.xhf.leetcode.plugin.review.backend.algorithm;
 
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardScheduler;
+import com.xhf.leetcode.plugin.review.backend.card.QuestionFront;
 import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
+import com.xhf.leetcode.plugin.utils.GsonUtils;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -39,7 +41,12 @@ public class AlgorithmApp {
         this.databaseAdapter.getSqlite().query("SELECT * FROM cards", resultSet -> {
             try {
                 while (resultSet.next()) {
-                    new QuestionCard(resultSet.getInt("card_id"), resultSet.getString("front"), resultSet.getString("back"), resultSet.getLong("created"));
+                    String strFront = resultSet.getString("front");
+                    QuestionFront questionFront = GsonUtils.fromJson(strFront, QuestionFront.class);
+                    new QuestionCard(resultSet.getInt("card_id"),
+                            questionFront,
+                            resultSet.getString("back"),
+                            resultSet.getLong("created"));
                     System.out.println("[Cards] Sucessfully loaded card " + resultSet.getInt("card_id"));
                 }
             } catch (SQLException e) {

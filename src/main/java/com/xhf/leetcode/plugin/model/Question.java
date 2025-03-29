@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
 public class Question implements DeepCodingQuestion {
     private String questionId;
     private String frontendQuestionId;
-
     private Double acRate;
 
     /**
@@ -331,7 +330,7 @@ public class Question implements DeepCodingQuestion {
                 .append(frontendQuestionId)
                 .append("]")
                 .append(" ").append(getTitleCn());
-        
+
         // 添加 VIP 标记
         if (paidOnly) {
             sb.append(" 【👑 vip】");
