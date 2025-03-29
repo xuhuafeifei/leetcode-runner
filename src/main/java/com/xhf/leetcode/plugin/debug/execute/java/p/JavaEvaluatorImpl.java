@@ -302,11 +302,11 @@ public class JavaEvaluatorImpl implements Evaluator {
             if (expression.contains("+=") || expression.contains("-=") || expression.contains("*=") || expression.contains("/=") || expression.contains("%=") || expression.contains("&=") || expression.contains("|=") || expression.contains("^=") || expression.contains("<<=") || expression.contains(">>=") || expression.contains(">>>=")) {
                 throw new ComputeError(BundleUtils.i18n("debug.eval.operation.not.support"));
             }
-            if (expression.contains("==")) {
-                throw new ComputeError(BundleUtils.i18n("debug.eval.two.equals"));
-            }
+//            if (expression.contains("==")) {
+//                throw new ComputeError(BundleUtils.i18n("debug.eval.two.equals"));
+//            }
             // 排除<=, >=的干扰
-            String tmp = expression.replaceAll("<=","").replaceAll(">=","");
+            String tmp = expression.replaceAll("<=","").replaceAll(">=","").replaceAll("==","");
             if (tmp.contains("=")) {
                 throw new ComputeError(BundleUtils.i18n("debug.eval.one.equal"));
             }
@@ -564,9 +564,9 @@ public class JavaEvaluatorImpl implements Evaluator {
                         // 运算符需要去除引号
                         sb.append(DebugUtils.removeQuotes(Env.inspector.inspectValue(v)));
                     } else {
-                        if (!super.isNumberValue(v) && !(v instanceof StringReference)) {
-                            throw new ComputeError(t.getToken() + BundleUtils.i18n("debug.eval.result.not.support.calculate") + v.type().name());
-                        }
+//                        if (!super.isNumberValue(v) && !(v instanceof StringReference) && !(v instanceof BooleanValue)) {
+//                            throw new ComputeError(t.getToken() + BundleUtils.i18n("debug.eval.result.not.support.calculate") + v.type().name());
+//                        }
                         sb.append(Env.inspector.inspectValue(v));
                     }
 
@@ -1175,6 +1175,12 @@ public class JavaEvaluatorImpl implements Evaluator {
                 }
                 return v.value;
             }
+            if ("true".equals(token)) {
+                return Env.vm.mirrorOf(true);
+            }
+            if ("false".equals(token)) {
+                return Env.vm.mirrorOf(false);
+            }
             // 从变量env中获取
             if ("this".equals(token)) {
                 return Env._this;
@@ -1190,6 +1196,8 @@ public class JavaEvaluatorImpl implements Evaluator {
     /**
      * VariableTokenChain将顶替InvokeTokenChain, InvokeToken的功能
      * 匹配规则详见{@link TokenFactory.VariableRuleChain}
+     * 另外, 值得一提的是, VariableTokenChain一般出现在InvokeTokenChain调用处理链的中间或者末尾
+     * 如: this.head, a.test()
      */
     public static class VariableTokenChain extends VariableToken implements TokenChain {
 
@@ -1707,7 +1715,7 @@ public class JavaEvaluatorImpl implements Evaluator {
             public static final Pattern evalPattern = Pattern.compile("<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!]");
 
             // 匹配只含有计算符号类型的Token
-            public static final Pattern operatorPattern = Pattern.compile("^(<<|>>|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!])$");
+            public static final Pattern operatorPattern = Pattern.compile("^(<<|>>|==|!=|[\\+\\-\\*\\/\\%&\\|\\^\\~\\<\\>\\!])$");
 
             /*
                 匹配invoke类型的Token [正则只会匹配一组方法调用]
@@ -1884,6 +1892,7 @@ public class JavaEvaluatorImpl implements Evaluator {
 
         /**
          * 匹配EvalToken的规则
+         * 对应{@link EvalToken}
          */
         public static class EvalRule extends AbstractRule {
             public EvalRule () {

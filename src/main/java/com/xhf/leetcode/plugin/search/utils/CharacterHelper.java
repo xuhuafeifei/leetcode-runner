@@ -404,6 +404,9 @@ public class CharacterHelper {
 				i = j - 1;
 			} else if (operatorPattern.matcher(String.valueOf(c)).find()) {
 				return true;
+			} else if (i + 1 < len && operatorPattern.matcher(String.valueOf(c) + arr[i+1]).find()) {
+				// 检测两个字符的
+				return true;
 			}
 		}
 		return false;

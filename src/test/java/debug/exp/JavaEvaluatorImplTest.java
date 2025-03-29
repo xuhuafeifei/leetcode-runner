@@ -102,6 +102,9 @@ public class JavaEvaluatorImplTest {
 
     @Test
     public void test() throws Exception {
+        assert tokenFactory.parseToToken("a == dfs().a.b.c") instanceof JavaEvaluatorImpl.EvalToken;
+        assert tokenFactory.parseToToken("a == dfs().a.b.c").getToken().equals("a == dfs().a.b.c");
+
         assert tokenFactory.parseToToken("1 + a.invoke(b, c, d)") instanceof JavaEvaluatorImpl.EvalToken;
         assert tokenFactory.parseToToken("1 + a.invoke(b, c, d)").getToken().equals("1 + a.invoke(b, c, d)");
 
