@@ -84,9 +84,11 @@
 
 感谢参与贡献的每一位小伙伴🥰
 
-<a href="https://github.com/xuhuafeifei/leetcode-runner/graphs/contributors">
-  <img src="https://opencollective.com/leetcode-runner/contributors.svg?width=890&button=false" alt="contributors" />
-</a>
+[//]: # (<a href="https://github.com/xuhuafeifei/leetcode-runner/graphs/contributors">)
+
+[//]: # (  <img src="https://opencollective.com/leetcode-runner/contributors.svg?width=890&button=false" alt="contributors" />)
+
+[//]: # (</a>)
 
 <!-- readme: contributors -start -->
 <!-- readme: contributors -end -->
