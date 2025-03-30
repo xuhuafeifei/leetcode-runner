@@ -97,7 +97,8 @@ public class DailyPlanTabPanel extends JPanel {
     int cursor = -1;
 
     private void loadContent() {
-        this.totalReviewQuestion = service.getTotalReviewQuestion(new QueryDimModel());
+        this.totalReviewQuestion = service.getAllQuestions();
+                //service.getTotalReviewQuestion(new QueryDimModel());
         this.questionCardPanel = new JPanel();
         questionCardPanel.setLayout(new BorderLayout());
 
