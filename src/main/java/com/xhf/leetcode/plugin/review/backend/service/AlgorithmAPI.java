@@ -14,15 +14,9 @@ import java.util.Map;
 public class AlgorithmAPI {
     // 单例
     private static AlgorithmApp instance = null;
-    private AlgorithmAPI() {
-    }
 
-    public static AlgorithmApp getInstance() {
-        if (instance == null) {
-            new AlgorithmApp();
-            instance = AlgorithmApp.getInstance();
-        }
-        return instance;
+    public AlgorithmAPI() {
+        instance = AlgorithmApp.getInstance();
     }
 
     /**

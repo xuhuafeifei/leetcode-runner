@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.review.backend.service;
 
+import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.QueryDim;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestionModel;
@@ -64,5 +66,30 @@ public class MockRQServiceImpl implements ReviewQuestionService {
         res.add(m3);
 
         return res;
+    }
+
+    @Override
+    public ReviewQuestion getTopQuestion() {
+        return null;
+    }
+
+    @Override
+    public void rateQuestion(FSRSRating rating) {
+
+    }
+
+    @Override
+    public void createQuestion(Question question) {
+
+    }
+
+    @Override
+    public List<ReviewQuestion> getAllQuestions() {
+        return null;
+    }
+
+    @Override
+    public void deleteQuestion(Integer id) {
+
     }
 }

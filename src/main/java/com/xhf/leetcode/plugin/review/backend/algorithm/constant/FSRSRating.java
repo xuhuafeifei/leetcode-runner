@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.review.backend.algorithm.constant;
 
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+
 /**
  * @author 文艺倾年
  */
@@ -7,25 +9,27 @@ public enum FSRSRating {
     /**
      * 忘记；错误答案
      */
-    AGAIN(0),
+    AGAIN(0, BundleUtils.i18nHelper("需要重新复习", "need to code again")),
     /**
      * 回忆起来；经过一定困难才答出的正确答案
      */
-    HARD(1),
+    HARD(1, BundleUtils.i18nHelper("有点困难", "hard to code")),
     /**
      * 经过延迟答出的正确答案
      */
-    GOOD(2),
+    GOOD(2, BundleUtils.i18nHelper("有思路, 能写出来", "know how to do it")),
     /**
      * 完美答案
      */
-    EASY(3);
+    EASY(3, BundleUtils.i18nHelper("小菜一碟", "a piece of cake"));
 
     /**
      * 构造函数
-     * @param id 评分的ID（0-3）
+     *
+     * @param id   评分的ID（0-3）
+     * @param name name
      */
-    FSRSRating(Integer id) {
+    FSRSRating(Integer id, String name) {
         this.id = id;
     }
 
@@ -37,5 +41,9 @@ public enum FSRSRating {
      */
     public Integer toInt() {
         return this.id;
+    }
+
+    public String getName() {
+        return this.name();
     }
 }

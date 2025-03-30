@@ -53,6 +53,10 @@ public class QuestionCardScheduler {
 
     /**
      * 在复习过程中对卡片评分时，更新队列和卡片数据
+     * <p>
+     * 每次评分都会作用到队列top部位的卡牌
+     * <p>
+     * rating 为卡片复习的质量评分（评分范围根据算法而定, 其内容详见FSRSRating枚举）
      *
      * @param rating 卡片复习的质量评分（评分范围根据算法而定）
      */

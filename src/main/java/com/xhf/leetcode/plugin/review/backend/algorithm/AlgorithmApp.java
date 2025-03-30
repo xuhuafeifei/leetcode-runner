@@ -15,16 +15,15 @@ import java.util.Map;
  */
 public class AlgorithmApp {
 
-    private static AlgorithmApp instance;
-    private Map<Integer, QuestionCard> cards;
-    private QuestionCardScheduler cardScheduler;
-    private DatabaseAdapter databaseAdapter;
+    private static volatile AlgorithmApp instance;
+    private final Map<Integer, QuestionCard> cards;
+    private final QuestionCardScheduler cardScheduler;
+    private final DatabaseAdapter databaseAdapter;
 
     /**
      * 实例化 AlgorithmApp。在这里执行启动应用程序所需的重要步骤
      */
     public AlgorithmApp() {
-        instance = this;
         // 实例化数据库
         this.databaseAdapter = new DatabaseAdapter();
         // 实例化 HashMap，用于存储从数据库加载的卡片
@@ -46,7 +45,10 @@ public class AlgorithmApp {
                     new QuestionCard(resultSet.getInt("card_id"),
                             questionFront,
                             resultSet.getString("back"),
-                            resultSet.getLong("created"));
+                            resultSet.getLong("created")
+                            )
+                            .setNextReview(resultSet.getLong("next_repetition"));
+                    ;
                     System.out.println("[Cards] Sucessfully loaded card " + resultSet.getInt("card_id"));
                 }
             } catch (SQLException e) {
@@ -60,6 +62,13 @@ public class AlgorithmApp {
      * @return 该类的实例
      */
     public static AlgorithmApp getInstance() {
+        if (instance == null) {
+            synchronized (AlgorithmApp.class) {
+                if (instance == null) {
+                    instance = new AlgorithmApp();
+                }
+            }
+        }
         return instance;
     }
 

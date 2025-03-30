@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.review.backend.card;
 
 import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
+import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
+import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestionModel;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 
 import java.sql.PreparedStatement;
@@ -15,7 +17,7 @@ public class QuestionCard {
 
     private QuestionFront front; // 卡片前面题目
     private String back; // 背部答案
-
+    private Long nextReview;
     private Long created; // 创建时间
 
     /**
@@ -111,8 +113,17 @@ public class QuestionCard {
         } catch (SQLException e) {
             System.out.println("[Cards] Failed inserting the card " + id + " into database: " + e);
         }
+        // todo: 存疑?
         new QuestionCard(id, front, back, created);
         System.out.println("[Cards] 成功本地创建卡片 " + id);
+    }
+
+    public void setNextReview(Long nextReview) {
+        this.nextReview = nextReview;
+    }
+
+    public Long getNextReview() {
+        return this.nextReview;
     }
 
     /**
@@ -123,5 +134,24 @@ public class QuestionCard {
         AlgorithmApp.getInstance().getCards().remove(this.id, this);
         // 数据库操作
         System.out.println("[Cards] 成功删除卡片 " + this.id);
+    }
+
+    public ReviewQuestion toReviewQuestion() {
+        ReviewQuestionModel model = new ReviewQuestionModel();
+        model.setUserSolution(this.getBack());
+        model.setNextReview(this.handleNextReview());
+        model.setStatus(this.getFront().getStatus());
+        model.setTitle(this.getFront().getTitle());
+        model.setDifficulty(this.getFront().getDifficulty());
+        return model;
+    }
+
+    private String handleNextReview() {
+        Long time = this.getNextReview();
+        // 把timestamp转换成日期格式, 处理成YYYY-MM-DD格式的字符串
+        if (time != null) {
+            return new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(time));
+        }
+        return "";
     }
 }
