@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.review.front;
+package com.xhf.leetcode.plugin.review.backend.algorithm.constant;
 
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 
@@ -10,6 +10,7 @@ public enum ReviewStatus {
 
     NOT_START(0, "未开始", "not start"),
     OVER_TIME(1, "逾期", "over time"),
+    // 在目前算法中, 理论上不存在已完成这个状态
     DONE(2, "已完成", "done");
 
     private final int id;          // 唯一标识

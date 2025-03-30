@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.review.backend.service;
 import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardReq;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,9 +65,8 @@ public class AlgorithmAPI {
     /**
      * 获取顶部卡片
      */
-    public QuestionCard getTopCard() {
-        QuestionCard topCard = instance.getCardScheduler().getTopCard();
-        return topCard;
+    public @Nullable QuestionCard getTopCard() {
+        return instance.getCardScheduler().getTopCard();
     }
 
 }

@@ -5,6 +5,7 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSState;
 import com.xhf.leetcode.plugin.review.backend.algorithm.result.FSRSAlgorithmResult;
 import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -47,7 +48,7 @@ public class QuestionCardScheduler {
         });
     }
 
-    public QuestionCard getTopCard() {
+    public @Nullable QuestionCard getTopCard() {
         return this.queue.front();
     }
 

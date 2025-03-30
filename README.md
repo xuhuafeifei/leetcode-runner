@@ -157,9 +157,31 @@ Leetcode题目都是核心代码模式，即只给出Solution，而没有main函
 
 感谢参与贡献的每一位小伙伴🥰
 
-<a href="https://github.com/xuhuafeifei/leetcode-runner/graphs/contributors">
-  <img src="https://opencollective.com/leetcode-runner/contributors.svg?width=890&button=false" alt="contributors" />
-</a>
+[//]: # (<a href="https://github.com/xuhuafeifei/leetcode-runner/graphs/contributors">)
+
+[//]: # (  <img src="https://opencollective.com/leetcode-runner/contributors.svg?width=890&button=false" alt="contributors" />)
+
+[//]: # (</a>)
+
+<!-- readme: contributors -start -->
+<table>
+<tr>
+    <td align="center">
+        <a href="https://github.com/xuhuafeifei">
+            <img src="https://avatars.githubusercontent.com/u/100324069?v=4" width="100;" alt="xuhuafeifei"/>
+            <br />
+            <sub><b>Feigebuge</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/itxaiohanglover">
+            <img src="https://avatars.githubusercontent.com/u/80608452?v=4" width="100;" alt="itxaiohanglover"/>
+            <br />
+            <sub><b>Artboy</b></sub>
+        </a>
+    </td></tr>
+</table>
+<!-- readme: contributors -end -->
 
 ## GitHub Star 趋势
 

@@ -3,6 +3,8 @@ package com.xhf.leetcode.plugin.review.front;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.ui.ColorUtil;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.ReviewStatus;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 
@@ -108,11 +110,11 @@ public class CssBuilder {
     }
 
     private String handleUserRate(String template) {
-        if (Objects.equals(this.userRate, UserRate.VERY_HARD.getCnName()) || Objects.equals(this.userRate, UserRate.VERY_HARD.getEnName())) {
+        if (Objects.equals(this.userRate, FSRSRating.AGAIN.getName()) || Objects.equals(this.userRate, FSRSRating.HARD.getName())) {
             template = template.replace("{{difficulty-css}}", "difficulty-hard");
-        } else if (Objects.equals(this.userRate, UserRate.AVERAGE.getCnName()) || Objects.equals(this.userRate, UserRate.AVERAGE.getEnName())) {
+        } else if (Objects.equals(this.userRate, FSRSRating.GOOD.getName())) {
             template = template.replace("{{difficulty-css}}", "difficulty-medium");
-        } else if (Objects.equals(this.userRate, UserRate.VERY_EASY.getCnName()) || Objects.equals(this.userRate, UserRate.VERY_EASY.getEnName())) {
+        } else if (Objects.equals(this.userRate, FSRSRating.EASY.getName())) {
             template = template.replace("{{difficulty-css}}", "difficulty-easy");
         } else {
             LogUtils.warn("unknown userRate! this.userRate = " + this.userRate);

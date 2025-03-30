@@ -50,6 +50,7 @@ public class FSRSAlgorithm{
 
     /**
      * 计算下一个复习时间、稳定性、难度等参数
+     * 同时将lastReview更新为当前时间
      * @return 包含计算结果的FSRSAlgorithmResult对象
      */
     public FSRSAlgorithmResult calc() {

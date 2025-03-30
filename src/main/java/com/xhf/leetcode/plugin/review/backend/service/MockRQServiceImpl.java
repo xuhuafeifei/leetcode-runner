@@ -79,7 +79,7 @@ public class MockRQServiceImpl implements ReviewQuestionService {
     }
 
     @Override
-    public void createQuestion(Question question) {
+    public void createQuestion(Question question, FSRSRating rating) {
 
     }
 
@@ -90,6 +90,11 @@ public class MockRQServiceImpl implements ReviewQuestionService {
 
     @Override
     public void deleteQuestion(Integer id) {
+
+    }
+
+    @Override
+    public void rateTopQuestion(FSRSRating rating) {
 
     }
 }

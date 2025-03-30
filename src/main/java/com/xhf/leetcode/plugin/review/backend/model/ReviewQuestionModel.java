@@ -12,6 +12,8 @@ public class ReviewQuestionModel implements ReviewQuestion {
     private String nextReview;
     private String difficulty;
     private String userSolution;
+    // index
+    private Integer id;
 
     public void setStatus(String status) {
         this.status = status;
@@ -74,5 +76,14 @@ public class ReviewQuestionModel implements ReviewQuestion {
     @Override
     public String getUserSolution() {
         return this.userSolution;
+    }
+
+    @Override
+    public Integer getId() {
+        return null;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }
