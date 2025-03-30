@@ -1,8 +1,24 @@
-# Leetcode-runner 刷题插件
+# Leetcode Runner 刷题插件
 
-<a href="https://github.com/continew-org/continew-admin" title="Release" target="_blank">
-<img src="https://img.shields.io/badge/SNAPSHOT-v3.6.0-%23ff3f59.svg" alt="Release" />
+<img src="./image/logo.png" style="display: block; margin: 0 auto; zoom:50%;">
+
+<div align=center>
+<a href="https://github.com/xuhuafeifei/leetcode-runner" title="License" target="_blank">
+<img src="https://img.shields.io/badge/License-Apache--2.0-blue.svg" alt="License" />
 </a>
+<a href="https://github.com/xuhuafeifei/leetcode-runner" title="Release" target="_blank">
+<img src="https://badgen.net/github/release/xuhuafeifei/leetcode-runner/stable" alt="Release" />
+</a>
+<a href="https://github.com/xuhuafeifei/leetcode-runner" title="GitHub Stars" target="_blank">
+<img src="https://badgen.net/github/stars/xuhuafeifei/leetcode-runner" alt="GitHub Stars" />
+</a>
+<a href="https://github.com/xuhuafeifei/leetcode-runner" title="GitHub Forks" target="_blank">
+<img src="https://badgen.net/github/forks/xuhuafeifei/leetcode-runner" alt="GitHub Forks" />
+</a>
+<a href="https://github.com/xuhuafeifei/leetcode-runner" title="GitHub Forks" target="_blank">
+<img src="https://badgen.net/github/issues/xuhuafeifei/leetcode-runner" alt="Issues" />
+</a>
+</div>
 
 📚 [在线文档](https://itxaiohanglover.github.io/leetcode-runner-doc/)
 
@@ -23,49 +39,106 @@
 
 ## 项目起源
 
-我热衷于做数据归档，归档后的数据可以提高学习/工作效率，为记忆“减负”，在持续的数据归档中，优质的“沉淀”会带来非匀速、跨越式的学习/工作体验。**数据归档是一件需要持续去做的事情**。
 
-## 为什么选我们？
+## 系统功能
 
-1.**甄选技术栈：** ContiNew（Continue New） 项目致力于持续迭代优化，让技术不掉队。在技术选型时，进行深度广泛地调研，从流行度、成熟度和发展潜力等多方面甄选技术栈。
+<img src="./image/five-core-function.jpg" style="display: block; margin: 0 auto; zoom:50%;">
 
-##  系统功能
+### 本地刷题支持
+作为一款Jetbrains IDE插件，它提供了本地刷题的支持，即在IDE中直接编写代码，并提交到Leetcode平台进行测试和运行。
 
-- 仪表盘：提供工作台、分析页，工作台提供功能快捷导航入口、最新公告、动态；分析页提供全面数据可视化能力
-- 个人中心：支持基础信息修改、密码修改、邮箱绑定、手机号绑定（并提供行为验证码、短信限流等安全处理）、第三方账号绑定/解绑、头像裁剪上传
+插件支持代码编写，测试案例设置，运行结果可视化，题目查看，题解查看，提交记录查看等诸多功能。
 
-## 系统截图
+<img src="./image/本地代码编写.jpg" style="display: block; margin: 0 auto; zoom:50%;">
 
-<table border="1" cellpadding="1" cellspacing="1" style="width: 500px">
-    <tbody>
-        <tr>
-            <td><img src=".image/screenshot/000登录页面.png" alt="登录页面" width="1920" /></td>
-            <td><img src=".image/screenshot/000登录页面-H5.png" alt="登录页面-H5" width="1920" /></td>
-        </tr>
-    </tbody>
-</table>
+### 核心断点调试功能
+Leetcode题目都是核心代码模式，即只给出Solution，而没有main函数。这使得调试变得更加困难，因为无法直接运行代码。如果用户想要调试，需要手动编写**大量多余代码**，手动将测试案例转换为对应代码。如果遇到链表或者二叉树等复杂数据结构，**极容易出错**。
 
+为了解决这一问题，Leetcode-Runner**内置调试系统**，<u>支持多种语言，无需额外编码，一键调试Solution代码</u>。
 
-## 核心技术栈
+此外，针对不同的数据结构，Leetcode-Runner还对数据进行优化。譬如Java的Map，Set，LinkedList等数据结构，给出更为人性化的显示方案。
 
-| 名称                                                         | 版本         | 简介                                                         |
-| :----------------------------------------------------------- | :----------- | :----------------------------------------------------------- |
-| <a href="https://vuejs.org/" target="_blank">Vue</a>         | 3.5.4        | 渐进式 JavaScript 框架，易学易用，性能出色，适用场景丰富的 Web 前端框架。 |
+**java**
+<img src="./image/本地Java代码调试-链表题目.jpg" style="display: block; margin: 0 auto; zoom:50%;">
+
+**java**
+<img src="./image/java-debug-人性化打印.png" style="display: block; margin: 0 auto; zoom:50%;">
+
+**python**
+<img src="./image/python-debug.jpg" style="display: block; margin: 0 auto; zoom:50%;">
+
+**cpp**
+<img src="./image/cpp-debug.jpg" style="display: block; margin: 0 auto; zoom:50%;">
 
 ## 快速开始
 
 > [!TIP]
 > 更详细的流程，请查看在线文档[《快速开始》](https://itxaiohanglover.github.io/leetcode-runner-doc/)。
 
-
-
 ## 项目结构
 
 ```
-
+─leetcode_runner
+    └─plugin
+        ├─actions
+        ├─bus
+        ├─comp
+        ├─debug
+        │  ├─analysis
+        │  │  ├─analyzer
+        │  │  └─converter
+        │  ├─command
+        │  │  ├─operation
+        │  │  ├─parameter
+        │  │  └─parser
+        │  ├─debugger
+        │  ├─env
+        │  ├─execute
+        │  │  ├─cpp
+        │  │  ├─java
+        │  │  └─python
+        │  ├─instruction
+        │  ├─output
+        │  ├─reader
+        │  └─utils
+        ├─editors
+        ├─exception
+        ├─io
+        │  ├─console
+        │  ├─file
+        │  └─http
+        ├─listener
+        ├─model
+        ├─render
+        ├─review
+        │  ├─backend
+        │  │  ├─algorithm
+        │  │  ├─card
+        │  │  ├─database
+        │  │  ├─model
+        │  │  └─service
+        │  └─front
+        ├─search
+        │  ├─dict
+        │  ├─engine
+        │  ├─lucence
+        │  ├─process
+        │  └─utils
+        ├─service
+        ├─setting
+        ├─utils
+        └─window
+            ├─deepcoding
+            │  └─filter
+            └─filter
 ```
 
 ## 贡献指南
+
+欢迎各路好汉一起来参与完善 Leetcode-runner，我们期待你的 PR！
+
+- 贡献代码：代码地址 [Leetcode-runner](https://github.com/xuhuafeifei/leetcode-runner)，欢迎提交 Issue 或者 Pull Requests。
+- 维护文档：文档地址 [Leetcode-runner-doc](https://github.com/itxaiohanglover/leetcode-runner-doc)，欢迎参与修订。
 
 如果您想提交新功能或优化现有代码，可以按照以下步骤操作：
 
