@@ -52,7 +52,10 @@ public class TodayQuestionAction extends AbstractAction {
         if (instance.todayQuestionSolved() == 1) {
             presentation.setIcon(IconLoader.getIcon("/icons/flame.svg", this.getClass()));
             // 获取当日连击次数
-            presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction") + " " + instance.getTodayQuestionCount());
+            String cnt = instance.getTodayQuestionCount();
+            presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction") + " " +
+                    BundleUtils.i18nHelper("坚持了" + cnt + "天", " Streak for " + cnt + " days")
+            );
             instance.modified();
         } else if (instance.todayQuestionSolved() == -1){
             presentation.setIcon(IconLoader.getIcon("/icons/daily.svg", this.getClass()));

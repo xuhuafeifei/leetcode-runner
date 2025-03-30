@@ -4,6 +4,7 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.QueryDim;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public interface ReviewQuestionService {
      *
      * @return ReviewQuestion
      */
-    ReviewQuestion getTopQuestion();
+    @Nullable ReviewQuestion getTopQuestion();
 
     /**
      * 为问题评分
@@ -45,7 +46,7 @@ public interface ReviewQuestionService {
      * 创建问题
      * @param question
      */
-    void createQuestion(Question question);
+    void createQuestion(Question question, FSRSRating rating);
 
     /**
      * 获取所有question
@@ -54,4 +55,6 @@ public interface ReviewQuestionService {
     List<ReviewQuestion> getAllQuestions();
 
     void deleteQuestion(Integer id);
+
+    void rateTopQuestion(FSRSRating rating);
 }

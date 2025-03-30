@@ -4,9 +4,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.QueryDimModel;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
-import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
+import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
@@ -42,30 +43,25 @@ public class DailyPlanTabPanel extends JPanel {
 
     // 掌握程度的枚举
     public enum MasteryLevel {
-        PERFECT(
-                "完全掌握【9-10】", // 描述信息
-                5,
+        AGAIN(
+                FSRSRating.AGAIN.getName(),
+                0,
                 new JBColor(new Color(246, 11, 11), new Color(252, 67, 39)) // 浅色主题：鲜红；深色主题：亮红
         ),
-        GOOD(
-                "基本掌握【7-8】",
-                4,
+        HARD(
+                FSRSRating.HARD.getName(),
+                1,
                 new JBColor(new Color(255, 165, 0), new Color(255, 140, 0)) // 浅色主题：亮橙；深色主题：深橙
         ),
-        MODERATE(
-                "一般理解【5-6】",
-                3,
-                new JBColor(new Color(222, 186, 27), new Color(225, 171, 9)) // 浅色主题：亮黄；深色主题：琥珀黄
-        ),
-        BASIC(
-                "初步了解【3-4】",
+        GOOD(
+                FSRSRating.GOOD.getName(),
                 2,
-                new JBColor(new Color(47, 183, 47), new Color(53, 166, 123)) // 浅色主题：翠绿；深色主题：亮绿
+                new JBColor(new Color(12, 163, 217), new Color(132, 195, 252)) // 浅色主题：亮蓝；深色主题：宝蓝
         ),
-        POOR(
-                "需要加强【1-2】",
-                1,
-                new JBColor(new Color(12, 163, 217), new Color(26, 122, 217)) // 浅色主题：亮蓝；深色主题：宝蓝
+        EASY(
+                FSRSRating.EASY.getName(),
+                3,
+                new JBColor(new Color(47, 183, 47), new Color(53, 166, 123)) // 浅色主题：翠绿；深色主题：亮绿
         );
 
         private final String description; // 描述信息
@@ -90,27 +86,11 @@ public class DailyPlanTabPanel extends JPanel {
         public int getLevel() {
             return this.level;
         }
-
-        public static MasteryLevel fromScore(int score) {
-            if (score >= 9 && score <= 10) {
-                return PERFECT;
-            } else if (score >= 7 && score <= 8) {
-                return GOOD;
-            } else if (score >= 5 && score <= 6) {
-                return MODERATE;
-            } else if (score >= 3 && score <= 4) {
-                return BASIC;
-            } else if (score >= 1 && score <= 2) {
-                return POOR;
-            } else {
-                throw new IllegalArgumentException("分数应在1到10之间");
-            }
-        }
     }
 
     public DailyPlanTabPanel(Project project) {
         this.project = project;
-        this.service = MockRQServiceImpl.getInstance();
+        this.service = new RQServiceImpl(project);
         loadContent();
     }
 
@@ -130,16 +110,16 @@ public class DailyPlanTabPanel extends JPanel {
         lef.setBorder(BorderFactory.createEmptyBorder());
         lef.setContentAreaFilled(false);
         lef.addActionListener(e -> {
-           if (cursor > 0) {
-               if (this.questionCard != null) {
-                   questionCardPanel.remove(this.questionCard);
-               }
-               this.questionCard = createQuestionCard(totalReviewQuestion.get(--cursor));
-               updatePageComp();
-               questionCardPanel.add(this.questionCard, BorderLayout.CENTER);
-               questionCardPanel.revalidate();
-               questionCardPanel.repaint();
-           }
+            if (cursor > 0) {
+                if (this.questionCard != null) {
+                    questionCardPanel.remove(this.questionCard);
+                }
+                this.questionCard = createQuestionCard(totalReviewQuestion.get(--cursor));
+                updatePageComp();
+                questionCardPanel.add(this.questionCard, BorderLayout.CENTER);
+                questionCardPanel.revalidate();
+                questionCardPanel.repaint();
+            }
         });
 
         var rig = new JButton(IconLoader.getIcon("/icons/right-btn.svg", this.getClass()));
@@ -195,7 +175,7 @@ public class DailyPlanTabPanel extends JPanel {
         // 掌握button
         JButton masterBtn = new JButton(BundleUtils.i18nHelper("掌握", "master"));
         masterBtn.addActionListener(e -> showMasteryDialog(rq));
-        
+
         // 继续学习button
         JButton deleteBtn = new JButton(BundleUtils.i18nHelper("删除", "delete"));
         deleteBtn.addActionListener(e -> removeQuestion(rq));
@@ -213,10 +193,10 @@ public class DailyPlanTabPanel extends JPanel {
             isShowingSolution = !isShowingSolution;
             // 更新按钮文字
             flipButton.setText(BundleUtils.i18nHelper(
-                isShowingSolution ? "查看题目" : "查看题解",
-                isShowingSolution ? "question" : "solution"
+                    isShowingSolution ? "查看题目" : "查看题解",
+                    isShowingSolution ? "question" : "solution"
             ));
-            
+
 
             // 替换编辑器组件
             contentPanel.removeAll();
@@ -266,16 +246,16 @@ public class DailyPlanTabPanel extends JPanel {
         // 创建对话框
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), BundleUtils.i18nHelper("设置掌握程度", "set mastery level"), true);
         dialog.setLayout(new BorderLayout());
-        
+
         // 创建单选按钮面板
         JPanel radioPanel = new JPanel();
         radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.Y_AXIS));
         radioPanel.setBorder(JBUI.Borders.empty(10));
-        
+
         // 创建按钮组
         ButtonGroup group = new ButtonGroup();
         JRadioButton[] buttons = new JRadioButton[MasteryLevel.values().length];
-        
+
         // 创建单选按钮
         MasteryLevel[] levels = MasteryLevel.values();
         for (int i = 0; i < levels.length; i++) {
@@ -283,51 +263,51 @@ public class DailyPlanTabPanel extends JPanel {
             buttons[i].setActionCommand(String.valueOf(levels[i].level));
             buttons[i].setForeground(levels[i].getColor());  // 设置文字颜色
             buttons[i].setFont(Constants.CN_FONT_BOLD);
-            
+
             // 创建带颜色边框的面板
             JPanel buttonPanel = new JPanel(new BorderLayout());
             buttonPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(levels[i].getColor(), 1),
-                BorderFactory.createEmptyBorder(5, 8, 5, 8)
+                    BorderFactory.createLineBorder(levels[i].getColor(), 1),
+                    BorderFactory.createEmptyBorder(5, 8, 5, 8)
             ));
             buttonPanel.setOpaque(false);
             buttonPanel.add(buttons[i], BorderLayout.CENTER);
-            
+
             group.add(buttons[i]);
             radioPanel.add(buttonPanel);
-            
+
             // 添加一些垂直间距
             if (i < levels.length - 1) {
                 radioPanel.add(Box.createVerticalStrut(8));
             }
         }
-        
+
         // 默认选中"基本掌握"
         buttons[1].setSelected(true);
-        
+
         // 创建确认按钮
         JButton confirmButton = new JButton(BundleUtils.i18nHelper("确认", "confirm"));
         confirmButton.addActionListener(e -> {
             // 获取选中的掌握程度
             String levelStr = group.getSelection().getActionCommand();
-            int masteryLevel = Integer.parseInt(levelStr);
-            
+            MasteryLevel level = MasteryLevel.valueOf(levelStr);
+
             // 更新问题状态
-            updateQuestionStatus(question, masteryLevel);
-            
+            updateQuestionStatus(question, level.getLevel());
+
             // 关闭对话框
             dialog.dispose();
         });
-        
+
         // 创建按钮面板
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBorder(JBUI.Borders.empty(0, 10, 10, 10));
         buttonPanel.add(confirmButton);
-        
+
         // 添加组件到对话框
         dialog.add(radioPanel, BorderLayout.CENTER);
         dialog.add(buttonPanel, BorderLayout.SOUTH);
-        
+
         // 设置对话框大小和位置
         dialog.pack();
         dialog.setLocationRelativeTo(this);
@@ -335,28 +315,38 @@ public class DailyPlanTabPanel extends JPanel {
     }
 
     private void updateQuestionStatus(ReviewQuestion question, int masteryLevel) {
-        // 模拟发送请求给后台
-        System.out.println("Updating question status: questionId=" + question.getTitle() + 
-                          ", masteryLevel=" + masteryLevel);
-        
-        // TODO: 调用实际的后端服务更新状态
-        // 模拟更新UI
-        if (currentCard instanceof JEditorPane) {
-            ((JEditorPane) currentCard).setText(
-                new CssBuilder()
-                    .addStatus(ReviewStatus.DONE.getName())  // 更新状态为已完成
-                    .addTitle(question.getTitle(), question.getDifficulty())
-                    .addUserRate(question.getUserRate())
-                    .lastModify(question.getLastModify())
-                    .nextReview(question.getNextReview())
-                    .build()
-            );
+        // 更新问题状态
+        service.rateTopQuestion(FSRSRating.values()[masteryLevel]);
+
+        // 通知后台删除该题目
+        service.deleteQuestion(question.getId());
+
+        // 获取新的题目
+        ReviewQuestion topQuestion = service.getTopQuestion();
+
+        // 如果没有题目需要复习，更新UI显示完成信息
+        if (topQuestion == null) {
+            contentPanel.removeAll();
+            this.currentCard = new JLabel(BundleUtils.i18nHelper("恭喜你，所有题目都已完成！", "Congratulations, all questions have been completed."));
+            contentPanel.add(this.currentCard, BorderLayout.CENTER);
+        } else {
+            // 更新UI显示新题目信息
+            if (currentCard instanceof JEditorPane) {
+                ((JEditorPane) currentCard).setText(new CssBuilder()
+                        .addStatus(topQuestion.getStatus())
+                        .addTitle(topQuestion.getTitle(), question.getDifficulty())
+                        .addUserRate(topQuestion.getUserRate())
+                        .lastModify(topQuestion.getLastModify())
+                        .nextReview(topQuestion.getNextReview())
+                        .build());
+            }
         }
-        
+
         // 刷新UI
         contentPanel.revalidate();
         contentPanel.repaint();
     }
+
 
     private Component createEditorComponent(ReviewQuestion rq) {
         if (isShowingSolution) {
@@ -365,13 +355,13 @@ public class DailyPlanTabPanel extends JPanel {
             editorPane.setContentType("text/html");
             editorPane.setEditable(false);
             editorPane.setText(
-                new CssBuilder()
-                    .addStatus(rq.getStatus())
-                    .addTitle(rq.getTitle(), rq.getDifficulty())
-                    .addUserRate(rq.getUserRate())
-                    .lastModify(rq.getLastModify())
-                    .nextReview(rq.getNextReview())
-                    .build()
+                    new CssBuilder()
+                            .addStatus(rq.getStatus())
+                            .addTitle(rq.getTitle(), rq.getDifficulty())
+                            .addUserRate(rq.getUserRate())
+                            .lastModify(rq.getLastModify())
+                            .nextReview(rq.getNextReview())
+                            .build()
             );
 
             return editorPane;
@@ -383,16 +373,16 @@ public class DailyPlanTabPanel extends JPanel {
             textArea.setRows(13);
             textArea.setWrapStyleWord(true);
             textArea.setLineWrap(true);
-            
+
             // 设置边框和内边距
             textArea.setBorder(new CompoundBorder(
-                JBUI.Borders.customLine(JBColor.border(), 1),  // 外边框
-                JBUI.Borders.empty(8)  // 内边距
+                    JBUI.Borders.customLine(JBColor.border(), 1),  // 外边框
+                    JBUI.Borders.empty(8)  // 内边距
             ));
-            
+
             // 设置背景色为稍微淡一点的主题色
             textArea.setBackground(JBColor.background().brighter());
-            
+
             // 添加焦点监听器
             textArea.addFocusListener(new java.awt.event.FocusAdapter() {
                 @Override

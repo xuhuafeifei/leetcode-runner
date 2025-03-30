@@ -12,4 +12,5 @@ public interface ReviewQuestion {
     String getNextReview();
     String getDifficulty();
     String getUserSolution();
+    Integer getId();
 }

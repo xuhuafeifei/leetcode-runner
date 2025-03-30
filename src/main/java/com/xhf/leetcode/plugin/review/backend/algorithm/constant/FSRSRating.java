@@ -23,6 +23,7 @@ public enum FSRSRating {
      */
     EASY(3, BundleUtils.i18nHelper("小菜一碟", "a piece of cake"));
 
+
     /**
      * 构造函数
      *
@@ -31,9 +32,20 @@ public enum FSRSRating {
      */
     FSRSRating(Integer id, String name) {
         this.id = id;
+        this.name = name;
     }
 
-    private Integer id;
+    private final Integer id;
+    private final String name;
+
+    public static String toName(Integer userRate) {
+        for (FSRSRating rating : FSRSRating.values()) {
+            if (rating.toInt().equals(userRate)) {
+                return rating.getName();
+            }
+        }
+        return BundleUtils.i18nHelper("未知", "unknown");
+    }
 
     /**
      * 获取评分的整数值
@@ -44,6 +56,6 @@ public enum FSRSRating {
     }
 
     public String getName() {
-        return this.name();
+        return this.name;
     }
 }

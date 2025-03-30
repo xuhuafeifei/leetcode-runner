@@ -4,6 +4,7 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 import com.xhf.leetcode.plugin.review.backend.algorithm.FSRSAlgorithm;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSState;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.ReviewStatus;
 import com.xhf.leetcode.plugin.review.backend.algorithm.result.FSRSAlgorithmResult;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestionModel;
@@ -16,11 +17,14 @@ import java.sql.SQLException;
  * @author 文艺倾年
  */
 public class QuestionCard {
+    /*
+        id是Question在QuestionList中的index下标
+     */
 
     private Integer id; // 卡片ID
 
-    private QuestionFront front; // 卡片前面题目
-    private String back; // 背部答案
+    private final QuestionFront front; // 卡片前面题目
+    private final String back; // 背部答案
     private Long nextReview;
     private Long created; // 创建时间
 
@@ -162,19 +166,41 @@ public class QuestionCard {
 
     public ReviewQuestion toReviewQuestion() {
         ReviewQuestionModel model = new ReviewQuestionModel();
+        model.setId(this.getId());
         model.setUserSolution(this.getBack());
         model.setNextReview(this.handleNextReview());
-        model.setStatus(this.getFront().getStatus());
+        model.setLastModify(this.handleLastModify());
+        model.setUserRate(FSRSRating.toName(this.getFront().getUserRate()));
+        model.setStatus(this.handleStatus());
         model.setTitle(this.getFront().getTitle());
         model.setDifficulty(this.getFront().getDifficulty());
         return model;
+    }
+
+    private String handleStatus() {
+        // 判断当前题目状态, 是否逾期
+        Long a = this.getNextReview();
+        Long b = System.currentTimeMillis();
+        // 判断时间差是否大于24h
+        if (a != null && b - a > 24 * 60 * 60 * 1000) {
+            return ReviewStatus.OVER_TIME.getName();
+        }
+        return ReviewStatus.NOT_START.getName();
+    }
+
+    private String handleLastModify() {
+        Long time = this.getCreated();
+        if (time != null) {
+            return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date(time));
+        }
+        return "";
     }
 
     private String handleNextReview() {
         Long time = this.getNextReview();
         // 把timestamp转换成日期格式, 处理成YYYY-MM-DD格式的字符串
         if (time != null) {
-            return new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(time));
+            return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date(time));
         }
         return "";
     }
