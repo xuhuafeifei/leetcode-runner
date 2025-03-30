@@ -1,6 +1,10 @@
 package com.xhf.leetcode.plugin.review.backend.card;
 
 import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
+import com.xhf.leetcode.plugin.review.backend.algorithm.FSRSAlgorithm;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSState;
+import com.xhf.leetcode.plugin.review.backend.algorithm.result.FSRSAlgorithmResult;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestionModel;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
@@ -99,21 +103,41 @@ public class QuestionCard {
         QuestionFront front = questionCardReq.getFront();
         String back = questionCardReq.getBack();
         String strFront = GsonUtils.toJsonStr(front);
+        // 根据打分计算参数
+        Integer rating = questionCardReq.getFsrsRating().toInt();
+        FSRSAlgorithm algorithm = FSRSAlgorithm.builder()
+                .rating(FSRSRating.values()[rating])
+                .stability(0)
+                .difficulty(0)
+                .elapsedDays(0)
+                .repetitions(0)
+                .state(FSRSState.values()[0])
+                .lastReview(0)
+                .build();
+        FSRSAlgorithmResult result = algorithm.calc();
         // TODO 增加条件判断，若数据已经存在，则执行更新。
         Long created = System.currentTimeMillis(); // 当前时间作为创建时间
         // 插入数据库
         try {
-            PreparedStatement ps = AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("INSERT INTO cards (card_id, front, back, created) VALUES (?, ?, ?, ?)");
+            PreparedStatement ps = AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("INSERT INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             ps.setInt(1, id);
             ps.setString(2, strFront);
             ps.setString(3, back);
             ps.setString(4, created.toString());
+            ps.setLong(5, result.getRepetitions());
+            ps.setFloat(6, result.getDifficulty());
+            ps.setFloat(7, result.getStability());
+            ps.setInt(8, result.getElapsedDays());
+            ps.setInt(9, result.getState().toInt());
+            ps.setInt(10, result.getInterval());
+            ps.setLong(11, result.getNextRepetitionTime());
+            ps.setLong(12, result.getLastReview());
             ps.executeUpdate();
             System.out.println("[Cards] Sucessfully inserted card " + id + " into database");
         } catch (SQLException e) {
             System.out.println("[Cards] Failed inserting the card " + id + " into database: " + e);
         }
-        // todo: 存疑?
+        // 避免每次创建后，手动去再去同步到内存中
         new QuestionCard(id, front, back, created);
         System.out.println("[Cards] 成功本地创建卡片 " + id);
     }
