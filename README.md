@@ -88,6 +88,9 @@
   <img src="https://opencollective.com/leetcode-runner/contributors.svg?width=890&button=false" alt="contributors" />
 </a>
 
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
+
 ## GitHub Star 趋势
 
 ![GitHub Star 趋势](https://starchart.cc/xuhuafeifei/leetcode-runner.svg)
