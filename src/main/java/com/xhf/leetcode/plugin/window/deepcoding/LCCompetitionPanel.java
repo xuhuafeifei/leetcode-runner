@@ -274,7 +274,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
             }
         });
 
-        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, BundleUtils.i18nHelper("Algorithm", "算法")) {
+        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, BundleUtils.i18nHelper("算法", "Algorithm")) {
             @Override
             public OptionConvert createConvert() {
                 var converter = new MapOptionConverter(70);
@@ -313,7 +313,7 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
             }
         });
 
-        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, BundleUtils.i18nHelper("difficulty", "难度")) {
+        list.add(new MySearchConditionPanel<CompetitionQuestion>(super::updateText, BundleUtils.i18nHelper("难度", "difficulty")) {
 
             @Override
             public OptionConvert createConvert() {
