@@ -34,7 +34,8 @@
             theme: {
                 current: "idea-light",
             },
-            maxWidth: $(window).width() - 100,
+            // maxWidth: $(window).width() - 100,
+            // maxWidth: "100%",
             actions: [], // close extra toolbar
             hljs: { style: "{{theme}}" },
             math: {
@@ -44,4 +45,10 @@
         value: document.getElementById("content").innerText
     })
 </script>
+<style>
+    /* 添加自定义CSS覆盖默认样式 */
+    .vditor-toolbar, .vditor-sv {
+        display: none !important;
+    }
+</style>
 {{css}}
