@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.SplitEditorToolbar;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.Key;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
@@ -104,7 +105,7 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
 
     @Override
     protected final AnAction copyToAction() {
-        return new AnAction(BundleUtils.i18n("editor.error.info.add.test.case"), BundleUtils.i18n("editor.error.info.add.success.desc"), AllIcons.Chooser.Left) {
+        return new AnAction(BundleUtils.i18n("editor.error.info.add.test.case"), BundleUtils.i18n("editor.error.info.add.success.desc"), IconLoader.getIcon("/icons/toleft.svg", this.getClass())) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 Project project = e.getProject();

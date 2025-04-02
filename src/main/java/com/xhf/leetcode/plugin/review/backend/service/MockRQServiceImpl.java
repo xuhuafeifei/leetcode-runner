@@ -27,12 +27,10 @@ public class MockRQServiceImpl implements ReviewQuestionService {
         return instance;
     }
 
-    @Override
     public int getTotalCnt(QueryDim queryDim) {
         return 0;
     }
 
-    @Override
     public List<ReviewQuestion> getTotalReviewQuestion(QueryDim queryDim) {
         ArrayList<ReviewQuestion> res = new ArrayList<>();
         ReviewQuestionModel m1 = new ReviewQuestionModel();

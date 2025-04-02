@@ -7,7 +7,6 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardReq;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionFront;
-import com.xhf.leetcode.plugin.review.backend.model.QueryDim;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -31,18 +30,6 @@ public class RQServiceImpl implements ReviewQuestionService {
     public RQServiceImpl(Project project) {
         this.project = project;
         this.app = new AlgorithmAPI();
-    }
-
-    @Override
-    @Deprecated
-    public int getTotalCnt(QueryDim queryDim) {
-        return 0;
-    }
-
-    @Override
-    @Deprecated
-    public List<ReviewQuestion> getTotalReviewQuestion(QueryDim queryDim) {
-        return null;
     }
 
     @Override

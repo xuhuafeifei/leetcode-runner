@@ -1,10 +1,12 @@
 package com.xhf.leetcode.plugin.review.front;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.openapi.wm.impl.IdeGlassPaneImpl;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.tabs.TabInfo;
-import com.intellij.ui.tabs.impl.JBTabsImpl;
+import com.intellij.ui.tabs.impl.JBEditorTabs;
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 
@@ -16,12 +18,12 @@ import java.awt.event.WindowEvent;
 /**
  * @author feigebuge
  */
-public class ReviewWindow extends JFrame {
+public class ReviewWindow extends JFrame implements Disposable {
     private final Project project;
     /**
      * 命令行选项卡
      */
-    private final JBTabsImpl tabs;
+    private final JBEditorTabs tabs;
 
     // jwindow的长/宽比
     public final static float radio = 1.2f;
@@ -29,7 +31,7 @@ public class ReviewWindow extends JFrame {
 
     public ReviewWindow(Project project) {
         this.project = project;
-        this.tabs = new JBTabsImpl(project);
+        this.tabs = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
 
         // 窗口配置
         setAlwaysOnTop(true);

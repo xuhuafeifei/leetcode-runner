@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.utils;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -22,7 +21,7 @@ public class CompilerHomeUtils {
         String command = osType.contains("win") ? winCommand : otherCommand;
 
         ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
-        processBuilder.directory(new File(processFilePath));
+        processBuilder.directory(null);
 
         try {
             Process process = processBuilder.start();
