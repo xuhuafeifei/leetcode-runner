@@ -15,6 +15,7 @@ import com.xhf.leetcode.plugin.bus.RePositionEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
+import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
@@ -323,7 +324,13 @@ public class ViewUtils {
         TaskCenter.getInstance().createTask(() -> {
             // 重新打开文件
             DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, index);
-            CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
+            try {
+                CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
+            } catch (FileCreateError e) {
+                LogUtils.error(e);
+                ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
+                return;
+            }
 
             // 获取并显示 ToolWindow（确保控制台窗口可见）
             showToolWindow(project);
@@ -362,7 +369,13 @@ public class ViewUtils {
                 ViewUtils.scrollToVisibleOfMyList(questionList, i);
                 TaskCenter.getInstance().createTask(() -> {
                     // 重新打开文件 (根据当前系统语言打开文件)
-                    CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
+                    try {
+                        CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
+                    } catch (FileCreateError e) {
+                        LogUtils.error(e);
+                        ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
+                        return;
+                    }
                     // 获取并显示 ToolWindow（确保控制台窗口可见）
                     showToolWindow(project);
                 }).invokeLater();

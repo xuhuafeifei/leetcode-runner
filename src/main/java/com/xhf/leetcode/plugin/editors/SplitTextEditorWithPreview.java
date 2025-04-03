@@ -19,6 +19,7 @@ import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.CodeService;
@@ -241,7 +242,12 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
 
                     // 打开下一道题目
                     assert project != null;
-                    doOpen(project, cFile, dci, true);
+                    try {
+                        doOpen(project, cFile, dci, true);
+                    } catch (FileCreateError ex) {
+                        LogUtils.error(ex);
+                        ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error"), true, true);
+                    }
                 } catch (Exception ex) {
                     LogUtils.error(ex);
                     Objects.requireNonNull(ConsoleUtils.getInstance(e.getProject())).showError("下一道题目打开错误! 错误原因 = " + ex.getMessage(), false, true);
@@ -264,7 +270,7 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
     /**
      * 打开文件. 同时定位到deep coding 模式的题目. 强制切换到deep coding对应模式的界面
      */
-    private void doOpen(Project project, VirtualFile cFile, DeepCodingInfo dci, boolean isNext) {
+    private void doOpen(Project project, VirtualFile cFile, DeepCodingInfo dci, boolean isNext) throws FileCreateError {
         // 获取dci
         int len = dci.getTotalLength();
         int idx = dci.getIdx();
@@ -374,6 +380,9 @@ public class SplitTextEditorWithPreview extends TextEditorWithPreview {
                     LogUtils.error(ex);
                     String msg = BundleUtils.i18nHelper("上一道题目打开错误! 错误原因 = " + ex.getMessage(), "Previous question open error! Reason: " + ex.getMessage());
                     Objects.requireNonNull(ConsoleUtils.getInstance(e.getProject())).showError(msg, false, true);
+                } catch (FileCreateError ex) {
+                    LogUtils.error(ex);
+                    ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error"), true, true);
                 }
             }
 

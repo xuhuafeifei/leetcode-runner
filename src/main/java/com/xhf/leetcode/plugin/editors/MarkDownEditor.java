@@ -14,6 +14,7 @@ import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
@@ -192,7 +193,12 @@ public class MarkDownEditor implements FileEditor {
                     var q = QuestionService.getInstance(project).getQuestionByTitleSlug(titleSlug, project);
                     if (q != null) {
                         ApplicationManager.getApplication().invokeLater(() -> {
-                            CodeService.getInstance(project).openCodeEditor(q);
+                            try {
+                                CodeService.getInstance(project).openCodeEditor(q);
+                            } catch (FileCreateError e) {
+                                LogUtils.error(e);
+                                ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
+                            }
                         });
                     } else {
                         openInDesktopBrowser(targetUrl);

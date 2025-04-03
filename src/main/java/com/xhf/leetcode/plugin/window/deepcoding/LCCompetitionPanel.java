@@ -14,6 +14,8 @@ import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
+import com.xhf.leetcode.plugin.exception.FileCreateError;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.listener.AbstractMouseAdapter;
 import com.xhf.leetcode.plugin.model.CompetitionQuestion;
@@ -227,7 +229,12 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
                     int idx = questionList.locationToIndex(point);
                     DeepCodingInfo dci = new DeepCodingInfo(LC_COMPETITION, questionList.getModel().getSize(), idx);
                     CompetitionQuestion cq = questionList.getModel().getElementAt(idx);
-                    CodeService.getInstance(project).openCodeEditor(cq.toQuestion(project), dci);
+                    try {
+                        CodeService.getInstance(project).openCodeEditor(cq.toQuestion(project), dci);
+                    } catch (FileCreateError ex) {
+                        LogUtils.error(ex);
+                        ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error"), true, true);
+                    }
                 }
             });
 

@@ -10,6 +10,8 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.exception.FileCreateError;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
@@ -306,7 +308,12 @@ public class QuestionService {
         LeetcodeClient instance = LeetcodeClient.getInstance(project);
         Question todayQuestion = instance.getTodayQuestion(project);
 
-        CodeService.getInstance(project).openCodeEditor(todayQuestion);
+        try {
+            CodeService.getInstance(project).openCodeEditor(todayQuestion);
+        } catch (FileCreateError e) {
+            LogUtils.error(e);
+            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error"), true, true);
+        }
     }
 
     /**

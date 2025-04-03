@@ -9,6 +9,8 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
+import com.xhf.leetcode.plugin.exception.FileCreateError;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.listener.AbstractMouseAdapter;
 import com.xhf.leetcode.plugin.model.DeepCodingInfo;
 import com.xhf.leetcode.plugin.model.Question;
@@ -488,7 +490,12 @@ public abstract class AbstractSearchPanel<T> extends SimpleToolWindowPanel {
                 int idx = questionList.locationToIndex(point);
                 DeepCodingInfo dci = new DeepCodingInfo(pattern, questionList.getModel().getSize(), idx);
                 Question question = questionList.getModel().getElementAt(idx);
-                CodeService.getInstance(project).openCodeEditor(question, dci);
+                try {
+                    CodeService.getInstance(project).openCodeEditor(question, dci);
+                } catch (FileCreateError ex) {
+                    LogUtils.error(ex);
+                    ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error"), true, true);
+                }
             }
         });
 

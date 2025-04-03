@@ -121,7 +121,7 @@ public class FileUtils {
         // create parent dirs
         if (parentDir != null && !parentDir.exists()) {
             if (!parentDir.mkdirs()) {
-                throw new RuntimeException("dir create error..");
+                throw new IOException("dir create error..");
             }
         }
         // create new file
@@ -148,7 +148,7 @@ public class FileUtils {
         // 创建父目录
         if (parentDir != null && !parentDir.exists()) {
             if (!parentDir.mkdirs()) {
-                throw new RuntimeException("目录创建错误..");
+                throw new IOException("目录创建错误..");
             }
         }
 

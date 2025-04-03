@@ -17,6 +17,7 @@ import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.PythonCodeAnalyzer;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
+import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.io.file.StoreService;
@@ -73,7 +74,7 @@ public class CodeService {
      *
      * @param question question
      */
-    public void openCodeEditor(Question question) {
+    public void openCodeEditor(Question question) throws FileCreateError {
         // 判断题目是否付费，以及用户VIP身份
         if(question.getIsPaidOnly() && !LoginService.getInstance(project).isPremium()) {
             ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("vip.question"), false, true);
@@ -81,7 +82,8 @@ public class CodeService {
         }
         QuestionService.getInstance(project).fillQuestion(question, project);
 
-        var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null);
+        String codeFilePath;
+        codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null);
 
         // open code editor and load content
         ApplicationManager.getApplication().invokeAndWait(() -> {
@@ -98,10 +100,11 @@ public class CodeService {
      * @param question question
      * @param deepCodingInfo dci
      */
-    public void openCodeEditor(Question question, DeepCodingInfo deepCodingInfo) {
+    public void openCodeEditor(Question question, DeepCodingInfo deepCodingInfo) throws FileCreateError {
         QuestionService.getInstance(project).fillQuestion(question, project);
 
-        var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, deepCodingInfo);
+        String codeFilePath;
+        codeFilePath = storeLeetcodeEditorAndGetStorePath(question, deepCodingInfo);
 
         // open code editor and load content
         ApplicationManager.getApplication().invokeAndWait(() -> {
@@ -113,7 +116,7 @@ public class CodeService {
         });
     }
 
-    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question, @Nullable DeepCodingInfo deepCodingInfo) {
+    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question, @Nullable DeepCodingInfo deepCodingInfo) throws FileCreateError {
         String codeFilePath = createCodeFile(question);
         analysisAndCreateFile(question);
 
@@ -140,7 +143,7 @@ public class CodeService {
      * @param fileLangType 文件代表的语言类型
      * @return 文件存储路径
      */
-    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question, @Nullable DeepCodingInfo deepCodingInfo, String fileLangType) {
+    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question, @Nullable DeepCodingInfo deepCodingInfo, String fileLangType) throws FileCreateError {
         AppSettings app = AppSettings.getInstance();
         String reposition = app.getReposition();
         String fileName = question.getFileName();
@@ -242,21 +245,22 @@ public class CodeService {
      * 该方法会关闭当前打开文件, 重新打开
      * 之所以关闭, 是因为只有关闭后, 才能够使用系统提供的编辑器显示
      */
-    public void reOpenCodeEditor(Question question, VirtualFile file, String langType) {
+    public void reOpenCodeEditor(Question question, VirtualFile file, String langType) throws FileCreateError {
         QuestionService.getInstance(project).fillQuestion(question, project);
 
         // restore
-        var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null, langType);
+        String codeFilePath = storeLeetcodeEditorAndGetStorePath(question, null, langType);
 
         // open code editor and load content
         openCodeEditor(file, codeFilePath);
     }
 
-    public void reOpenCodeEditor(Question question, VirtualFile file, String langType, DeepCodingInfo deepCodingInfo) {
+    public void reOpenCodeEditor(Question question, VirtualFile file, String langType, DeepCodingInfo deepCodingInfo) throws FileCreateError {
         QuestionService.getInstance(project).fillQuestion(question, project);
 
         // restore
-        var codeFilePath = storeLeetcodeEditorAndGetStorePath(question, deepCodingInfo, langType);
+        String codeFilePath;
+        codeFilePath = storeLeetcodeEditorAndGetStorePath(question, deepCodingInfo, langType);
 
         openCodeEditor(file, codeFilePath);
     }
@@ -334,7 +338,7 @@ public class CodeService {
         return filePath;
     }
 
-    private String createCodeFile(Question question) {
+    private String createCodeFile(Question question) throws FileCreateError {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)
                 // .append("temp")
@@ -347,13 +351,13 @@ public class CodeService {
             }
             FileUtils.createAndWriteFile(filePath, question.getCodeSnippets());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileCreateError(e);
         }
 
         return filePath;
     }
 
-    private String createCodeFile(Question question, String fileName) {
+    private String createCodeFile(Question question, String fileName) throws FileCreateError {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)
                 .append(fileName)
@@ -365,7 +369,7 @@ public class CodeService {
             }
             FileUtils.createAndWriteFile(filePath, question.getCodeSnippets());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileCreateError(e);
         }
 
         return filePath;

@@ -98,7 +98,12 @@ public abstract class AbstractAction extends AnAction {
                 }
             }
         }
-        doActionPerformed(project, e);
+        try {
+            doActionPerformed(project, e);
+        } catch (Exception ex) {
+            LogUtils.error(ex);
+            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.unknown.error") + "\n" + ex.getMessage(), false, true);
+        }
     }
 
     protected abstract void doActionPerformed(Project project, AnActionEvent e);
