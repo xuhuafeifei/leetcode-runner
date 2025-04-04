@@ -25,6 +25,7 @@ import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import com.xhf.leetcode.plugin.setting.LanguageConvertor;
 import com.xhf.leetcode.plugin.utils.*;
 import com.xhf.leetcode.plugin.window.TimerWindow;
 import org.apache.commons.lang3.StringUtils;
@@ -157,7 +158,7 @@ public class CodeService {
                 LogUtils.error(BundleUtils.i18n("leetcode.status.unknown") + " langType! langType = " + app.getLangType());
                 fileName = fileName + app.getFileTypeSuffix();
             } else {
-                if (reposition.equals(AppSettings.REPOSITION_DEFAULT)) {
+                if (LanguageConvertor.isEqual(reposition, AppSettings.REPOSITION_DEFAULT)) {
                     langType = LangType.getType(fileLangType);
                     if (langType == null) {
                         String msg = BundleUtils.i18nHelper("当前打开文件代表的fileLangType无法识别! fileLangType = " + fileLangType,
@@ -168,10 +169,10 @@ public class CodeService {
                     } else {
                         fileName = fileName + langType.getSuffix();
                     }
-                } else if (reposition.equals(AppSettings.REPOSITION_SETTING)) {
+                } else if (LanguageConvertor.isEqual(reposition, AppSettings.REPOSITION_SETTING)) {
                     fileName = fileName + langType.getSuffix();
                 } else {
-                    LogUtils.error(BundleUtils.i18n("leetcode.status.unknown") + " reposition! reposition = " + reposition);
+                    LogUtils.error(BundleUtils.i18n("leetcode.status.unknown") + " reposition! reposition = " + reposition + "\n" + AppSettings.getInstance().toString());
                     fileName = fileName + app.getFileTypeSuffix();
                 }
             }
