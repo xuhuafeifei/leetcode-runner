@@ -67,7 +67,7 @@ public final class AppSettings
 
     /*---------辅助配置---------*/
     public String rePositionSetting;
-    public String secretKey = "";
+    public transient String secretKey = "";
     public boolean encryptOrNot = false;
 
     @Override
