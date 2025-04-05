@@ -26,7 +26,7 @@ test {
 //}
 
 group 'com.xhf'
-version '3.6.9'
+version '3.7.0'
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -34,6 +34,36 @@ targetCompatibility = 11
 repositories {
     mavenCentral()
 }
+
+
+sourceSets {
+    main {
+        resources {
+            // 保留 template 目录，仅排除特定文件
+            exclude 'template/a.html',
+                    'template/card.html',
+                    'template/common.html',
+                    'template/common_dark.html',
+                    'template/finish.html',
+                    'template/finish_dark.html',
+                    'template/overdate.html',
+                    'template/overdate_dark.html'
+        }
+    }
+}
+
+tasks.jar {
+    // 为保险起见，打包阶段也排除同样的文件
+    exclude 'template/a.html'
+    exclude 'template/card.html'
+    exclude 'template/common.html'
+    exclude 'template/common_dark.html'
+    exclude 'template/finish.html'
+    exclude 'template/finish_dark.html'
+    exclude 'template/overdate.html'
+    exclude 'template/overdate_dark.html'
+}
+
 
 dependencies {
     testImplementation 'junit:junit:4.13.2'

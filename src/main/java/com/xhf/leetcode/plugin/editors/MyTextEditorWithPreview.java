@@ -6,6 +6,7 @@ import com.intellij.ide.IdeBundle;
 import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.impl.EditorComponentImpl;
 import com.intellij.openapi.fileEditor.*;
@@ -36,6 +37,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -133,16 +136,13 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     if (myComponent != null) {
       return myComponent;
     }
+
     mySplitter = new JBSplitter(myIsVerticalSplit, 0.5f, 0.15f, 0.85f);
     mySplitter.setSplitterProportionKey(getSplitterProportionKey());
-    // 调整顺序, 左边preview; 右边text
     mySplitter.setFirstComponent(myPreview.getComponent());
     mySplitter.setSecondComponent(myEditor.getComponent());
-    // 调宽分割线宽度
-    mySplitter.setDividerWidth(3 * (ExperimentalUI.isNewUI() ? 1 : 2));
-    if (ExperimentalUI.isNewUI()) {
-      mySplitter.getDivider().setBackground(JBColor.border());
-    }
+    mySplitter.setDividerWidth(3);
+    mySplitter.getDivider().setBackground(JBColor.border());
 
     myToolbarWrapper = createMarkdownToolbarWrapper(mySplitter);
 
@@ -152,42 +152,9 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     }
     adjustEditorsVisibility();
 
-    BorderLayoutPanel panel = JBUI.Panels.simplePanel(mySplitter).addToTop(myToolbarWrapper);
-    if (!isShowFloatingToolbar()) {
-      myComponent = panel;
-      return myComponent;
-    }
-
-    myToolbarWrapper.setVisible(false);
-    MyEditorLayeredComponentWrapper layeredPane = new MyEditorLayeredComponentWrapper(panel);
-    myComponent = layeredPane;
-    LayoutActionsFloatingToolbar toolbar = new LayoutActionsFloatingToolbar(myComponent, new DefaultActionGroup(myToolbarWrapper.getRightToolbar().getActions()));
-    Disposer.register(this, toolbar);
-    layeredPane.add(panel, JLayeredPane.DEFAULT_LAYER);
-    myComponent.add(toolbar, JLayeredPane.POPUP_LAYER);
-    registerToolbarListeners(panel, toolbar);
+    // 使用普通的 JPanel 来包装组件
+    myComponent = JBUI.Panels.simplePanel(mySplitter).addToTop(myToolbarWrapper);
     return myComponent;
-  }
-
-  protected boolean isShowFloatingToolbar() {
-    return Registry.is("ide.text.editor.with.preview.show.floating.toolbar") && myToolbarWrapper.isLeftToolbarEmpty();
-  }
-
-  private void registerToolbarListeners(JComponent actualComponent, LayoutActionsFloatingToolbar toolbar) {
-    UIUtil.addAwtListener(new MyMouseListener(toolbar), AWTEvent.MOUSE_MOTION_EVENT_MASK, toolbar);
-    final var actualEditor = UIUtil.findComponentOfType(actualComponent, EditorComponentImpl.class);
-    if (actualEditor != null) {
-      final var editorKeyListener = new KeyAdapter() {
-        @Override
-        public void keyPressed(KeyEvent event) {
-          toolbar.getVisibilityController().scheduleHide();
-        }
-      };
-      actualEditor.getEditor().getContentComponent().addKeyListener(editorKeyListener);
-      Disposer.register(toolbar, () -> {
-        actualEditor.getEditor().getContentComponent().removeKeyListener(editorKeyListener);
-      });
-    }
   }
 
   public boolean isVerticalSplit() {
@@ -502,11 +469,8 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
       if (this == SHOW_EDITOR) return AllIcons.General.LayoutEditorOnly;
       if (this == SHOW_PREVIEW) return AllIcons.General.LayoutPreviewOnly;
       boolean isVerticalSplit = editor != null && editor.myIsVerticalSplit;
-      if (ExperimentalUI.isNewUI()) {
-        return isVerticalSplit ? IconLoader.getIcon("expui/general/editorPreviewVertical.svg", AllIcons.class)
-                               : IconLoader.getIcon("expui/general/editorPreview.svg", AllIcons.class);
-      }
-      return isVerticalSplit ? AllIcons.Actions.PreviewDetailsVertically : AllIcons.Actions.PreviewDetails;
+      return isVerticalSplit ? IconLoader.getIcon("expui/general/editorPreviewVertical.svg", AllIcons.class)
+              : IconLoader.getIcon("expui/general/editorPreview.svg", AllIcons.class);
     }
   }
 
@@ -588,73 +552,5 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
   public static void openPreviewForFile(@NotNull Project project, @NotNull VirtualFile file) {
     file.putUserData(DEFAULT_LAYOUT_FOR_FILE, Layout.SHOW_PREVIEW);
     FileEditorManager.getInstance(project).openFile(file, true);
-  }
-
-  private static class MyEditorLayeredComponentWrapper extends JBLayeredPane {
-    private final JComponent editorComponent;
-
-    static final int toolbarTopPadding = 25;
-    static final int toolbarRightPadding = 20;
-
-    private MyEditorLayeredComponentWrapper(JComponent component) {
-      editorComponent = component;
-    }
-
-    @Override
-    public void doLayout() {
-      final var components = getComponents();
-      final var bounds = getBounds();
-      for (Component component : components) {
-        if (component == editorComponent) {
-          component.setBounds(0, 0, bounds.width, bounds.height);
-        }
-        else {
-          final var preferredComponentSize = component.getPreferredSize();
-          var x = 0;
-          var y = 0;
-          if (component instanceof LayoutActionsFloatingToolbar) {
-            x = bounds.width - preferredComponentSize.width - toolbarRightPadding;
-            y = toolbarTopPadding;
-          }
-          component.setBounds(x, y, preferredComponentSize.width, preferredComponentSize.height);
-        }
-      }
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-      return editorComponent.getPreferredSize();
-    }
-  }
-
-  private class MyMouseListener implements AWTEventListener {
-    private final LayoutActionsFloatingToolbar toolbar;
-    private final Alarm alarm;
-
-    MyMouseListener(LayoutActionsFloatingToolbar toolbar) {
-      this.toolbar = toolbar;
-      alarm = new Alarm(Alarm.ThreadToUse.POOLED_THREAD, toolbar);
-    }
-
-    /**
-     * 不要方, 这些报错无伤大雅, 反正能跑
-     * @param event the event to be processed
-     */
-    @Override
-    public void eventDispatched(AWTEvent event) {
-      var isMouseOutsideToolbar = toolbar.getMousePosition() == null;
-      if (myComponent.getMousePosition() != null) {
-        alarm.cancelAllRequests();
-        toolbar.getVisibilityController().scheduleShow();
-        if (isMouseOutsideToolbar) {
-          alarm.addRequest(() -> {
-            toolbar.getVisibilityController().scheduleHide();
-          }, 1400);
-        }
-      }
-      else if (isMouseOutsideToolbar) {
-        toolbar.getVisibilityController().scheduleHide();
-      }
-    }
   }
 }
