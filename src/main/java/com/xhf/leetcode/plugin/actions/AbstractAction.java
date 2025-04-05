@@ -79,13 +79,25 @@ public abstract class AbstractAction extends AnAction {
             AppSettings appSettings = AppSettings.getInstance();
             // reader 检测
             if (StringUtils.isBlank(appSettings.getReadTypeName())) {
-                Messages.showInfoMessage(BundleUtils.i18n("action.leetcode.actions.debug.reader"), "INFO");
+                Messages.showInfoMessage(
+                        BundleUtils.i18nHelper(
+                                "Debug设置模块 '读取类型' 没有设置, 请前往设置界面",
+                                "Debug setting 'read type' is not set, please go to the setting interface"
+                        ),
+                        "INFO"
+                );
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
             // output 检测
             if (StringUtils.isBlank(appSettings.getOutputTypeName())) {
-                Messages.showInfoMessage(BundleUtils.i18n("action.leetcode.actions.debug.output"), "INFO");
+                Messages.showInfoMessage(
+                        BundleUtils.i18nHelper(
+                                "Debug设置模块 '输出类型' 没有设置, 请前往设置界面",
+                                "Debug setting 'output type' is not set, please go to the setting interface"
+                        ),
+                        "INFO"
+                );
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
             }
