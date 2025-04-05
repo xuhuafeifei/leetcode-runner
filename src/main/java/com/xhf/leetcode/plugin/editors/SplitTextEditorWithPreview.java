@@ -39,7 +39,7 @@ import java.util.Objects;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class SplitTextEditorWithPreview extends TextEditorWithPreview {
+public class SplitTextEditorWithPreview extends MyTextEditorWithPreview {
 
     public SplitTextEditorWithPreview(@NotNull TextEditor editor, @NotNull FileEditor preview) {
         super(editor, preview, "Question " + Layout.SHOW_EDITOR_AND_PREVIEW.getName(), Layout.SHOW_EDITOR_AND_PREVIEW);
