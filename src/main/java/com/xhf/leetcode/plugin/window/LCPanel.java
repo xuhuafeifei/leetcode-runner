@@ -14,15 +14,22 @@ import com.xhf.leetcode.plugin.bus.DeepCodingEvent;
 import com.xhf.leetcode.plugin.bus.DeepCodingTabChooseEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.window.deepcoding.DeepCodingPanel;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
 
 /**
  * @author feigebuge
@@ -67,8 +74,58 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
             loginService.doLoginAfter();
         }
 
+        backgroundCheck();
+
         // register
         LCEventBus.getInstance().register(this);
+    }
+
+    private void backgroundCheck() {
+        // 检测存储路径是否正常
+        AppSettings appSettings = AppSettings.getInstance();
+        String filePath = appSettings.getFilePath();
+        if (StringUtils.isNotBlank(filePath)) {
+            TaskCenter.getInstance().createTask(() -> {
+                // 创建临时文件夹
+                try {
+                    // 在filePath下创建文件
+                    File file = FileUtils.createAndGetFile(new FileUtils.PathBuilder(filePath).append("temp-file.txt").build());
+                    // 删除文件
+                    FileUtils.removeFile(file.getAbsolutePath());
+                } catch (Exception e) {
+                    ConsoleUtils.getInstance(project).showWaring(
+                            BundleUtils.i18nHelper(
+                                    "您的存储路径存在异常, Runner无法正确创建文件, 请检查路径权限! filePath = " + filePath,
+                                    "Your storage path has an abnormality, Runner cannot create the file correctly, please check the path permission! filePath = " + filePath
+                            ),
+                            false, false
+                    );
+                }
+            }).invokeLater();
+        }
+        // 检测缓存存储路径是否异常
+        String path = appSettings.getCoreFilePath();
+        if (StringUtils.isNotBlank(path)) {
+            TaskCenter.getInstance().createTask(() -> {
+                // 创建缓存文件夹
+                try {
+                    // 在filePath下创建文件
+                    File file = FileUtils.createAndGetFile(new FileUtils.PathBuilder(path).append("temp-file.txt").build());
+                    // 删除文件
+                    FileUtils.removeFile(file.getAbsolutePath());
+                } catch (Exception e) {
+                    ConsoleUtils.getInstance(project).showError(
+                            BundleUtils.i18nHelper(
+                                    "您的缓存存储路径存在异常, Runner无法正确写入缓存文件, 请清除缓存后重试! core_path = " + path
+                                            + "\n" + "如果您需要更详细的信息, 可以参考: https://itxaiohanglover.github.io/leetcode-runner-doc/pages/9cc27d/#_11-%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E5%A4%B1%E8%B4%A5",
+                                    "Your cache storage path has an abnormality, Runner cannot write the cache file correctly, please clear the cache and try again! core_path = " + path
+                                            + "\n" + "If you need more detailed information, you can refer to: https://itxaiohanglover.github.io/leetcode-runner-doc/pages/9cc27d/#_11-%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E5%A4%B1%E8%B4%A5"
+                            ),
+                            false, false
+                    );
+                }
+            }).invokeLater();
+        }
     }
 
     private void init() {
