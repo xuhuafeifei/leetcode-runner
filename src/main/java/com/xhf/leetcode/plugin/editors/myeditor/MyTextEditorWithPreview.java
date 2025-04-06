@@ -1,4 +1,4 @@
-package com.xhf.leetcode.plugin.editors;
+package com.xhf.leetcode.plugin.editors.myeditor;
 
 import com.intellij.codeHighlighting.BackgroundEditorHighlighter;
 import com.intellij.icons.AllIcons;
@@ -6,7 +6,6 @@ import com.intellij.ide.IdeBundle;
 import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.actionSystem.*;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.impl.EditorComponentImpl;
 import com.intellij.openapi.fileEditor.*;
@@ -17,7 +16,6 @@ import com.intellij.openapi.util.registry.Registry;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.pom.Navigatable;
-import com.intellij.ui.ExperimentalUI;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBLayeredPane;
@@ -37,8 +35,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -152,9 +148,111 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     }
     adjustEditorsVisibility();
 
+    BorderLayoutPanel panel = JBUI.Panels.simplePanel(mySplitter).addToTop(myToolbarWrapper);
     // 使用普通的 JPanel 来包装组件
-    myComponent = JBUI.Panels.simplePanel(mySplitter).addToTop(myToolbarWrapper);
+    if (!isShowFloatingToolbar()) {
+      myComponent = panel;
+      return myComponent;
+    }
+    // 悬浮窗
+    myToolbarWrapper.setVisible(false);
+    MyEditorLayeredComponentWrapper layeredPane = new MyEditorLayeredComponentWrapper(panel);
+    myComponent = layeredPane;
+    com.xhf.leetcode.plugin.editors.myeditor.LayoutActionsFloatingToolbar toolbar = new com.xhf.leetcode.plugin.editors.myeditor.LayoutActionsFloatingToolbar(myComponent, new DefaultActionGroup(myToolbarWrapper.getRightToolbar().getActions()));
+    Disposer.register(this, toolbar);
+    layeredPane.add(panel, JLayeredPane.DEFAULT_LAYER);
+    myComponent.add(toolbar, JLayeredPane.POPUP_LAYER);
+    registerToolbarListeners(panel, toolbar);
     return myComponent;
+  }
+
+  private class MyMouseListener implements AWTEventListener {
+    private final LayoutActionsFloatingToolbar toolbar;
+    private final Alarm alarm;
+
+    MyMouseListener(LayoutActionsFloatingToolbar toolbar) {
+      this.toolbar = toolbar;
+      alarm = new Alarm(Alarm.ThreadToUse.POOLED_THREAD, toolbar);
+    }
+
+    @Override
+    public void eventDispatched(AWTEvent event) {
+      var isMouseOutsideToolbar = toolbar.getMousePosition() == null;
+      if (myComponent.getMousePosition() != null) {
+        alarm.cancelAllRequests();
+        toolbar.getVisibilityController().scheduleShow();
+        if (isMouseOutsideToolbar) {
+          alarm.addRequest(() -> {
+            toolbar.getVisibilityController().scheduleHide();
+          }, 1400);
+        }
+      }
+      else if (isMouseOutsideToolbar) {
+        toolbar.getVisibilityController().scheduleHide();
+      }
+    }
+  }
+
+  private void registerToolbarListeners(JComponent actualComponent, LayoutActionsFloatingToolbar toolbar) {
+    UIUtil.addAwtListener(new MyMouseListener(toolbar), AWTEvent.MOUSE_MOTION_EVENT_MASK, toolbar);
+    final var actualEditor = UIUtil.findComponentOfType(actualComponent, EditorComponentImpl.class);
+    if (actualEditor != null) {
+      final var editorKeyListener = new KeyAdapter() {
+        @Override
+        public void keyPressed(KeyEvent event) {
+          toolbar.getVisibilityController().scheduleHide();
+        }
+      };
+      actualEditor.getEditor().getContentComponent().addKeyListener(editorKeyListener);
+      Disposer.register(toolbar, () -> {
+        actualEditor.getEditor().getContentComponent().removeKeyListener(editorKeyListener);
+      });
+    }
+  }
+
+
+  private static class MyEditorLayeredComponentWrapper extends JBLayeredPane {
+    private final JComponent editorComponent;
+
+    static final int toolbarTopPadding = 25;
+    static final int toolbarRightPadding = 20;
+
+    private MyEditorLayeredComponentWrapper(JComponent component) {
+      editorComponent = component;
+    }
+
+    @Override
+    public void doLayout() {
+      final var components = getComponents();
+      final var bounds = getBounds();
+      for (Component component : components) {
+        if (component == editorComponent) {
+          component.setBounds(0, 0, bounds.width, bounds.height);
+        }
+        else {
+          final var preferredComponentSize = component.getPreferredSize();
+          var x = 0;
+          var y = 0;
+          if (component instanceof LayoutActionsFloatingToolbar) {
+            x = bounds.width - preferredComponentSize.width - toolbarRightPadding;
+            y = toolbarTopPadding;
+          }
+          component.setBounds(x, y, preferredComponentSize.width, preferredComponentSize.height);
+        }
+      }
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+      return editorComponent.getPreferredSize();
+    }
+  }
+
+
+  protected boolean isShowFloatingToolbar() {
+    return Registry.is("ide.text.editor.with.preview.show.floating.toolbar")
+//            && myToolbarWrapper.isLeftToolbarEmpty()
+    ;
   }
 
   public boolean isVerticalSplit() {
@@ -201,8 +299,23 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
   protected void onLayoutChange(Layout oldValue, Layout newValue) { }
 
   private void adjustEditorsVisibility() {
-    myEditor.getComponent().setVisible(myLayout == Layout.SHOW_EDITOR || myLayout == Layout.SHOW_EDITOR_AND_PREVIEW);
-    myPreview.getComponent().setVisible(myLayout == Layout.SHOW_PREVIEW || myLayout == Layout.SHOW_EDITOR_AND_PREVIEW);
+    // 单独处理Preview模式, 不能全部铺满, 否则悬浮框会被遮挡
+    if (myLayout == Layout.SHOW_PREVIEW) {
+      myPreview.getComponent().setVisible(true);
+      myEditor.getComponent().setVisible(true);
+      // 调整80%的宽度
+      mySplitter.setProportion(0.8f);
+      return;
+    } else if (myLayout == Layout.SHOW_EDITOR) {
+      myPreview.getComponent().setVisible(false);
+      myEditor.getComponent().setVisible(true);
+    } else if (myLayout == Layout.SHOW_EDITOR_AND_PREVIEW) {
+      myPreview.getComponent().setVisible(true);
+      myEditor.getComponent().setVisible(true);
+      mySplitter.setProportion(0.5f);
+    }
+//    myEditor.getComponent().setVisible(myLayout == Layout.SHOW_EDITOR || myLayout == Layout.SHOW_EDITOR_AND_PREVIEW);
+//    myPreview.getComponent().setVisible(myLayout == Layout.SHOW_PREVIEW || myLayout == Layout.SHOW_EDITOR_AND_PREVIEW);
   }
 
   protected void setLayout(@NotNull Layout layout) {

@@ -22,6 +22,7 @@ public class SplitTextEditorProvider implements AsyncFileEditorProvider, DumbAwa
     private final FileEditorProvider second;
 
     public SplitTextEditorProvider() {
+        // first = new PsiAwareTextEditorProvider();
         first = new CustomTextEditorProvider();
         // second = new MarkDownEditorProvider();
         second = new FocusTextEditorProvider();

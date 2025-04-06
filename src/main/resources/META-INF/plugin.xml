@@ -173,6 +173,15 @@
 <!--            <reference id="leetcode.plugin.ReviewAction"/>-->
         </group>
 
+        <group id="leetcode.plugin.editor.basic.group">
+            <reference id="leetcode.plugin.editor.RunCodeAction"/>
+            <reference id="leetcode.plugin.editor.SubmitCodeAction"/>
+            <reference id="leetcode.plugin.editor.TestCasesAction"/>
+            <separator/>
+            <reference id="leetcode.plugin.DefaultContent"/>
+            <reference id="leetcode.plugin.Timmer"/>
+        </group>
+
         <group id="leetcode.plugin.text.group">
             <reference id="leetcode.plugin.Reposition"/>
             <reference id="leetcode.plugin.debug.Debug"/>

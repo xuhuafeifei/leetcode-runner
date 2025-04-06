@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.io.http.utils;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
@@ -7,6 +9,7 @@ import com.xhf.leetcode.plugin.model.HttpRequest;
 import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.CookieStore;
@@ -24,6 +27,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -108,12 +112,38 @@ public class HttpClient {
             ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("network.error"), false, true);
             throw new RuntimeException("network exception or request url error!");
         }
+        try {
+            return loginCheck(httpResponse);
+        } catch (LoginException e) {
+            ConsoleUtils.getInstance(project).showWaring(e.getMessage(), false, true);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @NotNull
+    private HttpResponse loginCheck(HttpResponse httpResponse) throws LoginException {
+        String body = httpResponse.getBody();
+        String error = "";
+        // 如果解析失败, 则认为是正常的json数据, 直接返回
+        try {
+            JsonElement errorEle = JsonParser.parseString(body).getAsJsonObject().get("error");
+            // 如果没有error字段, 则认为是正常的json数据, 直接返回
+            if (errorEle == null) {
+                return httpResponse;
+            }
+            error = errorEle.getAsString();
+        } catch (Exception ignored) {
+            return httpResponse;
+        }
+        if (StringUtils.equals(error, "User is not authenticated")) {
+             throw new LoginException(BundleUtils.i18nHelper("登录过期, 请重新登陆!", "Login expired, please login again!"));
+        }
         return httpResponse;
     }
 
     /**
      * 添加请求头
-     * @param request
+     * @param request request
      */
     private void addHeaders(HttpRequestBase request) {
         for (Cookie cookie : cookieStore.getCookies()) {
@@ -130,7 +160,12 @@ public class HttpClient {
             }
             throw new RuntimeException("network exception or request url error!");
         }
-        return httpResponse;
+        try {
+            return loginCheck(httpResponse);
+        } catch (LoginException e) {
+            ConsoleUtils.getInstance(project).showWaring(e.getMessage(), false, true);
+            throw new RuntimeException(e);
+        }
     }
 
     /**
