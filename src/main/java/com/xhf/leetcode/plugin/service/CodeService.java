@@ -267,7 +267,7 @@ public class CodeService {
     }
 
     private void openCodeEditor(VirtualFile file, String codeFilePath) {
-        ApplicationManager.getApplication().invokeAndWait(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             ViewUtils.closeVFile(file, project);
             VirtualFile newfile = LocalFileSystem.getInstance().findFileByPath(codeFilePath);
             if (newfile != null) {

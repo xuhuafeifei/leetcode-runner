@@ -28,7 +28,6 @@ import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
-import com.xhf.leetcode.plugin.window.deepcoding.Hot100Panel;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -324,22 +323,19 @@ public class ViewUtils {
      * @param pattern deepcoding 的那种模式
      */
     private static void handleSuccessfulReposition(DeepCodingQuestion question, int size, int index, MyList<? extends DeepCodingQuestion> questionList, RePositionEvent event, Project project, String pattern) {
-        ViewUtils.scrollToVisibleOfMyList(questionList, index);
-        TaskCenter.getInstance().createTask(() -> {
-            // 重新打开文件
-            DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, index);
-            try {
-                CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
-            } catch (FileCreateError e) {
-                LogUtils.error(e);
-                ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
-                return;
-            }
+        ViewUtils.scrollToVisibleOfMyList(questionList, index, true);
+        // 重新打开文件
+        DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, index);
+        try {
+            CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
+        } catch (FileCreateError e) {
+            LogUtils.error(e);
+            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
+            return;
+        }
 
-            // 获取并显示 ToolWindow（确保控制台窗口可见）
-            showToolWindow(project);
-        }).invokeLater();
-        // JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
+        // 获取并显示 ToolWindow（确保控制台窗口可见）
+        showToolWindow(project);
     }
 
 
@@ -368,22 +364,18 @@ public class ViewUtils {
             // double check
             if (
                     i < model.getSize() &&
-                    (question = model.getElementAt(i)).getTitleSlug().equals(titleSlug))
-            {
-                ViewUtils.scrollToVisibleOfMyList(questionList, i);
-                TaskCenter.getInstance().createTask(() -> {
-                    // 重新打开文件 (根据当前系统语言打开文件)
-                    try {
-                        CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
-                    } catch (FileCreateError e) {
-                        LogUtils.error(e);
-                        ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
-                        return;
-                    }
-                    // 获取并显示 ToolWindow（确保控制台窗口可见）
-                    showToolWindow(project);
-                }).invokeLater();
-                // JOptionPane.showMessageDialog(null, "重定位成功! 当前文件将立刻被重新打开");
+                    (question = model.getElementAt(i)).getTitleSlug().equals(titleSlug)) {
+                ViewUtils.scrollToVisibleOfMyList(questionList, i, true);
+                // 重新打开文件 (根据当前系统语言打开文件)
+                try {
+                    CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
+                } catch (FileCreateError e) {
+                    LogUtils.error(e);
+                    ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
+                    return;
+                }
+                // 获取并显示 ToolWindow（确保控制台窗口可见）
+                showToolWindow(project);
                 return;
             }
             JOptionPane.showMessageDialog(null, "当前文件无法被重新打开");

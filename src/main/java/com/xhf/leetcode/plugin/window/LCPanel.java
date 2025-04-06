@@ -93,7 +93,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
                     // 删除文件
                     FileUtils.removeFile(file.getAbsolutePath());
                 } catch (Exception e) {
-                    ConsoleUtils.getInstance(project).showWaring(
+                    ConsoleUtils.getInstance(project).showError(
                             BundleUtils.i18nHelper(
                                     "您的存储路径存在异常, Runner无法正确创建文件, 请检查路径权限! filePath = " + filePath,
                                     "Your storage path has an abnormality, Runner cannot create the file correctly, please check the path permission! filePath = " + filePath

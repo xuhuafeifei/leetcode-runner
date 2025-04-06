@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.editors.myeditor;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.ui.JBColor;
 
@@ -22,7 +21,7 @@ public class MyLayoutActionsFloatingToolbar extends JPanel implements Disposable
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.CONTEXT_TOOLBAR, actionGroup, true);
+        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("myLayoutActionsFloatingToolbar", actionGroup, true);
         actionToolbar.setTargetComponent(parentComponent);
         actionToolbar.setReservePlaceAutoPopupIcon(false);
         actionToolbar.setMinimumButtonSize(new Dimension(22, 22));
@@ -31,7 +30,7 @@ public class MyLayoutActionsFloatingToolbar extends JPanel implements Disposable
 
         add(actionToolbar.getComponent(), BorderLayout.CENTER);
 
-        this.visibilityController = new ToolbarVisibilityController(false, parentComponent, actionToolbar.getComponent());
+        this.visibilityController = new ToolbarVisibilityController(false, parentComponent, this);
 
         // 同步位置
         parentComponent.addComponentListener(new ComponentAdapter() {
