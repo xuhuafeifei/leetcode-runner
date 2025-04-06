@@ -158,7 +158,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     myToolbarWrapper.setVisible(false);
     MyEditorLayeredComponentWrapper layeredPane = new MyEditorLayeredComponentWrapper(panel);
     myComponent = layeredPane;
-    com.xhf.leetcode.plugin.editors.myeditor.LayoutActionsFloatingToolbar toolbar = new com.xhf.leetcode.plugin.editors.myeditor.LayoutActionsFloatingToolbar(myComponent, new DefaultActionGroup(myToolbarWrapper.getRightToolbar().getActions()));
+    MyLayoutActionsFloatingToolbar toolbar = new MyLayoutActionsFloatingToolbar(myComponent, new DefaultActionGroup(myToolbarWrapper.getRightToolbar().getActions()));
     Disposer.register(this, toolbar);
     layeredPane.add(panel, JLayeredPane.DEFAULT_LAYER);
     myComponent.add(toolbar, JLayeredPane.POPUP_LAYER);
@@ -167,10 +167,10 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
   }
 
   private class MyMouseListener implements AWTEventListener {
-    private final LayoutActionsFloatingToolbar toolbar;
+    private final MyLayoutActionsFloatingToolbar toolbar;
     private final Alarm alarm;
 
-    MyMouseListener(LayoutActionsFloatingToolbar toolbar) {
+    MyMouseListener(MyLayoutActionsFloatingToolbar toolbar) {
       this.toolbar = toolbar;
       alarm = new Alarm(Alarm.ThreadToUse.POOLED_THREAD, toolbar);
     }
@@ -193,7 +193,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     }
   }
 
-  private void registerToolbarListeners(JComponent actualComponent, LayoutActionsFloatingToolbar toolbar) {
+  private void registerToolbarListeners(JComponent actualComponent, MyLayoutActionsFloatingToolbar toolbar) {
     UIUtil.addAwtListener(new MyMouseListener(toolbar), AWTEvent.MOUSE_MOTION_EVENT_MASK, toolbar);
     final var actualEditor = UIUtil.findComponentOfType(actualComponent, EditorComponentImpl.class);
     if (actualEditor != null) {
@@ -233,7 +233,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
           final var preferredComponentSize = component.getPreferredSize();
           var x = 0;
           var y = 0;
-          if (component instanceof LayoutActionsFloatingToolbar) {
+          if (component instanceof MyLayoutActionsFloatingToolbar) {
             x = bounds.width - preferredComponentSize.width - toolbarRightPadding;
             y = toolbarTopPadding;
           }
@@ -312,7 +312,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     } else if (myLayout == Layout.SHOW_EDITOR_AND_PREVIEW) {
       myPreview.getComponent().setVisible(true);
       myEditor.getComponent().setVisible(true);
-      mySplitter.setProportion(0.5f);
+      mySplitter.setProportion(0.4f);
     }
 //    myEditor.getComponent().setVisible(myLayout == Layout.SHOW_EDITOR || myLayout == Layout.SHOW_EDITOR_AND_PREVIEW);
 //    myPreview.getComponent().setVisible(myLayout == Layout.SHOW_PREVIEW || myLayout == Layout.SHOW_EDITOR_AND_PREVIEW);

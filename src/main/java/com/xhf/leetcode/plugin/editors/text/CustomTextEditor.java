@@ -11,6 +11,7 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.highlighter.EditorHighlighter;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
@@ -133,5 +134,14 @@ public class CustomTextEditor implements TextEditor {
     @Override
     public VirtualFile getFile() {
         return file;
+    }
+
+    /**
+     * 别删除, 返回null. 否则无法适配低版本IntelliJ IDEA
+     * @return null
+     */
+    @Override
+    public @Nullable FileEditorLocation getCurrentLocation() {
+        return null;
     }
 }
