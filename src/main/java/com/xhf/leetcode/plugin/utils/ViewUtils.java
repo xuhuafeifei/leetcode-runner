@@ -1,16 +1,21 @@
 package com.xhf.leetcode.plugin.utils;
 
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.testFramework.LightVirtualFile;
+import com.xhf.leetcode.plugin.actions.AbstractAction;
 import com.xhf.leetcode.plugin.bus.RePositionEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
@@ -19,12 +24,11 @@ import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
-import com.xhf.leetcode.plugin.model.DeepCodingInfo;
-import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
-import com.xhf.leetcode.plugin.model.LeetcodeEditor;
-import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
+import com.xhf.leetcode.plugin.window.deepcoding.Hot100Panel;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -388,4 +392,53 @@ public class ViewUtils {
             ConsoleUtils.getInstance(project).showError("文件重定位错误! 错误原因是: " + ex.getMessage(), false, true);
         }
     }
+
+    public static LangIconInfo getLangIconInfo() {
+        String langIconPath;
+        LangType type = LangType.getType(AppSettings.getInstance().getLangType());
+        String text;
+        if (type != null) {
+            switch (type) {
+                case C:
+                    langIconPath = "/icons/C.svg";
+                    text = "c";
+                    break;
+                case PYTHON3:
+                    langIconPath = "/icons/Python.svg";
+                    text = "python";
+                    break;
+                case CPP:
+                    langIconPath = "/icons/cpp.svg";
+                    text = "c++";
+                    break;
+                case JAVA:
+                    langIconPath = "/icons/java.svg";
+                    text = "java";
+                    break;
+                default:
+                    langIconPath = "/icons/coding.svg";
+                    text = "language";
+            }
+        } else {
+            langIconPath = "/icons/coding.svg";
+            text = "language";
+        }
+
+        return new LangIconInfo(langIconPath, text);
+    }
+
+    public static AnAction createLangIcon() {
+        LangIconInfo langIconInfo = ViewUtils.getLangIconInfo();
+        String text = langIconInfo.getText();
+        String langIconPath = langIconInfo.getLangIconPath();
+
+        return (new AbstractAction(text, text, IconLoader.getIcon(langIconPath, ViewUtils.class)) {
+            @Override
+            public void doActionPerformed(Project project, AnActionEvent e) {
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
+            }
+
+        });
+    }
+
 }

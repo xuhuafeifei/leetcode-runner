@@ -19,6 +19,7 @@
         <!-- editors -->
         <fileEditorProvider implementation="com.xhf.leetcode.plugin.editors.SplitTextEditorProvider"/>
         <fileEditorProvider implementation="com.xhf.leetcode.plugin.editors.MarkdownTextEditorProvider"/>
+        <fileEditorProvider implementation="com.xhf.leetcode.plugin.editors.text.CustomTextEditorProvider"/>
 
         <!-- setting -->
         <applicationConfigurable parentId="tools" instance="com.xhf.leetcode.plugin.setting.AppSettingsConfigurable"
@@ -120,41 +121,64 @@
             </action>
         </group>
 
+        <action id="leetcode.plugin.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
+                icon="/icons/run.svg">
+            <keyboard-shortcut
+                    keymap="$default"
+                    first-keystroke="ctrl alt 9"/>
+        </action>
+        <action id="leetcode.plugin.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
+                icon="/icons/submit.svg">
+            <keyboard-shortcut
+                    keymap="$default"
+                    first-keystroke="ctrl alt 0"/>
+        </action>
+        <action id="leetcode.plugin.editor.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
+                icon="/icons/test_cases.svg">
+        </action>
+        <action id="leetcode.plugin.DefaultContent" class="com.xhf.leetcode.plugin.actions.DefaultContentAction"
+                icon="/icons/default_code.svg">
+        </action>
+        <action id="leetcode.plugin.Timmer" class="com.xhf.leetcode.plugin.actions.TimerAction"
+                icon="/icons/clock.svg">
+        </action>
+        <action id="leetcode.plugin.debug.Debug" class="com.xhf.leetcode.plugin.actions.DebugAction"
+                icon="AllIcons.Debugger.AttachToProcess">
+        </action>
+        <action id="leetcode.plugin.RemoveCommentAction" class="com.xhf.leetcode.plugin.actions.RemoveCommentAction"
+                icon="/icons/rubbish.svg">
+        </action>
+        <action id="leetcode.plugin.AddCommentAction" class="com.xhf.leetcode.plugin.actions.AddCommentAction"
+                icon="/icons/addComment.svg">
+        </action>
+        <action id="leetcode.plugin.LogoAction" class="com.xhf.leetcode.plugin.actions.LogoAction"
+                icon="/icons/leetcode-runner24x24.svg">
+        </action>
+
         <group id="leetcode.plugin.editor.group">
-            <action id="leetcode.plugin.editor.RunCodeAction" class="com.xhf.leetcode.plugin.actions.RunCodeAction"
-                    icon="/icons/run.svg">
-                <keyboard-shortcut
-                        keymap="$default"
-                        first-keystroke="ctrl alt 9"/>
-            </action>
-            <action id="leetcode.plugin.editor.SubmitCodeAction" class="com.xhf.leetcode.plugin.actions.SubmitCodeAction"
-                    icon="/icons/submit.svg">
-                <keyboard-shortcut
-                        keymap="$default"
-                        first-keystroke="ctrl alt 0"/>
-            </action>
-            <action id="leetcode.plugin.editor.TestCasesAction" class="com.xhf.leetcode.plugin.actions.TestCasesAction"
-                    icon="/icons/test_cases.svg">
-            </action>
-            <separator/>
-            <action id="leetcode.plugin.DefaultContent" class="com.xhf.leetcode.plugin.actions.DefaultContentAction"
-                    icon="/icons/default_code.svg">
-            </action>
-            <action id="leetcode.plugin.Timmer" class="com.xhf.leetcode.plugin.actions.TimerAction"
-                    icon="/icons/clock.svg">
-            </action>
-            <separator/>
+            <reference id="leetcode.plugin.LogoAction"/>
+<!--            <reference id="leetcode.plugin.editor.RunCodeAction"/>-->
+<!--            <reference id="leetcode.plugin.editor.SubmitCodeAction"/>-->
+<!--            <reference id="leetcode.plugin.editor.TestCasesAction"/>-->
+<!--            <separator/>-->
+<!--            <reference id="leetcode.plugin.DefaultContent"/>-->
+<!--            <reference id="leetcode.plugin.Timmer"/>-->
+<!--            <separator/>-->
+<!--            <reference id="leetcode.plugin.Reposition"/>-->
+<!--            <reference id="leetcode.plugin.debug.Debug"/>-->
+<!--            <separator/>-->
+<!--            <reference id="leetcode.plugin.RemoveCommentAction"/>-->
+<!--            <reference id="leetcode.plugin.AddCommentAction"/>-->
+<!--            <separator/>-->
+<!--            <reference id="leetcode.plugin.ReviewAction"/>-->
+        </group>
+
+        <group id="leetcode.plugin.text.group">
             <reference id="leetcode.plugin.Reposition"/>
-            <action id="leetcode.plugin.debug.Debug" class="com.xhf.leetcode.plugin.actions.DebugAction"
-                    icon="AllIcons.Debugger.AttachToProcess">
-            </action>
+            <reference id="leetcode.plugin.debug.Debug"/>
             <separator/>
-            <action id="leetcode.plugin.RemoveCommentAction" class="com.xhf.leetcode.plugin.actions.RemoveCommentAction"
-                    icon="/icons/rubbish.svg">
-            </action>
-            <action id="leetcode.plugin.AddCommentAction" class="com.xhf.leetcode.plugin.actions.AddCommentAction"
-                    icon="/icons/addComment.svg">
-            </action>
+            <reference id="leetcode.plugin.RemoveCommentAction"/>
+            <reference id="leetcode.plugin.AddCommentAction"/>
             <separator/>
             <reference id="leetcode.plugin.ReviewAction"/>
         </group>

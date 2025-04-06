@@ -6,6 +6,7 @@ import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.xhf.leetcode.plugin.editors.text.CustomTextEditorProvider;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.NonNls;
@@ -21,7 +22,7 @@ public class SplitTextEditorProvider implements AsyncFileEditorProvider, DumbAwa
     private final FileEditorProvider second;
 
     public SplitTextEditorProvider() {
-        first = new PsiAwareTextEditorProvider();
+        first = new CustomTextEditorProvider();
         // second = new MarkDownEditorProvider();
         second = new FocusTextEditorProvider();
     }
