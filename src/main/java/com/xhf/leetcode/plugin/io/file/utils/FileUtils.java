@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * @author feigebuge
@@ -222,13 +223,40 @@ public class FileUtils {
     }
 
     /**
-     * unify path separator
-     * if path contains / such as E:/demo/a.text, change it into E:\demo\a.text
-     * @param path
-     * @return
+     * Unify path separator based on the operating system.
+     * - For Windows, replace all '/' with '\'.
+     * - For Mac/Linux, replace all '\' with '/'.
+     *
+     * @param path The input path to be unified.
+     * @return The unified path with correct separators for the current OS.
      */
     public static String unifyPath(String path) {
-        return path.replaceAll("/", "\\\\");
+        // 检查输入是否为空
+        if (path == null || path.isEmpty()) {
+            return ""; // 返回空字符串
+        }
+
+        // 获取当前操作系统名称
+        String osName = System.getProperty("os.name").toLowerCase();
+
+        // 判断操作系统类型并统一路径分隔符
+        if (osName.contains("win")) {
+            // Windows: 将所有正斜杠 '/' 替换为反斜杠 '\'
+            return path.replaceAll("/", "\\\\");
+        } else {
+            // Mac/Linux: 将所有反斜杠 '\' 替换为正斜杠 '/'
+            return path.replaceAll("\\\\", "/");
+        }
+    }
+
+    public static boolean isWin() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        return osName.contains("win");
+    }
+
+    public static boolean isMac() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        return osName.contains("mac");
     }
 
     public static String unUnifyPath(String path) {
@@ -284,15 +312,30 @@ public class FileUtils {
         }
     }
 
+
     /**
-     * judge whether the content is a file path or not
-     * @param content
-     * @return
+     * 判断内容是否为文件路径（增强版）
+     * @param content 输入的内容
+     * @return 如果是文件路径返回 true，否则返回 false
      */
     public static boolean isPath(String content) {
-        String regex = "^[a-zA-Z]:\\\\[^<>:\"/|?*]+(\\\\[^<>:\"/|?*]+)*$"; // Windows path
-        regex += "|^/[^<>:\"/|?*]+(/[^<>:\"/|?*]+)*$"; // Unix/Linux path
-        return content.matches(regex);
+        if (content == null || content.isEmpty()) {
+            return false; // 空字符串或 null 不可能是路径
+        }
+
+        // 预处理：将反斜杠替换为正斜杠（适用于跨平台场景）
+        content = content.replace("\\", "/");
+
+        // 定义正则表达式
+        String windowsRegex = "^[a-zA-Z]:/[^<>:\"|?*]+(/[^<>:\"|?*]+)*$"; // Windows路径（修复后）
+        String unixRegex = "^/[^<>:\"|?*]+(/[^<>:\"|?*]+)*$"; // Unix/Linux/Mac路径
+
+        // 编译正则表达式，提高性能
+        Pattern windowsPattern = Pattern.compile(windowsRegex);
+        Pattern unixPattern = Pattern.compile(unixRegex);
+
+        // 匹配路径
+        return windowsPattern.matcher(content).matches() || unixPattern.matcher(content).matches();
     }
 
     public static void deleteFile(String path) {
