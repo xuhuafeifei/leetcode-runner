@@ -442,7 +442,8 @@ public class CodeService {
      * @param file idea打开的虚拟文件
      * @return langType
      */
-    public String parseLangTypeFromVFile(VirtualFile file) {
+    @Safe
+    public @Nullable String parseLangTypeFromVFile(VirtualFile file) {
         String filePath = ViewUtils.getUnifyFilePathByVFile(file);
         return parseLangType(filePath);
     }
@@ -452,6 +453,7 @@ public class CodeService {
      * @param project project
      * @return langType
      */
+    @UnSafe("不安全的方法, 可能会产生弹框, 导致阻塞")
     public String parseLangTypeFromCVFile(Project project) {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {

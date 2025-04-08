@@ -15,6 +15,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.OSHandler;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
@@ -30,27 +31,27 @@ public class JavaDebugEnv extends AbstractDebugEnv {
     /**
      * Java编写的Main类路径
      */
-    private String mainJavaPath = "E:\\java_code\\lc-test\\cache\\debug\\Main.java";
+    private String mainJavaPath = "";
     /**
      * Java编写的Solution类的路径
      */
-    private String solutionJavaPath = "E:\\java_code\\lc-test\\cache\\debug\\Solution.java";
+    private String solutionJavaPath = "";
     /**
      * 编译后的Main.class路径
      */
-    private String mainClassPath = "E:\\java_code\\lc-test\\cache\\debug\\Main.class";
+    private String mainClassPath = "";
     /**
      * JAVA_HOME
      */
-    private String JAVA_HOME = "E:\\jdk8";
+    private String JAVA_HOME = "";
     /**
      * java执行路径
      */
-    private String java = "E:\\jdk8\\bin\\java.exe";
+    private String java = "";
     /**
      * javac执行路径
      */
-    private String javac = "E:\\jdk8\\bin\\javac.exe";
+    private String javac = "";
 
 
     public JavaDebugEnv(Project project) {
@@ -118,13 +119,13 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         }
         JAVA_HOME = myFileBrowserBtn.getText();
 
-        java = new FileUtils.PathBuilder(JAVA_HOME).append("bin").append("java.exe").build();
-        javac = new FileUtils.PathBuilder(JAVA_HOME).append("bin").append("javac.exe").build();
+        java = OSHandler.getJava(JAVA_HOME);
+        javac = OSHandler.getJavac(JAVA_HOME);
         if (!FileUtils.fileExists(java)) {
-            throw new DebugError("Java" + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + java);
+            throw new DebugError(OSHandler.getJavaName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + java);
         }
         if (!FileUtils.fileExists(javac)) {
-            throw new DebugError("Javac" + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + javac);
+            throw new DebugError(OSHandler.getJavacName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + javac);
         }
         // 存储正确的javaPath
         StoreService.getInstance(project).addCache("JAVA_HOME", JAVA_HOME);
@@ -141,7 +142,7 @@ public class JavaDebugEnv extends AbstractDebugEnv {
             String combinedCmd = " cmd /c " + cdCmd + " & " + cmd;
 
             LogUtils.simpleDebug("compile cmd = " + combinedCmd);
-            Process exec = DebugUtils.buildProcess("cmd.exe", "/c", cdCmd + " & " + cmd);
+            Process exec = OSHandler.buildProcess(cdCmd + " & " + cmd);
             DebugUtils.printProcess(exec, false, project);
 
             int i = exec.exitValue();

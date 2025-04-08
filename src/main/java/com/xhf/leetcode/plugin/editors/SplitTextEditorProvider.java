@@ -57,7 +57,9 @@ public class SplitTextEditorProvider implements AsyncFileEditorProvider, DumbAwa
             @Override
             public FileEditor build() {
                 return new SplitTextEditorWithPreview((TextEditor) first.createEditor(project, file),
-                        second.createEditor(project, file));
+                        second.createEditor(project, file),
+                        project
+                );
             }
         };
     }

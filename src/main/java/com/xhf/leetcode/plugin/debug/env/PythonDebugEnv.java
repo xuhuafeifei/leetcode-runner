@@ -16,6 +16,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.OSHandler;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 import javax.swing.*;
@@ -128,10 +129,10 @@ public class PythonDebugEnv extends AbstractDebugEnv {
             return false;
         }
         String pythonPath = myFileBrowserBtn.getText();
-        python = new FileUtils.PathBuilder(pythonPath).append("python.exe").build();
+        python = OSHandler.getPython(pythonPath);
 
         if (!FileUtils.fileExists(python)) {
-            throw new DebugError("python.exe" + BundleUtils.i18n("action.leetcode.plugin.path.error") + python);
+            throw new DebugError(OSHandler.getPythonName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + python);
         }
         // 存储正确的javaPath
         StoreService.getInstance(project).addCache("PYTHON_EXE", pythonPath);

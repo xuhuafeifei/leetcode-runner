@@ -32,9 +32,11 @@ public class CustomTextEditor implements TextEditor {
     private final Editor editor;
     private final JPanel component;
     private final VirtualFile file;
+    private final Project project;
 
     public CustomTextEditor(@NotNull Project project, @NotNull VirtualFile file) {
         this.file = file;
+        this.project = project;
         Document document = FileDocumentManager.getInstance().getDocument(file);
         if (document == null) {
             throw new IllegalStateException("Cannot create editor for file: " + file.getName());
@@ -55,7 +57,7 @@ public class CustomTextEditor implements TextEditor {
         ActionGroup action = (ActionGroup) ActionManager.getInstance().getAction("leetcode.plugin.text.group");
         DefaultActionGroup dag = new DefaultActionGroup();
         // 增加语言图标
-        dag.add(ViewUtils.createLangIcon());
+        dag.add(ViewUtils.createLangIcon(project));
         dag.addSeparator();
         dag.add(action);
 

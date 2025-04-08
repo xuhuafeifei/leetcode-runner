@@ -26,6 +26,7 @@ import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import org.jetbrains.annotations.Nullable;
@@ -124,7 +125,7 @@ public class ViewUtils {
      * @param project project
      * @return 虚拟文件
      */
-    public static VirtualFile getCurrentOpenVirtualFile(Project project) {
+    public static @Nullable VirtualFile getCurrentOpenVirtualFile(Project project) {
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
         VirtualFile[] selectedFiles = fileEditorManager.getSelectedFiles();
         if (selectedFiles.length > 0) {
@@ -385,7 +386,7 @@ public class ViewUtils {
         }
     }
 
-    public static LangIconInfo getLangIconInfo() {
+    public static LangIconInfo getLangIconInfo(Project project) {
         String langIconPath;
         LangType type = LangType.getType(AppSettings.getInstance().getLangType());
         String text;
@@ -419,8 +420,8 @@ public class ViewUtils {
         return new LangIconInfo(langIconPath, text);
     }
 
-    public static AnAction createLangIcon() {
-        LangIconInfo langIconInfo = ViewUtils.getLangIconInfo();
+    public static AnAction createLangIcon(Project project) {
+        LangIconInfo langIconInfo = ViewUtils.getLangIconInfo(project);
         String text = langIconInfo.getText();
         String langIconPath = langIconInfo.getLangIconPath();
 

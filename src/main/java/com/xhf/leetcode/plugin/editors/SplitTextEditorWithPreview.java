@@ -42,9 +42,11 @@ import java.util.Objects;
  */
 public class SplitTextEditorWithPreview extends MyTextEditorWithPreview {
 
-    public SplitTextEditorWithPreview(@NotNull TextEditor editor, @NotNull FileEditor preview) {
-        super(editor, preview, "Question " + Layout.SHOW_EDITOR_AND_PREVIEW.getName(), Layout.SHOW_EDITOR_AND_PREVIEW);
+    private final Project project;
 
+    public SplitTextEditorWithPreview(@NotNull TextEditor editor, @NotNull FileEditor preview, Project project) {
+        super(editor, preview, "Question " + Layout.SHOW_EDITOR_AND_PREVIEW.getName(), Layout.SHOW_EDITOR_AND_PREVIEW);
+        this.project = project;
         // 注册断点监听器
         subscribeToBreakpointEvents(editor.getEditor());
     }
@@ -118,8 +120,8 @@ public class SplitTextEditorWithPreview extends MyTextEditorWithPreview {
         // 检查断点是否属于当前 Editor
         String breakpointFilePath = breakpoint.getSourcePosition().getFile().getPath();
         // 获取 Editor 的文件路径
-        // String editorFilePath = editor.getDocument().toString();
-        String editorFilePath = ((EditorImpl) editor).getVirtualFile().getPath();
+        String editorFilePath = editor.getDocument().toString();
+        // String editorFilePath = ((EditorImpl) editor).getVirtualFile().getPath();
         return editorFilePath.contains(breakpointFilePath);
     }
 
@@ -140,8 +142,6 @@ public class SplitTextEditorWithPreview extends MyTextEditorWithPreview {
         dag.add(action);
         try {
             dag.addSeparator();
-            // 增加语言图标
-            dag.add(createLangIcon());
             // 判断是否是通过deep coding模式创建
             VirtualFile file = super.getFile();
             Project project = super.getEditor().getProject();
@@ -156,45 +156,6 @@ public class SplitTextEditorWithPreview extends MyTextEditorWithPreview {
             LogUtils.error(e);
         }
         return dag;
-    }
-
-    private AnAction createLangIcon() {
-        String langIconPath;
-        LangType type = LangType.getType(AppSettings.getInstance().getLangType());
-        String text;
-        if (type != null) {
-            switch (type) {
-                case C:
-                    langIconPath = "/icons/C.svg";
-                    text = "c";
-                    break;
-                case PYTHON3:
-                    langIconPath = "/icons/Python.svg";
-                    text = "python";
-                    break;
-                case CPP:
-                    langIconPath = "/icons/cpp.svg";
-                    text = "c++";
-                    break;
-                case JAVA:
-                    langIconPath = "/icons/java.svg";
-                    text = "java";
-                    break;
-                default:
-                    langIconPath = "/icons/coding.svg";
-                    text = "language";
-            }
-        } else {
-            langIconPath = "/icons/coding.svg";
-            text = "language";
-        }
-        return (new AbstractAction(text, text, IconLoader.getIcon(langIconPath, Hot100Panel.class)) {
-            @Override
-            public void doActionPerformed(Project project, AnActionEvent e) {
-                ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
-            }
-
-        });
     }
 
     /**

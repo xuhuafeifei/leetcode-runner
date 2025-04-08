@@ -43,7 +43,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
     /**
      * 核心存储路径. 所有debug相关文件都存储在filePath指定目录下
      */
-    protected String filePath = "E:\\java_code\\lc-test\\cache\\debug";
+    protected String filePath = "";
 
     protected final Project project;
     /**

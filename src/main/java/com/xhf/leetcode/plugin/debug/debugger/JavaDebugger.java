@@ -28,6 +28,7 @@ import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.OSHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -355,7 +356,8 @@ public class JavaDebugger extends AbstractDebugger {
         LogUtils.simpleDebug(combinedCmd);
 
         try {
-            var exec = DebugUtils.buildProcess("cmd.exe", "/c", combinedCmd);
+            var exec = OSHandler.buildProcess(combinedCmd);
+            // DebugUtils.buildProcess("cmd.exe", "/c", combinedCmd);
             getRunInfo(exec);
         } catch(InterruptedException ignored) {
         } catch (Exception e) {
