@@ -20,10 +20,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.BundleUtils;
-import com.xhf.leetcode.plugin.utils.Constants;
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.ViewUtils;
+import com.xhf.leetcode.plugin.utils.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -216,11 +213,10 @@ public class PythonDebugger extends AbstractDebugger {
      */
     private void startPythonService() {
         String python = env.getPython();
-        String cmd = String.format("\"%s\" \"%s\"", python, env.getMainPyPath());
-        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd")  + ": " + cmd, project);
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd")  + ": " + python + " " + env.getMainPyPath(), project);
 
         try {
-            this.exec = DebugUtils.buildProcess(cmd);
+            this.exec = DebugUtils.buildProcess(python, env.getMainPyPath());
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
             throw new DebugError(e.toString(), e);

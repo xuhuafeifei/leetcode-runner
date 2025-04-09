@@ -101,4 +101,28 @@ public class OSHandler {
         // 匹配路径
         return pattern.matcher(content).matches();
     }
+
+    public static String joinWithoutQuotes(String separator, String... args) {
+        StringBuilder sb = new StringBuilder();
+        for (String arg : args) {
+            sb.append(arg).append(separator);
+        }
+        return sb.toString().trim();
+    }
+
+    public static String joinWithQuotes(String separator, String... args) {
+        StringBuilder sb = new StringBuilder();
+        for (String arg : args) {
+            sb.append("\"").append(arg).append("\"").append(separator);
+        }
+        return sb.toString().trim();
+    }
+
+    public static String join(String separator, String... args) {
+        if (isWin()) {
+            return joinWithQuotes(separator, args);
+        } else {
+            return joinWithoutQuotes(separator, args);
+        }
+    }
 }
