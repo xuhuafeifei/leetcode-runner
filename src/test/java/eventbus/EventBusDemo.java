@@ -1,13 +1,11 @@
 package eventbus;
 
-import com.xhf.leetcode.plugin.bus.LCEventBus;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class EventBusDemo {
-    static LCEventBus bus = LCEventBus.getInstance();
 
 //    static class Subscriber implements Subscribe {
 //        @Override

@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.io.file.utils;
 
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.OSHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -249,16 +250,6 @@ public class FileUtils {
         }
     }
 
-    public static boolean isWin() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        return osName.contains("win");
-    }
-
-    public static boolean isMac() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        return osName.contains("mac");
-    }
-
     public static String unUnifyPath(String path) {
         return path.replaceAll("\\\\", "/");
     }
@@ -323,19 +314,7 @@ public class FileUtils {
             return false; // 空字符串或 null 不可能是路径
         }
 
-        // 预处理：将反斜杠替换为正斜杠（适用于跨平台场景）
-        content = content.replace("\\", "/");
-
-        // 定义正则表达式
-        String windowsRegex = "^[a-zA-Z]:/[^<>:\"|?*]+(/[^<>:\"|?*]+)*$"; // Windows路径（修复后）
-        String unixRegex = "^/[^<>:\"|?*]+(/[^<>:\"|?*]+)*$"; // Unix/Linux/Mac路径
-
-        // 编译正则表达式，提高性能
-        Pattern windowsPattern = Pattern.compile(windowsRegex);
-        Pattern unixPattern = Pattern.compile(unixRegex);
-
-        // 匹配路径
-        return windowsPattern.matcher(content).matches() || unixPattern.matcher(content).matches();
+        return OSHandler.isPath(content);
     }
 
     public static void deleteFile(String path) {
@@ -442,6 +421,11 @@ public class FileUtils {
         public String buildWithEscape() {
             String path = sb.toString();
             return BackslashEscape.escapeBackslash(path);
+        }
+
+        public boolean exists() {
+            String filePath = build();
+            return fileExists(filePath);
         }
     }
 }

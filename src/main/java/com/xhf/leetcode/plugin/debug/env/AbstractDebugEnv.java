@@ -157,10 +157,10 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         String filePath = resourceURL.toString();
         // 判断是否是 JAR 文件
         if (filePath.startsWith("jar:file:")) {
-            String jarFilePath = filePath.substring(10, filePath.indexOf("!"));
-            // 如果以/开头, 去除/
-            if (resourcePath.startsWith("/")) {
-                resourcePath = resourcePath.substring(1);
+            filePath = filePath.replace("jar:file:", "");
+            String jarFilePath = filePath.substring(0, filePath.indexOf("!"));
+            if (! FileUtils.fileExists(jarFilePath)) {
+                throw new DebugError("jar file not found: " + jarFilePath);
             }
 
             JarFile jarFile = new JarFile(jarFilePath);
