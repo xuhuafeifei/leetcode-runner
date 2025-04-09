@@ -16,6 +16,7 @@ import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.cef.browser.CefBrowser;
@@ -230,7 +231,7 @@ public final class LoginService {
             loginButton.addActionListener(e -> {
                 String text = textArea.getText();
                 if (text.isEmpty()) {
-                    JOptionPane.showMessageDialog(contentPane,  BundleUtils.i18nHelper("请输入你的cookie", "Please input your cookie"), BundleUtils.i18n("leetcode.error"), JOptionPane.ERROR_MESSAGE);
+                    ViewUtils.getDialogWrapper(contentPane, BundleUtils.i18nHelper("请输入你的cookie", "Please input your cookie"));
                     return;
                 }
                 LeetcodeClient instance = LeetcodeClient.getInstance(project);
@@ -239,7 +240,7 @@ public final class LoginService {
                     loginSuccessAfter(project);
                     frame.dispose();
                 } else {
-                    JOptionPane.showMessageDialog(contentPane, BundleUtils.i18nHelper("Cookie错误, 请重试", "Cookie Error, Please Try Again"), BundleUtils.i18n("leetcode.error"), JOptionPane.ERROR_MESSAGE);
+                    ViewUtils.getDialogWrapper(contentPane, BundleUtils.i18nHelper("Cookie错误, 请重试", "Cookie Error, Please Try Again"));
                 }
             });
         }

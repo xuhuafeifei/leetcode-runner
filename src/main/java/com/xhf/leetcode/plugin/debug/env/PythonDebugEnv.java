@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.debug.env;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
@@ -19,10 +20,7 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.OSHandler;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 
-import javax.swing.*;
 import java.io.IOException;
-
-import static javax.swing.JOptionPane.OK_OPTION;
 
 /**
  * @author feigebuge
@@ -115,17 +113,17 @@ public class PythonDebugEnv extends AbstractDebugEnv {
             myFileBrowserBtn.setText(javaPath);
         }
 
-        int i = JOptionPane.showOptionDialog(
-                null,
-                InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(BundleUtils.i18n("debug.leetcode.python.home.path.tip")).getTargetComponent(),
-                BundleUtils.i18nHelper("设置PYTHON_HOME", "Set PYTHON_HOME"),
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
-                BundleUtils.i18n("action.leetcode.plugin.ok")
-        );
-        if (i != OK_OPTION) {
+        int i = ViewUtils.getDialogWrapper(
+                InnerHelpTooltip
+                        .BoxLayout()
+                        .add(myFileBrowserBtn)
+                        .addHelp(BundleUtils.i18n("debug.leetcode.python.home.path.tip"))
+                        .getTargetComponent()
+                ,
+                BundleUtils.i18nHelper("设置PYTHON_HOME", "Set PYTHON_HOME")
+        ).getExitCode();
+
+        if (i != DialogWrapper.OK_EXIT_CODE) {
             return false;
         }
         String pythonPath = myFileBrowserBtn.getText();

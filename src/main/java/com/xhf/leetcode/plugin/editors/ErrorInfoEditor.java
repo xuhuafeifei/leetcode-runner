@@ -37,8 +37,10 @@ import java.beans.PropertyChangeListener;
 public class ErrorInfoEditor extends CopyToolBarEditor {
     private final @NotNull BorderLayoutPanel myComponent;
     private final SubmissionDetail sd;
+    private final Project project;
 
     public ErrorInfoEditor(Project project, SubmissionDetail sd) {
+        this.project = project;
         this.sd = sd;
         OutputDetail od = sd.getOutputDetail();
         String status = sd.getStatusDisplay();
@@ -98,7 +100,7 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
                 StringSelection stringSelection = new StringSelection(sd.getOutputDetail().getLastTestcase());
                 clipboard.setContents(stringSelection, null);
 
-                JOptionPane.showMessageDialog(null, BundleUtils.i18n("editor.error.info.copy.success"));
+                ConsoleUtils.getInstance(project).showInfoWithoutConsole(BundleUtils.i18n("editor.error.info.copy.success"), false, true);
             }
         };
     }
@@ -110,13 +112,13 @@ public class ErrorInfoEditor extends CopyToolBarEditor {
             public void actionPerformed(@NotNull AnActionEvent e) {
                 Project project = e.getProject();
                 if (project == null) {
-                    JOptionPane.showMessageDialog(null, BundleUtils.i18n("editor.error.project.null"));
+                    ViewUtils.getDialogWrapper(BundleUtils.i18n("editor.error.info.add.failure"));
                     return;
                 }
                 // 获取lc
                 LeetcodeEditor lc = ViewUtils.getLeetcodeEditorByCurrentVFile(project);
                 if (lc == null) {
-                    JOptionPane.showMessageDialog(null, BundleUtils.i18n("editor.error.info.add.failure"));
+                    ViewUtils.getDialogWrapper(BundleUtils.i18n("editor.error.info.add.failure"));
                     return;
                 }
                 String exampleTestcases = lc.getExampleTestcases();

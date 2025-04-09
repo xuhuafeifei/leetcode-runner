@@ -6,6 +6,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.components.JBLabel;
@@ -28,8 +29,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
-
-import static javax.swing.JOptionPane.OK_OPTION;
 
 /**
  * 启动cpp环境的debug
@@ -149,34 +148,23 @@ public class CppDebugEnv extends AbstractDebugEnv {
             myFileBrowserBtn.setText(javaPath);
         }
 
-        int i = JOptionPane.showOptionDialog(
-                null,
+        int i = ViewUtils.getDialogWrapper(
                 targetComponent,
-                BundleUtils.i18nHelper("选择MinGW目录", "choose MinGW directory"),
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel"), BundleUtils.i18n("debug.leetcode.main.mingw.no")},
-                BundleUtils.i18n("action.leetcode.plugin.ok")
-        );
+                BundleUtils.i18nHelper("选择MinGW目录", "choose MinGW directory")
+        ).getExitCode();
+
         if (i == 2) {
             // 给出下载链接
-            JOptionPane.showOptionDialog(
-                    null,
+            ViewUtils.getDialogWrapper(
                     FormBuilder.createFormBuilder()
                             .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.github.link")), new JBTextField("https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-win32-seh-ucrt-rt_v12-rev1.7z"), 1, false)
                             .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.my.link")), new JBTextField("https://pan.baidu.com/s/15aK7K5AIkMoMwxdV4jCNlA?pwd=1jxa"), 1, false)
                             .getPanel()
                     ,
-                    BundleUtils.i18n("debug.leetcode.mingw.download.function"),
-                    JOptionPane.OK_CANCEL_OPTION,
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
-                    BundleUtils.i18n("action.leetcode.plugin.ok")
+                    BundleUtils.i18n("debug.leetcode.mingw.download.function")
             );
         }
-        if (i != OK_OPTION) {
+        if (i != DialogWrapper.OK_EXIT_CODE) {
             return false;
         }
         this.MINGW_HOME = myFileBrowserBtn.getText();

@@ -5,6 +5,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -61,7 +62,7 @@ public class TestCaseDialog extends DialogWrapper {
             // get default data
             LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
             if (lc == null) {
-                JOptionPane.showMessageDialog(null, BundleUtils.i18n("comp.leetcode.testcase.fetch.failed"));
+                ViewUtils.getDialogWrapper( BundleUtils.i18n("comp.leetcode.testcase.fetch.failed"));
                 return;
             }
             String defaultTestcases = lc.getDefaultTestcases();
@@ -88,7 +89,7 @@ public class TestCaseDialog extends DialogWrapper {
         // update data
         LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
         if (lc == null) {
-            JOptionPane.showMessageDialog(null, BundleUtils.i18n("comp.leetcode.testcase.set.failed"));
+            ViewUtils.getDialogWrapper( BundleUtils.i18n("comp.leetcode.testcase.set.failed"));
             return;
         }
         lc.setExampleTestcases(inputText);

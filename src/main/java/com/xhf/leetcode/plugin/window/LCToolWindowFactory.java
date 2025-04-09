@@ -9,9 +9,9 @@ import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.util.Objects;
 
 /**
@@ -33,7 +33,7 @@ public class LCToolWindowFactory implements ToolWindowFactory, DumbAware {
     public static DataContext getDataContext(@NotNull Project project) {
         ToolWindow leetcodeToolWindows = ToolWindowManager.getInstance(project).getToolWindow(LEETCODE_RUNNER_ID);
         if (leetcodeToolWindows == null) {
-            JOptionPane.showMessageDialog(null,  LEETCODE_RUNNER_ID+ " 工具窗口获取失败\n, 请通过 'View->Tool Windows->Leetcode Runner' 打开", "提示", JOptionPane.INFORMATION_MESSAGE);
+            ViewUtils.showDialog(project, LEETCODE_RUNNER_ID+ " 工具窗口获取失败\n, 请通过 'View->Tool Windows->Leetcode Runner' 打开");
             throw new RuntimeException(LEETCODE_RUNNER_ID + " 获取失败");
         }
         LCPanel lcPanel = (LCPanel) Objects.requireNonNull(leetcodeToolWindows.getContentManager().getContent(0)).getComponent();

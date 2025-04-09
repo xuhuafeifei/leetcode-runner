@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.setting;
 import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.TitledSeparator;
@@ -24,8 +25,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.security.NoSuchAlgorithmException;
-
-import static javax.swing.JOptionPane.OK_OPTION;
 
 /**
  * @author feigebuge
@@ -137,26 +136,18 @@ public class AppSettingsComponent {
       try {
         String text = secretText.getText();
         if (StringUtils.isNotBlank(text)) {
-          int i = JOptionPane.showOptionDialog(
-                  null,
-                  BundleUtils.i18n("setting.leetcode.has.secret"),
-                  BundleUtils.i18n("debug.leetcode.testcase.input"),
-                  JOptionPane.OK_CANCEL_OPTION,
-                  JOptionPane.PLAIN_MESSAGE,
-                  null,
-                  new Object[]{BundleUtils.i18n("setting.leetcode.generate"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
-                  BundleUtils.i18n("action.leetcode.plugin.cancel")
-          );
-          if (i != OK_OPTION) {
+          int i = ViewUtils.getDialogWrapper(
+                  BundleUtils.i18n("setting.leetcode.has.secret")
+          ).getExitCode();
+
+          if (i != DialogWrapper.OK_EXIT_CODE) {
             return;
           }
         }
         String key = AESUtils.generateKey();
         secretText.setText(key);
       } catch (NoSuchAlgorithmException ex) {
-        JOptionPane.showMessageDialog(null, BundleUtils.i18n("setting.leetcode.aes.error")
-                + "\n" + ex.getMessage()
-                , BundleUtils.i18n("action.leetcode.plugin.error"), JOptionPane.ERROR_MESSAGE);
+        ViewUtils.showError(BundleUtils.i18n("action.leetcode.plugin.error"));
         LogUtils.error(ex);
       }
     });
@@ -171,7 +162,7 @@ public class AppSettingsComponent {
         generateBtn.setVisible(true);
         generateBtn.setEnabled(true);
         if (StringUtils.isBlank(secretText.getText())) {
-          JOptionPane.showMessageDialog(null, BundleUtils.i18n("setting.leetcode.secret.isnull"));
+          ViewUtils.getDialogWrapper( BundleUtils.i18n("setting.leetcode.secret.isnull"));
         }
       } else {
         secretLabel.setVisible(false);
@@ -229,7 +220,7 @@ public class AppSettingsComponent {
     language.addActionListener(e -> {
       String selectedItem = (String) language.getSelectedItem();
       if (StringUtils.isNotBlank(selectedItem) && !selectedItem.equals(AppSettings.getInstance().getLocale())) {
-        JOptionPane.showMessageDialog(null, BundleUtils.i18nHelper("语言设置生效需要重启IDE, 请您保存设置并重启", "Language settings take effect after restarting IDE, please save the settings and restart"));
+        ViewUtils.getDialogWrapper( BundleUtils.i18nHelper("语言设置生效需要重启IDE, 请您保存设置并重启", "Language settings take effect after restarting IDE, please save the settings and restart"));
       }
     });
   }

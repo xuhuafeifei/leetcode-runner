@@ -14,8 +14,6 @@ import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.*;
 
-import javax.swing.*;
-
 /**
  * 启动debug调试功能
  *
@@ -100,9 +98,11 @@ public class DebugAction extends AbstractAction {
         String langFromFile = CodeService.getInstance(project).parseLangTypeFromCVFile(project);
         if (LangType.getType(langFromFile) != langType) {
             LogUtils.warn(BundleUtils.i18n("action.leetcode.plugin.error") + ", LangType != langFromFile " + langType + " != " + langFromFile);
-            JOptionPane.showMessageDialog(null, BundleUtils.i18n("action.leetcode.actions.debug.langtype.not.equal") + "\n"
-                    + BundleUtils.i18n("action.leetcode.actions.debug.langtype.file.type") + " = " + langFromFile + "\n"
-                    + BundleUtils.i18n("action.leetcode.actions.debug.langtype.setting.type") + " = " + langType.getLangType()
+            ConsoleUtils.getInstance(project).showWaring(
+                    BundleUtils.i18n("action.leetcode.actions.debug.langtype.not.equal") + "\n"
+                            + BundleUtils.i18n("action.leetcode.actions.debug.langtype.file.type") + " = " + langFromFile + "\n"
+                            + BundleUtils.i18n("action.leetcode.actions.debug.langtype.setting.type") + " = " + langType.getLangType()
+                    , false, true
             );
             return false;
         }

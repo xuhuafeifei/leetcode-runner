@@ -42,6 +42,8 @@ public class CodeEditor extends CopyToolBarEditor {
      */
     private final BorderLayoutPanel myComponent;
 
+    private final Project project;
+
 
     @Override
     protected AnAction copyAction() {
@@ -53,7 +55,7 @@ public class CodeEditor extends CopyToolBarEditor {
                 StringSelection stringSelection = new StringSelection(textPane.getText());
                 clipboard.setContents(stringSelection, null);
 
-                JOptionPane.showMessageDialog(null, BundleUtils.i18n("action.leetcode.code.copy.success"));
+                ConsoleUtils.getInstance(project).showInfoWithoutConsole(BundleUtils.i18n("action.leetcode.code.copy.success"), false, true);
             }
         };
     }
@@ -66,7 +68,8 @@ public class CodeEditor extends CopyToolBarEditor {
                 String content = textPane.getText();
                 Project project = e.getProject();
                 if (project == null) {
-                    JOptionPane.showMessageDialog(null, BundleUtils.i18n("action.leetcode.code.copy.null"));
+                    ViewUtils.getDialogWrapper( BundleUtils.i18n("action.leetcode.code.copy.null"));
+
                     return;
                 }
                 ConsoleUtils instance = ConsoleUtils.getInstance(project);
@@ -82,6 +85,7 @@ public class CodeEditor extends CopyToolBarEditor {
     }
 
     public CodeEditor(@NotNull Project project, @NotNull String code) {
+        this.project = project;
         this.textPane = new JTextPane();
         this.textPane.setText(code); // set history code to text pane
         this.textPane.setFont(Constants.ENGLISH_FONT);

@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author feigebuge
@@ -69,7 +70,10 @@ public enum LangType {
         return null;
     }
 
-    public static boolean equals(String langType, String settingLangType) {
+    public static boolean equals(@Nullable String langType, String settingLangType) {
+        if (langType == null) {
+            return false;
+        }
         boolean flag = langType.equalsIgnoreCase(settingLangType);
         if (flag) return true;
         // python特判

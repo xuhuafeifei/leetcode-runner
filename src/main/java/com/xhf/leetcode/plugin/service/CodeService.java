@@ -7,6 +7,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
@@ -40,8 +41,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static javax.swing.JOptionPane.CLOSED_OPTION;
 
 /**
  * @author feigebuge
@@ -457,7 +456,7 @@ public class CodeService {
     public String parseLangTypeFromCVFile(Project project) {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
-            JOptionPane.showMessageDialog(null, BundleUtils.i18n("code.service.no.file.open"));
+            ViewUtils.getDialogWrapper( BundleUtils.i18n("code.service.no.file.open"));
             return null;
         }
         return parseLangTypeFromVFile(cFile);
@@ -598,7 +597,7 @@ public class CodeService {
     public void rePosition() {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
-            JOptionPane.showMessageDialog(null, BundleUtils.i18n("code.service.no.file.open"));
+            ViewUtils.getDialogWrapper( BundleUtils.i18n("code.service.no.file.open"));
             return;
         }
         String filePath = ViewUtils.getUnifyFilePathByVFile(cFile);
@@ -624,7 +623,7 @@ public class CodeService {
         // 获取当前打开文件的语言类型
         String langType = parseLangTypeFromVFile(cFile);
         if (fid == null || titleSlug == null) {
-            JOptionPane.showMessageDialog(null, BundleUtils.i18n("code.service.not.support.reposition"));
+            ViewUtils.getDialogWrapper( BundleUtils.i18n("code.service.not.support.reposition"));
             return;
         }
         if (! LangType.contains(langType)) {
@@ -638,7 +637,7 @@ public class CodeService {
                     + "Please Remove Current File And Reselect Question"
                     + "\n"
                     );
-            JOptionPane.showMessageDialog(null, msg);
+            ViewUtils.getDialogWrapper( msg);
             return;
         }
         // 遍历myList
@@ -654,7 +653,7 @@ public class CodeService {
     public void getDefaultContent() {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
-            JOptionPane.showMessageDialog(null, BundleUtils.i18n("code.service.no.file.open"));
+            ViewUtils.getDialogWrapper( BundleUtils.i18n("code.service.no.file.open"));
             return;
         }
         String titleSlug = parseTitleSlugFromVFile(cFile);
@@ -674,7 +673,7 @@ public class CodeService {
                     "plugin will load content type from your plugin setting.\r\nyour code file type = " + langType +
                     "Setting LangType = " + settingLangType
             );
-            JOptionPane.showMessageDialog(null, msg);
+            ViewUtils.getDialogWrapper( msg);
         }
         else if (! LangType.equals(langType, settingLangType)) {
             String msg = BundleUtils.i18nHelper(
@@ -686,17 +685,13 @@ public class CodeService {
                     "Your code file type = " + langType + "\r\n" +
                     "Setting LangType = " + settingLangType + "\r\n"
             );
-            int result = JOptionPane.showOptionDialog(
-                    null,
+
+            int result = ViewUtils.getDialogWrapper(
                     msg,
-                    BundleUtils.i18n("code.service.load.default.title"),
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    new Object[]{BundleUtils.i18n("YES"), BundleUtils.i18n("NO")},
-                    BundleUtils.i18n("NO")
-            );
-            if (result == CLOSED_OPTION) {
+                    BundleUtils.i18n("code.service.load.default.title")
+            ).getExitCode();
+
+            if (result == DialogWrapper.OK_EXIT_CODE) {
                 return;
             }
         }
@@ -712,15 +707,15 @@ public class CodeService {
             boolean flag = ViewUtils.writeContentToVFile(cFile, defaultCode);
             if (flag) {
                 String msg = BundleUtils.i18nHelper("加载默认代码成功!", "load default content success!");
-                JOptionPane.showMessageDialog(null, msg);
+                ViewUtils.getDialogWrapper( msg);
             }else {
                 String msg = BundleUtils.i18nHelper("加载默认代码失败!", "load default content error!");
-                JOptionPane.showMessageDialog(null, msg);
+                ViewUtils.getDialogWrapper( msg);
             }
 
         } else {
             String msg = BundleUtils.i18nHelper("未找到题目信息, 重定位失败!", "question not found, reposition failed!");
-            JOptionPane.showMessageDialog(null, msg + titleSlug);
+            ViewUtils.getDialogWrapper( msg + titleSlug);
         }
     }
 

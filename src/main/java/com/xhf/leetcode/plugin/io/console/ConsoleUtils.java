@@ -25,7 +25,7 @@ import java.util.Date;
 @Service(Service.Level.PROJECT)
 public final class ConsoleUtils implements Disposable {
 
-    private static final String LEETCODE_CODE_DIALOG_TITLE = BundleUtils.i18nHelper("插件信息", "plugin info");
+    public static final String LEETCODE_CODE_DIALOG_TITLE = BundleUtils.i18nHelper("插件信息", "plugin info");
     private final Project project;
     private ConsoleView consoleView;
 

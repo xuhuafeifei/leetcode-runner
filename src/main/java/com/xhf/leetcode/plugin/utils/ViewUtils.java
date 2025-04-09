@@ -10,6 +10,8 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
@@ -26,9 +28,9 @@ import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.CodeService;
-import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -96,15 +98,23 @@ public class ViewUtils {
         return new LightVirtualFile(lc.getTitleSlug() + ".html", lc.getMarkdownContent());
     }
 
-    public static LeetcodeEditor getLeetcodeEditorByEditor(SplitTextEditorWithPreview editor, Project project) {
+    public static @Nullable LeetcodeEditor getLeetcodeEditorByEditor(SplitTextEditorWithPreview editor, Project project) {
         // get cache
-        String path = editor.getFile().getPath();
+        VirtualFile file = editor.getFile();
+        if (file == null) {
+            return null;
+        }
+        String path = file.getPath();
         path = FileUtils.unifyPath(path);
         return StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
     }
 
     public static void showDialog(Project project, String message, String title) {
-        JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
+        Messages.showMessageDialog(project, message, title, Messages.getInformationIcon());
+    }
+
+    public static void showDialog(Project project, String message) {
+        Messages.showMessageDialog(project, message, ConsoleUtils.LEETCODE_CODE_DIALOG_TITLE, Messages.getInformationIcon());
     }
 
     /**
@@ -305,7 +315,7 @@ public class ViewUtils {
                         return;
                     }
                 }
-                JOptionPane.showMessageDialog(null, "当前文件无法被重新打开");
+                showDialog(project, BundleUtils.i18nHelper("当前文件无法被重新打开", "The current file cannot be re-opened"));
             }
         } catch (Exception ex) {
             LogUtils.error(ex);
@@ -379,7 +389,7 @@ public class ViewUtils {
                 showToolWindow(project);
                 return;
             }
-            JOptionPane.showMessageDialog(null, "当前文件无法被重新打开");
+            ViewUtils.getDialogWrapper( "当前文件无法被重新打开");
         } catch (Exception ex) {
             LogUtils.error(ex);
             ConsoleUtils.getInstance(project).showError("文件重定位错误! 错误原因是: " + ex.getMessage(), false, true);
@@ -434,4 +444,147 @@ public class ViewUtils {
         });
     }
 
+    @NotNull
+    public static DialogWrapper getDialogWrapper(JComponent component, String title) {
+        DialogWrapper dialog = new DialogWrapper((Project) null, true) {
+            private final DialogWrapperExitAction okAction =
+                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
+            private final DialogWrapperExitAction cancelAction =
+                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
+
+            {
+                setTitle(title);
+                init();
+
+                // 设置默认按钮为 OK（使用 getButton 取真实的按钮）
+                SwingUtilities.invokeLater(() -> {
+                    JButton okButton = getButton(okAction);
+                    if (okButton != null) {
+                        getRootPane().setDefaultButton(okButton);
+                    }
+                });
+            }
+
+            @Override
+            protected JComponent createCenterPanel() {
+                return component;
+            }
+
+            @Override
+            protected @NotNull Action getOKAction() {
+                return okAction;
+            }
+
+            @Override
+            protected @NotNull Action getCancelAction() {
+                return cancelAction;
+            }
+
+            @Override
+            public JComponent getPreferredFocusedComponent() {
+                return component;
+            }
+        };
+
+        dialog.show();
+        return dialog;
+    }
+
+    @NotNull
+    public static DialogWrapper getDialogWrapper(String title) {
+        DialogWrapper dialog = new DialogWrapper((Project) null, true) {
+            private final DialogWrapperExitAction okAction =
+                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
+            private final DialogWrapperExitAction cancelAction =
+                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
+
+            {
+                setTitle(title);
+                init();
+
+                // 设置默认按钮为 OK
+                SwingUtilities.invokeLater(() -> {
+                    JButton okButton = getButton(okAction);
+                    if (okButton != null) {
+                        getRootPane().setDefaultButton(okButton);
+                    }
+                });
+            }
+
+            @Override
+            protected JComponent createCenterPanel() {
+                return null; // 中间不显示任何组件
+            }
+
+            @Override
+            protected @NotNull Action getOKAction() {
+                return okAction;
+            }
+
+            @Override
+            protected @NotNull Action getCancelAction() {
+                return cancelAction;
+            }
+
+            @Override
+            public JComponent getPreferredFocusedComponent() {
+                return null; // 没有默认聚焦组件
+            }
+        };
+
+        dialog.show();
+        return dialog;
+    }
+
+    @NotNull
+    public static DialogWrapper getDialogWrapper(String msg, String title) {
+        JComponent messageComponent = new JPanel(new BorderLayout());
+        messageComponent.add(new JLabel(msg, SwingConstants.CENTER), BorderLayout.CENTER);
+
+        DialogWrapper dialog = new DialogWrapper((Project) null, true) {
+            private final DialogWrapperExitAction okAction =
+                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
+            private final DialogWrapperExitAction cancelAction =
+                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
+
+            {
+                setTitle(title);
+                init();
+
+                SwingUtilities.invokeLater(() -> {
+                    JButton okButton = getButton(okAction);
+                    if (okButton != null) {
+                        getRootPane().setDefaultButton(okButton);
+                    }
+                });
+            }
+
+            @Override
+            protected JComponent createCenterPanel() {
+                return messageComponent;
+            }
+
+            @Override
+            protected @NotNull Action getOKAction() {
+                return okAction;
+            }
+
+            @Override
+            protected @NotNull Action getCancelAction() {
+                return cancelAction;
+            }
+
+            @Override
+            public JComponent getPreferredFocusedComponent() {
+                return messageComponent;
+            }
+        };
+
+        dialog.show();
+        return dialog;
+    }
+
+    public static void showError(String s) {
+        Messages.showErrorDialog((Project) null, s, ConsoleUtils.LEETCODE_CODE_DIALOG_TITLE);
+    }
 }

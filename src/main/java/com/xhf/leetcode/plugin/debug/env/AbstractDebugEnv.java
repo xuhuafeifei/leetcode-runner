@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.debug.env;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.components.JBScrollPane;
 import com.xhf.leetcode.plugin.bus.DebugEndEvent;
 import com.xhf.leetcode.plugin.bus.DebugStartEvent;
@@ -25,8 +26,6 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import static javax.swing.JOptionPane.OK_OPTION;
 
 /**
  * DebugEnv父类
@@ -75,17 +74,13 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         // 获取之前存储的debug testcase
         jTextPane.setText(lc.getDebugTestcase());
 
-        int i = JOptionPane.showOptionDialog(
-                null,
+        DialogWrapper dialogWrapper = ViewUtils.getDialogWrapper(
                 new JBScrollPane(jTextPane),
-                BundleUtils.i18n("debug.leetcode.testcase.input"),
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                new Object[]{BundleUtils.i18n("action.leetcode.plugin.ok"), BundleUtils.i18n("action.leetcode.plugin.cancel")},
-                BundleUtils.i18n("action.leetcode.plugin.ok")
-        );
-        if (i != OK_OPTION) {
+                BundleUtils.i18n("debug.leetcode.testcase.input"));
+
+        int i = dialogWrapper.getExitCode();
+
+        if (i != DialogWrapper.OK_EXIT_CODE) {
             return false;
         }
 
