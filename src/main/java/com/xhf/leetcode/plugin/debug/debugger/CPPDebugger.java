@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.debug.debugger;
 
+import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.xdebugger.XSourcePosition;
@@ -112,6 +113,12 @@ public class CPPDebugger extends AbstractDebugger {
         if (r.getOperation() == Operation.R) {
             GdbParser instance = GdbParser.getInstance();
             CppGdbInfo cppGdbInfo = GsonUtils.fromJson(r.getMoreInfo(), CppGdbInfo.class);
+            // 异常判断
+            if (cppGdbInfo == null) {
+                DebugUtils.simpleDebug(BundleUtils.i18nHelper("cpp debug出现异常, 终止debug", "some error happen in cpp debug, the flow will stop soon"), project, ConsoleViewContentType.ERROR_OUTPUT, true);
+                DebugManager.getInstance(project).stopDebugger();
+                return;
+            }
             if (!"error".equals(cppGdbInfo.getStatus())) {
                 // 执行正确
                 GdbElement ele = instance.parse(instance.preHandle(cppGdbInfo.getStoppedReason()));
