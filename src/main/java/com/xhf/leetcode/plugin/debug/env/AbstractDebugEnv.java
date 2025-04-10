@@ -171,6 +171,12 @@ public abstract class AbstractDebugEnv implements DebugEnv {
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
                 String entryName = entry.getName();
+                if (! entryName.startsWith("/")) {
+                    entryName = "/" + entryName;
+                }
+                if (! resourcePath.startsWith("/")) {
+                    resourcePath = "/" + resourcePath;
+                }
 
                 // 判断条目是否是目标目录下的文件或目录
                 if (entryName.startsWith(resourcePath)) {
@@ -181,30 +187,8 @@ public abstract class AbstractDebugEnv implements DebugEnv {
 
                         // 判断是否需要排除文件
                         if (!ArrayUtils.contains(exp, fileName)) {
-                            // 在entry.getName()的基础上, 去除resourcePath
-                            /*
-                                假设项目resource目录结构如下所示
-                                resources
-                                ├─debug
-                                │  ├─java
-                                │  │  ├─ListNode.java
-                                │  │  ├─ListNodeConvertor.template
-                                │  │  ├─.....
-                                │  │  └─TreeNodeConvertor.template
-                                │  └─python
-                                │     ├─binarytree
-                                │     │  ├─exceptions.py
-                                │     │  ├─....
-                                │     ├─test.cmd
-                                │     ├─TreeNode.py
-                                │     ├─TreeNodeConvertor.template
-                                │─....
-                                在使用本方法时，如果resourcePath = /resource/debug/python, 那么
-                                entry.getName() 会包括从resource开始的目录
-                                以/debug/python/TreeNode.py为例, entry.getName() = debug/python/TreeNode.py
-                                而debug/python/是基本路径, 也就是处理后的resourcePath, 所以需要去掉
-                             */
-                            if (! copyFileHelper(entry, entry.getName().replace(resourcePath, ""), jarFile) ) {
+                            // 去除entryName的资源路径名称, 获取相对路径
+                            if (! copyFileHelper(entry, entryName.replace(resourcePath, ""), jarFile) ) {
                                 // 复制文件
                                 return false;
                             }
