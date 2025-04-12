@@ -216,6 +216,7 @@ public class PythonDebugger extends AbstractDebugger {
         DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd")  + ": " + python + " " + env.getMainPyPath(), project);
 
         try {
+            // fix #40
             this.exec = DebugUtils.buildProcess(python, env.getMainPyPath());
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
