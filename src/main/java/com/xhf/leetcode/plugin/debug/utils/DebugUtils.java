@@ -37,11 +37,11 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import java.net.InetSocketAddress;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -528,6 +528,9 @@ public class DebugUtils {
         try (ServerSocket socket = new ServerSocket()) {
             // 明确绑定到指定地址, 解决可能导致的端口占用判断异常问题
             socket.bind(new InetSocketAddress(host, port));
+            socket.bind(new InetSocketAddress("0.0.0.0", port));
+            socket.bind(new InetSocketAddress("127.0.0.1", port));
+            socket.bind(new InetSocketAddress("localhost", port));
             return false; // 端口可用
         } catch (IOException e) {
             return true; // 端口不可用

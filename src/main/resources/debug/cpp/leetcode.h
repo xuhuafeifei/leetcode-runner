@@ -17,6 +17,19 @@
 
 using namespace std;
 
+/*
+int port = {{port}};
+std::string gdb_path = {{gdb_path}};
+std::string solution_exe_path = {{solution_exe_path}};
+std::string std_log_path = {{std_log_path}};
+std::string std_err_path = {{std_err_path}};
+int port = 8080;
+std::string std_log_path = "E:\\java_code\\lc-test\\cache\\debug\\cpp\\cppLog\\std_log.log";
+std::string std_err_path = "E:\\java_code\\lc-test\\cache\\debug\\cpp\\cppLog\\std_err.log";
+std::string gdb_path = "E:\\mingw-2\\mingw64\\bin\\gdb.exe";
+std::string solution_exe_path = "E:\\java_code\\lc-test\\cache\\debug\\cpp\\cppLog\\solution.exe";
+*/
+
 bool starts_with(const std::string& str, const std::string& prefix) {
     if (prefix.size() > str.size()) return false;
     return std::equal(prefix.begin(), prefix.end(), str.begin());

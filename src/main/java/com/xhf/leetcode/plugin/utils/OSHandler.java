@@ -69,7 +69,6 @@ public class OSHandler {
         }
     }
 
-
     public static boolean isGPP(String gppPath) {
         if (isWin()) {
             return gppPath.endsWith("g++.exe") || gppPath.endsWith("clang++.exe") || gppPath.endsWith("clang.exe") ||
@@ -158,6 +157,24 @@ public class OSHandler {
             return joinWithQuotes(separator, args);
         } else {
             return joinWithoutQuotes(separator, args);
+        }
+    }
+
+    public static String chooseCompliedFile(String winFile, String linuxFile, String macFile) {
+        if (isWin()) {
+            return winFile;
+        } else if (isMac()) {
+            return macFile;
+        } else {
+            return linuxFile;
+        }
+    }
+
+    public static String chooseCompliedFile(String winFile, String linuxFile) {
+        if (isWin()) {
+            return winFile;
+        } else {
+            return linuxFile;
         }
     }
 }

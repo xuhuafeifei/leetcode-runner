@@ -29,7 +29,6 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.text.View;
 import java.io.IOException;
 
 /**
@@ -63,17 +62,16 @@ public class CppDebugEnv extends AbstractDebugEnv {
      */
     private int port;
     /**
-     * ServerMain的路径
-     */
-    private String serverMainPath;
-    /**
      * solution.exe的路径
      */
     private String solutionExePath;
     /**
      * ServerMain.exe的路径
+     * 在v3.7.0中, 取消了ServerMain.exe的编译, 直接使用已经在不同OS编译好的文件, 文件名均以leetcode_runner_debug_server_cpp_xxx.xxx命名
      */
     private String serverMainExePath;
+    private String stdLogPath;
+    private String stdErrPath;
 
     public CppDebugEnv(Project project) {
         super(project);
@@ -86,7 +84,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     @Override
     public boolean prepare() throws DebugError {
-        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyFile() && closeExe() && buildFile();
+        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && closeExe() && copyFile() && buildFile();
     }
 
     /**
@@ -95,37 +93,41 @@ public class CppDebugEnv extends AbstractDebugEnv {
      */
     private boolean closeExe() {
         this.solutionExePath = new FileUtils.PathBuilder(filePath).append("solution.exe").build();
-        this.serverMainExePath = new FileUtils.PathBuilder(filePath).append("ServerMain.exe").build();
+        this.serverMainExePath = new FileUtils.PathBuilder(filePath).append(getCompiledFileName()).build();
 
         try {
             FileUtils.removeFile(this.solutionExePath);
-            LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.exe.clear.success") + ": " + this.solutionExePath);
+            LogUtils.simpleDebug(this.solutionExePath + BundleUtils.i18nHelper(" 删除成功!", " delete failed!"));
         } catch (Exception e) {
-            DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.exe.clear.failed") + ": " + this.solutionExePath + " " + BundleUtils.i18n("action.leetcode.plugin.cause") +  " = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
+            DebugUtils.simpleDebug(this.solutionExePath + BundleUtils.i18nHelper(" 删除失败!", " delete failed!") + " " + BundleUtils.i18n("action.leetcode.plugin.cause") +  " = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
         }
         try {
             FileUtils.removeFile(this.serverMainExePath);
-            LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.main.clear.success") + ": " + this.solutionExePath);
+            LogUtils.simpleDebug(this.solutionExePath + BundleUtils.i18nHelper(" 删除成功!", " delete failed!"));
         } catch (Exception e) {
-            DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.main.clear.failed") + ": " + this.serverMainExePath + " cause = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
+            DebugUtils.simpleDebug(this.serverMainExePath + BundleUtils.i18nHelper(" 删除失败!", " delete failed!") + " cause = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
         }
         return true;
     }
 
+    private String getCompiledFile() {
+        return OSHandler.chooseCompliedFile(
+                "/debug/cpp/complie/windows/leetcode_runner_debug_server_cpp_windows.exe",
+                "/debug/cpp/complie/linux/leetcode_runner_debug_server_cpp_linux.out"
+        );
+    }
+
+    private String getCompiledFileName() {
+        return OSHandler.chooseCompliedFile(
+                "leetcode_runner_debug_server_cpp_windows.exe",
+                "leetcode_runner_debug_server_cpp_linux.out"
+        );
+    }
+
     @Override
     protected boolean copyFile() {
-        // return copyFileHelper("/debug/cpp/leetcode.h");
-        return
-                copyFileExcept("/debug/cpp",
-                        new String[] {
-                                "test.cmd",
-                                "ListNodeConvertor.template",
-                                "TreeNodeConvertor.template",
-                                "ServerMain.template",
-                                "Main.template",
-                                "Main.cpp"
-                        }
-                );
+        return copyFileHelper(getCompiledFile())
+               && copyFileHelper("/debug/cpp/leetcode.h") ;
     }
 
     @Override
@@ -185,13 +187,13 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
         // 校验路径GPP
         this.GPP = gppBtn.getText();
-        if (OSHandler.isGPP(this.GPP)) {
+        if (! OSHandler.isGPP(this.GPP)) {
             throw new DebugError(BundleUtils.i18nHelper("GPP路径错误: " + this.GPP, "GPP path error: " + this.GPP));
         }
 
         // 校验路径GDB
         this.GDB = gdbBtn.getText();
-        if (OSHandler.isGDB(this.GDB)) {
+        if (! OSHandler.isGDB(this.GDB)) {
             throw new DebugError(BundleUtils.i18nHelper("GDB路径错误: " + this.GDB, "GDB path error: " + this.GDB));
         }
 
@@ -269,28 +271,28 @@ public class CppDebugEnv extends AbstractDebugEnv {
     }
 
     /**
-     * cpp的debug, 不再采用Main, Solution独立的编写方式, 不然引用太操蛋了.
-     * 直接将main函数写入solution.cpp内
+     * 创建Main.cpp文件 + leetcode.h文件
+     * leetcode.h文件中包含了gdb_path, solution_exe_path, port, std_log_path, std_err_path
+     * Main.cpp文件中包含了用户编写的代码, 以及调用代码
      * <p>
-     * 此处创建的是ServerMain.cpp, 用于启动cpp的debug服务
+     * cpp debug采用预编译的形式启动项目. 由feigebuge在各个平台提前编译Cpp Server, 并放入项目目录中.
+     *
      * @return true
      * @throws DebugError error
      */
     @Override
     protected boolean createMainFile() throws DebugError {
-        String solutionExePath = new FileUtils.PathBuilder(filePath).append("solution.exe").build();
-        String serverMain = FileUtils.readContentFromFile(getClass().getResource("/debug/cpp/ServerMain.template"));
         // ({{gdb_path}}, {{solution_exe_path}}, R"(--interpreter=mi2)", log);
         this.port = DebugUtils.findAvailablePort();
         /*
           存储debug服务的std log
           目前不支持目标代码的标准输出的捕获
          */
-        String stdLogPath = new FileUtils.PathBuilder(filePath).append("cppLog").append("std_log.log").build();
+        this.stdLogPath = new FileUtils.PathBuilder(filePath).append("cppLog").append("std_log.log").build();
         /*
           存储debug服务的std err
          */
-        String stdErrPath = new FileUtils.PathBuilder(filePath).append("cppLog").append("std_err.log").build();
+        this.stdErrPath = new FileUtils.PathBuilder(filePath).append("cppLog").append("std_err.log").build();
 
         LogUtils.simpleDebug("stdLogPath = " + stdLogPath);
         LogUtils.simpleDebug("stdErrPath = " + stdErrPath);
@@ -305,17 +307,17 @@ public class CppDebugEnv extends AbstractDebugEnv {
         }
 
         LogUtils.info("cpp port = " + this.port);
-        serverMain = serverMain
-                .replace("{{gdb_path}}", "\"" + new FileUtils.PathBuilder(this.GDB).buildWithEscape() + "\"")
-                .replace("{{solution_exe_path}}", "\"" + new FileUtils.PathBuilder(solutionExePath).buildWithEscape() + "\"")
-                .replace("{{port}}", String.valueOf(this.port))
-                .replace("{{std_log_path}}", "\"" + new FileUtils.PathBuilder(stdLogPath).buildWithEscape() + "\"")
-                .replace("{{std_err_path}}", "\"" + new FileUtils.PathBuilder(stdErrPath).buildWithEscape() + "\"")
-        ;
-        // 写文件
-        this.serverMainPath = new FileUtils.PathBuilder(filePath).append("ServerMain.cpp").build();
-        StoreService.getInstance(project).writeFile(this.serverMainPath, serverMain);
         return true;
+    }
+
+    public String[] getServerArgv() {
+        return new String[]{
+                String.valueOf(this.port),
+                new FileUtils.PathBuilder(stdLogPath).build(),
+                new FileUtils.PathBuilder(stdErrPath).build(),
+                new FileUtils.PathBuilder(this.GDB).build(),
+                new FileUtils.PathBuilder(solutionExePath).build()
+        };
     }
 
     @Override
@@ -323,6 +325,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
         // 获取路径
         String solutionPath = new FileUtils.PathBuilder(filePath).append("solution.cpp").build();
         this.solutionCppPath = solutionPath;
+
         String solutionContent = getSolutionContent();
         // 获取main函数
         solutionContent += "\n" + getMainFunction();
@@ -426,11 +429,10 @@ public class CppDebugEnv extends AbstractDebugEnv {
         try {
             // 指定生成exe文件的绝对路径, 否则会出现一堆奇葩错误, md
             String cmd = GPP + " -g " + this.solutionCppPath + " -o " + this.solutionExePath;
-            String cmd2 = GPP + " -g " + this.serverMainPath + " -lws2_32 -o " + this.serverMainExePath;
 
-            String combinedCmd = cmd + " & " + cmd2;
+            DebugUtils.simpleDebug(cmd, project);
 
-            Integer i = ProgressManager.getInstance().run(new MyTask(project, combinedCmd));
+            Integer i = ProgressManager.getInstance().run(new MyTask(project, cmd));
 
             if (i == null) {
                 LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.compile.cancel"));
@@ -440,8 +442,8 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
             if (i != 0) {
                 throw new DebugError(BundleUtils.i18n("debug.leetcode.compile.error") + "\n" +
-                        "solution.exe = " + this.solutionExePath+
-                        "ServerMain.exe = " + this.serverMainExePath
+                        OSHandler.chooseCompliedFile("solution.exe", "solution.out") + " = " + this.solutionExePath + "\n" +
+                        getCompiledFileName() + " = " + this.serverMainExePath
                 );
             }
             return true;
@@ -472,10 +474,6 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     public int getOffset() {
         return offset;
-    }
-
-    public String getServerMainPath() {
-        return serverMainPath;
     }
 
     public String getSolutionExePath() {

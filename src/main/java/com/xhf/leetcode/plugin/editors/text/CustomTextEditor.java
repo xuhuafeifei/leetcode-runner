@@ -26,8 +26,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 
-import static com.intellij.openapi.actionSystem.ActionPlaces.TEXT_EDITOR_WITH_PREVIEW;
-
 public class CustomTextEditor implements TextEditor {
     private final Editor editor;
     private final JPanel component;

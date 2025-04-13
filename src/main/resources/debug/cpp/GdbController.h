@@ -1,6 +1,9 @@
 //
 // Created by 25080 on 2025/1/30.
 //
+// #ifdef _WIN32 or _WIN64
+#if defined(_WIN32) || defined(_WIN64)
+
 #pragma once
 #ifndef CPP_GDBCONTROLLER_H
 #define CPP_GDBCONTROLLER_H
@@ -412,3 +415,261 @@ void GdbController::create_gdb_process() {
 }
 
 #endif //CPP_GDBCONTROLLER_H
+
+#else
+
+#pragma once
+#ifndef CPP_GDBCONTROLLER_UNIX_H
+#define CPP_GDBCONTROLLER_UNIX_H
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <csignal>
+#include <cstring>
+#include <thread>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include "ExecuteResult.h"
+#include "GdbInstruction.h"
+#include "leetcode.h"
+#include "LogHelper.h"
+
+#define BUFFER_SIZE 2048
+
+typedef struct CPP_GDB_INFO {
+    std::string stopped_reason;
+    std::string console_output;
+    std::string status;
+    std::string log_output;
+    std::string result_record;
+
+    std::string to_string() const {
+        json j;
+        j["stopped_reason"] = stopped_reason;
+        j["console_output"] = console_output;
+        j["status"] = status;
+        j["log_output"] = log_output;
+        j["result_record"] = result_record;
+        return j.dump();
+    }
+    json to_json() const {
+        return {
+            {"stopped_reason", stopped_reason},
+            {"console_output", console_output},
+            {"status", status},
+            {"log_output", log_output},
+            {"result_record", result_record}
+        };
+    }
+} CPP_GDB_INFO;
+
+class GdbController {
+public:
+    GdbController(std::string gdb_path, std::string exe_path, std::string gdb_param, LogHelper& log);
+    void start_gdb();
+protected:
+    virtual GdbInstruction get_command() = 0;
+    virtual void show_gdb_output(ExecuteResult& r) = 0;
+    bool is_finish(const std::string& command) const {
+        return command == "exit" || command == "quit" || command == "q";
+    }
+
+    std::string read_and_handle_from_gdb();
+    void io_with_gdb();
+    void create_gdb_process();
+    ssize_t write_to_gdb(const char* buf, size_t count);
+    std::string read_from_gdb();
+
+    ExecuteResult parse_gdb_output(const std::string& gdb_result, const GdbInstruction& gdbInst);
+    std::string extract_console_stream_output(std::string line);
+    std::string extract_error(std::string line);
+    static std::string extract_text(const std::string& basicString);
+
+    std::string gdb_path;
+    std::string exe_path;
+    std::string gdb_param;
+
+    int pipe_in[2]{};   // parent writes to child
+    int pipe_out[2]{};  // child writes to parent
+
+    pid_t gdb_pid = -1;
+
+    LogHelper log;
+    char buffer[BUFFER_SIZE]{};
+};
+
+GdbController::GdbController(std::string gdb_path, std::string exe_path, std::string gdb_param, LogHelper& log)
+    : gdb_path(std::move(gdb_path)), exe_path(std::move(exe_path)), gdb_param(std::move(gdb_param)), log(log) {}
+
+void GdbController::start_gdb() {
+    create_gdb_process();
+    read_and_handle_from_gdb();
+    io_with_gdb();
+    close(pipe_in[1]); // Close write end
+}
+
+void GdbController::create_gdb_process() {
+    if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1) {
+        throw std::runtime_error("pipe creation failed");
+    }
+
+    gdb_pid = fork();
+    if (gdb_pid < 0) {
+        throw std::runtime_error("fork failed");
+    }
+
+    if (gdb_pid == 0) {
+        dup2(pipe_in[0], STDIN_FILENO);
+        dup2(pipe_out[1], STDOUT_FILENO);
+        dup2(pipe_out[1], STDERR_FILENO);
+
+        close(pipe_in[1]);
+        close(pipe_out[0]);
+
+        execlp(gdb_path.c_str(), gdb_path.c_str(), "--interpreter=mi2", exe_path.c_str(), nullptr);
+        perror("execlp");
+        exit(1);
+    }
+
+    // Parent process closes unused pipe ends
+    close(pipe_in[0]);
+    close(pipe_out[1]);
+}
+
+std::string GdbController::read_from_gdb() {
+    std::string output;
+    ssize_t count;
+    while ((count = read(pipe_out[0], buffer, BUFFER_SIZE)) > 0) {
+        output.append(buffer, count);
+        if (output.rfind("(gdb)", output.size() - 5) != std::string::npos) break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    return output;
+}
+
+std::string GdbController::read_and_handle_from_gdb() {
+    std::string output = read_from_gdb();
+    log.log_info("gdb result:\n" + output);
+    return output;
+}
+
+ssize_t GdbController::write_to_gdb(const char* buf, size_t count) {
+    return write(pipe_in[1], buf, count);
+}
+
+void GdbController::io_with_gdb() {
+    // 循环读取 GDB 输出并允许用户输入命令
+    while (true) {
+        log.log_info("Enter GDB Command: -------------------------------\n");
+        auto gdb_command = get_command();
+        log.log_info("user input command: " + gdb_command.to_string());
+        auto user_command = gdb_command.gdbCommand;
+
+        // 如果用户输入 exit，则退出循环
+        if (is_finish(user_command)) {
+            write_to_gdb("quit", 4);
+            auto r = ExecuteResult::success_no_result("NULL");
+            show_gdb_output(r);
+            break;
+        }
+
+        // 向 GDB 发送命令
+        log.log_info("send command to gdb: " + user_command);
+        write_to_gdb((user_command).c_str(), user_command.length());
+
+        // 读取 GDB 的输出
+        log.log_info("start to read result from gdb");
+        auto gdb_result = read_and_handle_from_gdb();
+
+        // 解析 GDB 输出
+        ExecuteResult r = parse_gdb_output(gdb_result, gdb_command);
+
+        log.log_info("execute result = \n" + r.to_json() + "\n");
+
+        show_gdb_output(r);
+    }
+}
+
+/**
+ * GDB MI Syntax
+ * https://sourceware.org/gdb/current/onlinedocs/gdb.html/GDB_002fMI-Output-Syntax.html#GDB_002fMI-Output-Syntax
+ */
+ExecuteResult GdbController::parse_gdb_output(const std::string& gdb_result, const GdbInstruction& gdbInst) {
+    auto s = trim(gdb_result);
+    // 按照换行符切割
+    auto lines = split(s, '\n');
+    // 如果最后一个元素是(gdb), 移除它
+    if (!lines.empty() && ends_with(lines.back(), "(gdb) ")) {
+        lines.pop_back();
+    }
+
+    ExecuteResult result;
+    result.operation = gdbInst.operation;
+    CPP_GDB_INFO cpp_gdb_info;
+
+    for (const auto& line : lines) {
+        if (starts_with(line, "^")) { // 结果记录
+            if (starts_with(line, "^done")) {
+                cpp_gdb_info.status = "done";
+                // 解析更多详细信息...
+                result.has_result = true;
+                if (result.result.empty()) {
+                    result.result = "done";
+                }
+            } else if (starts_with(line, "^running")) {
+                cpp_gdb_info.status = "running";
+            } else if (starts_with(line, "^error")) {
+                cpp_gdb_info.status = "error";
+                // 提取错误信息...
+                auto msg = extract_error(line);
+            } else if (starts_with(line, "^exit")) {
+                cpp_gdb_info.status = "exit";
+            }
+            cpp_gdb_info.result_record += extract_text(line);
+        } else if (starts_with(line, "*")) { // 异步记录
+            if (starts_with(line, "*stopped")) {
+                cpp_gdb_info.stopped_reason = extract_text(line); // 自定义函数提取原因
+            }
+        } else if (starts_with(line, "@")) { // 流输出
+            if (starts_with(line, "@console")) {
+                cpp_gdb_info.console_output = extract_text(line); // 自定义函数提取输出
+            }
+        } else if (starts_with(line, "~")) { // 普通文本输出
+            result.has_result = true;
+            result.result += extract_console_stream_output(line); // 自定义函数提取文本
+        } else if (starts_with(line, "&")) {
+            cpp_gdb_info.log_output += extract_text(line);
+        }
+    }
+
+    result.success = true;
+    result.more_info = cpp_gdb_info.to_json().dump();
+    return result;
+}
+std::string GdbController::extract_console_stream_output(std::string line) {
+    auto s = line.substr(1);
+    if (s[0] == '\"') s = s.substr(1, s.length() - 2);
+    return s;
+}
+
+std::string GdbController::extract_error(std::string line) {
+    auto s = line.substr(11);
+    if (s[0] == '\"') s = s.substr(1, s.length() - 2);
+    return s;
+}
+
+string GdbController::extract_text(const string &basicString) {
+    auto s = basicString;
+    if (s[0] == '\"') s = s.substr(1, s.length() - 2);
+    return s;
+}
+
+
+#endif // CPP_GDBCONTROLLER_UNIX_H
+
+
+
+#endif

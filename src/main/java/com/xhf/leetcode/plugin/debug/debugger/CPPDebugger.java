@@ -22,10 +22,7 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.BundleUtils;
-import com.xhf.leetcode.plugin.utils.GsonUtils;
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.ViewUtils;
+import com.xhf.leetcode.plugin.utils.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -180,14 +177,21 @@ public class CPPDebugger extends AbstractDebugger {
     }
 
     private void startCppService() {
-        String serverMainExePath = env.getServerMainExePath();
-        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd") + ": " + serverMainExePath, project);
+        StringBuilder sb = new StringBuilder(env.getServerMainExePath());
+        for (String arg : env.getServerArgv()) {
+            sb.append(" ").append(arg);
+        }
+
+        String cmd = sb.toString();
+
+        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd") + ": " + cmd, project);
 
         try {
-            this.exec = DebugUtils.buildProcess(serverMainExePath);
+            this.exec = OSHandler.buildProcess(cmd);
+//            this.exec = DebugUtils.buildProcess(cmd);
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
-            throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed") + e.getCause() + "\n" + BundleUtils.i18n("debug.leetcode.instruction") + " = " + serverMainExePath);
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed") + "\n" + e.getCause() + "\n" + BundleUtils.i18n("debug.leetcode.instruction") + " = " + cmd);
         }
 
         // 五次检测连接(3s还连接不上, 挂了)
