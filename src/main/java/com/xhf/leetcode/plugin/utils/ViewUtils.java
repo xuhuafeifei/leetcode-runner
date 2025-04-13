@@ -445,6 +445,66 @@ public class ViewUtils {
     }
 
     @NotNull
+    public static DialogWrapper getDialogWrapper(JComponent component, String title, String[] exitActionNames, int[] exitActionCodes) {
+        DialogWrapper dialog = new DialogWrapper((Project) null, true) {
+            private final DialogWrapperExitAction okAction =
+                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
+            private final DialogWrapperExitAction cancelAction =
+                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
+
+            {
+                if (exitActionCodes.length != exitActionNames.length) {
+                    throw new IllegalArgumentException("exitActionNames and exitActionCodes must have the same length");
+                }
+                setTitle(title);
+                init();
+
+                // 设置默认按钮为 OK（使用 getButton 取真实的按钮）
+                SwingUtilities.invokeLater(() -> {
+                    JButton okButton = getButton(okAction);
+                    if (okButton != null) {
+                        getRootPane().setDefaultButton(okButton);
+                    }
+                });
+            }
+
+            @Override
+            protected JComponent createCenterPanel() {
+                return component;
+            }
+
+            @Override
+            protected @NotNull Action getOKAction() {
+                return okAction;
+            }
+
+            @Override
+            protected @NotNull Action getCancelAction() {
+                return cancelAction;
+            }
+
+            @Override
+            protected Action @NotNull [] createActions() {
+                Action[] actions = new Action[2 + exitActionCodes.length];
+                for (int i = 0; i < exitActionCodes.length; i++) {
+                    actions[i] = new DialogWrapperExitAction(exitActionNames[i], exitActionCodes[i]);
+                }
+                actions[exitActionCodes.length] = getOKAction();
+                actions[exitActionCodes.length + 1] = getCancelAction();
+                return actions;
+            }
+
+            @Override
+            public JComponent getPreferredFocusedComponent() {
+                return component;
+            }
+        };
+
+        dialog.show();
+        return dialog;
+    }
+
+    @NotNull
     public static DialogWrapper getDialogWrapper(JComponent component, String title) {
         DialogWrapper dialog = new DialogWrapper((Project) null, true) {
             private final DialogWrapperExitAction okAction =
@@ -541,47 +601,7 @@ public class ViewUtils {
         JComponent messageComponent = new JPanel(new BorderLayout());
         messageComponent.add(new JLabel(msg, SwingConstants.CENTER), BorderLayout.CENTER);
 
-        DialogWrapper dialog = new DialogWrapper((Project) null, true) {
-            private final DialogWrapperExitAction okAction =
-                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
-            private final DialogWrapperExitAction cancelAction =
-                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
-
-            {
-                setTitle(title);
-                init();
-
-                SwingUtilities.invokeLater(() -> {
-                    JButton okButton = getButton(okAction);
-                    if (okButton != null) {
-                        getRootPane().setDefaultButton(okButton);
-                    }
-                });
-            }
-
-            @Override
-            protected JComponent createCenterPanel() {
-                return messageComponent;
-            }
-
-            @Override
-            protected @NotNull Action getOKAction() {
-                return okAction;
-            }
-
-            @Override
-            protected @NotNull Action getCancelAction() {
-                return cancelAction;
-            }
-
-            @Override
-            public JComponent getPreferredFocusedComponent() {
-                return messageComponent;
-            }
-        };
-
-        dialog.show();
-        return dialog;
+        return getDialogWrapper(messageComponent, title);
     }
 
     public static void showError(String s) {

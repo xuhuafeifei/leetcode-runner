@@ -24,10 +24,12 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.OSHandler;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.text.View;
 import java.io.IOException;
 
 /**
@@ -128,6 +130,85 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     @Override
     protected boolean buildToolPrepare() throws DebugError {
+        if (OSHandler.isWin()) {
+            return buildToolPrepareForWin();
+        } else {
+            return buildToolPrepareForMac();
+        }
+    }
+
+    private boolean buildToolPrepareForMac() {
+        boolean GPP_FLAG = StoreService.getInstance(project).contains("GPP");
+        boolean GDB_FLAG = StoreService.getInstance(project).contains("GDB");
+
+        // gpp路径选择BTN
+        TextFieldWithBrowseButton gppBtn = new TextFieldWithBrowseButton();
+        gppBtn.addBrowseFolderListener(
+                new TextBrowseFolderListener(
+                        FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
+                ) {
+                });
+
+        // gdb路径选择BTN
+        TextFieldWithBrowseButton gdbBtn = new TextFieldWithBrowseButton();
+        gdbBtn.addBrowseFolderListener(
+                new TextBrowseFolderListener(
+                        FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
+                ) {
+                });
+
+        // 判断是否有缓存
+        if (GPP_FLAG) {
+            gppBtn.setText(StoreService.getInstance(project).getCache("GPP", String.class));
+        }
+        if (GDB_FLAG) {
+            gdbBtn.setText(StoreService.getInstance(project).getCache("GDB", String.class));
+        }
+
+        // 弹框选择
+        JPanel targetComponent = new JPanel();
+        targetComponent.add(
+                FormBuilder.createFormBuilder()
+                        .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.gpp.path")), gppBtn, 1, false)
+                        .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.gdb.path")), gdbBtn, 1, false)
+                        .getPanel()
+        );
+
+        int i = ViewUtils.getDialogWrapper(
+                targetComponent,
+                BundleUtils.i18nHelper("选择GPP和GDB路径", "choose GPP and GDB path")
+        ).getExitCode();
+
+        if (i != DialogWrapper.OK_EXIT_CODE) {
+            return false;
+        }
+
+        // 校验路径GPP
+        this.GPP = gppBtn.getText();
+        if (OSHandler.isGPP(this.GPP)) {
+            throw new DebugError(BundleUtils.i18nHelper("GPP路径错误: " + this.GPP, "GPP path error: " + this.GPP));
+        }
+
+        // 校验路径GDB
+        this.GDB = gdbBtn.getText();
+        if (OSHandler.isGDB(this.GDB)) {
+            throw new DebugError(BundleUtils.i18nHelper("GDB路径错误: " + this.GDB, "GDB path error: " + this.GDB));
+        }
+
+        if (!FileUtils.fileExists(GPP)) {
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.gpp.error") + GPP);
+        }
+        if (!FileUtils.fileExists(GDB)) {
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.gdb.error") + GDB);
+        }
+
+        // 存储正确的javaPath
+        StoreService.getInstance(project).addCache("GPP", GPP);
+        StoreService.getInstance(project).addCache("GDB", GDB);
+        return true;
+    }
+
+    private boolean buildToolPrepareForWin() {
         boolean flag = StoreService.getInstance(project).contains("MINGW_HOME");
 
         TextFieldWithBrowseButton myFileBrowserBtn = new TextFieldWithBrowseButton();
@@ -142,18 +223,22 @@ public class CppDebugEnv extends AbstractDebugEnv {
         JPanel targetComponent;
         targetComponent = InnerHelpTooltip.BoxLayout().add(myFileBrowserBtn).addHelp(HELP_CONTENT).getTargetComponent();
 
-        String javaPath;
+        String cppPath;
         if (flag) {
-            javaPath = StoreService.getInstance(project).getCache("MINGW_HOME", String.class);
-            myFileBrowserBtn.setText(javaPath);
+            cppPath = StoreService.getInstance(project).getCache("MINGW_HOME", String.class);
+            myFileBrowserBtn.setText(cppPath);
         }
+
+        int MiNGW_EXIT_CODE = 999;
 
         int i = ViewUtils.getDialogWrapper(
                 targetComponent,
-                BundleUtils.i18nHelper("选择MinGW目录", "choose MinGW directory")
+                BundleUtils.i18nHelper("选择MinGW目录", "choose MinGW directory"),
+                new String[] {BundleUtils.i18n("debug.leetcode.main.mingw.no")},
+                new int[] {MiNGW_EXIT_CODE}
         ).getExitCode();
 
-        if (i == 2) {
+        if (i == MiNGW_EXIT_CODE) {
             // 给出下载链接
             ViewUtils.getDialogWrapper(
                     FormBuilder.createFormBuilder()

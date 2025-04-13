@@ -120,14 +120,20 @@ public class PythonDebugEnv extends AbstractDebugEnv {
                         .addHelp(BundleUtils.i18n("debug.leetcode.python.home.path.tip"))
                         .getTargetComponent()
                 ,
-                BundleUtils.i18nHelper("设置PYTHON_HOME", "Set PYTHON_HOME")
+                BundleUtils.i18nHelper("设置python解释器路径", "Set python interpreter path")
         ).getExitCode();
 
         if (i != DialogWrapper.OK_EXIT_CODE) {
             return false;
         }
+
         String pythonPath = myFileBrowserBtn.getText();
-        python = OSHandler.getPython(pythonPath);
+        boolean exist = OSHandler.isPythonInterpreter(pythonPath);
+        if (!exist) {
+            throw new DebugError(BundleUtils.i18nHelper("python解释器路径错误! " + pythonPath, "Invalid python interpreter path! ") + pythonPath);
+        }
+
+        python = pythonPath;
 
         if (!FileUtils.fileExists(python)) {
             throw new DebugError(OSHandler.getPythonName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + python);

@@ -53,6 +53,41 @@ public class OSHandler {
         }
     }
 
+    public static boolean isPythonInterpreter(String pythonPath) {
+        if (isWin()) {
+            return pythonPath.endsWith("python.exe") || pythonPath.endsWith("python3.exe") ||
+                    pythonPath.endsWith("python2.exe") || pythonPath.endsWith("python");
+        } else {
+            // 判断是否存在python, python3, python2
+            if (pythonPath.endsWith("python3") || pythonPath.endsWith("python2") || pythonPath.endsWith("python")
+                    || pythonPath.endsWith("python3.exe") || pythonPath.endsWith("python2.exe") || pythonPath.endsWith("python.exe")
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+
+    public static boolean isGPP(String gppPath) {
+        if (isWin()) {
+            return gppPath.endsWith("g++.exe") || gppPath.endsWith("clang++.exe") || gppPath.endsWith("clang.exe") ||
+                    gppPath.endsWith("cc.exe") || gppPath.endsWith("c++.exe") || gppPath.endsWith("g++");
+        } else {
+            return gppPath.endsWith("g++") || gppPath.endsWith("clang++") || gppPath.endsWith("clang") || gppPath.endsWith("cc") || gppPath.endsWith("c++")
+                   || gppPath.endsWith("g++.exe") ;
+        }
+    }
+
+    public static boolean isGDB(String gdbPath) {
+        if (isWin()) {
+            return gdbPath.endsWith("gdb.exe") || gdbPath.endsWith("gdb-multiarch.exe") || gdbPath.endsWith("gdb") || gdbPath.endsWith("gdb-multiarch");
+        } else {
+            return gdbPath.endsWith("gdb") || gdbPath.endsWith("gdb-multiarch") || gdbPath.endsWith("gdb.exe") || gdbPath.endsWith("gdb-multiarch.exe");
+        }
+    }
+
     public static String getPython(String pythonPath) {
         if (isWin()) {
             return new FileUtils.PathBuilder(pythonPath).append("python.exe").build();
