@@ -34,6 +34,9 @@ public class DebugPanel extends JPanel{
         // 添加选项到 Panel 和 ButtonGroup
         for (String option : options) {
             JBRadioButton radioButton = new JBRadioButton(option);
+            if (option.equals(OutputType.STD_OUT.getName())) {
+                radioButton.setEnabled(false);
+            }
             outputType.add(radioButton);
             panel.add(radioButton);
         }
@@ -58,6 +61,9 @@ public class DebugPanel extends JPanel{
         // 添加选项到 Panel 和 ButtonGroup
         for (String option : options) {
             JBRadioButton radioButton = new JBRadioButton(option);
+            if (option.equals(ReadType.STD_IN.getName())) {
+                radioButton.setEnabled(false);
+            }
             readTypeGroup.add(radioButton);
             panel.add(radioButton);
         }

@@ -177,18 +177,22 @@ public class CPPDebugger extends AbstractDebugger {
     }
 
     private void startCppService() {
-        StringBuilder sb = new StringBuilder(env.getServerMainExePath());
+        String serverMainExePath = env.getServerMainExePath();
+        StringBuilder sb = new StringBuilder(serverMainExePath);
         for (String arg : env.getServerArgv()) {
             sb.append(" ").append(arg);
         }
 
         String cmd = sb.toString();
+        // 如果是mac/linux, 先修改权限, 添加执行权限
+        if (! OSHandler.isWin()) {
+            cmd = "chmod 744 " + serverMainExePath + " && " + cmd;
+        }
 
         DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd") + ": " + cmd, project);
 
         try {
             this.exec = OSHandler.buildProcess(cmd);
-//            this.exec = DebugUtils.buildProcess(cmd);
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
             throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed") + "\n" + e.getCause() + "\n" + BundleUtils.i18n("debug.leetcode.instruction") + " = " + cmd);

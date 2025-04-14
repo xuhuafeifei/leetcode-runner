@@ -79,7 +79,7 @@ public class DebugUtils {
                     }
                     LogUtils.simpleDebug("cmd error result = " + errorMessage);
                     if (project != null) {
-                        ConsoleUtils.getInstance(project).showError(errorMessage, false);
+                        ConsoleUtils.getInstance(project).showError("cmd running error: " + errorMessage, false);
                     } else {
                         LogUtils.simpleDebug("Project为NULL, 当前为测试模式");
                     }

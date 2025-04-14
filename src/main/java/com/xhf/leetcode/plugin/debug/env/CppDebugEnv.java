@@ -92,7 +92,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
      * @return boolean
      */
     private boolean closeExe() {
-        this.solutionExePath = new FileUtils.PathBuilder(filePath).append("solution.exe").build();
+        this.solutionExePath = new FileUtils.PathBuilder(filePath).append(OSHandler.chooseCompliedFile("solution.exe", "solution.out")).build();
         this.serverMainExePath = new FileUtils.PathBuilder(filePath).append(getCompiledFileName()).build();
 
         try {
@@ -113,14 +113,16 @@ public class CppDebugEnv extends AbstractDebugEnv {
     private String getCompiledFile() {
         return OSHandler.chooseCompliedFile(
                 "/debug/cpp/complie/windows/leetcode_runner_debug_server_cpp_windows.exe",
-                "/debug/cpp/complie/linux/leetcode_runner_debug_server_cpp_linux.out"
+                "/debug/cpp/complie/linux/leetcode_runner_debug_server_cpp_linux.out",
+                        "/debug/cpp/complie/mac/leetcode_runner_debug_server_cpp_mac.out"
         );
     }
 
     private String getCompiledFileName() {
         return OSHandler.chooseCompliedFile(
                 "leetcode_runner_debug_server_cpp_windows.exe",
-                "leetcode_runner_debug_server_cpp_linux.out"
+                "leetcode_runner_debug_server_cpp_linux.out",
+                "leetcode_runner_debug_server_cpp_mac.out"
         );
     }
 
@@ -310,6 +312,10 @@ public class CppDebugEnv extends AbstractDebugEnv {
         return true;
     }
 
+    /**
+     * 获取运行server的命令行参数
+     * @return
+     */
     public String[] getServerArgv() {
         return new String[]{
                 String.valueOf(this.port),
@@ -394,7 +400,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
              */
             new Thread(() -> {
                 try {
-                    process = DebugUtils.buildProcess("cmd.exe", "/c", combinedCmd);
+                    process = OSHandler.buildProcess(combinedCmd);
                     DebugUtils.printProcess(process, true, super.myProject);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -429,6 +435,10 @@ public class CppDebugEnv extends AbstractDebugEnv {
         try {
             // 指定生成exe文件的绝对路径, 否则会出现一堆奇葩错误, md
             String cmd = GPP + " -g " + this.solutionCppPath + " -o " + this.solutionExePath;
+            // win/mac, 为编译文件增加可执行权限
+            if (! OSHandler.isWin()) {
+                cmd = cmd + " && chmod 744 " + this.solutionExePath;
+            }
 
             DebugUtils.simpleDebug(cmd, project);
 

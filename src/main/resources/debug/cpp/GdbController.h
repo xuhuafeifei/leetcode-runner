@@ -2,9 +2,9 @@
 // Created by 25080 on 2025/1/30.
 //
 // #ifdef _WIN32 or _WIN64
+#pragma once
 #if defined(_WIN32) || defined(_WIN64)
 
-#pragma once
 #ifndef CPP_GDBCONTROLLER_H
 #define CPP_GDBCONTROLLER_H
 
@@ -418,16 +418,11 @@ void GdbController::create_gdb_process() {
 
 #else
 
-#pragma once
 #ifndef CPP_GDBCONTROLLER_UNIX_H
 #define CPP_GDBCONTROLLER_UNIX_H
 
 #include <unistd.h>
-#include <fcntl.h>
 #include <sys/types.h>
-#include <sys/wait.h>
-#include <csignal>
-#include <cstring>
 #include <thread>
 #include <stdexcept>
 #include <string>
@@ -492,8 +487,8 @@ protected:
     std::string exe_path;
     std::string gdb_param;
 
-    int pipe_in[2]{};   // parent writes to child
-    int pipe_out[2]{};  // child writes to parent
+    int pipe_in[2]{};   // 父进程->子进程
+    int pipe_out[2]{};  // 子进程->父进程
 
     pid_t gdb_pid = -1;
 
@@ -521,23 +516,32 @@ void GdbController::create_gdb_process() {
         throw std::runtime_error("fork failed");
     }
 
-    if (gdb_pid == 0) {
+    if (gdb_pid == 0) { // 子进程
+        std::cout << "Child process started" << std::endl;
+        // 重定向标准输入输出
         dup2(pipe_in[0], STDIN_FILENO);
         dup2(pipe_out[1], STDOUT_FILENO);
         dup2(pipe_out[1], STDERR_FILENO);
 
+        // 关闭不需要的 pipe 端
+        close(pipe_in[0]);
         close(pipe_in[1]);
         close(pipe_out[0]);
+        close(pipe_out[1]);
 
+        // 启动 gdb
         execlp(gdb_path.c_str(), gdb_path.c_str(), "--interpreter=mi2", exe_path.c_str(), nullptr);
-        perror("execlp");
-        exit(1);
+
+        // 如果 exec 失败，打印错误并退出子进程
+        perror("execlp failed");
+        exit(EXIT_FAILURE);
     }
 
-    // Parent process closes unused pipe ends
+    // 父进程关闭不需要的 pipe 端
     close(pipe_in[0]);
     close(pipe_out[1]);
 }
+
 
 std::string GdbController::read_from_gdb() {
     std::string output;

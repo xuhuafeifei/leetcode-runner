@@ -32,8 +32,9 @@ public:
     }
 
     void log_info(const std::string& msg) {
-        std::ofstream outFile(this->std_out_path, std::ios::app | std::ios::out | std::ios::ate);
-        log(outFile, msg);
+        // std::ofstream outFile(this->std_out_path, std::ios::app | std::ios::out | std::ios::ate);
+        // TODO: 改回来
+        log(std::cout, msg);
     }
 
 private:
