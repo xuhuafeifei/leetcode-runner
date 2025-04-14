@@ -517,39 +517,79 @@ void GdbController::create_gdb_process() {
     }
 
     if (gdb_pid == 0) { // 子进程
-        std::cout << "Child process started" << std::endl;
+        log.log_info("Child process started");
+        
+        // 关闭不需要的管道端
+        close(pipe_in[1]);  // 关闭父进程的写入端
+        close(pipe_out[0]); // 关闭父进程的读取端
+
         // 重定向标准输入输出
         dup2(pipe_in[0], STDIN_FILENO);
         dup2(pipe_out[1], STDOUT_FILENO);
         dup2(pipe_out[1], STDERR_FILENO);
 
-        // 关闭不需要的 pipe 端
+        // 关闭原始管道端
         close(pipe_in[0]);
-        close(pipe_in[1]);
-        close(pipe_out[0]);
         close(pipe_out[1]);
 
         // 启动 gdb
         execlp(gdb_path.c_str(), gdb_path.c_str(), "--interpreter=mi2", exe_path.c_str(), nullptr);
 
-        // 如果 exec 失败，打印错误并退出子进程
+        // 如果 exec 失败
         perror("execlp failed");
         exit(EXIT_FAILURE);
+    } else { // 父进程
+        // 关闭不需要的管道端
+        close(pipe_in[0]);  // 关闭子进程的读取端
+        close(pipe_out[1]); // 关闭子进程的写入端
     }
-
-    // 父进程关闭不需要的 pipe 端
-    close(pipe_in[0]);
-    close(pipe_out[1]);
 }
-
 
 std::string GdbController::read_from_gdb() {
     std::string output;
-    ssize_t count;
-    while ((count = read(pipe_out[0], buffer, BUFFER_SIZE)) > 0) {
-        output.append(buffer, count);
-        if (output.rfind("(gdb)", output.size() - 5) != std::string::npos) break;
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    fd_set read_fds;
+    struct timeval timeout;
+    int max_fd = pipe_out[0] + 1;
+
+    while (true) {
+        FD_ZERO(&read_fds);
+        FD_SET(pipe_out[0], &read_fds);
+
+        // 设置超时100ms
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 100000;
+
+        int ready = select(max_fd, &read_fds, NULL, NULL, &timeout);
+
+        if (ready < 0) {
+            perror("select error");
+            break;
+        } else if (ready == 0) {
+            // 超时，检查是否有完整输出
+            if (output.find("(gdb)") != std::string::npos) {
+                break;
+            }
+            continue;
+        }
+
+        if (FD_ISSET(pipe_out[0], &read_fds)) {
+            char buf[BUFFER_SIZE];
+            ssize_t count = read(pipe_out[0], buf, sizeof(buf));
+
+            if (count < 0) {
+                perror("read error");
+                break;
+            } else if (count == 0) {
+                // EOF
+                break;
+            } else {
+                output.append(buf, count);
+                // 检查是否收到GDB提示符
+                if (output.find("(gdb)") != std::string::npos) {
+                    break;
+                }
+            }
+        }
     }
     return output;
 }
@@ -561,7 +601,16 @@ std::string GdbController::read_and_handle_from_gdb() {
 }
 
 ssize_t GdbController::write_to_gdb(const char* buf, size_t count) {
-    return write(pipe_in[1], buf, count);
+    ssize_t bytes_written = write(pipe_in[1], buf, count);
+    if (bytes_written < 0) {
+        perror("write to gdb failed");
+        return -1;
+    }
+    // 确保命令以换行符结束
+    if (buf[count-1] != '\n') {
+        write(pipe_in[1], "\n", 1);
+    }
+    return bytes_written;
 }
 
 void GdbController::io_with_gdb() {
@@ -582,11 +631,18 @@ void GdbController::io_with_gdb() {
 
         // 向 GDB 发送命令
         log.log_info("send command to gdb: " + user_command);
-        write_to_gdb((user_command).c_str(), user_command.length());
+        if (write_to_gdb(user_command.c_str(), user_command.size()) < 0) {
+            log.log_stderr("Failed to send command to GDB");
+            break;
+        }
 
         // 读取 GDB 的输出
         log.log_info("start to read result from gdb");
         auto gdb_result = read_and_handle_from_gdb();
+        if (gdb_result.empty()) {
+            log.log_stderr("No response from GDB");
+            break;
+        }
 
         // 解析 GDB 输出
         ExecuteResult r = parse_gdb_output(gdb_result, gdb_command);
@@ -595,6 +651,11 @@ void GdbController::io_with_gdb() {
 
         show_gdb_output(r);
     }
+
+    // 等待子进程结束
+    int status;
+    waitpid(gdb_pid, &status, 0);
+    log.log_info("GDB process exited with status: " + std::to_string(status));
 }
 
 /**

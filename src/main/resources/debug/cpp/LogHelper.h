@@ -6,6 +6,7 @@
 #ifndef CPP_LOGHELPER_H
 #define CPP_LOGHELPER_H
 #include <iostream>
+#include <fstream>
 
 class LogHelper {
 private:
@@ -32,9 +33,8 @@ public:
     }
 
     void log_info(const std::string& msg) {
-        // std::ofstream outFile(this->std_out_path, std::ios::app | std::ios::out | std::ios::ate);
-        // TODO: 改回来
-        log(std::cout, msg);
+        std::ofstream outFile(this->std_out_path, std::ios::app | std::ios::out | std::ios::ate);
+        log(outFile, msg);
     }
 
 private:
