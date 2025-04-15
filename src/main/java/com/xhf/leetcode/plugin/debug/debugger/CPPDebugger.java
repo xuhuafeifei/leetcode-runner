@@ -118,11 +118,17 @@ public class CPPDebugger extends AbstractDebugger {
             }
             if (!"error".equals(cppGdbInfo.getStatus())) {
                 // 执行正确
-                GdbElement ele = instance.parse(instance.preHandle(cppGdbInfo.getStoppedReason()));
-                String reason = ele.getAsGdbObject().get("reason").getAsGdbPrimitive().getAsString();
-                // 不是因为breakpoint终止, 那么就是GDB完成运行或者出现异常, 需要停止debug
-                if (! "breakpoint-hit".equals(reason)) {
-                    DebugManager.getInstance(project).stopDebugger();
+                String stoppedReason = cppGdbInfo.getStoppedReason();
+                GdbElement ele = instance.parse(instance.preHandle(stoppedReason));
+                if (ele.isGdbObject()) {
+                    GdbElement reason = ele.getAsGdbObject().get("reason");
+                    if (reason != null) {
+                        String output = reason.getAsGdbPrimitive().getAsString();
+                        // 不是因为breakpoint终止, 那么就是GDB完成运行或者出现异常, 需要停止debug
+                        if (! "breakpoint-hit".equals(output)) {
+                            DebugManager.getInstance(project).stopDebugger();
+                        }
+                    }
                 }
             } else {
                 // 执行错误

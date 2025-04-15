@@ -423,6 +423,7 @@ void GdbController::create_gdb_process() {
 
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <thread>
 #include <stdexcept>
 #include <string>
