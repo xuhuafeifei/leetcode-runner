@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.debug.execute.python;
 
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
+import com.xhf.leetcode.plugin.debug.execute.AbstractInstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
@@ -14,7 +15,7 @@ import com.xhf.leetcode.plugin.utils.Constants;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class AbstractPythonInstExecutor implements InstExecutor {
+public abstract class AbstractPythonInstExecutor extends AbstractInstExecutor {
     protected static final String PY_SERVER_DISCONNECT = Constants.PY_SERVER_DISCONNECT;
 
     @Override
