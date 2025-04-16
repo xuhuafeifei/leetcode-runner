@@ -17,13 +17,18 @@ public abstract class AbstractInstExecutor implements InstExecutor {
      */
     protected void doMoreInst(Operation[] operations, String[] cmdArgs, ReadType readType) {
         // 这么设置的原因可以参考JavaNInst
+        if (readType == null) {
+            readType = ReadType.getByName(AppSettings.getInstance().getReadTypeName());
+        }
         if (AppSettings.getInstance().isUIOutput()) {
             if (readType == ReadType.UI_IN) {
-                InstSource.uiInstInput(Instruction.success(readType, Operation.W, ""));
-                InstSource.uiInstInput(Instruction.success(readType, Operation.P, ""));
+                for (Operation operation : operations) {
+                    InstSource.uiInstInput(Instruction.success(readType, operation, ""));
+                }
             } else if (readType == ReadType.COMMAND_IN) {
-                InstSource.userCmdInput("w");
-                InstSource.userCmdInput("p");
+                for (String cmd : cmdArgs) {
+                    InstSource.userCmdInput(cmd);
+                }
             }
         }
     }

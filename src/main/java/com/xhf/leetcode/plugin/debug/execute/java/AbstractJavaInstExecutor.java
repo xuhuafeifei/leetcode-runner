@@ -7,12 +7,14 @@ import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.debug.execute.AbstractInstExecutor;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class AbstractJavaInstExecutor implements InstExecutor {
+public abstract class AbstractJavaInstExecutor extends AbstractInstExecutor {
+
     @Override
     public ExecuteResult execute(Instruction inst, ExecuteContext context) {
         if (! (context instanceof Context) ) {
