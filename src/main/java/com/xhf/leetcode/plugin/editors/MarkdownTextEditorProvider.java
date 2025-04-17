@@ -10,6 +10,7 @@ import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.Article;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.MarkdownContentType;
+import com.xhf.leetcode.plugin.utils.OSHandler;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +30,8 @@ public class MarkdownTextEditorProvider implements AsyncFileEditorProvider, Dumb
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
         String filePath = ViewUtils.getUnifyFilePathByVFile(file);
-        String[] split = filePath.split("\\\\");
+        filePath = OSHandler.unifyFileSeparator(filePath, "/");
+        String[] split = filePath.split("/");
         String fileName = split[split.length - 1];
         return fileName.startsWith("[0x3f]");
     }
