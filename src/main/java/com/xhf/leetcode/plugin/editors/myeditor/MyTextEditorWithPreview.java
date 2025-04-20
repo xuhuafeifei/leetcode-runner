@@ -24,6 +24,7 @@ import com.intellij.util.ObjectUtils;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.components.BorderLayoutPanel;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +38,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.function.Supplier;
 
 import static com.intellij.openapi.actionSystem.ActionPlaces.TEXT_EDITOR_WITH_PREVIEW;
@@ -250,9 +252,12 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
 
 
   protected boolean isShowFloatingToolbar() {
-    return Registry.is("ide.text.editor.with.preview.show.floating.toolbar")
-//            && myToolbarWrapper.isLeftToolbarEmpty()
-    ;
+    try {
+      return Registry.is("ide.text.editor.with.preview.show.floating.toolbar");
+    } catch (MissingResourceException e) {
+      LogUtils.warn("ide.text.editor.with.preview.show.floating.toolbar registry key not found");
+      return false;
+    }
   }
 
   public boolean isVerticalSplit() {

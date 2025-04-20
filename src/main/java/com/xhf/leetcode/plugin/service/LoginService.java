@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.service;
 
 import com.google.common.eventbus.Subscribe;
-import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.Disposer;
@@ -9,6 +8,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
 import com.xhf.leetcode.plugin.bus.*;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
@@ -35,19 +35,27 @@ import java.util.Objects;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-@Service(Service.Level.PROJECT)
 @LCSubscriber(events = {ClearCacheEvent.class})
 public final class LoginService {
 
     private final Project project;
 
-    public LoginService(Project project) {
+    private static volatile LoginService instance;
+
+    private LoginService(Project project) {
         this.project = project;
         LCEventBus.getInstance().register(this);
     }
 
     public static LoginService getInstance(Project project) {
-        return project.getService(LoginService.class);
+        if (instance == null) {
+            synchronized (LoginService.class) {
+                if (instance == null) {
+                    instance = new LoginService(project);
+                }
+            }
+        }
+        return instance;
     }
 
     public void doLogin() {
@@ -326,24 +334,29 @@ public final class LoginService {
                             // login info exists!
                             if (cookieList.stream().anyMatch(c -> c.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION))) {
                                 LogUtils.simpleDebug("login info exists, do login success after...");
-                                // update cookies
-                                LeetcodeClient.getInstance(project).clearCookies();
-                                // store cookies
-                                LeetcodeClient.getInstance(project).setCookies(cookieList);
-                                loginSuccessAfter(project);
-                                new Thread(() -> {
-                                    try {
-                                        // clear all cookies
-                                        cefCookieManager.deleteCookies("", "");
-                                    } finally {
-                                        if (frame != null) {
-                                            frame.setVisible(false);
-                                            frame.dispose();
+                                try {
+                                    // update cookies
+                                    LeetcodeClient.getInstance(project).clearCookies();
+                                    // store cookies
+                                    LeetcodeClient.getInstance(project).setCookies(cookieList);
+                                    loginSuccessAfter(project);
+                                } catch (Exception e) {
+                                    LogUtils.warn("something wrong when login success after...\n" + DebugUtils.getStackTraceAsString(e));
+                                } finally {
+                                    new Thread(() -> {
+                                        try {
+                                            // clear all cookies
+                                            cefCookieManager.deleteCookies("", "");
+                                        } finally {
+                                            if (frame != null) {
+                                                frame.setVisible(false);
+                                                frame.dispose();
+                                            }
                                         }
-                                    }
-                                    // close jcef browser
-                                    Disposer.dispose(jbcebrowser);
-                                }).start();
+                                        // close jcef browser
+                                        Disposer.dispose(jbcebrowser);
+                                    }).start();
+                                }
                             } else {
                                 cookieList.clear();
                             }
