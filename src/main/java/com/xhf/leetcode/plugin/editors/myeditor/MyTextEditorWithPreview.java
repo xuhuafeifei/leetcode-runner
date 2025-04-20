@@ -61,7 +61,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
   private boolean myIsVerticalSplit;
   private JComponent myComponent;
   private JBSplitter mySplitter;
-  private SplitEditorToolbar myToolbarWrapper;
+  private MySplitEditorToolbar myToolbarWrapper;
   private final @Nls String myName;
   public static final Key<Layout> DEFAULT_LAYOUT_FOR_FILE = Key.create("MyTextEditorWithPreview.DefaultLayout");
 
@@ -270,7 +270,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
   }
 
   @NotNull
-  private SplitEditorToolbar createMarkdownToolbarWrapper(@NotNull JComponent targetComponentForActions) {
+  private MySplitEditorToolbar createMarkdownToolbarWrapper(@NotNull JComponent targetComponentForActions) {
     final ActionToolbar leftToolbar = createToolbar();
     if (leftToolbar != null) {
       leftToolbar.setTargetComponent(targetComponentForActions);
@@ -281,7 +281,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     rightToolbar.setTargetComponent(targetComponentForActions);
     rightToolbar.setReservePlaceAutoPopupIcon(false);
 
-    return new SplitEditorToolbar(leftToolbar, rightToolbar);
+    return new MySplitEditorToolbar(leftToolbar, rightToolbar);
   }
 
   @Override
