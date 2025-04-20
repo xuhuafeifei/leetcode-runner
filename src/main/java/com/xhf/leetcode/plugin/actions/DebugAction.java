@@ -61,6 +61,16 @@ public class DebugAction extends AbstractAction {
         if (! doCheck(project, langType)) {
             return;
         }
+        // mac操作系统不支持cpp的调试, 因为他无法兼容gdb（操蛋的mac对gdb有诸多限制, 且lldb又找不到输出结构化数据的方式, 放弃了，毁灭吧）
+        if (OSHandler.isMac()) {
+            ConsoleUtils.getInstance(project).showWaring(
+                BundleUtils.i18nHelper(
+                    "暂不支持mac操作系统的cpp调试, 因为他对gdb调试存在诸多限制且lldb又找不到输出结构化数据的方式, 放弃了, 毁灭吧",
+                    "not support mac os cpp debug, because it has many limitations of gdb and lldb can't find a way to output structured data, give up, destroy it"),
+                false, true
+            );
+            return;
+        }
         Debugger debugger = DebugManager.getInstance(project).createDebugger(CPPDebugger.class);
         try {
             debugger.start();

@@ -71,7 +71,8 @@ void DebugServer::start() {
         }
     });
 
-    svr.listen("localhost", this->port);
+    // md, 用127.0.0.1, 否则localhost可能会绑定到ipv6
+    svr.listen("127.0.0.1", this->port);
 
     watch_thread.join();
     log.log_info("WebGdbServer stopped...");

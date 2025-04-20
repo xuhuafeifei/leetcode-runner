@@ -118,11 +118,17 @@ public class CPPDebugger extends AbstractDebugger {
             }
             if (!"error".equals(cppGdbInfo.getStatus())) {
                 // 执行正确
-                GdbElement ele = instance.parse(instance.preHandle(cppGdbInfo.getStoppedReason()));
-                String reason = ele.getAsGdbObject().get("reason").getAsGdbPrimitive().getAsString();
-                // 不是因为breakpoint终止, 那么就是GDB完成运行或者出现异常, 需要停止debug
-                if (! "breakpoint-hit".equals(reason)) {
-                    DebugManager.getInstance(project).stopDebugger();
+                String stoppedReason = cppGdbInfo.getStoppedReason();
+                GdbElement ele = instance.parse(instance.preHandle(stoppedReason));
+                if (ele.isGdbObject()) {
+                    GdbElement reason = ele.getAsGdbObject().get("reason");
+                    if (reason != null) {
+                        String output = reason.getAsGdbPrimitive().getAsString();
+                        // 不是因为breakpoint终止, 那么就是GDB完成运行或者出现异常, 需要停止debug
+                        if (! "breakpoint-hit".equals(output)) {
+                            DebugManager.getInstance(project).stopDebugger();
+                        }
+                    }
                 }
             } else {
                 // 执行错误
@@ -177,18 +183,22 @@ public class CPPDebugger extends AbstractDebugger {
     }
 
     private void startCppService() {
-        StringBuilder sb = new StringBuilder(env.getServerMainExePath());
+        String serverMainExePath = env.getServerMainExePath();
+        StringBuilder sb = new StringBuilder(serverMainExePath);
         for (String arg : env.getServerArgv()) {
             sb.append(" ").append(arg);
         }
 
         String cmd = sb.toString();
+        // 如果是mac/linux, 先修改权限, 添加执行权限
+        if (! OSHandler.isWin()) {
+            cmd = "chmod 744 " + serverMainExePath + " && " + cmd;
+        }
 
         DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd") + ": " + cmd, project);
 
         try {
             this.exec = OSHandler.buildProcess(cmd);
-//            this.exec = DebugUtils.buildProcess(cmd);
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
             throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed") + "\n" + e.getCause() + "\n" + BundleUtils.i18n("debug.leetcode.instruction") + " = " + cmd);

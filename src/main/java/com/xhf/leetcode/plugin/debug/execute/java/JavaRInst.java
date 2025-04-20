@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.debug.execute.java;
 
+import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
@@ -13,6 +14,11 @@ public class JavaRInst extends AbstractJavaInstExecutor {
     public ExecuteResult doExecute(Instruction inst, Context context) {
         context.removeStepRequest();
         context.getVm().resume();
+        super.doMoreInst(
+            new Operation[] {Operation.W, Operation.P},
+            new String[] {"w", "p"},
+            inst.getReadType()
+        );
         return ExecuteResult.success(inst.getOperation());
     }
 }

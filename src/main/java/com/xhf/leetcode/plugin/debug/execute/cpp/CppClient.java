@@ -23,7 +23,7 @@ public class CppClient {
     public CppClient(Project project) {
         var debugger = DebugManager.getInstance(project).getCurrentDebugger();
         int cppPort = ((CppDebugEnv) debugger.getEnv()).getPort();
-        this.url = "http://localhost:" + cppPort;
+        this.url = "http://127.0.0.1:" + cppPort;
     }
 
     public ExecuteResult postRequest(Instruction inst) {

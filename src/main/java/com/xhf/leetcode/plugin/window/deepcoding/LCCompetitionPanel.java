@@ -91,7 +91,13 @@ public class LCCompetitionPanel extends AbstractSearchPanel<CompetitionQuestion>
         editorPane.setMargin(JBUI.emptyInsets());
         editorPane.setBorder(BorderFactory.createEmptyBorder());
         editorPane.setContentType("text/html");
-        editorPane.setText("<p>  当前界面数据来自于<a href='https://github.com/huxulm/lc-rating'>github开源项目lc-rating</a> <font color=red>感谢!</font></p><p>  当前界面题解来自于<a href='https://space.bilibili.com/206214'>bilibili@灵茶山艾府</a> <font color=red>感谢!</font></p>");
+        editorPane.setText(
+            BundleUtils.i18nHelper(
+                "<p>  当前界面数据来自于<a href='https://github.com/huxulm/lc-rating'>github开源项目lc-rating</a> <font color=red>感谢!</font></p><p>  当前界面题解来自于<a href='https://space.bilibili.com/206214'>bilibili@灵茶山艾府</a> <font color=red>感谢!</font></p>",
+                "<p>  current data is from <a href='https://github.com/huxulm/lc-rating'>github open source project lc-rating</a> <font color=red>thank you!</font></p><p>  current solution is from <a href='https://space.bilibili.com/206214'>bilibili@灵茶山艾府</a> <font color=red>thank you!</font></p>"
+            )
+
+        );
         editorPane.setEditable(false);
         editorPane.setOpaque(false);
 

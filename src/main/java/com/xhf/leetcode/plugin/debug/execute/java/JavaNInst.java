@@ -43,9 +43,12 @@ public class JavaNInst extends AbstractJavaInstExecutor {
          *
          * 至此, 实现了在第13行执行N指令, 高亮显示下一行代码, 也就是14行
          */
-        if (AppSettings.getInstance().isUIOutput()) {
-            InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, ""));
-        }
+        super.doMoreInst(
+            new Operation[] {Operation.W, Operation.P},
+            new String[] {"W", "P"},
+            inst.getReadType()
+        );
+
         // 输出一下当前所在行号, 不然UI显示的时候遇到系统代码, 啥也看不到, 就很操蛋
         Location location = context.getLocation();
         // debug

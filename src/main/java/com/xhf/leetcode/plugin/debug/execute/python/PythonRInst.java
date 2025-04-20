@@ -17,6 +17,11 @@ public class PythonRInst extends AbstractPythonInstExecutor {
         // 但pythonDebugger一切行为都需要我手动判断, 比较操蛋. 除非我每次循环都判断一次连接情况, 否则只能通过执行指令的方式判断
         // python server是否关闭
         super.doExecute(inst, pCtx);
+        super.doMoreInst(
+            new Operation[]{Operation.P},
+            new String[]{"p"},
+            pCtx.getReadType()
+        );
         return new PythonWInst().execute(Instruction.success(pCtx.getReadType(), Operation.W, null), pCtx);
     }
 }

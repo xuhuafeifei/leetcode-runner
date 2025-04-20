@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.utils;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
@@ -176,5 +177,13 @@ public class OSHandler {
         } else {
             return linuxFile;
         }
+    }
+
+    public static String unifyFileSeparator(String filePath, String s) {
+        return filePath
+            .replace("\\\\", s)
+            .replace("/", s)
+            .replace("\\", s)
+        ;
     }
 }

@@ -20,12 +20,11 @@ public class CppRInst extends AbstractCppInstExecutor {
     @Override
     protected ExecuteResult doExecute(Instruction inst, CppContext pCtx, String gdbCommand) {
         ReadType readType = pCtx.getReadType();
-        switch (readType) {
-            case COMMAND_IN:
-                InstSource.userCmdInput("w");
-            case UI_IN:
-                InstSource.uiInstInput(Instruction.success(readType, Operation.W, null));
-        }
+        super.doMoreInst(
+            new Operation[] {Operation.W, Operation.P},
+            new String[] {"w", "p"},
+            readType
+        );
         return super.doExecute(inst, pCtx, gdbCommand);
         // return new CppWInst().execute(Instruction.success(pCtx.getReadType(), Operation.W, null), pCtx);
     }

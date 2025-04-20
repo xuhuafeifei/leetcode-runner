@@ -6,6 +6,7 @@
 #ifndef CPP_LOGHELPER_H
 #define CPP_LOGHELPER_H
 #include <iostream>
+#include <fstream>
 
 class LogHelper {
 private:

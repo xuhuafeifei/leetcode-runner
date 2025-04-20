@@ -56,6 +56,9 @@ public class GdbParser {
 
     public GdbElement parseResultClass(String input) {
         input = input.trim();
+        if (StringUtils.isBlank(input)) {
+            return new GdbPrimitive(input);
+        }
         if (input.startsWith("^") || input.startsWith("*") || input.startsWith("=")) {
             // 去掉前缀（如 ^done, *stopped, =thread-group-added）
             input = input.substring(input.indexOf(',') + 1).trim();

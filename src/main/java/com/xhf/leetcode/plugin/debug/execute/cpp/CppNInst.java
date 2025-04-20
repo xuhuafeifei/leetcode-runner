@@ -21,8 +21,10 @@ public class CppNInst extends AbstractCppInstExecutor {
     @Override
     protected void doAfter(ExecuteResult r, CppContext pCtx) {
         // 这么设置的原因可以参考JavaNInst
-        if (AppSettings.getInstance().isUIOutput()) {
-            InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.W, ""));
-        }
+        super.doMoreInst(
+            new Operation[]{Operation.W, Operation.P},
+            new String[]{"w", "p"},
+            pCtx.getReadType()
+        );
     }
 }
