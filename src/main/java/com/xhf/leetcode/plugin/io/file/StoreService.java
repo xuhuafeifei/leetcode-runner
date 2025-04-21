@@ -8,10 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.AESUtils;
-import com.xhf.leetcode.plugin.utils.GsonUtils;
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.TaskCenter;
+import com.xhf.leetcode.plugin.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,6 +33,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class StoreService implements Disposable {
     private Project project;
 
+    private static volatile StoreService instance;
+
     public StoreService(Project project) {
         this.project = project;
         // load data
@@ -57,7 +56,28 @@ public final class StoreService implements Disposable {
     }
 
     public static StoreService getInstance(Project project) {
-        return project.getService(StoreService.class);
+        try {
+            if (instance == null) {
+                synchronized (StoreService.class) {
+                    if (instance == null) {
+                        instance = project.getService(StoreService.class);
+                    }
+                }
+            }
+            return instance;
+        } catch (Exception e) {
+            LogUtils.error(e);
+            ViewUtils.getDialogWrapper(
+                    BundleUtils.i18nHelper(
+                    "无法获取全局缓存服务实例, 请重启IDE\n 错误原因: " + e.getMessage(),
+                    "cannot get global cache service instance, please restart IDE\n error reason: " + e.getMessage()),
+                    BundleUtils.i18nHelper(
+                            "严重错误",
+                            "fatal error"
+                    )
+            ).show();
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
