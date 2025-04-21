@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.io.file.utils;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.OSHandler;
+import java.net.URLDecoder;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -131,7 +132,14 @@ public class FileUtils {
     }
 
     public static boolean fileExists(String path) {
-        return new File(path).exists();
+        boolean exists = new File(path).exists();
+        if (! exists) {
+            // 解码 URL 编码的路径
+            String decodedPath;
+            decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+            return new File(decodedPath).exists();
+        }
+        return true;
     }
 
     /**

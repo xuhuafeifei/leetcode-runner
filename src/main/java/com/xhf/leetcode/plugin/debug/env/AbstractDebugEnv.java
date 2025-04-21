@@ -135,7 +135,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
             return forceTraverse(resourcePath, exceptFileName);
         } catch (Exception e) {
             LogUtils.error(e);
-            throw new DebugError(e.toString());
+            throw new DebugError(e);
         }
     }
 

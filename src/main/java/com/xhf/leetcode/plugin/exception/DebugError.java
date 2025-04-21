@@ -5,8 +5,13 @@ package com.xhf.leetcode.plugin.exception;
  * @email 2508020102@qq.com
  */
 public class DebugError extends RuntimeException{
+
     public DebugError(String message) {
         super(message, null);
+    }
+
+    public DebugError(Throwable e) {
+        super(e);
     }
 
     public DebugError(String message, Throwable e) {
