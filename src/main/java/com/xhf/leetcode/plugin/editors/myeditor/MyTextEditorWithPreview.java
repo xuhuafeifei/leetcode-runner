@@ -61,7 +61,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
   private boolean myIsVerticalSplit;
   private JComponent myComponent;
   private JBSplitter mySplitter;
-  private SplitEditorToolbar myToolbarWrapper;
+  private MySplitEditorToolbar myToolbarWrapper;
   private final @Nls String myName;
   public static final Key<Layout> DEFAULT_LAYOUT_FOR_FILE = Key.create("MyTextEditorWithPreview.DefaultLayout");
 
@@ -75,6 +75,12 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     myName = editorName;
     myDefaultLayout = ObjectUtils.notNull(getLayoutForFile(myEditor.getFile()), defaultLayout);
     myIsVerticalSplit = isVerticalSplit;
+    mySplitter = new JBSplitter(myIsVerticalSplit, 0.5f, 0.15f, 0.85f);
+    mySplitter.setSplitterProportionKey(getSplitterProportionKey());
+    mySplitter.setFirstComponent(myPreview.getComponent());
+    mySplitter.setSecondComponent(myEditor.getComponent());
+    mySplitter.setDividerWidth(3);
+    mySplitter.getDivider().setBackground(JBColor.border());
   }
 
   public MyTextEditorWithPreview(@NotNull TextEditor editor,
@@ -134,13 +140,6 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     if (myComponent != null) {
       return myComponent;
     }
-
-    mySplitter = new JBSplitter(myIsVerticalSplit, 0.5f, 0.15f, 0.85f);
-    mySplitter.setSplitterProportionKey(getSplitterProportionKey());
-    mySplitter.setFirstComponent(myPreview.getComponent());
-    mySplitter.setSecondComponent(myEditor.getComponent());
-    mySplitter.setDividerWidth(3);
-    mySplitter.getDivider().setBackground(JBColor.border());
 
     myToolbarWrapper = createMarkdownToolbarWrapper(mySplitter);
 
@@ -270,7 +269,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
   }
 
   @NotNull
-  private SplitEditorToolbar createMarkdownToolbarWrapper(@NotNull JComponent targetComponentForActions) {
+  private MySplitEditorToolbar createMarkdownToolbarWrapper(@NotNull JComponent targetComponentForActions) {
     final ActionToolbar leftToolbar = createToolbar();
     if (leftToolbar != null) {
       leftToolbar.setTargetComponent(targetComponentForActions);
@@ -281,7 +280,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     rightToolbar.setTargetComponent(targetComponentForActions);
     rightToolbar.setReservePlaceAutoPopupIcon(false);
 
-    return new SplitEditorToolbar(leftToolbar, rightToolbar);
+    return new MySplitEditorToolbar(leftToolbar, rightToolbar);
   }
 
   @Override
@@ -304,6 +303,10 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
   protected void onLayoutChange(Layout oldValue, Layout newValue) { }
 
   private void adjustEditorsVisibility() {
+    if (myPreview == null || myEditor == null || myLayout == null) {
+      LogUtils.warn("myPreview or myEditor or myLayout is null");
+      return;
+    }
     // 单独处理Preview模式, 不能全部铺满, 否则悬浮框会被遮挡
     if (myLayout == Layout.SHOW_PREVIEW) {
       myPreview.getComponent().setVisible(true);

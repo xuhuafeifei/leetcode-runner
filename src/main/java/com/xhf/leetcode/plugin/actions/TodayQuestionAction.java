@@ -1,11 +1,13 @@
 package com.xhf.leetcode.plugin.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * get daily question
@@ -29,11 +31,6 @@ public class TodayQuestionAction extends AbstractAction {
         instance.updateTodayStatus();
         instance.todayQuestion(project);
     }
-
-//    @Override
-//    public @NotNull ActionUpdateThread getActionUpdateThread() {
-//        return super.getActionUpdateThread();
-//    }
 
     /**
      * 该方法会被多次且频繁调用, 因此尽量减少操作逻辑
