@@ -55,22 +55,6 @@ public class SplitTextEditorWithPreview extends MyTextEditorWithPreview {
         subscribeToBreakpointEvents(editor.getEditor());
     }
 
-//    public SplitTextEditorWithPreview(
-//        @NotNull  CustomTextEditorProvider editor,
-//        @NotNull FileEditorProvider preview,
-//        @NotNull  Project project,
-//        @NotNull  VirtualFile virtualFile
-//    ) {
-//        super(
-//            (TextEditor) editor.createEditor(project, virtualFile),
-//            preview.createEditor(project, virtualFile)
-//        );
-//        this.project = project;
-//        // 注册断点监听器
-//        subscribeToBreakpointEvents(editor.getEditor());
-//    }
-
-
     @Nullable
     protected ActionGroup createRightToolbarActionGroup() {
         ActionGroup action = (ActionGroup) ActionManager.getInstance().getAction("leetcode.plugin.editor.basic.group");

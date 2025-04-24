@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -58,7 +59,9 @@ public class TodayQuestionAction extends AbstractAction {
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction") + " " +
                     BundleUtils.i18nHelper("坚持了" + cnt + "天", " Streak for " + cnt + " days")
             );
-            instance.modified();
+            if (!Objects.equals(cnt, "NULL")) {
+                instance.modified();
+            }
         } else if (instance.todayQuestionSolved() == -1){
             presentation.setIcon(IconLoader.getIcon("/icons/daily.svg", this.getClass()));
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction"));

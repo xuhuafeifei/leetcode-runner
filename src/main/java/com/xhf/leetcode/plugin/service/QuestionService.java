@@ -10,6 +10,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
@@ -24,7 +25,9 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +52,7 @@ public class QuestionService {
     private boolean todaySolved = false;
 
     private boolean needModify = false;
+
     private CalendarSubmitRecord calendarSubmitRecord;
 
     public QuestionService(Project project) {
@@ -405,11 +409,35 @@ public class QuestionService {
     public void TodayQuestionOkEventListener(TodayQuestionOkEvent event) {
         todaySolved = true;
         needModify  = true;
-        this.calendarSubmitRecord = LeetcodeClient.getInstance(project).getCalendarSubmitRecord();
+        try {
+            this.calendarSubmitRecord = LeetcodeClient.getInstance(project).getCalendarSubmitRecord();
+        } catch (Exception e) {
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            // roll back
+            this.calendarSubmitRecord = null;
+        }
     }
 
+    AtomicInteger retryCount = new AtomicInteger(0);
+
+    /**
+     * 该方法会被TodayQuestionAction频繁调用, 因此尽可能不要话费太多时间
+     * @return String 今日一题的完成次数
+     */
     public String getTodayQuestionCount() {
         if (calendarSubmitRecord == null) {
+            // 如果为null, 则尝试异步获取一次
+            TaskCenter.getInstance().createTask(() -> {
+                // 如果超过五次都没有获取成功, 则放弃
+                if (retryCount.get() < 5) {
+                    TodayQuestionOkEventListener(null);
+                } else {
+                    // 终止获取, 同时修改图标状态的标识位
+                    modified();
+                }
+                retryCount.incrementAndGet();
+            }).invokeLater();
+
             return "NULL";
         }
         return String.valueOf(calendarSubmitRecord.getDailyQuestionStreakCount());

@@ -18,6 +18,14 @@ public class CalendarSubmitRecord {
      */
     private int monthlyAcCount;
 
+    public static CalendarSubmitRecord getDefault() {
+        CalendarSubmitRecord calendarSubmitRecord = new CalendarSubmitRecord();
+        calendarSubmitRecord.setDailySubmitStreakCount(0);
+        calendarSubmitRecord.setDailyQuestionStreakCount(0);
+        calendarSubmitRecord.setMonthlyAcCount(0);
+        return calendarSubmitRecord;
+    }
+
     public int getDailySubmitStreakCount() {
         return dailySubmitStreakCount;
     }
