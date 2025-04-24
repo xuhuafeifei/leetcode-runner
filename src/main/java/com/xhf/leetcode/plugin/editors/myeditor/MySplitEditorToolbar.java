@@ -31,6 +31,7 @@ public class MySplitEditorToolbar extends EditorHeaderComponent {
     add(myRightToolbar.getComponent());
   }
 
+
   public ActionToolbar getRightToolbar() {
     return myRightToolbar;
   }

@@ -32,6 +32,11 @@ public class TodayQuestionAction extends AbstractAction {
         instance.todayQuestion(project);
     }
 
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
+
     /**
      * 该方法会被多次且频繁调用, 因此尽量减少操作逻辑
      */

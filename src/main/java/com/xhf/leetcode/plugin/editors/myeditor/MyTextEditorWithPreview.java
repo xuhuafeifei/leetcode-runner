@@ -25,6 +25,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.editors.text.CustomTextEditor;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.Nls;
@@ -73,6 +74,10 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
                                @NotNull Layout defaultLayout,
                                boolean isVerticalSplit) {
     myEditor = editor;
+    if (editor instanceof CustomTextEditor) {
+      CustomTextEditor cte = (CustomTextEditor) editor;
+      cte.setToolbar(createViewActionGroup());
+    }
     myPreview = preview;
     myName = editorName;
     myDefaultLayout = ObjectUtils.notNull(getLayoutForFile(myEditor.getFile()), defaultLayout);
@@ -151,7 +156,7 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     }
     adjustEditorsVisibility();
 
-    BorderLayoutPanel panel = JBUI.Panels.simplePanel(mySplitter).addToTop(myToolbarWrapper);
+    BorderLayoutPanel panel = JBUI.Panels.simplePanel(mySplitter);
     // 使用普通的 JPanel 来包装组件
     if (!isShowFloatingToolbar()) {
       myComponent = panel;
@@ -349,7 +354,9 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
 
   private void invalidateLayout() {
     adjustEditorsVisibility();
-    myToolbarWrapper.refresh();
+    if (myToolbarWrapper != null) {
+      myToolbarWrapper.refresh();
+    }
     myComponent.repaint();
 
     final JComponent focusComponent = getPreferredFocusedComponent();
@@ -540,7 +547,13 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     final ActionGroup group = createRightToolbarActionGroup();
     final ActionGroup rightToolbarActions = group == null
                                             ? viewActions
-                                            : new DefaultActionGroup(group, Separator.create(), viewActions);
+                                            :
+                                                AppSettings.getInstance().getEnableFloatingToolbar() ?
+                                                    // 如果开启悬浮窗, 则右侧工具栏显示在悬浮窗上, 否则显示在编辑器上
+                                                    new DefaultActionGroup(group, Separator.create(), viewActions):
+                                                    // 否则, 只显示viewActions
+                                                    new DefaultActionGroup(viewActions);
+
     return ActionManager.getInstance().createActionToolbar(TEXT_EDITOR_WITH_PREVIEW, rightToolbarActions, true);
   }
 

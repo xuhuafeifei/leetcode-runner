@@ -4,6 +4,8 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorPolicy;
+import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileEditor.TextEditorWithPreview;
 import com.intellij.openapi.options.ShowSettingsUtil;
@@ -20,6 +22,8 @@ import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.editors.myeditor.MyTextEditorWithPreview;
+import com.xhf.leetcode.plugin.editors.text.CustomTextEditor;
+import com.xhf.leetcode.plugin.editors.text.CustomTextEditorProvider;
 import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.*;
@@ -50,6 +54,22 @@ public class SplitTextEditorWithPreview extends MyTextEditorWithPreview {
         // 注册断点监听器
         subscribeToBreakpointEvents(editor.getEditor());
     }
+
+//    public SplitTextEditorWithPreview(
+//        @NotNull  CustomTextEditorProvider editor,
+//        @NotNull FileEditorProvider preview,
+//        @NotNull  Project project,
+//        @NotNull  VirtualFile virtualFile
+//    ) {
+//        super(
+//            (TextEditor) editor.createEditor(project, virtualFile),
+//            preview.createEditor(project, virtualFile)
+//        );
+//        this.project = project;
+//        // 注册断点监听器
+//        subscribeToBreakpointEvents(editor.getEditor());
+//    }
+
 
     @Nullable
     protected ActionGroup createRightToolbarActionGroup() {
