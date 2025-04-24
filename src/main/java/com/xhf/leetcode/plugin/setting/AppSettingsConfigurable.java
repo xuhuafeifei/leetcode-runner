@@ -52,7 +52,8 @@ final class AppSettingsConfigurable implements Configurable {
             !mySettingsComponent.getReposition().equals(state.rePositionSetting) ||
             !mySettingsComponent.getLocale().equals(state.locale) ||
             !mySettingsComponent.getSecretKey().equals(state.secretKey) ||
-            !mySettingsComponent.getEncryptOrNot() == state.encryptOrNot
+            !mySettingsComponent.getEncryptOrNot() == state.encryptOrNot ||
+            !mySettingsComponent.getEnableFloatingToolbar() == state.enableFloatingToolbar
             ;
   }
 
@@ -87,6 +88,8 @@ final class AppSettingsConfigurable implements Configurable {
     if (secretKeyUpdateSend) {
       LCEventBus.getInstance().post(new SecretKeyUpdateEvent(state.secretKey));
     }
+
+    state.enableFloatingToolbar = mySettingsComponent.getEnableFloatingToolbar();
   }
 
   /**
@@ -108,6 +111,8 @@ final class AppSettingsConfigurable implements Configurable {
 
     mySettingsComponent.setSecretKey(state.secretKey);
     mySettingsComponent.setEncryptOrNot(state.encryptOrNot);
+
+    mySettingsComponent.setEnableFloatingToolbar(state.enableFloatingToolbar);
   }
 
   @Override

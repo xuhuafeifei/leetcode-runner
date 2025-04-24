@@ -69,6 +69,7 @@ public final class AppSettings
     public String rePositionSetting;
     public transient String secretKey = "";
     public boolean encryptOrNot = false;
+    public boolean enableFloatingToolbar = true;
 
     @Override
     public String toString() {
@@ -79,6 +80,7 @@ public final class AppSettings
               ", readTypeName='" + readTypeName + '\'' +
               ", outputTypeName='" + outputTypeName + '\'' +
               ", rePositionSetting='" + rePositionSetting + '\'' +
+              ", enableFloatingToolbar=" + enableFloatingToolbar +
               '}';
     }
   }
@@ -264,5 +266,9 @@ public final class AppSettings
 
   public boolean getEncryptOrNot() {
     return myState.encryptOrNot;
+  }
+
+  public boolean getEnableFloatingToolbar() {
+    return myState.enableFloatingToolbar;
   }
 }

@@ -24,6 +24,8 @@ import com.intellij.util.ObjectUtils;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.intellij.util.ui.components.BorderLayoutPanel;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -251,6 +253,17 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
 
 
   protected boolean isShowFloatingToolbar() {
+    boolean flag;
+    try {
+      flag = AppSettings.getInstance().getEnableFloatingToolbar();
+    } catch (Exception e) {
+      LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+      flag = false;
+    }
+
+    if (! flag) {
+      return false;
+    }
     try {
       return Registry.is("ide.text.editor.with.preview.show.floating.toolbar");
     } catch (MissingResourceException e) {
