@@ -59,6 +59,7 @@ public class TodayQuestionAction extends AbstractAction {
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction") + " " +
                     BundleUtils.i18nHelper("坚持了" + cnt + "天", " Streak for " + cnt + " days")
             );
+
             if (!Objects.equals(cnt, "NULL")) {
                 instance.modified();
             }
