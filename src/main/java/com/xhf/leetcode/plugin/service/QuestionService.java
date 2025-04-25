@@ -26,6 +26,7 @@ import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.TaskCenter;
+import com.xhf.leetcode.plugin.utils.TodayIconStatusEnum;
 import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.StringUtils;
@@ -364,13 +365,13 @@ public class QuestionService {
      * 判断当前每日一题解决状态
      * 该方法会被频繁调用, 因此采用本地变量缓存的形式进行判断, 而不是调用leetcode接口查询数据
      *
-     * @return 返回1, 表示已经解决. 0表示无需修改图标状态. -1表示需要修改为为解决
+     * @return 返回1, 表示已经解决. 0表示无需修改图标状态. -1表示需要修改为未解决图标
      */
-    public int todayQuestionSolved() {
+    public TodayIconStatusEnum todayQuestionSolved() {
         if (! needModify) {
-            return 0;
+            return TodayIconStatusEnum.NO_NEED_MODIFY;
         }
-        return todaySolved ? 1 : -1;
+        return todaySolved ? TodayIconStatusEnum.SOLVED : TodayIconStatusEnum.NOT_SOLVED;
     }
 
     public void modified() {

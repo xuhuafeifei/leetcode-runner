@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.TodayIconStatusEnum;
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,7 +53,7 @@ public class TodayQuestionAction extends AbstractAction {
         Presentation presentation = e.getPresentation();
         // 根据某些条件动态设置图标
         QuestionService instance = QuestionService.getInstance(e.getProject());
-        if (instance.todayQuestionSolved() == 1) {
+        if (instance.todayQuestionSolved() == TodayIconStatusEnum.SOLVED) {
             presentation.setIcon(IconLoader.getIcon("/icons/flame.svg", this.getClass()));
             // 获取当日连击次数
             String cnt = instance.getTodayQuestionCount();
@@ -63,7 +64,7 @@ public class TodayQuestionAction extends AbstractAction {
             if (!Objects.equals(cnt, "NULL")) {
                 instance.modified();
             }
-        } else if (instance.todayQuestionSolved() == -1){
+        } else if (instance.todayQuestionSolved() == TodayIconStatusEnum.NOT_SOLVED){
             presentation.setIcon(IconLoader.getIcon("/icons/daily.svg", this.getClass()));
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction"));
             instance.modified();
