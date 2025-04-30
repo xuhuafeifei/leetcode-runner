@@ -19,7 +19,7 @@ public class DatabaseAdapter {
      * 数据库适配器的构造函数，从配置文件中读取所有数据并建立数据库连接。
      * 此外，还会创建所有必要的表。
      */
-    public DatabaseAdapter(Project project) {
+    private DatabaseAdapter(Project project) {
         this.dbFolder  = PathManager.getSystemPath();
         this.dbName = "memory.db";
         String path = new PathBuilder(dbFolder).append(dbName).build();
@@ -43,6 +43,20 @@ public class DatabaseAdapter {
 
         // 创建数据库表
         this.createTables();
+    }
+
+    // 单例
+    private static volatile DatabaseAdapter instance = null;
+
+    public static DatabaseAdapter getInstance(Project project) {
+        if (instance == null) {
+            synchronized (DatabaseAdapter.class) {
+                if (instance == null) {
+                    instance = new DatabaseAdapter(project);
+                }
+            }
+        }
+        return instance;
     }
 
     /**

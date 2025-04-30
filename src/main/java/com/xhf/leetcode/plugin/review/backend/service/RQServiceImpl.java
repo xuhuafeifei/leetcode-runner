@@ -32,7 +32,7 @@ public class RQServiceImpl implements ReviewQuestionService {
 
     private RQServiceImpl(Project project) {
         this.project = project;
-        this.app = new AlgorithmAPI(project);
+        this.app = AlgorithmAPI.getInstance(project);
     }
 
     public static RQServiceImpl getInstance(Project project) {
@@ -66,13 +66,13 @@ public class RQServiceImpl implements ReviewQuestionService {
     private QuestionCardReq toQuestionCardReq(Question question, FSRSRating rating) {
         int id = getId(question);
         QuestionFront front = getQuestionFront(question, rating);
-        return new QuestionCardReq(id, front, "", rating, this.project);
+        return new QuestionCardReq(id, front, "", rating);
     }
 
     private QuestionFront getQuestionFront(Question question, FSRSRating rating) {
         return
                 new QuestionFront(
-                question.getTitle(),
+                question.getTitleCn(),
                 question.getDifficulty(),
                 question.getStatus(),
                 question.getAcRate(),

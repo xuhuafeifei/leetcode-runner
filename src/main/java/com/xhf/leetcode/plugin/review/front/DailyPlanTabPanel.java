@@ -5,18 +5,17 @@ import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
-import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import java.awt.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * 每日一题面板
@@ -82,28 +81,78 @@ public class DailyPlanTabPanel extends JPanel {
 
         // 创建内容面板容器
         contentPanel = new JPanel(new BorderLayout());
-        this.currentCard = createEditorComponent(rq);  // 保存引用
-        contentPanel.add(this.currentCard, BorderLayout.CENTER);
-        jPanel.add(contentPanel, BorderLayout.CENTER);
+        if (rq != null) {
+            this.currentCard = createEditorComponent(rq);  // 保存引用
+            contentPanel.add(this.currentCard, BorderLayout.CENTER);
+            jPanel.add(contentPanel, BorderLayout.CENTER);
 
-        JPanel bottomPanel = new JPanel();
-        // 掌握button
-        JButton masterBtn = new JButton(BundleUtils.i18nHelper("掌握", "master"));
-        masterBtn.addActionListener(e -> showMasteryDialog());
+            JPanel bottomPanel = new JPanel();
+            // 掌握button
+            JButton masterBtn = new JButton(BundleUtils.i18nHelper("掌握", "master"));
+            masterBtn.addActionListener(e -> showMasteryDialog());
 
-        // 继续学习button
-        JButton deleteBtn = new JButton(BundleUtils.i18nHelper("删除", "delete"));
-        deleteBtn.addActionListener(e -> removeQuestion(rq));
-        // 反转button
-        JButton flipButton = getFlipBtn(rq);
+            // 继续学习button
+            JButton deleteBtn = new JButton(BundleUtils.i18nHelper("删除", "delete"));
+            deleteBtn.addActionListener(e -> removeQuestion(rq));
 
-        bottomPanel.add(masterBtn);
-        bottomPanel.add(deleteBtn);
-        bottomPanel.add(flipButton);
+            // 反转button
+            JButton flipButton = getFlipBtn(rq);
 
-        jPanel.add(bottomPanel, BorderLayout.SOUTH);
+            bottomPanel.add(masterBtn);
+            bottomPanel.add(deleteBtn);
+            bottomPanel.add(flipButton);
+
+            jPanel.add(bottomPanel, BorderLayout.SOUTH);
+        } else {
+            JEditorPane emptyMessagePane = new JEditorPane();
+            emptyMessagePane.setContentType("text/html");
+            emptyMessagePane.setEditable(false);
+
+            String message = BundleUtils.i18nHelper("没有题目需要复习！", "No question needs to be reviewed!");
+
+            String htmlContent = createHtmlContent().replace("${message}", message);
+
+            this.currentCard = emptyMessagePane;
+            emptyMessagePane.setText(htmlContent);
+
+            jPanel.add(contentPanel, BorderLayout.CENTER);
+
+            jPanel.add(contentPanel, BorderLayout.CENTER);
+        }
 
         return jPanel;
+    }
+
+    private String createHtmlContent() {
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "    <style>\n" +
+                "        .empty-message {\n" +
+                "            font-family: Arial, sans-serif;\n" +
+                "            text-align: center;\n" +
+                "            padding: 40px;\n" +
+                "            color: #666;\n" +
+                "            font-size: 18px;\n" +
+                "            background-color: #f8f9fa;\n" +
+                "            border-radius: 8px;\n" +
+                "            margin: 20px;\n" +
+                "            box-shadow: 0 2px 4px rgba(0,0,0,0.05);\n" +
+                "        }\n" +
+                "        .empty-message .icon {\n" +
+                "            font-size: 48px;\n" +
+                "            margin-bottom: 15px;\n" +
+                "            color: #adb5bd;\n" +
+                "        }\n" +
+                "    </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "    <div class=\"empty-message\">\n" +
+                "        <div class=\"icon\">☑\uFE0F</div>\n" +
+                "        <div>${message}</div>\n" +
+                "    </div>\n" +
+                "</body>\n" +
+                "</html>";
     }
 
     /**

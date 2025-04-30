@@ -4,9 +4,6 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import java.util.function.Consumer;
 
 /**
@@ -14,7 +11,6 @@ import java.util.function.Consumer;
  */
 public class Sqlite {
     private String dbFolder, dbName;
-    private ExecutorService executorService;
     private Connection connection;
 
     /**
@@ -24,7 +20,6 @@ public class Sqlite {
     public Sqlite(String dbFolder, String dbName) {
         this.dbFolder = dbFolder;
         this.dbName = dbName;
-        this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
     /**
@@ -101,7 +96,7 @@ public class Sqlite {
      */
     public void update(PreparedStatement statement) {
         checkConnection();
-        this.executorService.execute(() -> this.queryUpdate(statement));
+        this.queryUpdate(statement);
     }
 
     /**
@@ -110,7 +105,7 @@ public class Sqlite {
      */
     public void update(String statement) {
         checkConnection();
-        this.executorService.execute(() -> this.queryUpdate(statement));
+        this.queryUpdate(statement);
     }
 
     /**
@@ -129,10 +124,8 @@ public class Sqlite {
      */
     public void query(PreparedStatement statement, Consumer<ResultSet> consumer) {
         checkConnection();
-        this.executorService.execute(() -> {
-            ResultSet result = this.query(statement);
-            consumer.accept(result);
-        });
+        ResultSet result = this.query(statement);
+        consumer.accept(result);
     }
 
     /**
@@ -142,10 +135,8 @@ public class Sqlite {
      */
     public void query(String statement, Consumer<ResultSet> consumer) {
         checkConnection();
-        this.executorService.execute(() -> {
-            ResultSet result = this.query(statement);
-            consumer.accept(result);
-        });
+        ResultSet result = this.query(statement);
+        consumer.accept(result);
     }
 
     /**

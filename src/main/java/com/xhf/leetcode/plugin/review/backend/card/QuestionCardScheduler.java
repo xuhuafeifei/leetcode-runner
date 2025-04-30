@@ -1,11 +1,11 @@
 package com.xhf.leetcode.plugin.review.backend.card;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 import com.xhf.leetcode.plugin.review.backend.algorithm.FSRSAlgorithm;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSState;
 import com.xhf.leetcode.plugin.review.backend.algorithm.result.FSRSAlgorithmResult;
-import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * 初始化完成后必须调用init
  * @author 文艺倾年
  */
 public class QuestionCardScheduler {
@@ -25,11 +26,28 @@ public class QuestionCardScheduler {
     /**
      * 构造函数，用于初始化卡片调度器
      */
-    public QuestionCardScheduler(Project project, DatabaseAdapter databaseAdapter) {
+    private QuestionCardScheduler(Project project) {
         this.queue = new Queue<>();
         this.project = project;
-        this.databaseAdapter = databaseAdapter;
-        this.queueDueCards();
+        this.databaseAdapter = DatabaseAdapter.getInstance(project);
+    }
+
+    public void init() {
+        queueDueCards();
+    }
+
+    // 单例
+    private static volatile QuestionCardScheduler instance = null;
+
+    public static QuestionCardScheduler getInstance(Project project) {
+        if (instance == null) {
+            synchronized (QuestionCardScheduler.class) {
+                if (instance == null) {
+                    instance = new QuestionCardScheduler(project);
+                }
+            }
+        }
+        return instance;
     }
 
     /**

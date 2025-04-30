@@ -1,41 +1,47 @@
 package com.xhf.leetcode.plugin.review.backend.algorithm;
 
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSState;
+import com.xhf.leetcode.plugin.review.backend.algorithm.result.FSRSAlgorithmResult;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
-import com.xhf.leetcode.plugin.review.backend.card.QuestionCardScheduler;
+import com.xhf.leetcode.plugin.review.backend.card.QuestionCardReq;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionFront;
 import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 
-import com.xhf.leetcode.plugin.utils.LogUtils;
-import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 每次实例化App后, 必须调用init()方法
  * @author 文艺倾年
  */
 public class AlgorithmApp {
 
     private static volatile AlgorithmApp instance;
     private final Map<Integer, QuestionCard> cards;
-    private final QuestionCardScheduler cardScheduler;
     private final DatabaseAdapter databaseAdapter;
     private final Project project;
 
     /**
      * 实例化 AlgorithmApp。在这里执行启动应用程序所需的重要步骤
      */
-    public AlgorithmApp(Project project) {
+    private AlgorithmApp(Project project) {
         // 实例化数据库
         this.project = project;
-        this.databaseAdapter = new DatabaseAdapter(project);
         // 实例化 HashMap，用于存储从数据库加载的卡片
         this.cards = new HashMap<>();
-        this.loadCards();
-        this.cardScheduler = new QuestionCardScheduler(project, this.databaseAdapter);
+        this.databaseAdapter = DatabaseAdapter.getInstance(project);
+    }
+
+    /**
+     * 每次实例化完成后, 必须调用init()方法
+     */
+    public void init() {
+        loadCards();
     }
 
     /**
@@ -48,16 +54,16 @@ public class AlgorithmApp {
                 while (resultSet.next()) {
                     String strFront = resultSet.getString("front");
                     QuestionFront questionFront = GsonUtils.fromJson(strFront, QuestionFront.class);
-                    new QuestionCard(
+                    QuestionCard card = new QuestionCard(
                             resultSet.getInt("card_id"),
                             questionFront,
                             resultSet.getString("back"),
-                            resultSet.getLong("created"),
-                            project
-                    )
-                        .setNextReview(resultSet.getLong("next_repetition"));
-                    ;
-                    System.out.println("[Cards] Sucessfully loaded card " + resultSet.getInt("card_id"));
+                            resultSet.getLong("created")
+                    );
+                    card.setNextReview(resultSet.getLong("next_repetition"));
+                    this.cards.put(card.getId(), card);
+
+                    System.out.println("[Cards] Sucessfully loaded card " + card.getId());
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -74,6 +80,7 @@ public class AlgorithmApp {
             synchronized (AlgorithmApp.class) {
                 if (instance == null) {
                     instance = new AlgorithmApp(project);
+                    instance.loadCards();
                 }
             }
         }
@@ -88,18 +95,79 @@ public class AlgorithmApp {
         return this.cards;
     }
 
+
     /**
-     * 获取管理待复习卡片的 CardScheduler
-     * @return CardScheduler
+     * 根据卡片ID获取卡片对象
+     * @param id 卡片的ID
+     * @return 加载的卡片对象
      */
-    public QuestionCardScheduler getCardScheduler() {
-        return this.cardScheduler;
+    public QuestionCard getById(Integer id) {
+        // 根据ID从HashMap中获取卡片对象
+        return this.cards.get(id);
     }
 
     /**
-     * @return DatabaseAdapter
+     * 使用给定的数据创建一张卡片
      */
-    public DatabaseAdapter getDatabaseAdapter() {
-        return this.databaseAdapter;
+    public void create(QuestionCardReq questionCardReq) {
+        Integer id = questionCardReq.getId();
+        QuestionFront front = questionCardReq.getFront();
+        String back = questionCardReq.getBack();
+        String strFront = GsonUtils.toJsonStr(front);
+        // 根据打分计算参数
+        Integer rating = questionCardReq.getFsrsRating().toInt();
+        FSRSAlgorithm algorithm = FSRSAlgorithm.builder()
+                .rating(FSRSRating.values()[rating])
+                .stability(0)
+                .difficulty(0)
+                .elapsedDays(0)
+                .repetitions(0)
+                .state(FSRSState.values()[0])
+                .lastReview(0)
+                .build();
+        FSRSAlgorithmResult result = algorithm.calc();
+        // TODO 增加条件判断，若数据已经存在，则执行更新。
+        Long created = System.currentTimeMillis(); // 当前时间作为创建时间
+        // 插入数据库
+        try {
+            PreparedStatement ps =
+                    this.databaseAdapter.getSqlite().prepare("INSERT INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            ps.setInt(1, id);
+            ps.setString(2, strFront);
+            ps.setString(3, back);
+            ps.setString(4, created.toString());
+            ps.setLong(5, result.getRepetitions());
+            ps.setFloat(6, result.getDifficulty());
+            ps.setFloat(7, result.getStability());
+            ps.setInt(8, result.getElapsedDays());
+            ps.setInt(9, result.getState().toInt());
+            ps.setInt(10, result.getInterval());
+            ps.setLong(11, result.getNextRepetitionTime());
+            ps.setLong(12, result.getLastReview());
+            ps.executeUpdate();
+            System.out.println("[Cards] Sucessfully inserted card " + id + " into database");
+        } catch (SQLException e) {
+            System.out.println("[Cards] Failed inserting the card " + id + " into database: " + e);
+        }
+        QuestionCard card = new QuestionCard(id, front, back, created);
+        this.cards.put(id, card);
+        System.out.println("[Cards] 成功本地创建卡片 " + id);
+    }
+
+
+    /**
+     * 通过从数据库和AlgorithmApp中的HashMap "cards" 删除来删除卡片
+     */
+    public void delete(QuestionCard card) {
+        this.databaseAdapter.getSqlite().update("DELETE FROM cards WHERE card_id = '" + card.getId() + "'");
+        this.cards.remove(card.getId(), card);
+        // 数据库操作
+        System.out.println("[Cards] 成功删除卡片 " + card.getId());
+    }
+
+    public void update(QuestionCard card, String back) {
+        this.databaseAdapter.getSqlite().update("UPDATE cards SET back = '" + back + "' WHERE card_id = '" + card.getId() + "'");
+        // 数据库操作
+        System.out.println("[Cards] 成功删除卡片 " + card.getId());
     }
 }

@@ -1,6 +1,5 @@
 package com.xhf.leetcode.plugin.review.backend.card;
 
-import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 
 /**
@@ -11,17 +10,14 @@ public class QuestionCardReq {
     private QuestionFront front; // 卡片前面题目
     private String back; // 背部答案
     private FSRSRating fsrsRating; // 评分
-    private Project project; // 项目
-
     public QuestionCardReq() {
     }
 
-    public QuestionCardReq(Integer id, QuestionFront front, String back, FSRSRating fsrsRating, Project project) {
+    public QuestionCardReq(Integer id, QuestionFront front, String back, FSRSRating fsrsRating) {
         this.id = id;
         this.front = front;
         this.back = back;
         this.fsrsRating = fsrsRating;
-        this.project = project;
     }
 
     public Integer getId() {
@@ -54,9 +50,5 @@ public class QuestionCardReq {
 
     public void setFsrsRating(FSRSRating fsrsRating) {
         this.fsrsRating = fsrsRating;
-    }
-
-    public Project getProject() {
-        return project;
     }
 }
