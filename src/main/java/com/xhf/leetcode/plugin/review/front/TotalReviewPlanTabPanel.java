@@ -5,6 +5,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
+import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
@@ -31,7 +32,7 @@ public class TotalReviewPlanTabPanel extends JPanel {
     
     public TotalReviewPlanTabPanel(Project project) {
         this.project = project;
-        this.service = MockRQServiceImpl.getInstance();
+        this.service = RQServiceImpl.getInstance(project);
         setLayout(new BorderLayout());
         loadContent();
     }

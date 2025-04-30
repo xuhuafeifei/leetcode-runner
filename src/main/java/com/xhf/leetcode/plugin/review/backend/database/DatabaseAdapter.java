@@ -1,6 +1,12 @@
 package com.xhf.leetcode.plugin.review.backend.database;
 
 import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
+import com.xhf.leetcode.plugin.io.file.utils.FileUtils.PathBuilder;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import java.io.IOException;
 
 /**
  * @author 文艺倾年
@@ -13,10 +19,24 @@ public class DatabaseAdapter {
      * 数据库适配器的构造函数，从配置文件中读取所有数据并建立数据库连接。
      * 此外，还会创建所有必要的表。
      */
-    public DatabaseAdapter() {
-        this.dbFolder  = "E:/data";
-//        this.dbFolder  = PathManager.getSystemPath();
+    public DatabaseAdapter(Project project) {
+        this.dbFolder  = PathManager.getSystemPath();
         this.dbName = "memory.db";
+        String path = new PathBuilder(dbFolder).append(dbName).build();
+        try {
+            FileUtils.createAndGetFile(path);
+        } catch (IOException e) {
+            // 弹框提示
+            ConsoleUtils.getInstance(project).showError(
+                BundleUtils.i18nHelper(
+                "无法创建数据库文件, 路径为: " + path + ", 请检查权限。错误信息: " + e.getMessage(),
+                "Failed to create database file, path: " + path + ", please check your permission. Error message: " + e.getMessage()
+                ),
+                true,
+                true
+            );
+            throw new RuntimeException(e);
+        }
 
         // 使用加载的数据创建MySQL对象
         this.sqlite = new Sqlite(this.dbFolder, this.dbName).connect();

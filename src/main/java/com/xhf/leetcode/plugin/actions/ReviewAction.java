@@ -13,7 +13,7 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 public class ReviewAction extends AbstractAction {
     @Override
     protected void doActionPerformed(Project project, AnActionEvent e) {
-        if (1 == 1) {
+        if (1 == 0) {
             ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18nHelper("正在开发中, 敬请期待", "under development, please wait"), true, true);
             return ;
         }

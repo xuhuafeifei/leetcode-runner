@@ -37,6 +37,9 @@ import com.xhf.leetcode.plugin.model.DeepCodingInfo;
 import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
+import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
+import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
@@ -60,11 +63,13 @@ public class CustomTextEditor implements TextEditor {
     private final JPanel component;
     private final VirtualFile file;
     private final Project project;
+    private final RQServiceImpl service;
     private @Nullable ActionGroup actionGroup;
 
     public CustomTextEditor(@NotNull Project project, @NotNull VirtualFile file) {
         this.file = file;
         this.project = project;
+        this.service = RQServiceImpl.getInstance(project);
         Document document = FileDocumentManager.getInstance().getDocument(file);
         if (document == null) {
             throw new IllegalStateException("Cannot create editor for file: " + file.getName());
@@ -78,6 +83,42 @@ public class CustomTextEditor implements TextEditor {
 
         component = new JPanel(new BorderLayout());
         component.add(editor.getComponent(), BorderLayout.CENTER);
+        component.add(createButtonToolbar(), BorderLayout.SOUTH);
+    }
+
+    private JComponent createButtonToolbar() {
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        JButton rate = new JButton(BundleUtils.i18nHelper("评分", "Rate"));
+        rate.addActionListener(e -> {
+            // 评分
+            showMasteryDialog();
+        });
+        jPanel.add(rate);
+        return jPanel;
+    }
+
+    /**
+     * 点击掌握按钮, 弹出掌握程度dialog
+     * 在dialog中点击确认按钮, 则会同步刷新card数据, 并标记为已完成
+     * 同时会向后台发出请求, 更新数据
+     */
+    private void showMasteryDialog() {
+        new AbstractMasteryDialog(this.getComponent(), BundleUtils.i18nHelper("设置掌握程度", "set mastery level")) {
+
+            @Override
+            protected void setConfirmButtonListener(JButton confirmButton, ButtonGroup group) {
+                confirmButton.addActionListener(e -> {
+                    // 获取选中的掌握程度
+                    String levelStr = group.getSelection().getActionCommand();
+
+                    service.createQuestion(ViewUtils.getQuestionByVFile(file, project), FSRSRating.getById(levelStr));
+
+                    // 关闭对话框
+                    this.dispose();
+                });
+            }
+        };
     }
 
     public void setToolbar() {

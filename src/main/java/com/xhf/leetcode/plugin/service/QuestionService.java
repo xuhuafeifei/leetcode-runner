@@ -443,4 +443,31 @@ public class QuestionService {
         }
         return String.valueOf(calendarSubmitRecord.getDailyQuestionStreakCount());
     }
+
+    /**
+     * 通过fid查询Question对象
+     * @param fid fid
+     * @param project project
+     * @return Question对象
+     */
+    public Question getQuestionByFid(String fid, Project project) {
+        try {
+            // 此处应对正常的Question
+            int idx = Integer.parseInt(fid) - 1;
+            List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
+            return totalQuestion.get(idx);
+        } catch (NumberFormatException e) {
+            // 此处应对LCP, 面试题那种玩意儿
+            // 暴力for循环
+            List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
+            // 解析不出来的, 都是在三千题网上
+            for (int i = 3200; i < totalQuestion.size(); i++) {
+                if (StringUtils.equals(totalQuestion.get(i).getFrontendQuestionId(), fid)) {
+                    return totalQuestion.get(i);
+                }
+            }
+            ConsoleUtils.getInstance(project).showError("fid not found ! " + fid, true, true);
+            throw new RuntimeException("fid not found ! " + fid);
+        }
+    }
 }

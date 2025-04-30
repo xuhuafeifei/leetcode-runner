@@ -1,10 +1,12 @@
 package com.xhf.leetcode.plugin.review.backend.card;
 
+import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.review.backend.algorithm.FSRSAlgorithm;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSState;
 import com.xhf.leetcode.plugin.review.backend.algorithm.result.FSRSAlgorithmResult;
 import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
+import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
@@ -16,13 +18,17 @@ import java.sql.SQLException;
  */
 public class QuestionCardScheduler {
 
+    private final Project project;
+    private final DatabaseAdapter databaseAdapter;
     private Queue<QuestionCard> queue;
 
     /**
      * 构造函数，用于初始化卡片调度器
      */
-    public QuestionCardScheduler() {
+    public QuestionCardScheduler(Project project, DatabaseAdapter databaseAdapter) {
         this.queue = new Queue<>();
+        this.project = project;
+        this.databaseAdapter = databaseAdapter;
         this.queueDueCards();
     }
 
@@ -35,10 +41,10 @@ public class QuestionCardScheduler {
             this.queue.dequeue();
         }
         // 数据库中查询
-        AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().syncQuery("SELECT * FROM cards" + " WHERE next_repetition <= " + System.currentTimeMillis(), resultSet -> {
+        this.databaseAdapter.getSqlite().syncQuery("SELECT * FROM cards" + " WHERE next_repetition <= " + System.currentTimeMillis(), resultSet -> {
             try {
                 while (resultSet.next()) {
-                    QuestionCard dueCard = QuestionCard.getById(resultSet.getInt("card_id"));
+                    QuestionCard dueCard = AlgorithmApp.getInstance(project).getCards().get(resultSet.getInt("card_id"));
                     System.out.println("[CardScheduler] Due time for card " + dueCard.getId());
                     this.queue.enqueue(dueCard);
                 }
@@ -67,7 +73,7 @@ public class QuestionCardScheduler {
         if (ratedCard != null) {
             try {
                 // 1.查询数据库
-                PreparedStatement ps = AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("SELECT * FROM cards" + " WHERE card_id = ?");
+                PreparedStatement ps = this.databaseAdapter.getSqlite().prepare("SELECT * FROM cards" + " WHERE card_id = ?");
                 ps.setInt(1, ratedCard.getId());
                 ResultSet rs = ps.executeQuery();
                 rs.next();
@@ -85,7 +91,7 @@ public class QuestionCardScheduler {
                 FSRSAlgorithmResult result = algorithm.calc();
 
                 // 3.更新数据库
-                PreparedStatement db = AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("UPDATE cards SET repetitions = ?, difficulty = ?, stability = ?, elapsed_days = ?, state = ?, day_interval = ?, next_repetition = ?, last_review = ? WHERE card_id = ?");
+                PreparedStatement db = this.databaseAdapter.getSqlite().prepare("UPDATE cards SET repetitions = ?, difficulty = ?, stability = ?, elapsed_days = ?, state = ?, day_interval = ?, next_repetition = ?, last_review = ? WHERE card_id = ?");
                 db.setLong(1, result.getRepetitions());
                 db.setFloat(2, result.getDifficulty());
                 db.setFloat(3, result.getStability());
