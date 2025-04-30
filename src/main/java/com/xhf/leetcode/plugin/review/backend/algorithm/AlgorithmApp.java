@@ -1,11 +1,15 @@
 package com.xhf.leetcode.plugin.review.backend.algorithm;
 
+import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardScheduler;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionFront;
 import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,19 +23,19 @@ public class AlgorithmApp {
     private final Map<Integer, QuestionCard> cards;
     private final QuestionCardScheduler cardScheduler;
     private final DatabaseAdapter databaseAdapter;
+    private final Project project;
 
     /**
      * 实例化 AlgorithmApp。在这里执行启动应用程序所需的重要步骤
      */
-    public AlgorithmApp() {
-//        // 这里需要加入instance实例化，否则getInstance()会一直进入实例化数据库
-//        instance = this;
+    public AlgorithmApp(Project project) {
         // 实例化数据库
-        this.databaseAdapter = new DatabaseAdapter();
+        this.project = project;
+        this.databaseAdapter = new DatabaseAdapter(project);
         // 实例化 HashMap，用于存储从数据库加载的卡片
         this.cards = new HashMap<>();
         this.loadCards();
-        this.cardScheduler = new QuestionCardScheduler();
+        this.cardScheduler = new QuestionCardScheduler(project, this.databaseAdapter);
     }
 
     /**
@@ -44,12 +48,14 @@ public class AlgorithmApp {
                 while (resultSet.next()) {
                     String strFront = resultSet.getString("front");
                     QuestionFront questionFront = GsonUtils.fromJson(strFront, QuestionFront.class);
-                    new QuestionCard(resultSet.getInt("card_id"),
+                    new QuestionCard(
+                            resultSet.getInt("card_id"),
                             questionFront,
                             resultSet.getString("back"),
-                            resultSet.getLong("created")
-                            )
-                            .setNextReview(resultSet.getLong("next_repetition"));
+                            resultSet.getLong("created"),
+                            project
+                    )
+                        .setNextReview(resultSet.getLong("next_repetition"));
                     ;
                     System.out.println("[Cards] Sucessfully loaded card " + resultSet.getInt("card_id"));
                 }
@@ -63,11 +69,11 @@ public class AlgorithmApp {
      * 获取类的实例
      * @return 该类的实例
      */
-    public static AlgorithmApp getInstance() {
+    public static AlgorithmApp getInstance(Project project) {
         if (instance == null) {
             synchronized (AlgorithmApp.class) {
                 if (instance == null) {
-                    instance = new AlgorithmApp();
+                    instance = new AlgorithmApp(project);
                 }
             }
         }

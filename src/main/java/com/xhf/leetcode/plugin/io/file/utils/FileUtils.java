@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.io.file.utils;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.OSHandler;
+import java.net.URLDecoder;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -130,8 +131,32 @@ public class FileUtils {
         return file.createNewFile();
     }
 
+    /**
+     * 判断文件是否存在. 如果文件不存在，则尝试使用 URL 编码的路径进行解码，再次判断文件是否存在
+     * @param path
+     * @return
+     */
     public static boolean fileExists(String path) {
-        return new File(path).exists();
+        boolean exists = new File(path).exists();
+        if (! exists) {
+            // 解码 URL 编码的路径
+            String decodedPath;
+            decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+            return new File(decodedPath).exists();
+        }
+        return true;
+    }
+
+    private static File fileExistsOrNot(String path) {
+        File file = new File(path);
+        if (file.exists()) return file;
+
+        String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+        File file1 = new File(decodedPath);
+        if (file1.exists()) {
+            return file1;
+        }
+        return null;
     }
 
     /**

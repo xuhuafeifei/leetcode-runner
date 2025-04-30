@@ -27,6 +27,7 @@ public class CustomTextEditorProvider extends TextEditorProvider {
         return new CustomTextEditor(project, file);
     }
 
+
     @Override
     public @NotNull FileEditorPolicy getPolicy() {
         return FileEditorPolicy.HIDE_DEFAULT_EDITOR;

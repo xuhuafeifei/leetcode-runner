@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.review.backend.algorithm.constant;
 
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author 文艺倾年
@@ -45,6 +47,16 @@ public enum FSRSRating {
             }
         }
         return BundleUtils.i18nHelper("未知", "unknown");
+    }
+
+    public static @NotNull FSRSRating getById(String levelStr) {
+        for (FSRSRating rating : FSRSRating.values()) {
+            if (String.valueOf(rating.id).equals(levelStr)) {
+                return rating;
+            }
+        }
+        LogUtils.warn("未知的评分：" + levelStr);
+        return FSRSRating.EASY;
     }
 
     /**

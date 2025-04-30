@@ -80,7 +80,7 @@ public class ReviewQuestionModel implements ReviewQuestion {
 
     @Override
     public Integer getId() {
-        return null;
+        return this.id;
     }
 
     public void setId(Integer id) {

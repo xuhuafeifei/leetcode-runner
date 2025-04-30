@@ -26,7 +26,7 @@ test {
 //}
 
 group 'com.xhf'
-version '3.6.9-PATCH'
+version '3.6.9-PATCH-test'
 
 sourceCompatibility = 11
 targetCompatibility = 11

@@ -10,6 +10,7 @@ import com.xhf.leetcode.plugin.review.backend.card.QuestionFront;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -27,9 +28,18 @@ public class RQServiceImpl implements ReviewQuestionService {
     private final AlgorithmAPI app;
     private final Project project;
 
-    public RQServiceImpl(Project project) {
+    private static RQServiceImpl instance;
+
+    private RQServiceImpl(Project project) {
         this.project = project;
-        this.app = new AlgorithmAPI();
+        this.app = new AlgorithmAPI(project);
+    }
+
+    public static RQServiceImpl getInstance(Project project) {
+        if (instance == null) {
+            instance = new RQServiceImpl(project);
+        }
+        return instance;
     }
 
     @Override
@@ -56,7 +66,7 @@ public class RQServiceImpl implements ReviewQuestionService {
     private QuestionCardReq toQuestionCardReq(Question question, FSRSRating rating) {
         int id = getId(question);
         QuestionFront front = getQuestionFront(question, rating);
-        return new QuestionCardReq(id, front, "", rating);
+        return new QuestionCardReq(id, front, "", rating, this.project);
     }
 
     private QuestionFront getQuestionFront(Question question, FSRSRating rating) {
@@ -97,7 +107,7 @@ public class RQServiceImpl implements ReviewQuestionService {
 
 
     @Override
-    public List<ReviewQuestion> getAllQuestions() {
+    public @NotNull List<ReviewQuestion>  getAllQuestions() {
         List<QuestionCard> allCards = app.getAllCards();
         return allCards.stream()
                 .map(QuestionCard::toReviewQuestion)
@@ -114,5 +124,10 @@ public class RQServiceImpl implements ReviewQuestionService {
     @Override
     public void rateTopQuestion(FSRSRating rating) {
         app.rateCard(rating.toInt());
+    }
+
+    @Override
+    public void updateBack(Integer id, String back) {
+        app.updateCardBack(id, back);
     }
 }

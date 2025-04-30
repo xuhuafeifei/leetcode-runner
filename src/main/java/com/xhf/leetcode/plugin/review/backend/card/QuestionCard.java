@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.review.backend.card;
 
+import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 import com.xhf.leetcode.plugin.review.backend.algorithm.FSRSAlgorithm;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
@@ -17,6 +18,9 @@ import java.sql.SQLException;
  * @author 文艺倾年
  */
 public class QuestionCard {
+
+    private final AlgorithmApp app;
+    private final Project project;
     /*
         id是Question在QuestionList中的index下标
      */
@@ -35,13 +39,15 @@ public class QuestionCard {
      * @param back 卡片的背面文本
      * @param created 卡片的创建时间
      */
-    public QuestionCard(Integer id, QuestionFront front, String back, Long created) {
+    public QuestionCard(Integer id, QuestionFront front, String back, Long created, Project project) {
         this.id = id;
         this.front = front;
         this.back = back;
         this.created = created;
+        this.project = project;
         // 每次实例化后，自动插入到Map中
-        AlgorithmApp.getInstance().getCards().put(id, this);
+        this.app = AlgorithmApp.getInstance(project);
+        app.getCards().put(id, this);
     }
 
 
@@ -94,9 +100,9 @@ public class QuestionCard {
      * @param id 卡片的ID
      * @return 加载的卡片对象
      */
-    public static QuestionCard getById(Integer id) {
+    public QuestionCard getById(Integer id) {
         // 根据ID从HashMap中获取卡片对象
-        return AlgorithmApp.getInstance().getCards().get(id);
+        return app.getCards().get(id);
     }
 
     /**
@@ -123,7 +129,8 @@ public class QuestionCard {
         Long created = System.currentTimeMillis(); // 当前时间作为创建时间
         // 插入数据库
         try {
-            PreparedStatement ps = AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().prepare("INSERT INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement ps =
+                AlgorithmApp.getInstance(questionCardReq.getProject()).getDatabaseAdapter().getSqlite().prepare("INSERT INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             ps.setInt(1, id);
             ps.setString(2, strFront);
             ps.setString(3, back);
@@ -142,7 +149,7 @@ public class QuestionCard {
             System.out.println("[Cards] Failed inserting the card " + id + " into database: " + e);
         }
         // 避免每次创建后，手动去再去同步到内存中
-        new QuestionCard(id, front, back, created);
+        new QuestionCard(id, front, back, created, questionCardReq.getProject());
         System.out.println("[Cards] 成功本地创建卡片 " + id);
     }
 
@@ -158,8 +165,8 @@ public class QuestionCard {
      * 通过从数据库和AlgorithmApp中的HashMap "cards" 删除来删除卡片
      */
     public void delete() {
-        AlgorithmApp.getInstance().getDatabaseAdapter().getSqlite().update("DELETE FROM cards WHERE card_id = '" + this.id + "'");
-        AlgorithmApp.getInstance().getCards().remove(this.id, this);
+        app.getDatabaseAdapter().getSqlite().update("DELETE FROM cards WHERE card_id = '" + this.id + "'");
+        app.getCards().remove(this.id, this);
         // 数据库操作
         System.out.println("[Cards] 成功删除卡片 " + this.id);
     }
@@ -204,4 +211,12 @@ public class QuestionCard {
         }
         return "";
     }
+
+    public void update(String back) {
+        app.getDatabaseAdapter().getSqlite().update("UPDATE cards SET back = " + back + " WHERE card_id = '" + this.id + "'");
+        app.getCards().remove(this.id, this);
+        // 数据库操作
+        System.out.println("[Cards] 成功删除卡片 " + this.id);
+    }
+
 }

@@ -17,6 +17,8 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.UnSafe;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.swing.*;
@@ -135,7 +137,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
             return forceTraverse(resourcePath, exceptFileName);
         } catch (Exception e) {
             LogUtils.error(e);
-            throw new DebugError(e.toString());
+            throw new DebugError(e);
         }
     }
 
@@ -159,6 +161,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         if (filePath.startsWith("jar:file:")) {
             filePath = filePath.replace("jar:file:", "");
             String jarFilePath = filePath.substring(0, filePath.indexOf("!"));
+            jarFilePath = URLDecoder.decode(jarFilePath, StandardCharsets.UTF_8);
             if (! FileUtils.fileExists(jarFilePath)) {
                 throw new DebugError("jar file not found: " + jarFilePath);
             }

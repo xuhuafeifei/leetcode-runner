@@ -1528,6 +1528,8 @@ public class JavaEvaluatorImpl implements Evaluator {
                         v = takeValueByVName(vName, Env.takeMemberValues(v.value));
                     }
                 }
+                // 这个有些多此一举, 因为别的方法会进行兜底
+                assert v != null;
                 return v.value;
             }
             if ("true".equals(token)) {

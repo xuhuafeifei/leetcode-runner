@@ -72,6 +72,11 @@ public class AppSettingsComponent {
           ,"Select the language type displayed by Leetcode-Runner"
   );
 
+  private static final String FLOATING_TOOLBAR_HELP_TEXT = BundleUtils.i18nHelper(
+      "是否启用悬浮工具栏, 该功能将在代码编辑区域的右上角显示一个悬浮工具栏, 方便快速操作, 如: 代码运行, 输入测试案例等.",
+      "Whether to enable the floating toolbar, which will display a floating toolbar in the upper right corner of the code editing area, to facilitate quick operation, such as code running, input test cases, etc."
+  );
+
   /*---------debug----------*/
   private final DebugPanel debugPanel = new DebugPanel();
 
@@ -80,6 +85,7 @@ public class AppSettingsComponent {
   private final ComboBox<String> language   = new ComboBox<>();
   private JBTextField secretText;
   private OnOffButton onOffButton;
+  private OnOffButton enableFloatingToolbarBtn;
 
 
   public AppSettingsComponent() {
@@ -99,6 +105,7 @@ public class AppSettingsComponent {
             .addLabeledComponent(new JBLabel(BundleUtils.i18nHelper("重定位", "Reposition")), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(reposition).addHelp(REPOSITION_HELP_TEXT).getTargetComponent(), 1, false)
             .addLabeledComponent(new JBLabel(BundleUtils.i18nHelper("语言和地区", "Language  ")), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(language).addHelp(LANGUAGE_HELP_TEXT).getTargetComponent(), 1, false)
             .addComponent(createEncryptPanel())
+            .addLabeledComponent(new JBLabel(BundleUtils.i18nHelper("是否启用悬浮工具栏", "enable floating toolbar or not")), InnerHelpTooltip.FlowLayout(FlowLayout.LEFT).add(enableFloatingToolbarBtn).addHelp(FLOATING_TOOLBAR_HELP_TEXT).getTargetComponent(), 1, false)
             .addComponentFillVertically(new JPanel(), 0)
             .getPanel();
     LCEventBus.getInstance().register(this);
@@ -223,6 +230,9 @@ public class AppSettingsComponent {
         ViewUtils.getDialogWrapper( BundleUtils.i18nHelper("语言设置生效需要重启IDE, 请您保存设置并重启", "Language settings take effect after restarting IDE, please save the settings and restart"));
       }
     });
+
+    enableFloatingToolbarBtn = new OnOffButton();
+    enableFloatingToolbarBtn.setSelected(true);
   }
 
   public JPanel getPanel() {
@@ -353,5 +363,14 @@ public class AppSettingsComponent {
   public void setEncryptOrNot(boolean encryptOrNot) {
     onOffButton.setSelected(encryptOrNot);
     onOffButton.dispatchEvent(new ActionEvent(onOffButton, ActionEvent.ACTION_PERFORMED, null));
+  }
+
+  public void setEnableFloatingToolbar(boolean enableFloatingToolbar) {
+    enableFloatingToolbarBtn.setSelected(enableFloatingToolbar);
+    enableFloatingToolbarBtn.dispatchEvent(new ActionEvent(enableFloatingToolbarBtn, ActionEvent.ACTION_PERFORMED, null));
+  }
+
+  public boolean getEnableFloatingToolbar() {
+    return enableFloatingToolbarBtn.isSelected();
   }
 }

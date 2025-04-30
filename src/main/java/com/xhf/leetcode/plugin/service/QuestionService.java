@@ -10,6 +10,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.*;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
@@ -24,7 +25,10 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
+import com.xhf.leetcode.plugin.utils.TodayIconStatusEnum;
 import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +53,7 @@ public class QuestionService {
     private boolean todaySolved = false;
 
     private boolean needModify = false;
+
     private CalendarSubmitRecord calendarSubmitRecord;
 
     public QuestionService(Project project) {
@@ -360,13 +365,13 @@ public class QuestionService {
      * 判断当前每日一题解决状态
      * 该方法会被频繁调用, 因此采用本地变量缓存的形式进行判断, 而不是调用leetcode接口查询数据
      *
-     * @return 返回1, 表示已经解决. 0表示无需修改图标状态. -1表示需要修改为为解决
+     * @return 返回1, 表示已经解决. 0表示无需修改图标状态. -1表示需要修改为未解决图标
      */
-    public int todayQuestionSolved() {
+    public TodayIconStatusEnum todayQuestionSolved() {
         if (! needModify) {
-            return 0;
+            return TodayIconStatusEnum.NO_NEED_MODIFY;
         }
-        return todaySolved ? 1 : -1;
+        return todaySolved ? TodayIconStatusEnum.SOLVED : TodayIconStatusEnum.NOT_SOLVED;
     }
 
     public void modified() {
@@ -405,13 +410,64 @@ public class QuestionService {
     public void TodayQuestionOkEventListener(TodayQuestionOkEvent event) {
         todaySolved = true;
         needModify  = true;
-        this.calendarSubmitRecord = LeetcodeClient.getInstance(project).getCalendarSubmitRecord();
+        try {
+            this.calendarSubmitRecord = LeetcodeClient.getInstance(project).getCalendarSubmitRecord();
+        } catch (Exception e) {
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            // roll back
+            this.calendarSubmitRecord = null;
+        }
     }
 
+    AtomicInteger retryCount = new AtomicInteger(0);
+
+    /**
+     * 该方法会被TodayQuestionAction频繁调用, 因此尽可能不要话费太多时间
+     * @return String 今日一题的完成次数
+     */
     public String getTodayQuestionCount() {
         if (calendarSubmitRecord == null) {
+            // 如果为null, 则尝试异步获取一次
+//            TaskCenter.getInstance().createTask(() -> {
+//                // 如果超过五次都没有获取成功, 则放弃
+//                if (retryCount.get() < 5) {
+//                    TodayQuestionOkEventListener(null);
+//                } else {
+//                    // 终止获取, 同时修改图标状态的标识位
+//                    modified();
+//                }
+//                retryCount.incrementAndGet();
+//            }).invokeLater();
+
             return "NULL";
         }
         return String.valueOf(calendarSubmitRecord.getDailyQuestionStreakCount());
+    }
+
+    /**
+     * 通过fid查询Question对象
+     * @param fid fid
+     * @param project project
+     * @return Question对象
+     */
+    public Question getQuestionByFid(String fid, Project project) {
+        try {
+            // 此处应对正常的Question
+            int idx = Integer.parseInt(fid) - 1;
+            List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
+            return totalQuestion.get(idx);
+        } catch (NumberFormatException e) {
+            // 此处应对LCP, 面试题那种玩意儿
+            // 暴力for循环
+            List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
+            // 解析不出来的, 都是在三千题网上
+            for (int i = 3200; i < totalQuestion.size(); i++) {
+                if (StringUtils.equals(totalQuestion.get(i).getFrontendQuestionId(), fid)) {
+                    return totalQuestion.get(i);
+                }
+            }
+            ConsoleUtils.getInstance(project).showError("fid not found ! " + fid, true, true);
+            throw new RuntimeException("fid not found ! " + fid);
+        }
     }
 }

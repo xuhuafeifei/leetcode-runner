@@ -1,11 +1,15 @@
 package com.xhf.leetcode.plugin.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.TodayIconStatusEnum;
+import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * get daily question
@@ -30,10 +34,10 @@ public class TodayQuestionAction extends AbstractAction {
         instance.todayQuestion(project);
     }
 
-//    @Override
-//    public @NotNull ActionUpdateThread getActionUpdateThread() {
-//        return super.getActionUpdateThread();
-//    }
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
 
     /**
      * 该方法会被多次且频繁调用, 因此尽量减少操作逻辑
@@ -49,15 +53,18 @@ public class TodayQuestionAction extends AbstractAction {
         Presentation presentation = e.getPresentation();
         // 根据某些条件动态设置图标
         QuestionService instance = QuestionService.getInstance(e.getProject());
-        if (instance.todayQuestionSolved() == 1) {
+        if (instance.todayQuestionSolved() == TodayIconStatusEnum.SOLVED) {
             presentation.setIcon(IconLoader.getIcon("/icons/flame.svg", this.getClass()));
             // 获取当日连击次数
             String cnt = instance.getTodayQuestionCount();
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction") + " " +
                     BundleUtils.i18nHelper("坚持了" + cnt + "天", " Streak for " + cnt + " days")
             );
+
+//            if (!Objects.equals(cnt, "NULL")) {
             instance.modified();
-        } else if (instance.todayQuestionSolved() == -1){
+//            }
+        } else if (instance.todayQuestionSolved() == TodayIconStatusEnum.NOT_SOLVED){
             presentation.setIcon(IconLoader.getIcon("/icons/daily.svg", this.getClass()));
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction"));
             instance.modified();

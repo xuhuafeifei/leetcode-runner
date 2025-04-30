@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.Separator;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
@@ -26,7 +27,9 @@ import com.xhf.leetcode.plugin.actions.AbstractAction;
 import com.xhf.leetcode.plugin.bus.DeepCodingTabChooseEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.comp.MyList;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
+import com.xhf.leetcode.plugin.editors.myeditor.MySplitEditorToolbar;
 import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.CompetitionQuestion;
@@ -34,7 +37,11 @@ import com.xhf.leetcode.plugin.model.DeepCodingInfo;
 import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
+import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
+import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -56,10 +63,13 @@ public class CustomTextEditor implements TextEditor {
     private final JPanel component;
     private final VirtualFile file;
     private final Project project;
+    private final RQServiceImpl service;
+    private @Nullable ActionGroup actionGroup;
 
     public CustomTextEditor(@NotNull Project project, @NotNull VirtualFile file) {
         this.file = file;
         this.project = project;
+        this.service = RQServiceImpl.getInstance(project);
         Document document = FileDocumentManager.getInstance().getDocument(file);
         if (document == null) {
             throw new IllegalStateException("Cannot create editor for file: " + file.getName());
@@ -72,8 +82,52 @@ public class CustomTextEditor implements TextEditor {
         ((EditorEx) editor).setHighlighter(highlighter);
 
         component = new JPanel(new BorderLayout());
-        component.add(createToolbar(), BorderLayout.NORTH);
         component.add(editor.getComponent(), BorderLayout.CENTER);
+        component.add(createButtonToolbar(), BorderLayout.SOUTH);
+    }
+
+    private JComponent createButtonToolbar() {
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        JButton rate = new JButton(BundleUtils.i18nHelper("评分", "Rate"));
+        rate.addActionListener(e -> {
+            // 评分
+            showMasteryDialog();
+        });
+        jPanel.add(rate);
+        return jPanel;
+    }
+
+    /**
+     * 点击掌握按钮, 弹出掌握程度dialog
+     * 在dialog中点击确认按钮, 则会同步刷新card数据, 并标记为已完成
+     * 同时会向后台发出请求, 更新数据
+     */
+    private void showMasteryDialog() {
+        new AbstractMasteryDialog(this.getComponent(), BundleUtils.i18nHelper("设置掌握程度", "set mastery level")) {
+
+            @Override
+            protected void setConfirmButtonListener(JButton confirmButton, ButtonGroup group) {
+                confirmButton.addActionListener(e -> {
+                    // 获取选中的掌握程度
+                    String levelStr = group.getSelection().getActionCommand();
+
+                    service.createQuestion(ViewUtils.getQuestionByVFile(file, project), FSRSRating.getById(levelStr));
+
+                    // 关闭对话框
+                    this.dispose();
+                });
+            }
+        };
+    }
+
+    public void setToolbar() {
+        component.add(createToolbar(), BorderLayout.NORTH);
+    }
+
+    public void setToolbar(ActionGroup actionGroup) {
+        this.actionGroup = actionGroup;
+        setToolbar();
     }
 
     private JComponent createToolbar() {
@@ -100,7 +154,34 @@ public class CustomTextEditor implements TextEditor {
 
         ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("CustomTextEditor", dag, true);
         toolbar.setTargetComponent(editor.getComponent());
-        return toolbar.getComponent();
+        return new MySplitEditorToolbar(toolbar, createOrNot());
+    }
+
+    private ActionToolbar createOrNot() {
+        boolean flag;
+        try {
+            flag = AppSettings.getInstance().getEnableFloatingToolbar();
+        } catch (Exception e) {
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            flag = false;
+        }
+        // 兼容悬浮窗显示+非悬浮窗显示
+        // 如果flag = false, 不显示悬浮toolbar, 在CustomTextEditor显示
+        if (!flag) {
+            ActionGroup action = (ActionGroup) ActionManager.getInstance().getAction("leetcode.plugin.editor.basic.group");
+            ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("custom_text_editor_toolbar",
+                // 如果actionGroup为空, 则不讲他添加到UI
+                actionGroup == null ?
+                    action : new DefaultActionGroup(action, Separator.create(), actionGroup),
+                true);
+            actionToolbar.setTargetComponent(editor.getComponent());
+            return actionToolbar;
+        }
+        // 返回一个空的toolbar, 用于占位
+        ActionToolbar actionToolbar = ActionManager.getInstance()
+            .createActionToolbar("custom_text_empty_editor_toolbar", new DefaultActionGroup(), true);
+        actionToolbar.setTargetComponent(editor.getComponent());
+        return actionToolbar;
     }
 
 

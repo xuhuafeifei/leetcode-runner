@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.review.backend.service;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public interface ReviewQuestionService {
+
     /**
      * 获取用户当前需要复习的题目内容
      *
@@ -35,9 +37,11 @@ public interface ReviewQuestionService {
      * 获取所有question
      * @return
      */
-    List<ReviewQuestion> getAllQuestions();
+    @NotNull List<ReviewQuestion> getAllQuestions();
 
     void deleteQuestion(Integer id);
 
     void rateTopQuestion(FSRSRating rating);
+
+    void updateBack(Integer id, String back);
 }

@@ -33,6 +33,7 @@ public class Sqlite {
      */
     public Sqlite connect() {
         try {
+            Class.forName("org.sqlite.JDBC");
             // 保证兼容其他系统
             String dbUrl = "jdbc:sqlite:" + this.dbFolder + File.separator + this.dbName;
             // 初始化时自动创建目录结构
@@ -45,6 +46,8 @@ public class Sqlite {
                     "SQLLite错误: " + e,
                     "建立数据库连接时发生错误", JOptionPane.ERROR_MESSAGE);
             System.out.println("[Database] 无法连接到数据库: " + e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
 
         return this;

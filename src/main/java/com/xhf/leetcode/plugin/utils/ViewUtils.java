@@ -28,6 +28,7 @@ import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import org.jetbrains.annotations.NotNull;
@@ -606,5 +607,10 @@ public class ViewUtils {
 
     public static void showError(String s) {
         Messages.showErrorDialog((Project) null, s, ConsoleUtils.LEETCODE_CODE_DIALOG_TITLE);
+    }
+
+    public static Question getQuestionByVFile(VirtualFile file, Project project) {
+        String fid = CodeService.getInstance(project).parseFidFromVFile(file);
+        return QuestionService.getInstance(project).getQuestionByFid(fid, project);
     }
 }

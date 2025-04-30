@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.review.backend.service;
 
+import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardReq;
@@ -16,8 +17,8 @@ public class AlgorithmAPI {
     // 单例
     private static AlgorithmApp instance = null;
 
-    public AlgorithmAPI() {
-        instance = AlgorithmApp.getInstance();
+    public AlgorithmAPI(Project project) {
+        instance = AlgorithmApp.getInstance(project);
     }
 
     /**
@@ -43,12 +44,23 @@ public class AlgorithmAPI {
         return new ArrayList<>(cards.values());
     }
 
+    private QuestionCard getById(Integer id) {
+        return instance.getCards().get(id);
+    }
+
     /**
      * 删除卡片通过ID
      */
     public void deleteCardById(Integer id) {
-        QuestionCard card = QuestionCard.getById(id);
+        QuestionCard card = getById(id);
         card.delete();
+        updateQueue();
+    }
+
+    public void updateCardBack(Integer id, String back) {
+        // todo:
+        QuestionCard card = getById(id);
+        card.update(back);
         updateQueue();
     }
 
