@@ -428,16 +428,16 @@ public class QuestionService {
     public String getTodayQuestionCount() {
         if (calendarSubmitRecord == null) {
             // 如果为null, 则尝试异步获取一次
-            TaskCenter.getInstance().createTask(() -> {
-                // 如果超过五次都没有获取成功, 则放弃
-                if (retryCount.get() < 5) {
-                    TodayQuestionOkEventListener(null);
-                } else {
-                    // 终止获取, 同时修改图标状态的标识位
-                    modified();
-                }
-                retryCount.incrementAndGet();
-            }).invokeLater();
+//            TaskCenter.getInstance().createTask(() -> {
+//                // 如果超过五次都没有获取成功, 则放弃
+//                if (retryCount.get() < 5) {
+//                    TodayQuestionOkEventListener(null);
+//                } else {
+//                    // 终止获取, 同时修改图标状态的标识位
+//                    modified();
+//                }
+//                retryCount.incrementAndGet();
+//            }).invokeLater();
 
             return "NULL";
         }
