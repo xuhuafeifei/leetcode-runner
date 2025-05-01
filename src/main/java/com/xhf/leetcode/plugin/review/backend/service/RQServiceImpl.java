@@ -72,12 +72,13 @@ public class RQServiceImpl implements ReviewQuestionService {
     private QuestionFront getQuestionFront(Question question, FSRSRating rating) {
         return
                 new QuestionFront(
-                question.getTitleCn(),
-                question.getDifficulty(),
-                question.getStatus(),
-                question.getAcRate(),
-                rating.toInt()
-        );
+                    question.getTitleCn(),
+                    question.getDifficulty(),
+                    question.getStatus(),
+                    question.getAcRate(),
+                    rating.toInt(),
+                    question.getTitleCn()
+                );
     }
 
     int getId(Question question) {

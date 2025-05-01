@@ -4,6 +4,9 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.ReviewStatus;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestionModel;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author 文艺倾年
@@ -96,7 +99,7 @@ public class QuestionCard {
         model.setLastModify(this.handleLastModify());
         model.setUserRate(FSRSRating.toName(this.getFront().getUserRate()));
         model.setStatus(this.handleStatus());
-        model.setTitle(this.getFront().getTitle());
+        model.setTitle(BundleUtils.i18nHelper(this.getFront().getTitleCn(), Objects.requireNonNullElse(this.getFront().getTitle(), "")));
         model.setDifficulty(this.getFront().getDifficulty());
         return model;
     }

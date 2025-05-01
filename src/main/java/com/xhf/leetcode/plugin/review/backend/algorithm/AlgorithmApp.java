@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.review.backend.algorithm;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSState;
 import com.xhf.leetcode.plugin.review.backend.algorithm.result.FSRSAlgorithmResult;
@@ -10,6 +11,7 @@ import com.xhf.leetcode.plugin.review.backend.card.QuestionFront;
 import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -63,10 +65,10 @@ public class AlgorithmApp {
                     card.setNextReview(resultSet.getLong("next_repetition"));
                     this.cards.put(card.getId(), card);
 
-                    System.out.println("[Cards] Sucessfully loaded card " + card.getId());
+                    LogUtils.info("[Cards] Sucessfully loaded card " + card.getId());
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogUtils.warn(DebugUtils.getStackTraceAsString(e));
             }
         });
     }
@@ -145,13 +147,13 @@ public class AlgorithmApp {
             ps.setLong(11, result.getNextRepetitionTime());
             ps.setLong(12, result.getLastReview());
             ps.executeUpdate();
-            System.out.println("[Cards] Sucessfully inserted card " + id + " into database");
+            LogUtils.info("[Cards] Sucessfully inserted card " + id + " into database");
         } catch (SQLException e) {
-            System.out.println("[Cards] Failed inserting the card " + id + " into database: " + e);
+            LogUtils.info("[Cards] Failed inserting the card " + id + " into database: " + e);
         }
         QuestionCard card = new QuestionCard(id, front, back, created);
         this.cards.put(id, card);
-        System.out.println("[Cards] 成功本地创建卡片 " + id);
+        LogUtils.info("[Cards] 成功本地创建卡片 " + id);
     }
 
 
@@ -162,12 +164,12 @@ public class AlgorithmApp {
         this.databaseAdapter.getSqlite().update("DELETE FROM cards WHERE card_id = '" + card.getId() + "'");
         this.cards.remove(card.getId(), card);
         // 数据库操作
-        System.out.println("[Cards] 成功删除卡片 " + card.getId());
+        LogUtils.info("[Cards] 成功删除卡片 " + card.getId());
     }
 
     public void update(QuestionCard card, String back) {
         this.databaseAdapter.getSqlite().update("UPDATE cards SET back = '" + back + "' WHERE card_id = '" + card.getId() + "'");
         // 数据库操作
-        System.out.println("[Cards] 成功删除卡片 " + card.getId());
+        LogUtils.info("[Cards] 成功删除卡片 " + card.getId());
     }
 }

@@ -1,12 +1,14 @@
 package com.xhf.leetcode.plugin.review.backend.card;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 import com.xhf.leetcode.plugin.review.backend.algorithm.FSRSAlgorithm;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSState;
 import com.xhf.leetcode.plugin.review.backend.algorithm.result.FSRSAlgorithmResult;
 import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
@@ -63,11 +65,11 @@ public class QuestionCardScheduler {
             try {
                 while (resultSet.next()) {
                     QuestionCard dueCard = AlgorithmApp.getInstance(project).getCards().get(resultSet.getInt("card_id"));
-                    System.out.println("[CardScheduler] Due time for card " + dueCard.getId());
+                    LogUtils.info("[CardScheduler] Due time for card " + dueCard.getId());
                     this.queue.enqueue(dueCard);
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogUtils.warn(DebugUtils.getStackTraceAsString(e));
             }
         });
     }
@@ -121,9 +123,9 @@ public class QuestionCardScheduler {
                 db.setInt(9, ratedCard.getId());
                 db.execute();
 
-                System.out.println("[CardScheduler] 卡片 " + " 评分为 " + rating);
+                LogUtils.info("[CardScheduler] 卡片 " + " 评分为 " + rating);
             } catch (Exception e) {
-                e.printStackTrace();
+                LogUtils.warn(DebugUtils.getStackTraceAsString(e));
             }
         }
         this.queue.dequeue();

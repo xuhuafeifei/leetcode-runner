@@ -1,5 +1,7 @@
 package com.xhf.leetcode.plugin.review.backend.database;
 
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
@@ -31,16 +33,16 @@ public class Sqlite {
             Class.forName("org.sqlite.JDBC");
             // 保证兼容其他系统
             String dbUrl = "jdbc:sqlite:" + this.dbFolder + File.separator + this.dbName;
+            LogUtils.info("[Database] 正在连接到数据库: " + dbUrl);
             // 初始化时自动创建目录结构
             initializeDatabaseDirectory();
             connection = DriverManager.getConnection(dbUrl);
-            System.out.println("[Database] 成功连接到数据库");
+            LogUtils.info("[Database] 成功连接到数据库");
         } catch (SQLException e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(new JFrame(),
                     "SQLLite错误: " + e,
                     "建立数据库连接时发生错误", JOptionPane.ERROR_MESSAGE);
-            System.out.println("[Database] 无法连接到数据库: " + e);
+            LogUtils.info("[Database] 无法连接到数据库: " + e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -71,7 +73,7 @@ public class Sqlite {
                     throw new RuntimeException("无法创建数据库文件: " +
                             dbName + " (可能已被其他进程占用)");
                 }
-                System.out.println("[Database] 自动创建新数据库文件: " + dbFile.getAbsolutePath());
+                LogUtils.info("[Database] 自动创建新数据库文件: " + dbFile.getAbsolutePath());
             } catch (IOException e) {
                 throw new RuntimeException("创建数据库文件失败", e);
             }
@@ -86,7 +88,7 @@ public class Sqlite {
         try {
             this.connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
     }
 
@@ -149,7 +151,7 @@ public class Sqlite {
         try {
             return query(this.connection.prepareStatement(query));
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
         return null;
     }
@@ -164,7 +166,7 @@ public class Sqlite {
         try {
             return statement.executeQuery();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
         return null;
     }
@@ -189,7 +191,7 @@ public class Sqlite {
         try {
             return this.connection.prepareStatement(query);
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
         return null;
     }
@@ -203,7 +205,7 @@ public class Sqlite {
         try (PreparedStatement statement = this.connection.prepareStatement(query)) {
             queryUpdate(statement);
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
     }
 
@@ -216,12 +218,12 @@ public class Sqlite {
         try {
             preparedStatement.executeUpdate();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         } finally {
             try {
                 preparedStatement.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                LogUtils.warn(DebugUtils.getStackTraceAsString(e));
             }
         }
     }
@@ -233,7 +235,7 @@ public class Sqlite {
         try {
             if (this.connection == null || this.connection.isClosed()) connect();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
     }
 

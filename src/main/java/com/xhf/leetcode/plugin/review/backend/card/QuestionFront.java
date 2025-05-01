@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.review.backend.card;
  */
 public class QuestionFront {
     private String title; // 题目名称
+    private String titleCn; // 题目中文名称
     private String difficulty; // 困难度【题目本身的困难度, 中等，简单，困难】
     private String status; // 状态
     private Double acRate; // 通过率
@@ -16,12 +17,13 @@ public class QuestionFront {
     public QuestionFront() {
     }
 
-    public QuestionFront(String title, String difficulty, String status, Double acRate, Integer userRate) {
+    public QuestionFront(String title, String difficulty, String status, Double acRate, Integer userRate, String titleCn) {
         this.title = title;
         this.difficulty = difficulty;
         this.status = status;
         this.acRate = acRate;
         this.userRate = userRate;
+        this.titleCn = titleCn;
     }
 
     public String getTitle() {
@@ -62,5 +64,13 @@ public class QuestionFront {
 
     public void setUserRate(Integer userRate) {
         this.userRate = userRate;
+    }
+    
+    public String getTitleCn() {
+        return titleCn;
+    }
+
+    public void setTitleCn(String titleCn) {
+        this.titleCn = titleCn;
     }
 }

@@ -40,10 +40,6 @@ public class DailyPlanTabPanel extends JPanel {
      */
     private Component currentCard;
     private JPanel questionCardPanel;
-    /**
-     * 显示当前question card所在页数
-     */
-    private JLabel pageComp;
 
     private @Nullable ReviewQuestion topQuestion;
 
@@ -72,12 +68,15 @@ public class DailyPlanTabPanel extends JPanel {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BorderLayout());
 
-        this.pageComp = new JLabel();
-        this.pageComp.setFont(Constants.ENGLISH_FONT);
-        this.pageComp.setHorizontalAlignment(SwingConstants.CENTER);
-        this.pageComp.setBorder(JBUI.Borders.empty(3, 0));
+        /**
+         * 显示当前question card所在页数
+         */
+        JLabel pageComp = new JLabel();
+        pageComp.setFont(Constants.ENGLISH_FONT);
+        pageComp.setHorizontalAlignment(SwingConstants.CENTER);
+        pageComp.setBorder(JBUI.Borders.empty(3, 0));
 
-        jPanel.add(this.pageComp, BorderLayout.NORTH);
+        jPanel.add(pageComp, BorderLayout.NORTH);
 
         // 创建内容面板容器
         contentPanel = new JPanel(new BorderLayout());
@@ -115,9 +114,7 @@ public class DailyPlanTabPanel extends JPanel {
             this.currentCard = emptyMessagePane;
             emptyMessagePane.setText(htmlContent);
 
-            jPanel.add(contentPanel, BorderLayout.CENTER);
-
-            jPanel.add(contentPanel, BorderLayout.CENTER);
+            jPanel.add(emptyMessagePane, BorderLayout.CENTER);
         }
 
         return jPanel;
@@ -189,7 +186,6 @@ public class DailyPlanTabPanel extends JPanel {
     }
 
     private void removeQuestion(ReviewQuestion rq) {
-        // todo: 调用实际的后端服务删除题目
         service.deleteQuestion(rq.getId());
 
         // 刷新UI
