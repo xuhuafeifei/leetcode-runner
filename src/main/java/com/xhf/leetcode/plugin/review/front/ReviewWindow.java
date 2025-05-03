@@ -80,7 +80,7 @@ public class ReviewWindow extends JFrame implements Disposable {
 
     private void onMessageListener(String msg) {
         if ("close_window".equals(msg)) {
-            dispose();
+            ActionUtils.disposeReviewWindow();
         }
     }
 
@@ -110,5 +110,6 @@ public class ReviewWindow extends JFrame implements Disposable {
     @Override
     public void dispose() {
         Disposer.dispose(this);
+        super.dispose();
     }
 }

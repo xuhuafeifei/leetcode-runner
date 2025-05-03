@@ -88,25 +88,7 @@ public class DailyPlanTabPanel extends JPanel {
             contentPanel.add(this.currentCard, BorderLayout.CENTER);
             jPanel.add(contentPanel, BorderLayout.CENTER);
 
-            JPanel bottomPanel = new JPanel();
-            // 掌握button
-            JButton masterBtn = new JButton(BundleUtils.i18nHelper("掌握", "master"));
-            masterBtn.addActionListener(e -> showMasteryDialog());
-
-            // 继续学习button
-            JButton deleteBtn = new JButton(BundleUtils.i18nHelper("删除", "delete"));
-            deleteBtn.addActionListener(e -> removeQuestion(rq));
-
-            // 解题button
-            JButton doItBtn = new JButton(BundleUtils.i18nHelper("做题", "do it"));
-            doItBtn.addActionListener(e -> doIt(rq));
-
-            // 反转button
-            // JButton flipButton = getFlipBtn(rq);
-
-            bottomPanel.add(masterBtn);
-            bottomPanel.add(deleteBtn);
-            bottomPanel.add(doItBtn);
+            JPanel bottomPanel = getjPanel(rq);
 
             jPanel.add(bottomPanel, BorderLayout.SOUTH);
         } else {
@@ -125,6 +107,29 @@ public class DailyPlanTabPanel extends JPanel {
         }
 
         return jPanel;
+    }
+
+    private @NotNull JPanel getjPanel(ReviewQuestion rq) {
+        JPanel bottomPanel = new JPanel();
+        // 掌握button
+        JButton masterBtn = new JButton(BundleUtils.i18nHelper("掌握", "master"));
+        masterBtn.addActionListener(e -> showMasteryDialog());
+
+        // 继续学习button
+        JButton deleteBtn = new JButton(BundleUtils.i18nHelper("删除", "delete"));
+        deleteBtn.addActionListener(e -> removeQuestion(rq));
+
+        // 解题button
+        JButton doItBtn = new JButton(BundleUtils.i18nHelper("做题", "do it"));
+        doItBtn.addActionListener(e -> doIt(rq));
+
+        // 反转button
+        // JButton flipButton = getFlipBtn(rq);
+
+        bottomPanel.add(masterBtn);
+        bottomPanel.add(deleteBtn);
+        bottomPanel.add(doItBtn);
+        return bottomPanel;
     }
 
     private void doIt(ReviewQuestion rq) {

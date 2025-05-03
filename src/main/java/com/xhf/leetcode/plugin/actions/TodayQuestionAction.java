@@ -61,14 +61,11 @@ public class TodayQuestionAction extends AbstractAction {
                     BundleUtils.i18nHelper("坚持了" + cnt + "天", " Streak for " + cnt + " days")
             );
 
-//            if (!Objects.equals(cnt, "NULL")) {
             instance.modified();
-//            }
         } else if (instance.todayQuestionSolved() == TodayIconStatusEnum.NOT_SOLVED){
             presentation.setIcon(IconLoader.getIcon("/icons/daily.svg", this.getClass()));
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction"));
             instance.modified();
         }
-        // LogUtils.simpleDebug("end update..., take = " + (System.currentTimeMillis() - start));
     }
 }
