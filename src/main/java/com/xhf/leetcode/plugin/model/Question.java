@@ -340,6 +340,14 @@ public class Question implements DeepCodingQuestion {
         return sb.toString();
     }
 
+    public String getReviewTitleCn() {
+        return "[" + frontendQuestionId + "] " + getTitleCn();
+    }
+
+    public String getReviewTitle() {
+        return "[" + frontendQuestionId + "] " + getTitle();
+    }
+
     public String getTranslatedTitle() {
         return translatedTitle;
     }

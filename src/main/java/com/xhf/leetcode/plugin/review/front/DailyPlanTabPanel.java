@@ -9,7 +9,6 @@ import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-import com.xhf.leetcode.plugin.utils.Constants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +27,8 @@ public class DailyPlanTabPanel extends JPanel {
 
     private final ReviewQuestionService service;
 
+    private final ReviewEnv env;
+
     /**
      * 卡片面板, 包含内容+底部button
      */
@@ -41,15 +42,22 @@ public class DailyPlanTabPanel extends JPanel {
     private Component currentCard;
     private JPanel questionCardPanel;
 
+    private Dimension globalSize;
     private @Nullable ReviewQuestion topQuestion;
 
-    public DailyPlanTabPanel(Project project) {
+    public DailyPlanTabPanel(Project project, ReviewEnv env) {
         this.project = project;
         this.service = RQServiceImpl.getInstance(project);
+        this.env = env;
+        this.env.registerListener(this::onMessageReceived);
         loadContent();
     }
 
-    int cursor = -1;
+    private void onMessageReceived(String msg) {
+        if ("get_top_question".equals(msg)) {
+            loadContent();
+        }
+    }
 
     private void loadContent() {
         this.questionCardPanel = new JPanel();
@@ -62,21 +70,10 @@ public class DailyPlanTabPanel extends JPanel {
         add(questionCardPanel);
     }
 
-    private Dimension globalSize;
 
     private Component createQuestionCard(ReviewQuestion rq) {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BorderLayout());
-
-        /**
-         * 显示当前question card所在页数
-         */
-        JLabel pageComp = new JLabel();
-        pageComp.setFont(Constants.ENGLISH_FONT);
-        pageComp.setHorizontalAlignment(SwingConstants.CENTER);
-        pageComp.setBorder(JBUI.Borders.empty(3, 0));
-
-        jPanel.add(pageComp, BorderLayout.NORTH);
 
         // 创建内容面板容器
         contentPanel = new JPanel(new BorderLayout());
@@ -215,6 +212,8 @@ public class DailyPlanTabPanel extends JPanel {
                     service.rateQuestion(FSRSRating.getById(levelStr));
                     // 更新问题状态
                     nextQuestion();
+                    // 通知TotalReviewPlan刷新获取新的题目
+                    env.post("refresh");
 
                     // 关闭对话框
                     this.dispose();

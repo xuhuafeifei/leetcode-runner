@@ -13,6 +13,7 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,14 +26,14 @@ import java.util.stream.Collectors;
 public class RQServiceImpl implements ReviewQuestionService {
 
 
-    private final AlgorithmAPI app;
+    private final AlgorithmAPI api;
     private final Project project;
 
     private static RQServiceImpl instance;
 
     private RQServiceImpl(Project project) {
         this.project = project;
-        this.app = AlgorithmAPI.getInstance(project);
+        this.api = AlgorithmAPI.getInstance(project);
     }
 
     public static RQServiceImpl getInstance(Project project) {
@@ -44,7 +45,7 @@ public class RQServiceImpl implements ReviewQuestionService {
 
     @Override
     public @Nullable ReviewQuestion getTopQuestion() {
-        QuestionCard topCard = app.getTopCard();
+        QuestionCard topCard = api.getTopCard();
         if (topCard == null) {
             return null;
         }
@@ -53,12 +54,12 @@ public class RQServiceImpl implements ReviewQuestionService {
 
     @Override
     public void rateQuestion(FSRSRating rating) {
-        app.rateCard(rating.toInt());
+        api.rateCard(rating.toInt());
     }
 
     @Override
     public void createQuestion(Question question, FSRSRating rating) {
-        app.createCard(
+        api.createCard(
                 toQuestionCardReq(question, rating)
         );
     }
@@ -72,12 +73,12 @@ public class RQServiceImpl implements ReviewQuestionService {
     private QuestionFront getQuestionFront(Question question, FSRSRating rating) {
         return
                 new QuestionFront(
-                    question.getTitleCn(),
+                    question.getReviewTitle(),
                     question.getDifficulty(),
                     question.getStatus(),
                     question.getAcRate(),
                     rating.toInt(),
-                    question.getTitleCn()
+                    question.getReviewTitleCn()
                 );
     }
 
@@ -109,8 +110,9 @@ public class RQServiceImpl implements ReviewQuestionService {
 
     @Override
     public @NotNull List<ReviewQuestion>  getAllQuestions() {
-        List<QuestionCard> allCards = app.getAllCards();
+        List<QuestionCard> allCards = api.getAllCards();
         return allCards.stream()
+                .sorted(Comparator.comparingLong(QuestionCard::getNextReview))
                 .map(QuestionCard::toReviewQuestion)
                 .collect(Collectors.toList())
                 ;
@@ -119,16 +121,16 @@ public class RQServiceImpl implements ReviewQuestionService {
 
     @Override
     public void deleteQuestion(Integer id) {
-        app.deleteCardById(id);
+        api.deleteCardById(id);
     }
 
     @Override
     public void rateTopQuestion(FSRSRating rating) {
-        app.rateCard(rating.toInt());
+        api.rateCard(rating.toInt());
     }
 
     @Override
     public void updateBack(Integer id, String back) {
-        app.updateCardBack(id, back);
+        api.updateCardBack(id, back);
     }
 }

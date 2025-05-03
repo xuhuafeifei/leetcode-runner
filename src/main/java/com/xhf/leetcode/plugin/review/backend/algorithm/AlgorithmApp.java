@@ -60,12 +60,13 @@ public class AlgorithmApp {
                             resultSet.getInt("card_id"),
                             questionFront,
                             resultSet.getString("back"),
-                            resultSet.getLong("created")
+                            resultSet.getLong("created"),
+                            resultSet.getLong("next_repetition")
                     );
                     card.setNextReview(resultSet.getLong("next_repetition"));
                     this.cards.put(card.getId(), card);
 
-                    LogUtils.info("[Cards] Sucessfully loaded card " + card.getId());
+                    LogUtils.simpleDebug("[Cards] Sucessfully loaded card " + card.getId());
                 }
             } catch (SQLException e) {
                 LogUtils.warn(DebugUtils.getStackTraceAsString(e));
@@ -132,8 +133,11 @@ public class AlgorithmApp {
         Long created = System.currentTimeMillis(); // 当前时间作为创建时间
         // 插入数据库
         try {
-            PreparedStatement ps =
-                    this.databaseAdapter.getSqlite().prepare("INSERT INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+//            PreparedStatement ps =
+//                    this.databaseAdapter.getSqlite().prepare("INSERT INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement ps = this.databaseAdapter.getSqlite().prepare(
+                    "INSERT OR REPLACE INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
             ps.setInt(1, id);
             ps.setString(2, strFront);
             ps.setString(3, back);
@@ -151,7 +155,7 @@ public class AlgorithmApp {
         } catch (SQLException e) {
             LogUtils.info("[Cards] Failed inserting the card " + id + " into database: " + e);
         }
-        QuestionCard card = new QuestionCard(id, front, back, created);
+        QuestionCard card = new QuestionCard(id, front, back, created, result.getNextRepetitionTime());
         this.cards.put(id, card);
         LogUtils.info("[Cards] 成功本地创建卡片 " + id);
     }

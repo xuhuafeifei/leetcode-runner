@@ -62,29 +62,31 @@ public class ReviewWindow extends JFrame implements Disposable {
 
     private JPanel createMainPanel() {
         var mainPanel = new JPanel();
+        var env = new ReviewEnv();
+
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createLineBorder(JBColor.border(), 1));
         mainPanel.setBackground(JBColor.background());
         mainPanel.setOpaque(true); // 确保背景不透明
 
         // tabs
-        tabs.addTab(createDailyPlanTabInfo());
-        tabs.addTab(createTotalReviewPlanTabInfo());
+        tabs.addTab(createDailyPlanTabInfo(env));
+        tabs.addTab(createTotalReviewPlanTabInfo(env));
 
         mainPanel.add(tabs, BorderLayout.CENTER);
 
         return mainPanel;
     }
 
-    private TabInfo createDailyPlanTabInfo() {
-        JPanel panel  = new DailyPlanTabPanel(project);
+    private TabInfo createDailyPlanTabInfo(ReviewEnv env) {
+        JPanel panel  = new DailyPlanTabPanel(project, env);
         TabInfo tabInfo = new TabInfo(panel);
         tabInfo.setText(BundleUtils.i18n("action.leetcode.review.dailyPlan"));
         return tabInfo;
     }
 
-    private TabInfo createTotalReviewPlanTabInfo() {
-        JPanel panel  = new TotalReviewPlanTabPanel(project);
+    private TabInfo createTotalReviewPlanTabInfo(ReviewEnv env) {
+        JPanel panel  = new TotalReviewPlanTabPanel(project, env);
         TabInfo tabInfo = new TabInfo(panel);
         tabInfo.setText(BundleUtils.i18n("action.leetcode.review.totalReview"));
         return tabInfo;

@@ -4,11 +4,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
-import com.xhf.leetcode.plugin.review.backend.service.MockRQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -24,17 +24,24 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class TotalReviewPlanTabPanel extends JPanel {
-    private final Project project;
     private final ReviewQuestionService service;
+    private final ReviewEnv env;
     private JBTable reviewTable;
     private DefaultTableModel tableModel;
     private List<ReviewQuestion> reviewQuestions;
     
-    public TotalReviewPlanTabPanel(Project project) {
-        this.project = project;
+    public TotalReviewPlanTabPanel(Project project, ReviewEnv env) {
         this.service = RQServiceImpl.getInstance(project);
+        this.env = env;
+        this.env.registerListener(this::onMessageReceived);
         setLayout(new BorderLayout());
         loadContent();
+    }
+
+    private void onMessageReceived(String msg) {
+        if ("refresh".equals(msg)) {
+            loadContent();
+        }
     }
 
     private void loadContent() {
@@ -149,9 +156,10 @@ public class TotalReviewPlanTabPanel extends JPanel {
             if (selectedRow >= 0) {
                 // 删除按钮的逻辑
                 // TODO: 实现删除逻辑
-                System.out.println("Delete row: " + selectedRow);
+                LogUtils.info("Delete row: " + selectedRow);
                 tableModel.removeRow(selectedRow);
                 reviewQuestions.remove(selectedRow);
+                env.post("get_top_question");
             }
         });
         buttonPanel.add(deleteButton);

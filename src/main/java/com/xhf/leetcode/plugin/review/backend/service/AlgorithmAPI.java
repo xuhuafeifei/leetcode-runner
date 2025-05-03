@@ -45,6 +45,7 @@ public class AlgorithmAPI {
      */
     public void updateQueue() {
         this.cardScheduler.queueDueCards();
+        app.loadCards();
     }
 
     /**
@@ -90,6 +91,7 @@ public class AlgorithmAPI {
         // 内存队列操作，无需更新
         if(index != -1) {
             this.cardScheduler.onRating(index);
+            updateQueue();
         }
     }
 

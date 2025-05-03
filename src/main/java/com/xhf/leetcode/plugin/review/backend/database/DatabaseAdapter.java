@@ -6,6 +6,8 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils.PathBuilder;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 
 /**
@@ -99,7 +101,7 @@ public class DatabaseAdapter {
      * 获取用于建立数据库连接的Sqlite对象
      * @return Sqlite对象
      */
-    public Sqlite getSqlite() {
+    public @NotNull Sqlite getSqlite() {
         return this.sqlite;
     }
 }
