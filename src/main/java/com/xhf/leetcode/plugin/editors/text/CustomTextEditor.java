@@ -1,12 +1,6 @@
 package com.xhf.leetcode.plugin.editors.text;
 
-import com.intellij.openapi.actionSystem.ActionGroup;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionToolbar;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.actionSystem.Separator;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
@@ -32,11 +26,7 @@ import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.editors.myeditor.MySplitEditorToolbar;
 import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
-import com.xhf.leetcode.plugin.model.CompetitionQuestion;
-import com.xhf.leetcode.plugin.model.DeepCodingInfo;
-import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
-import com.xhf.leetcode.plugin.model.LeetcodeEditor;
-import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
@@ -50,13 +40,13 @@ import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import com.xhf.leetcode.plugin.window.deepcoding.Hot100Panel;
 import com.xhf.leetcode.plugin.window.deepcoding.Interview150Panel;
 import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
-import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
+import java.util.Objects;
 
 public class CustomTextEditor implements TextEditor {
     private final Editor editor;
@@ -69,7 +59,7 @@ public class CustomTextEditor implements TextEditor {
     public CustomTextEditor(@NotNull Project project, @NotNull VirtualFile file) {
         this.file = file;
         this.project = project;
-        this.service = RQServiceImpl.getInstance(project);
+        this.service = new RQServiceImpl(project);
         Document document = FileDocumentManager.getInstance().getDocument(file);
         if (document == null) {
             throw new IllegalStateException("Cannot create editor for file: " + file.getName());

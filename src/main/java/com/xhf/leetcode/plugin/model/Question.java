@@ -1,8 +1,11 @@
 package com.xhf.leetcode.plugin.model;
 
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -217,6 +220,33 @@ public class Question implements DeepCodingQuestion {
         }
         sb.append(basic).append(start).append(content).append(end);
         return sb.toString();
+    }
+
+    public static int getIdx(Question question, Project project) {
+        String fid = question.getFrontendQuestionId();
+        if (fid != null) {
+            try {
+                return Integer.parseInt(fid) - 1;
+            } catch (Exception e) {
+                LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+            }
+        } else {
+            throw new IllegalArgumentException("frontendQuestionId not found");
+        }
+
+        String titleSlug = question.getTitleSlug();
+        List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
+
+        // 遍历所有元素, 找到匹配的titleSlug, 然后返回index
+        for (int i = 0; i < totalQuestion.size(); i++) {
+            Question q = totalQuestion.get(i);
+            if (q.getTitleSlug().equals(titleSlug)) {
+                return i;
+            }
+        }
+
+        // 抛出异常
+        throw new IllegalArgumentException("question not found");
     }
 
     public List<TopicTag> getTopicTags() {

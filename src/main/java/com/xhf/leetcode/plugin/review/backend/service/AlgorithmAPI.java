@@ -15,30 +15,23 @@ import java.util.Map;
  * @author 文艺倾年
  */
 public class AlgorithmAPI {
-    // 单例
-    private static AlgorithmApp app = null;
-    private static AlgorithmAPI instance = null;
-    private final QuestionCardScheduler cardScheduler;
+    private AlgorithmApp app;
+    private QuestionCardScheduler cardScheduler;
 
     /**
      * 一定是先初始化app, 再初始化cardScheduler
      * @param project project
      */
-    private AlgorithmAPI(Project project) {
+    public AlgorithmAPI(Project project) {
         app = AlgorithmApp.getInstance(project);
         cardScheduler = QuestionCardScheduler.getInstance(project);
+        init();
+    }
 
+    private void init() {
         app.init();
         cardScheduler.init();
     }
-
-    public static AlgorithmAPI getInstance(Project project) {
-        if (instance == null) {
-            instance = new AlgorithmAPI(project);
-        }
-        return instance;
-    }
-
 
     /**
      * 更新队列

@@ -24,16 +24,13 @@ import java.util.Map;
 public class AlgorithmApp {
 
     private static volatile AlgorithmApp instance;
-    private final Map<Integer, QuestionCard> cards;
-    private final DatabaseAdapter databaseAdapter;
-    private final Project project;
+    private Map<Integer, QuestionCard> cards;
+    private DatabaseAdapter databaseAdapter;
 
     /**
      * 实例化 AlgorithmApp。在这里执行启动应用程序所需的重要步骤
      */
     private AlgorithmApp(Project project) {
-        // 实例化数据库
-        this.project = project;
         // 实例化 HashMap，用于存储从数据库加载的卡片
         this.cards = new HashMap<>();
         this.databaseAdapter = DatabaseAdapter.getInstance(project);

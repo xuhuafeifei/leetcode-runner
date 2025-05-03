@@ -104,4 +104,12 @@ public class DatabaseAdapter {
     public @NotNull Sqlite getSqlite() {
         return this.sqlite;
     }
+
+    public void dispose() {
+        if (this.sqlite!= null) {
+            this.sqlite.disconnect();
+        }
+        this.sqlite = null;
+        instance = null;
+    }
 }

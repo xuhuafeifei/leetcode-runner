@@ -2,11 +2,12 @@ package com.xhf.leetcode.plugin.review.front;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.openapi.wm.impl.IdeGlassPaneImpl;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.tabs.TabInfo;
-import com.intellij.ui.tabs.impl.JBEditorTabs;
+import com.intellij.ui.tabs.impl.JBTabsImpl;
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 
@@ -23,7 +24,7 @@ public class ReviewWindow extends JFrame implements Disposable {
     /**
      * 命令行选项卡
      */
-    private final JBEditorTabs tabs;
+    private final JBTabsImpl tabs;
 
     // jwindow的长/宽比
     public final static float radio = 1.2f;
@@ -31,7 +32,7 @@ public class ReviewWindow extends JFrame implements Disposable {
 
     public ReviewWindow(Project project) {
         this.project = project;
-        this.tabs = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
+        this.tabs = new JBTabsImpl(project, IdeFocusManager.getInstance(project), this);
 
         // 窗口配置
         setAlwaysOnTop(true);
@@ -44,15 +45,13 @@ public class ReviewWindow extends JFrame implements Disposable {
         centerWindow();
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        
+
         // 添加窗口监听器
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 // 调用原有的关闭逻辑
                 ActionUtils.disposeReviewWindow();
-                // 关闭窗口
-                dispose();
             }
         });
 
@@ -63,6 +62,7 @@ public class ReviewWindow extends JFrame implements Disposable {
     private JPanel createMainPanel() {
         var mainPanel = new JPanel();
         var env = new ReviewEnv();
+        env.registerListener(this::onMessageListener);
 
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createLineBorder(JBColor.border(), 1));
@@ -76,6 +76,12 @@ public class ReviewWindow extends JFrame implements Disposable {
         mainPanel.add(tabs, BorderLayout.CENTER);
 
         return mainPanel;
+    }
+
+    private void onMessageListener(String msg) {
+        if ("close_window".equals(msg)) {
+            dispose();
+        }
     }
 
     private TabInfo createDailyPlanTabInfo(ReviewEnv env) {
@@ -99,5 +105,10 @@ public class ReviewWindow extends JFrame implements Disposable {
                 (screen.width - getWidth()) / 2,
                 (screen.height - getHeight()) / 4
         );
+    }
+
+    @Override
+    public void dispose() {
+        Disposer.dispose(this);
     }
 }

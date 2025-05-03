@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.utils;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -90,5 +91,9 @@ public class LogUtils {
     public static void warn(String message) {
         IDEA_LOGGER.warn(message);
         consoleLog(message, "WARN", 1);
+    }
+
+    public static void warn(Throwable e) {
+        warn(DebugUtils.getStackTraceAsString(e));
     }
 }

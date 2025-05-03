@@ -3,9 +3,11 @@ package com.xhf.leetcode.plugin.review.front;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
+import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
+import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
@@ -26,12 +28,14 @@ import java.util.List;
 public class TotalReviewPlanTabPanel extends JPanel {
     private final ReviewQuestionService service;
     private final ReviewEnv env;
+    private final Project project;
     private JBTable reviewTable;
     private DefaultTableModel tableModel;
     private List<ReviewQuestion> reviewQuestions;
     
     public TotalReviewPlanTabPanel(Project project, ReviewEnv env) {
-        this.service = RQServiceImpl.getInstance(project);
+        this.project = project;
+        this.service = new RQServiceImpl(project);
         this.env = env;
         this.env.registerListener(this::onMessageReceived);
         setLayout(new BorderLayout());
@@ -155,7 +159,11 @@ public class TotalReviewPlanTabPanel extends JPanel {
             int selectedRow = reviewTable.getSelectedRow();
             if (selectedRow >= 0) {
                 // 删除按钮的逻辑
-                // TODO: 实现删除逻辑
+                String fid = Question.parseFrontendQuestionId((String) tableModel.getValueAt(selectedRow, 0));
+                Question question = QuestionService.getInstance(project).getQuestionByFid(fid, project);
+                int id = Question.getIdx(question, project);
+
+                service.deleteQuestion(id);
                 LogUtils.info("Delete row: " + selectedRow);
                 tableModel.removeRow(selectedRow);
                 reviewQuestions.remove(selectedRow);

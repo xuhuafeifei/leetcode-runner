@@ -26,21 +26,14 @@ import java.util.stream.Collectors;
 public class RQServiceImpl implements ReviewQuestionService {
 
 
-    private final AlgorithmAPI api;
+    private AlgorithmAPI api;
     private final Project project;
 
     private static RQServiceImpl instance;
 
-    private RQServiceImpl(Project project) {
+    public RQServiceImpl(Project project) {
         this.project = project;
-        this.api = AlgorithmAPI.getInstance(project);
-    }
-
-    public static RQServiceImpl getInstance(Project project) {
-        if (instance == null) {
-            instance = new RQServiceImpl(project);
-        }
-        return instance;
+        this.api = new AlgorithmAPI(project);
     }
 
     @Override
@@ -65,7 +58,7 @@ public class RQServiceImpl implements ReviewQuestionService {
     }
 
     private QuestionCardReq toQuestionCardReq(Question question, FSRSRating rating) {
-        int id = getId(question);
+        int id = Question.getIdx(question, project);
         QuestionFront front = getQuestionFront(question, rating);
         return new QuestionCardReq(id, front, "", rating);
     }
@@ -81,32 +74,6 @@ public class RQServiceImpl implements ReviewQuestionService {
                     question.getReviewTitleCn()
                 );
     }
-
-    int getId(Question question) {
-        String fid = question.getFrontendQuestionId();
-        if (fid != null) {
-            try {
-                return Integer.parseInt(fid) - 1;
-            } catch (Exception e) {
-                LogUtils.warn(DebugUtils.getStackTraceAsString(e));
-            }
-        }
-
-        String titleSlug = question.getTitleSlug();
-        List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
-
-        // 遍历所有元素, 找到匹配的titleSlug, 然后返回index
-        for (int i = 0; i < totalQuestion.size(); i++) {
-            Question q = totalQuestion.get(i);
-            if (q.getTitleSlug().equals(titleSlug)) {
-                return i;
-            }
-        }
-
-        // 抛出异常
-        throw new IllegalArgumentException("question not found");
-    }
-
 
     @Override
     public @NotNull List<ReviewQuestion>  getAllQuestions() {

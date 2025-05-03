@@ -3,12 +3,18 @@ package com.xhf.leetcode.plugin.review.front;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
+import com.xhf.leetcode.plugin.exception.FileCreateError;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
+import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
+import com.xhf.leetcode.plugin.service.CodeService;
+import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +53,7 @@ public class DailyPlanTabPanel extends JPanel {
 
     public DailyPlanTabPanel(Project project, ReviewEnv env) {
         this.project = project;
-        this.service = RQServiceImpl.getInstance(project);
+        this.service = new RQServiceImpl(project);
         this.env = env;
         this.env.registerListener(this::onMessageReceived);
         loadContent();
@@ -55,7 +61,7 @@ public class DailyPlanTabPanel extends JPanel {
 
     private void onMessageReceived(String msg) {
         if ("get_top_question".equals(msg)) {
-            loadContent();
+            nextQuestion();
         }
     }
 
@@ -91,12 +97,16 @@ public class DailyPlanTabPanel extends JPanel {
             JButton deleteBtn = new JButton(BundleUtils.i18nHelper("删除", "delete"));
             deleteBtn.addActionListener(e -> removeQuestion(rq));
 
+            // 解题button
+            JButton doItBtn = new JButton(BundleUtils.i18nHelper("做题", "do it"));
+            doItBtn.addActionListener(e -> doIt(rq));
+
             // 反转button
-            JButton flipButton = getFlipBtn(rq);
+            // JButton flipButton = getFlipBtn(rq);
 
             bottomPanel.add(masterBtn);
             bottomPanel.add(deleteBtn);
-            bottomPanel.add(flipButton);
+            bottomPanel.add(doItBtn);
 
             jPanel.add(bottomPanel, BorderLayout.SOUTH);
         } else {
@@ -115,6 +125,20 @@ public class DailyPlanTabPanel extends JPanel {
         }
 
         return jPanel;
+    }
+
+    private void doIt(ReviewQuestion rq) {
+        // 获取当前Question
+        Question q = QuestionService.getInstance(project).getTotalQuestion(project).get(rq.getId());
+        try {
+            CodeService.getInstance(project).openCodeEditor(q);
+        } catch (FileCreateError e) {
+            ConsoleUtils.getInstance(project).showError(BundleUtils.i18nHelper("打开文件失败", "Failed to open file"), true, true, e.getMessage(), "Error", null);
+            LogUtils.warn(e);
+            return;
+        }
+        // 关闭当前窗口
+        env.post("close_window");
     }
 
     private String createHtmlContent() {
