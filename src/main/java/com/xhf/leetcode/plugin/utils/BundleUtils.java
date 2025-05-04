@@ -13,25 +13,28 @@ import java.util.ResourceBundle;
 public class BundleUtils {
     @NonNls
     public static final String I18N = "messages/info";
-    private static final ResourceBundle bundle;
-    private static final I18nTypeEnum i18N;
+    private static volatile ResourceBundle bundle;
+    private static volatile I18nTypeEnum i18N;
 
-    static {
-        String locale = AppSettings.getInstance().getLocale();
-        i18N = I18nTypeEnum.getI18N(locale);
-        bundle = ResourceBundle.getBundle(I18N, i18N.getLocal());
-    }
+    private static final Object INIT_LOCK = new Object();
 
     private BundleUtils() {
     }
 
-    /**
-     * 获取指定键对应的本地化字符串。
-     *
-     * @param key 资源键
-     * @return 本地化字符串
-     */
+    private static void initBundle() {
+        if (bundle == null) {
+            synchronized (INIT_LOCK) {
+                if (bundle == null) {
+                    String locale = AppSettings.getInstance().getLocale();
+                    i18N = I18nTypeEnum.getI18N(locale);
+                    bundle = ResourceBundle.getBundle(I18N, i18N.getLocal());
+                }
+            }
+        }
+    }
+
     public static String i18n(@PropertyKey(resourceBundle = "messages.info") String key) {
+        initBundle();
         return bundle.getString(key);
     }
 
@@ -44,6 +47,7 @@ public class BundleUtils {
      */
     @Deprecated
     public static String i18n(String key, Object... params) {
+        initBundle();
         String messagePattern = bundle.getString(key);
         return java.text.MessageFormat.format(messagePattern, params);
     }

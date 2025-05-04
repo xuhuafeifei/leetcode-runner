@@ -147,35 +147,18 @@ public class DailyPlanTabPanel extends JPanel {
     }
 
     private String createHtmlContent() {
-        return "<!DOCTYPE html>\n" +
-                "<html>\n" +
-                "<head>\n" +
-                "    <style>\n" +
-                "        .empty-message {\n" +
-                "            font-family: Arial, sans-serif;\n" +
-                "            text-align: center;\n" +
-                "            padding: 40px;\n" +
-                "            color: #666;\n" +
-                "            font-size: 18px;\n" +
-                "            background-color: #f8f9fa;\n" +
-                "            border-radius: 8px;\n" +
-                "            margin: 20px;\n" +
-                "            box-shadow: 0 2px 4px rgba(0,0,0,0.05);\n" +
-                "        }\n" +
-                "        .empty-message .icon {\n" +
-                "            font-size: 48px;\n" +
-                "            margin-bottom: 15px;\n" +
-                "            color: #adb5bd;\n" +
-                "        }\n" +
-                "    </style>\n" +
-                "</head>\n" +
-                "<body>\n" +
-                "    <div class=\"empty-message\">\n" +
-                "        <div class=\"icon\">☑\uFE0F</div>\n" +
-                "        <div>${message}</div>\n" +
-                "    </div>\n" +
-                "</body>\n" +
-                "</html>";
+        return "<html>" +
+            "<head><style>" +
+            "body { font-family: Arial; font-size: 16px; color: #666; } " +
+            ".empty-message { text-align: center; padding: 20px; margin: 20px; }" +
+            ".icon { font-size: 32px; color: gray; }" +
+            "</style></head>" +
+            "<body>" +
+            "<div class=\"empty-message\">" +
+            "    <div class=\"icon\">☑\uFE0F</div>" +
+            "    <div>${message}</div>" +
+            "</div>" +
+            "</body></html>";
     }
 
     /**
