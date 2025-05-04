@@ -91,9 +91,11 @@ public class QuestionCardScheduler {
         QuestionCard ratedCard = this.queue.front();
 
         if (ratedCard != null) {
-            try {
-                // 1.查询数据库
-                PreparedStatement ps = this.databaseAdapter.getSqlite().prepare("SELECT * FROM cards" + " WHERE card_id = ?");
+            // 1.查询数据库
+            String query = "SELECT * FROM cards" + " WHERE card_id = ?";
+            LogUtils.simpleDebug("[CardScheduler] 查询卡片 SQL: " + ratedCard.getId());
+
+            try (PreparedStatement ps = this.databaseAdapter.getSqlite().prepare(query)) {
                 ps.setInt(1, ratedCard.getId());
                 ResultSet rs = ps.executeQuery();
                 rs.next();
@@ -111,17 +113,21 @@ public class QuestionCardScheduler {
                 FSRSAlgorithmResult result = algorithm.calc();
 
                 // 3.更新数据库
-                PreparedStatement db = this.databaseAdapter.getSqlite().prepare("UPDATE cards SET repetitions = ?, difficulty = ?, stability = ?, elapsed_days = ?, state = ?, day_interval = ?, next_repetition = ?, last_review = ? WHERE card_id = ?");
-                db.setLong(1, result.getRepetitions());
-                db.setFloat(2, result.getDifficulty());
-                db.setFloat(3, result.getStability());
-                db.setInt(4, result.getElapsedDays());
-                db.setInt(5, result.getState().toInt());
-                db.setInt(6, result.getInterval());
-                db.setLong(7, result.getNextRepetitionTime());
-                db.setLong(8, result.getLastReview());
-                db.setInt(9, ratedCard.getId());
-                db.execute();
+                String update = "UPDATE cards SET repetitions = ?, difficulty = ?, stability = ?, elapsed_days = ?, state = ?, day_interval = ?, next_repetition = ?, last_review = ? WHERE card_id = ?";
+                LogUtils.simpleDebug("[CardScheduler] 更新卡片 SQL: " + ratedCard.getId());
+
+                try (PreparedStatement db = this.databaseAdapter.getSqlite().prepare(update)) {
+                    db.setLong(1, result.getRepetitions());
+                    db.setFloat(2, result.getDifficulty());
+                    db.setFloat(3, result.getStability());
+                    db.setInt(4, result.getElapsedDays());
+                    db.setInt(5, result.getState().toInt());
+                    db.setInt(6, result.getInterval());
+                    db.setLong(7, result.getNextRepetitionTime());
+                    db.setLong(8, result.getLastReview());
+                    db.setInt(9, ratedCard.getId());
+                    db.execute();
+                }
 
                 LogUtils.info("[CardScheduler] 卡片 " + " 评分为 " + rating);
             } catch (Exception e) {
