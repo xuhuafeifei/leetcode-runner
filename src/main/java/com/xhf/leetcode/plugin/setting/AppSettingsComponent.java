@@ -232,7 +232,7 @@ public class AppSettingsComponent {
     });
 
     enableFloatingToolbarBtn = new OnOffButton();
-    enableFloatingToolbarBtn.setSelected(true);
+    enableFloatingToolbarBtn.setSelected(false);
   }
 
   public JPanel getPanel() {
