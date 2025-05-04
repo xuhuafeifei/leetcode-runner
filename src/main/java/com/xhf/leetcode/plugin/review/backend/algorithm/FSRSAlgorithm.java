@@ -14,8 +14,12 @@ public class FSRSAlgorithm{
     // 算法的标准值
     private final float REQUEST_RETENTION = 0.9F; // 目标记忆保留率（90%）
     private final int MAXIMUM_INTERVAL = 36500; // 最大复习间隔（365天）
-    private final float EASY_BONUS = 1.3F; // 容易卡片间隔奖励系数
-    private final float HARD_FACTOR = 1.2F; // 困难卡片难度系数
+    private final float EASY_BONUS = 1.5F; // 容易卡片间隔奖励系数
+    private final float GOOD_BONUS = 1.3F;
+    private final float HARD_BONUS = 1.1F;
+    private final float AGAIN_BONUS = 1.0F;
+
+    private final float HARD_FACTOR = 1.0F; // 困难卡片难度系数
     private final float[] WEIGHTS = new float[]{1F, 1F, 5F, -1F, -1F, 0.1F, 1.5F, -0.2F, 0.8F, 2, -0.2F, 0.2F, 1F}; /* 各参数权重配置 */
 
     private FSRSRating rating;
@@ -68,19 +72,24 @@ public class FSRSAlgorithm{
 
         this.card.updateState();
 
-        int easyInterval, hardInterval, goodInterval;
+        int easyInterval, hardInterval, goodInterval, nextInterval;
 
         // 处理新卡片
         if (this.card.getState() == FSRSState.NEW) {
             this.init();
 
             this.card.getRatingToCard().get(FSRSRating.AGAIN).setDueTime(this.card.getDueTime() + TimeUnit.MINUTES.toMillis(1));
-            this.card.getRatingToCard().get(FSRSRating.HARD).setDueTime(this.card.getDueTime() + TimeUnit.MINUTES.toMillis(15));
+            this.card.getRatingToCard().get(FSRSRating.HARD).setDueTime(this.card.getDueTime() + TimeUnit.MINUTES.toMillis(5));
             this.card.getRatingToCard().get(FSRSRating.GOOD).setDueTime(this.card.getDueTime() + TimeUnit.MINUTES.toMillis(10));
+            this.card.getRatingToCard().get(FSRSRating.EASY).setDueTime(this.card.getDueTime() + TimeUnit.MINUTES.toMillis(15));
 
-            easyInterval = this.nextInterval(this.card.getRatingToCard().get(FSRSRating.EASY).getStability() * EASY_BONUS);
-            this.card.getRatingToCard().get(FSRSRating.EASY).setScheduledDays(easyInterval);
-            this.card.getRatingToCard().get(FSRSRating.EASY).setDueTime(this.card.getDueTime() + TimeUnit.DAYS.toMillis(easyInterval));
+//            easyInterval = this.nextInterval(this.card.getRatingToCard().get(FSRSRating.EASY).getStability() * EASY_BONUS);
+//            this.card.getRatingToCard().get(FSRSRating.EASY).setScheduledDays(easyInterval);
+//            this.card.getRatingToCard().get(FSRSRating.EASY).setDueTime(this.card.getDueTime() + TimeUnit.DAYS.toMillis(easyInterval));
+
+            nextInterval = this.nextInterval(this.card.getRatingToCard().get(this.rating).getStability() * this.getBonusByRating(this.rating));
+            this.card.getRatingToCard().get(this.rating).setScheduledDays(nextInterval);
+            this.card.getRatingToCard().get(this.rating).setDueTime(this.card.getDueTime() + TimeUnit.DAYS.toMillis(nextInterval));
 
             // 处理正在学习或重新学习的卡片
         } else if (this.card.getState() == FSRSState.LEARNING || this.card.getState() == FSRSState.RELEARNING) {
@@ -110,6 +119,19 @@ public class FSRSAlgorithm{
         newCard.setLastReview(System.currentTimeMillis());
         newCard.setRepetitions(this.card.getRepetitions() + 1);
         return new FSRSAlgorithmResult(newCard);
+    }
+
+    private float getBonusByRating(FSRSRating rating) {
+        if (rating == FSRSRating.AGAIN) {
+            return AGAIN_BONUS;
+        } else if (rating == FSRSRating.HARD) {
+            return HARD_BONUS;
+        } else if (rating == FSRSRating.GOOD) {
+            return GOOD_BONUS;
+        } else if (rating == FSRSRating.EASY) {
+            return EASY_BONUS;
+        }
+        return 1.0F;
     }
 
     /**
