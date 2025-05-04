@@ -48,7 +48,10 @@ public class AlgorithmApp {
      * 卡片将存储在类的 HashMap "cards" 中
      */
     public void loadCards() {
-        this.databaseAdapter.getSqlite().query("SELECT * FROM cards", resultSet -> {
+        String query = "SELECT * FROM cards";
+        LogUtils.simpleDebug("[cards] 查询所有数据 SQL: " + query);
+
+        this.databaseAdapter.getSqlite().query(query, resultSet -> {
             try {
                 while (resultSet.next()) {
                     String strFront = resultSet.getString("front");
@@ -126,15 +129,15 @@ public class AlgorithmApp {
                 .lastReview(0)
                 .build();
         FSRSAlgorithmResult result = algorithm.calc();
-        // TODO 增加条件判断，若数据已经存在，则执行更新。
         Long created = System.currentTimeMillis(); // 当前时间作为创建时间
-        // 插入数据库
-        try {
-//            PreparedStatement ps =
-//                    this.databaseAdapter.getSqlite().prepare("INSERT INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            PreparedStatement ps = this.databaseAdapter.getSqlite().prepare(
-                    "INSERT OR REPLACE INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
+        // 插入数据库
+        String insert = "INSERT OR REPLACE INTO cards (card_id, front, back, created, repetitions, difficulty, stability, elapsed_days, state, day_interval, next_repetition, last_review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        LogUtils.simpleDebug("[cards] 插入数据 SQL: " + insert);
+
+        try (
+            PreparedStatement ps = this.databaseAdapter.getSqlite().prepare(insert))
+        {
             ps.setInt(1, id);
             ps.setString(2, strFront);
             ps.setString(3, back);
@@ -162,14 +165,20 @@ public class AlgorithmApp {
      * 通过从数据库和AlgorithmApp中的HashMap "cards" 删除来删除卡片
      */
     public void delete(QuestionCard card) {
-        this.databaseAdapter.getSqlite().update("DELETE FROM cards WHERE card_id = '" + card.getId() + "'");
+        String delete = "DELETE FROM cards WHERE card_id = '" + card.getId() + "'";
+        LogUtils.simpleDebug("[cards] 删除数据 SQL: " + delete);
+
+        this.databaseAdapter.getSqlite().update(delete);
         this.cards.remove(card.getId(), card);
         // 数据库操作
         LogUtils.info("[Cards] 成功删除卡片 " + card.getId());
     }
 
     public void update(QuestionCard card, String back) {
-        this.databaseAdapter.getSqlite().update("UPDATE cards SET back = '" + back + "' WHERE card_id = '" + card.getId() + "'");
+        String updateBack = "UPDATE cards SET back = '" + back + "' WHERE card_id = '" + card.getId() + "'";
+        LogUtils.simpleDebug("[cards] 更新back数据 SQL: " + updateBack);
+
+        this.databaseAdapter.getSqlite().update(updateBack);
         // 数据库操作
         LogUtils.info("[Cards] 成功删除卡片 " + card.getId());
     }
