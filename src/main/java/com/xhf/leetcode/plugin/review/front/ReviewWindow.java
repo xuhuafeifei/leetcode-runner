@@ -7,6 +7,7 @@ import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.openapi.wm.impl.IdeGlassPaneImpl;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.tabs.TabInfo;
+import com.intellij.ui.tabs.impl.JBEditorTabs;
 import com.intellij.ui.tabs.impl.JBTabsImpl;
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
@@ -24,15 +25,15 @@ public class ReviewWindow extends JFrame implements Disposable {
     /**
      * 命令行选项卡
      */
-    private final JBTabsImpl tabs;
+    private final JBEditorTabs tabs;
 
     // jwindow的长/宽比
     public final static float radio = 1.2f;
-    public final static int initHeight = 395;
+    public final static int initHeight = 330;
 
     public ReviewWindow(Project project) {
         this.project = project;
-        this.tabs = new JBTabsImpl(project, IdeFocusManager.getInstance(project), this);
+        this.tabs = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
 
         // 窗口配置
         setAlwaysOnTop(true);

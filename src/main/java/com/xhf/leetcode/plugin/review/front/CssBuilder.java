@@ -111,28 +111,28 @@ public class CssBuilder {
 
     private String handleUserRate(String template) {
         if (Objects.equals(this.userRate, FSRSRating.AGAIN.getName()) || Objects.equals(this.userRate, FSRSRating.HARD.getName())) {
-            template = template.replace("{{difficulty-css}}", "difficulty-hard");
+            template = template.replace("{{difficulty-color}}", "#F60B0BFF");
         } else if (Objects.equals(this.userRate, FSRSRating.GOOD.getName())) {
-            template = template.replace("{{difficulty-css}}", "difficulty-medium");
+            template = template.replace("{{difficulty-color}}", "#FF8C00FF");
         } else if (Objects.equals(this.userRate, FSRSRating.EASY.getName())) {
-            template = template.replace("{{difficulty-css}}", "difficulty-easy");
+            template = template.replace("{{difficulty-color}}", "#2FB72FFF");
         } else {
             LogUtils.warn("unknown userRate! this.userRate = " + this.userRate);
-            template = template.replace("{{difficulty-css}}", "difficulty-easy");
+            template = template.replace("{{difficulty-color}}", "#2FB72FFF");
         }
         return template.replace("{{difficulty-content}}", this.userRate);
     }
 
     private String handleTitle(String template) {
         if (Objects.equals(this.difficulty, "EASY")) {
-            template = template.replace("{{title-css}}", "title-easy");
+            template = template.replace("{{title-color}}", "#5CB85CFF");
         } else if (Objects.equals(this.difficulty, "MEDIUM")) {
-            template = template.replace("{{title-css}}", "title-medium");
+            template = template.replace("{{title-color}}", "#F38618FF");
         } else if (Objects.equals(this.difficulty, "HARD")) {
-            template = template.replace("{{title-css}}", "title-hard");
+            template = template.replace("{{title-color}}", "#EF3D3DFF");
         } else {
             LogUtils.warn("unknown difficulty! this.difficulty = " + this.difficulty);
-            template = template.replace("{{title-css}}", "title-easy");
+            template = template.replace("{{title-css}}", "#5CB85CFF");
         }
         template = template.replace("{{title-content}}", this.title);
         return template;
@@ -146,284 +146,56 @@ public class CssBuilder {
         } else if (Objects.equals(status, ReviewStatus.OVER_TIME.getCnName()) || Objects.equals(status, ReviewStatus.OVER_TIME.getEnName())) {
             tmp = Objects.equals(theme, "light") ? getOvertime() : getOvertimeDark();
         } else if (Objects.equals(status, ReviewStatus.DONE.getCnName()) || Objects.equals(status, ReviewStatus.DONE.getEnName())) {
-            tmp = Objects.equals(theme, "light") ? getDone() : getDoneDark();
+            // tmp = Objects.equals(theme, "light") ? getDone() : getDoneDark();
+            tmp = Objects.equals(theme, "light") ? getCommon() : getCommonDark(); // 废弃done状态
         } else {
             tmp = Objects.equals(theme, "light") ? getCommon() : getCommonDark();
         }
         return tmp.replace("{{status-content}}", status);
     }
 
-    public String getDone() {
-        return "<style>\n" +
-                "    .card {\n" +
-                "        width: 230px;\n" +
-                "        padding: 12px;\n" +
-                "        border-radius: 8px;\n" +
-                "        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);\n" +
-                "        background-color: #fff;\n" +
-                "        font-family: Arial, sans-serif;\n" +
-                "        display: flex;\n" +
-                "        flex-direction: column;\n" +
-                "        border: 2px solid #bcb6b6;\n" +
-                "    }\n" +
-                "\n" +
-                "    .card p {\n" +
-                "        margin: 10px 0;\n" +
-                "        text-decoration: line-through;\n" +
-                "        color: #aaa;\n" +
-                "    }\n" +
-                "</style>\n" +
-                "<div class=\"card\">\n" +
-                "    <p class=\"status\">{{status-content}}</p>\n" +
-                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
-                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
-                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
-                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
-                "</div>";
+    public String getCommon() {
+        return "<html><body style='margin:0;padding:0;background:white;font-family:Arial;width:280px'>" +
+            "<div style='padding:12px'>" +
+            "    <p style='margin:6px 0;color:#1a73e8;font-weight:bold;font-size:14px'>{{status-content}}</p>" +
+            "    <p style='margin:6px 0;font-weight:bold;font-size:15px;color:{{title-color}}'>{{title-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:13px;color:{{difficulty-color}}'>{{difficulty-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:12px;color:#5f6368'>{{lastModify-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:12px;color:#5f6368'>{{nextReview-content}}</p>" +
+            "</div></body></html>";
     }
 
-    public String getDoneDark() {
-        return "<style>\n" +
-                "    .card {\n" +
-                "        width: 230px;\n" +
-                "        padding: 12px;\n" +
-                "        border-radius: 8px;\n" +
-                "        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);\n" +
-                "        background-color: #2b2b2b;\n" +
-                "        font-family: Arial, sans-serif;\n" +
-                "        display: flex;\n" +
-                "        flex-direction: column;\n" +
-                "        border: 2px solid #555;\n" +
-                "    }\n" +
-                "\n" +
-                "    .card p {\n" +
-                "        margin: 10px 0;\n" +
-                "        text-decoration: line-through;\n" +
-                "        color: #777;\n" +
-                "    }\n" +
-                "</style>\n" +
-                "<div class=\"card\">\n" +
-                "    <p class=\"status\">{{status-content}}</p>\n" +
-                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
-                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
-                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
-                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
-                "</div>";
+    public String getCommonDark() {
+        return "<html><body style='margin:0;padding:0;background:#202124;font-family:Arial;width:280px;color:#e8eaed'>" +
+            "<div style='padding:12px'>" +
+            "    <p style='margin:6px 0;color:#8ab4f8;font-weight:bold;font-size:14px'>{{status-content}}</p>" +
+            "    <p style='margin:6px 0;font-weight:bold;font-size:15px;color:{{title-color}}'>{{title-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:13px;color:{{difficulty-color}}'>{{difficulty-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:12px;color:#9aa0a6'>{{lastModify-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:12px;color:#9aa0a6'>{{nextReview-content}}</p>" +
+            "</div></body></html>";
     }
 
-    private String getOvertime() {
-        return "<style>\n" +
-                "    .card {\n" +
-                "        width: 230px;\n" +
-                "        padding: 12px;\n" +
-                "        border-radius: 8px;\n" +
-                "        box-shadow: 0 2px 6px rgba(255, 0, 0, 0.4); /* 红色阴影 */\n" +
-                "        background-color: #fff5f5; /* 浅红背景 */\n" +
-                "        font-family: Arial, sans-serif;\n" +
-                "        display: flex;\n" +
-                "        flex-direction: column;\n" +
-                "        border: 2px solid #ff0000; /* 红色边框 */\n" +
-                "    }\n" +
-                "\n" +
-                "    .card p {\n" +
-                "        margin: 10px 0;\n" +
-                "        color: #ff0000; /* 纯红色字体 */\n" +
-                "        font-weight: bold;\n" +
-                "        text-decoration: underline wavy red; /* 波浪红色下划线，类似 IDEA 语法错误 */\n" +
-                "    }\n" +
-                "</style>\n" +
-                "<div class=\"card\">\n" +
-                "    <p class=\"status\">{{status-content}}</p>\n" +
-                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
-                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
-                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
-                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
-                "</div>";
+    public String getOvertime() {
+        return "<html><body style='margin:0;padding:0;background:#fce8e6;font-family:Arial;width:280px'>" +
+            "<div style='padding:12px;color:#d93025'>" +
+            "    <p style='margin:6px 0;font-weight:bold;font-size:14px'>{{status-content}}</p>" +
+            "    <p style='margin:6px 0;font-weight:bold;font-size:15px'>{{title-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:13px'>{{difficulty-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:12px'>{{lastModify-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:12px'>{{nextReview-content}}</p>" +
+            "</div></body></html>";
     }
 
-    private String getOvertimeDark() {
-        return "<style>\n" +
-                "    .card {\n" +
-                "        width: 230px;\n" +
-                "        padding: 12px;\n" +
-                "        border-radius: 8px;\n" +
-                "        box-shadow: 0 2px 6px rgba(255, 0, 0, 0.4); /* 红色阴影 */\n" +
-                "        background-color: #2b2b2b; /* 深色背景 */\n" +
-                "        font-family: Arial, sans-serif;\n" +
-                "        display: flex;\n" +
-                "        flex-direction: column;\n" +
-                "        border: 2px solid #ff0000; /* 红色边框 */\n" +
-                "    }\n" +
-                "\n" +
-                "    .card p {\n" +
-                "        margin: 10px 0;\n" +
-                "        color: #ff0000; /* 纯红色字体 */\n" +
-                "        font-weight: bold;\n" +
-                "        text-decoration: underline wavy red; /* 波浪红色下划线，类似 IDEA 语法错误 */\n" +
-                "    }\n" +
-                "\n" +
-                "</style>\n" +
-                "<div class=\"card\">\n" +
-                "    <p class=\"status\">{{status-content}}</p>\n" +
-                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
-                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
-                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
-                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
-                "</div>";
-    }
-
-    private String getCommon() {
-        return "<style>\n" +
-                "    .card {\n" +
-                "        width: 230px;\n" +
-                "        padding: 12px;\n" +
-                "        border-radius: 8px;\n" +
-                "        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);\n" +
-                "        background-color: #fff;\n" +
-                "        font-family: Arial, sans-serif;\n" +
-                "        display: flex;\n" +
-                "        flex-direction: column;\n" +
-                "        border: 2px solid #bcb6b6;\n" +
-                "    }\n" +
-                "\n" +
-                "    .card p {\n" +
-                "        margin: 10px 0;\n" +
-                "    }\n" +
-                "\n" +
-                "    .status {\n" +
-                "        color: rgb(71, 157, 255);\n" +
-                "        font-weight: bold;\n" +
-                "    }\n" +
-                "\n" +
-                "    .title {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(51, 51, 51);\n" +
-                "    }\n" +
-                "\n" +
-                "    .title-easy {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(92, 184, 92);\n" +
-                "    }\n" +
-                "\n" +
-                "    .title-medium {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(240, 173, 78);\n" +
-                "    }\n" +
-                "\n" +
-                "    .title-medium {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(217, 83, 79);\n" +
-                "    }\n" +
-                "\n" +
-                "    .difficulty {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(255, 165, 2);\n" +
-                "    }\n" +
-                "\n" +
-                "    .difficulty-easy {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(92, 184, 92);\n" +
-                "    }\n" +
-                "\n" +
-                "    .difficulty-medium {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(240, 173, 78);\n" +
-                "    }\n" +
-                "\n" +
-                "    .difficulty-hard {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(217, 83, 79);\n" +
-                "    }\n" +
-                "\n" +
-                "    .date {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(102, 102, 102);\n" +
-                "    }\n" +
-                "</style>\n" +
-                "<div class=\"card\">\n" +
-                "    <p class=\"status\">{{status-content}}</p>\n" +
-                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
-                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
-                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
-                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
-                "</div>";
-    }
-
-    private String getCommonDark() {
-        return "<style>\n" +
-                "    .card {\n" +
-                "        width: 230px;\n" +
-                "        padding: 12px;\n" +
-                "        border-radius: 8px;\n" +
-                "        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);\n" +
-                "        background-color: #2b2b2b;\n" +
-                "        font-family: Arial, sans-serif;\n" +
-                "        display: flex;\n" +
-                "        flex-direction: column;\n" +
-                "        border: 2px solid #555;\n" +
-                "    }\n" +
-                "\n" +
-                "    .card p {\n" +
-                "        margin: 10px 0;\n" +
-                "    }\n" +
-                "\n" +
-                "    .status {\n" +
-                "        color: rgb(97, 175, 239);\n" +
-                "        font-weight: bold;\n" +
-                "    }\n" +
-                "\n" +
-                "    .title {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(220, 220, 220);\n" +
-                "    }\n" +
-                "\n" +
-                "    .title-easy {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(92, 184, 92);\n" +
-                "    }\n" +
-                "\n" +
-                "    .title-medium {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(240, 173, 78);\n" +
-                "    }\n" +
-                "\n" +
-                "    .title-hard {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(217, 83, 79);\n" +
-                "    }\n" +
-                "\n" +
-                "    .difficulty {\n" +
-                "        color: rgb(255, 165, 2);\n" +
-                "    }\n" +
-                "\n" +
-                "    .difficulty-easy {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(92, 184, 92);\n" +
-                "    }\n" +
-                "\n" +
-                "    .difficulty-medium {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(240, 173, 78);\n" +
-                "    }\n" +
-                "\n" +
-                "    .difficulty-hard {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(217, 83, 79);\n" +
-                "    }\n" +
-                "\n" +
-                "    .date {\n" +
-                "        font-weight: bold;\n" +
-                "        color: rgb(232, 228, 228);\n" +
-                "    }\n" +
-                "\n" +
-                "</style>\n" +
-                "<div class=\"card\">\n" +
-                "    <p class=\"status\">{{status-content}}</p>\n" +
-                "    <p class=\"{{title-css}}\">{{title-content}}</p>\n" +
-                "    <p class=\"{{difficulty-css}}\">{{difficulty-content}}</p>\n" +
-                "    <p class=\"date\">{{lastModify-content}}</p>\n" +
-                "    <p class=\"date\">{{nextReview-content}}</p>\n" +
-                "</div>";
+    public String getOvertimeDark() {
+        return "<html><body style='margin:0;padding:0;background:#3c1f1f;font-family:Arial;width:280px;color:#f28b82'>" +
+            "<div style='padding:12px'>" +
+            "    <p style='margin:6px 0;font-weight:bold;font-size:14px'>{{status-content}}</p>" +
+            "    <p style='margin:6px 0;font-weight:bold;font-size:15px'>{{title-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:13px'>{{difficulty-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:12px'>{{lastModify-content}}</p>" +
+            "    <p style='margin:6px 0;font-size:12px'>{{nextReview-content}}</p>" +
+            "</div></body></html>";
     }
 
     public String getTheme() {
