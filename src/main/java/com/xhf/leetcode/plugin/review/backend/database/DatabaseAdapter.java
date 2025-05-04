@@ -6,6 +6,7 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils.PathBuilder;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -94,7 +95,10 @@ public class DatabaseAdapter {
      */
     private void createTables() {
         // 重新生成对应的语句
-        this.sqlite.queryUpdate("CREATE TABLE IF NOT EXISTS cards (card_id int NOT NULL, front TEXT, back TEXT, created BIGINT NOT NULL, stability FLOAT DEFAULT 0, difficulty FLOAT DEFAULT 0, elapsed_days INT DEFAULT 0, repetitions INT DEFAULT 0, day_interval INT DEFAULT 0, state INT DEFAULT 0, next_repetition BIGINT DEFAULT 0, last_review BIGINT DEFAULT 0, PRIMARY KEY (card_id))");
+        String create = "CREATE TABLE IF NOT EXISTS cards (card_id int NOT NULL, front TEXT, back TEXT, created BIGINT NOT NULL, stability FLOAT DEFAULT 0, difficulty FLOAT DEFAULT 0, elapsed_days INT DEFAULT 0, repetitions INT DEFAULT 0, day_interval INT DEFAULT 0, state INT DEFAULT 0, next_repetition BIGINT DEFAULT 0, last_review BIGINT DEFAULT 0, PRIMARY KEY (card_id))";
+        LogUtils.simpleDebug("[cards] create table: " + create);
+
+        this.sqlite.queryUpdate(create);
    }
 
     /**
