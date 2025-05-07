@@ -472,7 +472,7 @@ public class FileUtils {
         }
 
         // Unix非法字符（主要是空字符和斜杠）
-        if (filePath.contains("\0") || filePath.contains("/")) {
+        if (filePath.contains("\0") || filePath.contains(" ")) {
             return false;
         }
 

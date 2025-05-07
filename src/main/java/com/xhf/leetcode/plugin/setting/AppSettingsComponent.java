@@ -211,9 +211,6 @@ public class AppSettingsComponent {
     myFileBrowserBtn.addBrowseFolderListener(ViewUtils.getBrowseFolderListener(myFileBrowserBtn));
     myFileBrowserBtn.setText(AppSettings.getInstance().getFilePath());
     myFileBrowserBtn.setEditable(false);
-    myFileBrowserBtn.addActionListener(e -> {
-
-    });
 
     reposition.addItem(BundleUtils.i18nHelper(LanguageConvertor.REPOSITION_DEFAULT_ZH, LanguageConvertor.REPOSITION_DEFAULT_EN));
     reposition.addItem(BundleUtils.i18nHelper(LanguageConvertor.REPOSITION_SETTING_ZH, LanguageConvertor.REPOSITION_SETTING_EN));

@@ -676,6 +676,7 @@ public class ViewUtils {
             private void setPathValid(boolean isValid, String errorMessage) {
                 if (isValid) {
                     myFileBrowserBtn.setForeground(UIManager.getColor("TextField.foreground"));
+                    myFileBrowserBtn.setBackground(UIManager.getColor("TextField.background"));
                 } else {
                     myFileBrowserBtn.setBackground(JBColor.RED);  // 使用IntelliJ平台的颜色
                     myFileBrowserBtn.setToolTipText(errorMessage);
