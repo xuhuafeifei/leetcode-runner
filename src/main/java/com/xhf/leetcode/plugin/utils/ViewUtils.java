@@ -646,7 +646,7 @@ public class ViewUtils {
                 }
 
                 if (!FileUtils.isValidFilePath(selectedPath)) {
-                    String osName = FileUtils.getOSName();
+                    String osName = OSHandler.getOSName();
                     String errorMsg =
                             BundleUtils.i18nHelper(
                                     String.format("路径包含非法字符（%s系统）",

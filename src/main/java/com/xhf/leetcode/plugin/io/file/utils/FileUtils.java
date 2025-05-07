@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -415,7 +416,7 @@ public class FileUtils {
         }
 
         // 检查操作系统类型
-        String os = System.getProperty("os.name").toLowerCase();
+        String os = OSHandler.getOSName();
 
         if (os.contains("win")) {
             return isValidWindowsFilePath(filePath);
@@ -423,7 +424,6 @@ public class FileUtils {
             return isValidUnixFilePath(filePath);
         }
 
-        // 默认使用Unix规则
         return isValidUnixFilePath(filePath);
     }
 
@@ -437,8 +437,9 @@ public class FileUtils {
         }
 
         // Windows非法字符
-        Pattern winIllegalChars = Pattern.compile("[<>:\"/\\\\|?*]");
-        if (winIllegalChars.matcher(filePath).find()) {
+        try {
+            Paths.get(filePath);
+        } catch (InvalidPathException ignored) {
             return false;
         }
 
@@ -457,6 +458,11 @@ public class FileUtils {
             if (!driveLetter.matches("[a-zA-Z]")) {
                 return false;
             }
+        }
+
+        // 判断空格等特殊字符
+        if (filePath.contains(" ") || filePath.contains("\t") || filePath.contains("\r") || filePath.contains("\n") || filePath.contains("\0")) {
+            return false;
         }
 
         return true;
@@ -482,13 +488,6 @@ public class FileUtils {
         }
 
         return true;
-    }
-
-    /**
-     * 获取当前操作系统类型的描述
-     */
-    public static String getOSName() {
-        return System.getProperty("os.name");
     }
 
     /**
