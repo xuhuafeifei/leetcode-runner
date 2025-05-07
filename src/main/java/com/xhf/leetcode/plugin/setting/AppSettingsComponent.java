@@ -1,10 +1,8 @@
 package com.xhf.leetcode.plugin.setting;
 
 import com.google.common.eventbus.Subscribe;
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBCheckBox;
@@ -210,13 +208,12 @@ public class AppSettingsComponent {
       myLangType.addItem(langType.getLangType());
     }
     // init file chooser
-    myFileBrowserBtn.addBrowseFolderListener(
-            new TextBrowseFolderListener(
-                    FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
-            ) {
-            });
+    myFileBrowserBtn.addBrowseFolderListener(ViewUtils.getBrowseFolderListener(myFileBrowserBtn));
     myFileBrowserBtn.setText(AppSettings.getInstance().getFilePath());
     myFileBrowserBtn.setEditable(false);
+    myFileBrowserBtn.addActionListener(e -> {
+
+    });
 
     reposition.addItem(BundleUtils.i18nHelper(LanguageConvertor.REPOSITION_DEFAULT_ZH, LanguageConvertor.REPOSITION_DEFAULT_EN));
     reposition.addItem(BundleUtils.i18nHelper(LanguageConvertor.REPOSITION_SETTING_ZH, LanguageConvertor.REPOSITION_SETTING_EN));
@@ -232,7 +229,7 @@ public class AppSettingsComponent {
     });
 
     enableFloatingToolbarBtn = new OnOffButton();
-    enableFloatingToolbarBtn.setSelected(true);
+    enableFloatingToolbarBtn.setSelected(false);
   }
 
   public JPanel getPanel() {

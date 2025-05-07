@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class RQServiceImpl implements ReviewQuestionService {
 
 
-    private AlgorithmAPI api;
+    private final AlgorithmAPI api;
     private final Project project;
 
     private static RQServiceImpl instance;

@@ -3,12 +3,12 @@ package com.xhf.leetcode.plugin.io.file.utils;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.OSHandler;
-import java.net.URLDecoder;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -404,6 +404,92 @@ public class FileUtils {
         }
     }
 
+    /**
+     * 验证文件路径是否合法（根据当前操作系统）
+     * @param filePath 要验证的文件路径
+     * @return 如果路径合法返回true，否则返回false
+     */
+    public static boolean isValidFilePath(String filePath) {
+        if (filePath == null || filePath.isEmpty()) {
+            return false;
+        }
+
+        // 检查操作系统类型
+        String os = System.getProperty("os.name").toLowerCase();
+
+        if (os.contains("win")) {
+            return isValidWindowsFilePath(filePath);
+        } else if (os.contains("mac") || os.contains("nix") || os.contains("nux") || os.contains("aix")) {
+            return isValidUnixFilePath(filePath);
+        }
+
+        // 默认使用Unix规则
+        return isValidUnixFilePath(filePath);
+    }
+
+    /**
+     * Windows平台文件路径验证
+     */
+    private static boolean isValidWindowsFilePath(String filePath) {
+        // Windows路径长度限制（260个字符）
+        if (filePath.length() > 259) {
+            return false;
+        }
+
+        // Windows非法字符
+        Pattern winIllegalChars = Pattern.compile("[<>:\"/\\\\|?*]");
+        if (winIllegalChars.matcher(filePath).find()) {
+            return false;
+        }
+
+        // 保留设备名检查（CON, PRN, AUX, NUL, COM1-9, LPT1-9等）
+        String fileName = new File(filePath).getName().toUpperCase();
+        Pattern winReservedNames = Pattern.compile(
+                "^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\\..*)?$",
+                Pattern.CASE_INSENSITIVE);
+        if (winReservedNames.matcher(fileName).matches()) {
+            return false;
+        }
+
+        // 驱动器字母检查（如C:\）
+        if (filePath.matches("^[a-zA-Z]:\\\\.*")) {
+            String driveLetter = filePath.substring(0, 1);
+            if (!driveLetter.matches("[a-zA-Z]")) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Unix-like平台文件路径验证（macOS/Linux）
+     */
+    private static boolean isValidUnixFilePath(String filePath) {
+        // Unix路径长度限制（根据系统不同，通常很长）
+        if (filePath.length() > 4096) {
+            return false;
+        }
+
+        // Unix非法字符（主要是空字符和斜杠）
+        if (filePath.contains("\0") || filePath.contains("/")) {
+            return false;
+        }
+
+        // 特殊文件检查（. 和 ..）
+        if (filePath.equals(".") || filePath.equals("..")) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 获取当前操作系统类型的描述
+     */
+    public static String getOSName() {
+        return System.getProperty("os.name");
+    }
 
     /**
      * build a file path and make sure the path is unified

@@ -1,13 +1,11 @@
 package com.xhf.leetcode.plugin.debug.env;
 
 import com.intellij.execution.ui.ConsoleViewContentType;
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
@@ -147,19 +145,11 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
         // gpp路径选择BTN
         TextFieldWithBrowseButton gppBtn = new TextFieldWithBrowseButton();
-        gppBtn.addBrowseFolderListener(
-                new TextBrowseFolderListener(
-                        FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
-                ) {
-                });
+        gppBtn.addBrowseFolderListener(ViewUtils.getBrowseFolderListener(gppBtn));
 
         // gdb路径选择BTN
         TextFieldWithBrowseButton gdbBtn = new TextFieldWithBrowseButton();
-        gdbBtn.addBrowseFolderListener(
-                new TextBrowseFolderListener(
-                        FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
-                ) {
-                });
+        gdbBtn.addBrowseFolderListener(ViewUtils.getBrowseFolderListener(gdbBtn));
 
         // 判断是否有缓存
         if (GPP_FLAG) {
@@ -216,11 +206,7 @@ public class CppDebugEnv extends AbstractDebugEnv {
         boolean flag = StoreService.getInstance(project).contains("MINGW_HOME");
 
         TextFieldWithBrowseButton myFileBrowserBtn = new TextFieldWithBrowseButton();
-        myFileBrowserBtn.addBrowseFolderListener(
-                new TextBrowseFolderListener(
-                        FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
-                ) {
-                });
+        myFileBrowserBtn.addBrowseFolderListener(ViewUtils.getBrowseFolderListener(myFileBrowserBtn));
 
         // 携带帮助文档的按钮
         String HELP_CONTENT = BundleUtils.i18n("debug.leetcode.main.mingw.help");
