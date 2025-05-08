@@ -1,9 +1,7 @@
 package com.xhf.leetcode.plugin.debug.env;
 
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
@@ -92,11 +90,8 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         boolean flag = StoreService.getInstance(project).contains("JAVA_HOME");
 
         TextFieldWithBrowseButton myFileBrowserBtn = new TextFieldWithBrowseButton();
-        myFileBrowserBtn.addBrowseFolderListener(
-                new TextBrowseFolderListener(
-                        FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
-                ) {
-                });
+        myFileBrowserBtn.addBrowseFolderListener(ViewUtils.getBrowseFolderListener(myFileBrowserBtn));
+
         String javaPath;
         if (flag) {
             javaPath = StoreService.getInstance(project).getCache("JAVA_HOME", String.class);

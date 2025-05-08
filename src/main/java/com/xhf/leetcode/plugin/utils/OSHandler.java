@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.utils;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
@@ -12,13 +11,17 @@ import java.util.regex.Pattern;
  */
 public class OSHandler {
 
+    public static String getOSName() {
+        return System.getProperty("os.name").toLowerCase();
+    }
+
     public static boolean isWin() {
-        String osName = System.getProperty("os.name").toLowerCase();
+        String osName = getOSName();
         return osName.contains("win");
     }
 
     public static boolean isMac() {
-        String osName = System.getProperty("os.name").toLowerCase();
+        String osName = getOSName();
         return osName.contains("mac");
     }
 

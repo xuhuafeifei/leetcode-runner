@@ -65,6 +65,7 @@ final class AppSettingsConfigurable implements Configurable {
     AppSettings.State state =
             Objects.requireNonNull(AppSettings.getInstance().getState());
     state.langType = mySettingsComponent.getLangType();
+    // check
     state.filePath = mySettingsComponent.getFilePath();
     // make sure that the core file path only init once and the path is valid
     if (state.isEmptyCoreFilePath() && FileUtils.isPath(mySettingsComponent.getFilePath())) {

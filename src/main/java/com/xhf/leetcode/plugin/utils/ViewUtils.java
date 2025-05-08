@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -12,11 +13,14 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.TextBrowseFolderListener;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.testFramework.LightVirtualFile;
+import com.intellij.ui.JBColor;
 import com.xhf.leetcode.plugin.actions.AbstractAction;
 import com.xhf.leetcode.plugin.bus.RePositionEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
@@ -31,11 +35,14 @@ import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -612,5 +619,75 @@ public class ViewUtils {
     public static Question getQuestionByVFile(VirtualFile file, Project project) {
         String fid = CodeService.getInstance(project).parseFidFromVFile(file);
         return QuestionService.getInstance(project).getQuestionByFid(fid, project);
+    }
+
+    /**
+     * 给FileBrowseFolder添加路径验证器
+     * @param myFileBrowserBtn TextFieldWithBrowseButton
+     * @return TextBrowseFolderListener
+     */
+    public static TextBrowseFolderListener getBrowseFolderListener(TextFieldWithBrowseButton myFileBrowserBtn) {
+        return new TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                super.actionPerformed(e);
+                validateSelectedPath();
+            }
+
+            /**
+             * 验证选择的路径并更新UI状态
+             */
+            private void validateSelectedPath() {
+                String selectedPath = myFileBrowserBtn.getText();
+
+                if (StringUtils.isEmpty(selectedPath)) {
+                    setPathValid(false, BundleUtils.i18nHelper("路径不能为空", "The path cannot be empty"));
+                    return;
+                }
+
+                if (!FileUtils.isValidFilePath(selectedPath)) {
+                    String osName = OSHandler.getOSName();
+                    String errorMsg =
+                            BundleUtils.i18nHelper(
+                                    String.format("路径包含非法字符（%s系统）",
+                                            osName.contains("Windows") ? "Windows" : "Unix-like"),
+                                    String.format("The path contains invalid characters (%s system)",
+                                            osName.contains("Windows") ? "Windows" : "Unix-like")
+                            );
+                    setPathValid(false, errorMsg);
+                    return;
+                }
+
+                // 可选：检查路径是否存在
+                if (!new File(selectedPath).exists()) {
+                    setPathValid(false, "指定路径不存在");
+                    return;
+                }
+
+                // 路径有效
+                setPathValid(true, null);
+            }
+
+            /**
+             * 更新UI状态反映路径有效性
+             * @param isValid 是否有效
+             * @param errorMessage 错误信息（无效时显示）
+             */
+            private void setPathValid(boolean isValid, String errorMessage) {
+                if (isValid) {
+                    myFileBrowserBtn.setForeground(UIManager.getColor("TextField.foreground"));
+                    myFileBrowserBtn.setBackground(UIManager.getColor("TextField.background"));
+                } else {
+                    myFileBrowserBtn.setBackground(JBColor.RED);  // 使用IntelliJ平台的颜色
+                    myFileBrowserBtn.setToolTipText(errorMessage);
+                    myFileBrowserBtn.setText(""); //  清空
+
+                    // 可选：显示错误弹窗
+                    if (errorMessage != null) {
+                        Messages.showErrorDialog(errorMessage, "路径错误");
+                    }
+                }
+            }
+        };
     }
 }
