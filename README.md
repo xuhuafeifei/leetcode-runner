@@ -53,7 +53,14 @@
 
 <img src="./image/本地代码编写.jpg" style="display: block; margin: 0 auto; zoom:50%;">
 
+> 3.7.0新UI
+>
+> ![image-20250512142956579](README.assets/image-20250512142956579.png)
+
+
+
 ### 核心断点调试功能
+
 Leetcode题目都是核心代码模式，即只给出Solution，而没有main函数。这使得调试变得更加困难，因为无法直接运行代码。如果用户想要调试，需要手动编写**大量多余代码**，手动将测试案例转换为对应代码。如果遇到链表或者二叉树等复杂数据结构，**极容易出错**。
 
 为了解决这一问题，Leetcode-Runner**内置调试系统**，<u>支持多种语言，无需额外编码，一键调试Solution代码</u>。
@@ -105,7 +112,6 @@ leetcode-runner内置的精选题库有：
 
 此外插件对于灵神文章中出现的链接做出额外优化，如果链接指向的是题目，则会在Leetcode-Runner中打开。
 
-
 <img src="./image/deep-coding-linsheng.gif" style="display: block; margin: 0 auto; zoom:50%;">
 
 </br>
@@ -116,11 +122,11 @@ leetcode-runner内置的精选题库有：
 
 为了解决这一问题，Leetcode-Runner引入review功能，允许用户将刷过的题目添加到复习题单，系统会**自动规划**下一次做题时间，并且复习时间的规划符合`记忆遗忘曲线`。通过不断重复，帮助用户真正掌握某一道题目。
 
-目前该功能正处于**开发阶段**，预计将在`v3.7.0版本`上线。
 
-> 功能示意览图
 
-<img src="./image/review规划.gif" style="display: block; margin: 0 auto; zoom:50%;">
+<img src="./image/review.gif" style="display: block; margin: 0 auto; zoom:50%;">
+
+
 
 ## 项目结构
 
