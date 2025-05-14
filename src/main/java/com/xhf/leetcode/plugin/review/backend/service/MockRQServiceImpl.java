@@ -111,12 +111,12 @@ public class MockRQServiceImpl implements ReviewQuestionService {
     }
 
     @Override
-    public void rateQuestion(FSRSRating rating) {
+    public void rateQuestion(FSRSRating rating, String back) {
 
     }
 
     @Override
-    public void createQuestion(Question question, FSRSRating rating) {
+    public void createQuestion(Question question, FSRSRating rating, String back) {
 
     }
 

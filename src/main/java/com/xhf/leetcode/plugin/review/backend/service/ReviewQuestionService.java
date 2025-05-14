@@ -25,13 +25,13 @@ public interface ReviewQuestionService {
      * 为问题评分
      * @param rating
      */
-    void rateQuestion(FSRSRating rating);
+    void rateQuestion(FSRSRating rating, String back);
 
     /**
      * 创建问题
      * @param question
      */
-    void createQuestion(Question question, FSRSRating rating);
+    void createQuestion(Question question, FSRSRating rating, String back);
 
     /**
      * 获取所有question

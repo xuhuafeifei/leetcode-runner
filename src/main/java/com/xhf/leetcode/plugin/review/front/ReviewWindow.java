@@ -10,6 +10,8 @@ import com.intellij.ui.tabs.TabInfo;
 import com.intellij.ui.tabs.impl.JBEditorTabs;
 import com.intellij.ui.tabs.impl.JBTabsImpl;
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
+import com.xhf.leetcode.plugin.review.utils.MessageReceiveInterface;
+import com.xhf.leetcode.plugin.review.utils.ReviewConstants;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 import javax.swing.*;
@@ -20,7 +22,7 @@ import java.awt.event.WindowEvent;
 /**
  * @author feigebuge
  */
-public class ReviewWindow extends JFrame implements Disposable {
+public class ReviewWindow extends JFrame implements Disposable, MessageReceiveInterface {
     private final Project project;
     /**
      * 命令行选项卡
@@ -63,7 +65,7 @@ public class ReviewWindow extends JFrame implements Disposable {
     private JPanel createMainPanel() {
         var mainPanel = new JPanel();
         var env = new ReviewEnv();
-        env.registerListener(this::onMessageListener);
+        env.registerListener(this);
 
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createLineBorder(JBColor.border(), 1));
@@ -79,8 +81,9 @@ public class ReviewWindow extends JFrame implements Disposable {
         return mainPanel;
     }
 
-    private void onMessageListener(String msg) {
-        if ("close_window".equals(msg)) {
+    @Override
+    public void onMessageReceived(String msg) {
+        if (ReviewConstants.CLOSE_WINDOW.equals(msg)) {
             ActionUtils.disposeReviewWindow();
         }
     }
@@ -113,4 +116,5 @@ public class ReviewWindow extends JFrame implements Disposable {
         Disposer.dispose(this);
         super.dispose();
     }
+
 }

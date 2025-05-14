@@ -1,15 +1,12 @@
 package com.xhf.leetcode.plugin.review.backend.service;
 
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardReq;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionFront;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
-import com.xhf.leetcode.plugin.service.QuestionService;
-import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,21 +43,22 @@ public class RQServiceImpl implements ReviewQuestionService {
     }
 
     @Override
-    public void rateQuestion(FSRSRating rating) {
-        api.rateCard(rating.toInt());
+    public void rateQuestion(FSRSRating rating, String back) {
+        api.rateCard(rating.toInt(), back);
     }
 
+
     @Override
-    public void createQuestion(Question question, FSRSRating rating) {
+    public void createQuestion(Question question, FSRSRating rating, String back) {
         api.createCard(
-                toQuestionCardReq(question, rating)
+                toQuestionCardReq(question, rating, back)
         );
     }
 
-    private QuestionCardReq toQuestionCardReq(Question question, FSRSRating rating) {
+    private QuestionCardReq toQuestionCardReq(Question question, FSRSRating rating, String back) {
         int id = Question.getIdx(question, project);
         QuestionFront front = getQuestionFront(question, rating);
-        return new QuestionCardReq(id, front, "", rating);
+        return new QuestionCardReq(id, front, back, rating);
     }
 
     private QuestionFront getQuestionFront(Question question, FSRSRating rating) {
@@ -93,7 +91,7 @@ public class RQServiceImpl implements ReviewQuestionService {
 
     @Override
     public void rateTopQuestion(FSRSRating rating) {
-        api.rateCard(rating.toInt());
+        api.rateCard(rating.toInt(), null);
     }
 
     @Override

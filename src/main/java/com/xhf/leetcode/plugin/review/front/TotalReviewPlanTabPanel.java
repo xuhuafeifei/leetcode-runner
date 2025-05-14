@@ -7,6 +7,8 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
+import com.xhf.leetcode.plugin.review.utils.MessageReceiveInterface;
+import com.xhf.leetcode.plugin.review.utils.ReviewConstants;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
@@ -25,7 +27,7 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class TotalReviewPlanTabPanel extends JPanel {
+public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInterface {
     private final ReviewQuestionService service;
     private final ReviewEnv env;
     private final Project project;
@@ -37,13 +39,13 @@ public class TotalReviewPlanTabPanel extends JPanel {
         this.project = project;
         this.service = new RQServiceImpl(project);
         this.env = env;
-        this.env.registerListener(this::onMessageReceived);
+        this.env.registerListener(this);
         setLayout(new BorderLayout());
         loadContent();
     }
 
-    private void onMessageReceived(String msg) {
-        if ("refresh".equals(msg)) {
+    public void onMessageReceived(String msg) {
+        if (ReviewConstants.REFRESH.equals(msg)) {
             loadContent();
         }
     }
@@ -74,8 +76,38 @@ public class TotalReviewPlanTabPanel extends JPanel {
         }
         
         // 创建表格
-        reviewTable = new JBTable(tableModel);
-        
+        reviewTable = new JBTable(tableModel) {
+            // 自定义 ToolTip 显示
+            @Override
+            public String getToolTipText(MouseEvent e) {
+                int row = rowAtPoint(e.getPoint());
+                int col = columnAtPoint(e.getPoint());
+
+                if (row >= 0 && col >= 0) {
+                    ReviewQuestion question = reviewQuestions.get(row);
+                    String difficulty = question.getDifficulty();
+                    String mastery = question.getUserRate();
+                    String userSolution = question.getUserSolution();
+
+                    // 构建详细的 ToolTip 信息
+                    return String.format(
+                            "<html><b>题目:</b> %s<br>" +
+                            "<b>难度:</b> %s<br>" +
+                            "<b>掌握程度:</b> %s<br>" +
+                            "<b>下次复习:</b> %s<br>" +
+                            "<b>用户备注:</b> %s</html>"
+                        ,
+                        question.getTitle(),
+                        difficulty,
+                        mastery,
+                        question.getNextReview(),
+                        userSolution
+                    );
+                }
+                return null;
+            }
+        };
+
         // 设置表格属性
         reviewTable.setRowHeight(30);
         reviewTable.setShowGrid(true);
@@ -167,7 +199,7 @@ public class TotalReviewPlanTabPanel extends JPanel {
                 LogUtils.info("Delete row: " + selectedRow);
                 tableModel.removeRow(selectedRow);
                 reviewQuestions.remove(selectedRow);
-                env.post("get_top_question");
+                env.post(ReviewConstants.GET_TOP_QUESTION);
             }
         });
         buttonPanel.add(deleteButton);
