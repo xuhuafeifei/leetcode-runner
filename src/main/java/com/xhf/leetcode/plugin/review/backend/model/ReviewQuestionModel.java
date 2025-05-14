@@ -79,6 +79,11 @@ public class ReviewQuestionModel implements ReviewQuestion {
     }
 
     @Override
+    public void setBack(String newSolution) {
+        this.userSolution = newSolution;
+    }
+
+    @Override
     public Integer getId() {
         return this.id;
     }

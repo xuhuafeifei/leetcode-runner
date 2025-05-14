@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.review.front;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.popup.IconButton;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.exception.FileCreateError;
@@ -11,10 +13,14 @@ import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
+import com.xhf.leetcode.plugin.review.utils.MessageReceiveInterface;
+import com.xhf.leetcode.plugin.review.utils.ReviewConstants;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +34,7 @@ import java.awt.*;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class DailyPlanTabPanel extends JPanel {
+public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface {
     private final Project project;
 
     private final ReviewQuestionService service;
@@ -55,25 +61,32 @@ public class DailyPlanTabPanel extends JPanel {
         this.project = project;
         this.service = new RQServiceImpl(project);
         this.env = env;
-        this.env.registerListener(this::onMessageReceived);
+        this.env.registerListener(this);
         loadContent();
     }
 
-    private void onMessageReceived(String msg) {
-        if ("get_top_question".equals(msg)) {
+    @Override
+    public void onMessageReceived(String msg) {
+        if (ReviewConstants.GET_TOP_QUESTION.equals(msg)) {
             nextQuestion();
         }
     }
 
     private void loadContent() {
+        setLayout(new BorderLayout());
         this.questionCardPanel = new JPanel();
-        questionCardPanel.setLayout(new BorderLayout());
 
         this.topQuestion = service.getTopQuestion();
         this.questionCard = createQuestionCard(topQuestion);
-        questionCardPanel.add(this.questionCard, BorderLayout.CENTER);
+        questionCardPanel.add(this.questionCard);
 
-        add(questionCardPanel);
+        var iconBtn = new IconButton(BundleUtils.i18nHelper("翻转卡片", "flip card"), IconLoader.getIcon("/icons/flip.svg", DailyPlanTabPanel.class));
+        var flipBtn = new JButton(iconBtn);
+        flipBtn.setBorder(JBUI.Borders.empty(0, 5, 0, 5));
+        flipBtn.addActionListener(doFlip(flipBtn, topQuestion));
+
+        add(flipBtn, BorderLayout.NORTH);
+        add(questionCardPanel, BorderLayout.CENTER);
     }
 
 
@@ -194,6 +207,34 @@ public class DailyPlanTabPanel extends JPanel {
         return flipButton;
     }
 
+    private ActionListener doFlip(JButton button, ReviewQuestion rq) {
+        return new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                // 获取当前Question面板的大小
+                if (isShowingSolution) {
+                    // isShowingSolution为true, 表示此时面板是显示题解, 需要记录此时的大小
+                    globalSize = currentCard.getSize();
+                }
+
+                isShowingSolution = !isShowingSolution;
+                // 更新按钮文字
+                button.setText(BundleUtils.i18nHelper(
+                    isShowingSolution ? "查看题目" : "查看题解",
+                    isShowingSolution ? "question" : "solution"
+                ));
+
+                // 替换编辑器组件
+                contentPanel.removeAll();
+                currentCard = createEditorComponent(rq);
+                contentPanel.add(currentCard, BorderLayout.CENTER);
+                contentPanel.revalidate();
+                contentPanel.repaint();
+            }
+        };
+    }
+
     private void removeQuestion(ReviewQuestion rq) {
         service.deleteQuestion(rq.getId());
 
@@ -216,12 +257,12 @@ public class DailyPlanTabPanel extends JPanel {
         new AbstractMasteryDialog(this, BundleUtils.i18nHelper("设置掌握程度", "set mastery level")) {
 
             @Override
-            protected void setConfirmButtonListener(JButton confirmButton, ButtonGroup group) {
+            protected void setConfirmButtonListener(JButton confirmButton, ButtonGroup group, JTextArea textArea) {
                 confirmButton.addActionListener(e -> {
                     // 获取选中的掌握程度
                     String levelStr = group.getSelection().getActionCommand();
 
-                    service.rateQuestion(FSRSRating.getById(levelStr));
+                    service.rateQuestion(FSRSRating.getById(levelStr), textArea.getText());
                     // 更新问题状态
                     nextQuestion();
                     // 通知TotalReviewPlan刷新获取新的题目
@@ -248,40 +289,6 @@ public class DailyPlanTabPanel extends JPanel {
         questionCardPanel.revalidate();
         questionCardPanel.repaint();
     }
-
-    private void updateQuestionStatus(ReviewQuestion question, int masteryLevel) {
-        // 更新问题状态
-        service.rateTopQuestion(FSRSRating.values()[masteryLevel]);
-
-        // 通知后台删除该题目
-        service.deleteQuestion(question.getId());
-
-        // 获取新的题目
-        this.topQuestion = service.getTopQuestion();
-
-        // 如果没有题目需要复习，更新UI显示完成信息
-        if (topQuestion == null) {
-            contentPanel.removeAll();
-            this.currentCard = new JLabel(BundleUtils.i18nHelper("恭喜你，所有题目都已完成！", "Congratulations, all questions have been completed."));
-            contentPanel.add(this.currentCard, BorderLayout.CENTER);
-        } else {
-            // 更新UI显示新题目信息
-            if (currentCard instanceof JEditorPane) {
-                ((JEditorPane) currentCard).setText(new CssBuilder()
-                        .addStatus(topQuestion.getStatus())
-                        .addTitle(topQuestion.getTitle(), question.getDifficulty())
-                        .addUserRate(topQuestion.getUserRate())
-                        .lastModify(topQuestion.getLastModify())
-                        .nextReview(topQuestion.getNextReview())
-                        .build());
-            }
-        }
-
-        // 刷新UI
-        contentPanel.revalidate();
-        contentPanel.repaint();
-    }
-
 
     private Component createEditorComponent(ReviewQuestion rq) {
         if (isShowingSolution) {
@@ -331,7 +338,10 @@ public class DailyPlanTabPanel extends JPanel {
                 public void focusLost(java.awt.event.FocusEvent e) {
                     String newSolution = textArea.getText();
                     service.updateBack(rq.getId(), newSolution);
-                    System.out.println("Save solution: " + newSolution);
+                    // 更新ReviewQuestion
+                    rq.setBack(newSolution);
+                    env.post(ReviewConstants.REFRESH);
+                    LogUtils.simpleDebug("Save solution: " + newSolution);
                 }
             });
             textArea.setSize(globalSize);

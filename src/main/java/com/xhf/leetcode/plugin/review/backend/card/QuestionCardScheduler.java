@@ -86,8 +86,9 @@ public class QuestionCardScheduler {
      * rating 为卡片复习的质量评分（评分范围根据算法而定, 其内容详见FSRSRating枚举）
      *
      * @param rating 卡片复习的质量评分（评分范围根据算法而定）
+     * @param back   卡片复习的反馈信息, 如果为null, 则不更新数据库
      */
-    public void onRating(int rating) {
+    public void onRating(int rating, @Nullable String back) {
         QuestionCard ratedCard = this.queue.front();
 
         if (ratedCard != null) {
@@ -113,7 +114,7 @@ public class QuestionCardScheduler {
                 FSRSAlgorithmResult result = algorithm.calc();
 
                 // 3.更新数据库
-                String update = "UPDATE cards SET repetitions = ?, difficulty = ?, stability = ?, elapsed_days = ?, state = ?, day_interval = ?, next_repetition = ?, last_review = ? WHERE card_id = ?";
+                String update = "UPDATE cards SET repetitions = ?, difficulty = ?, stability = ?, elapsed_days = ?, state = ?, day_interval = ?, next_repetition = ?, last_review = ?, back = ? WHERE card_id = ?";
                 LogUtils.simpleDebug("[CardScheduler] 更新卡片 SQL: " + ratedCard.getId());
 
                 try (PreparedStatement db = this.databaseAdapter.getSqlite().prepare(update)) {
@@ -126,6 +127,7 @@ public class QuestionCardScheduler {
                     db.setLong(7, result.getNextRepetitionTime());
                     db.setLong(8, result.getLastReview());
                     db.setInt(9, ratedCard.getId());
+                    db.setString(10, back == null ? rs.getString("back") : back);
                     db.execute();
                 }
 

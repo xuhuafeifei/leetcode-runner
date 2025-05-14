@@ -71,7 +71,6 @@ public class AlgorithmAPI {
     }
 
     public void updateCardBack(Integer id, String back) {
-        // todo:
         QuestionCard card = getById(id);
         app.update(card, back);
         updateQueue();
@@ -80,10 +79,10 @@ public class AlgorithmAPI {
     /**
      * 评分
      */
-    public void rateCard(Integer index) {
+    public void rateCard(Integer index, String back) {
         // 内存队列操作，无需更新
         if(index != -1) {
-            this.cardScheduler.onRating(index);
+            this.cardScheduler.onRating(index, back);
             updateQueue();
         }
     }

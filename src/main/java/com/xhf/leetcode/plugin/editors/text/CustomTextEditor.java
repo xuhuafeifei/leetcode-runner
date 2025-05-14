@@ -97,12 +97,12 @@ public class CustomTextEditor implements TextEditor {
         new AbstractMasteryDialog(this.getComponent(), BundleUtils.i18nHelper("设置掌握程度", "set mastery level")) {
 
             @Override
-            protected void setConfirmButtonListener(JButton confirmButton, ButtonGroup group) {
+            protected void setConfirmButtonListener(JButton confirmButton, ButtonGroup group, JTextArea textArea) {
                 confirmButton.addActionListener(e -> {
                     // 获取选中的掌握程度
                     String levelStr = group.getSelection().getActionCommand();
 
-                    service.createQuestion(ViewUtils.getQuestionByVFile(file, project), FSRSRating.getById(levelStr));
+                    service.createQuestion(ViewUtils.getQuestionByVFile(file, project), FSRSRating.getById(levelStr), textArea.getText());
 
                     // 关闭对话框
                     this.dispose();
