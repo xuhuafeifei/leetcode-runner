@@ -340,6 +340,7 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
                     service.updateBack(rq.getId(), newSolution);
                     // 更新ReviewQuestion
                     rq.setBack(newSolution);
+                    // 通知TotalReviewPlan刷新获取新的题目
                     env.post(ReviewConstants.REFRESH);
                     LogUtils.simpleDebug("Save solution: " + newSolution);
                 }
