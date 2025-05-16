@@ -19,14 +19,14 @@ import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * 每日一题面板
@@ -41,18 +41,22 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
 
     private final ReviewEnv env;
 
+    private boolean isShowingSolution = true;
+
     /**
      * 卡片面板, 包含内容+底部button
      */
-    private Component questionCard;
-    private boolean isShowingSolution = true;
-    private JPanel contentPanel;
+    private JPanel questionCard;
 
     /**
-     * 当前面板, 只包含内容信息
+     * 当前面板, 只包含卡片内容信息
      */
     private Component currentCard;
-    private JPanel questionCardPanel;
+
+    /**
+     * 最大容器, 包含卡片内容+按钮
+     */
+//    private JPanel questionCardPanel;
 
     private Dimension globalSize;
     private @Nullable ReviewQuestion topQuestion;
@@ -74,36 +78,31 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
 
     private void loadContent() {
         setLayout(new BorderLayout());
-        this.questionCardPanel = new JPanel();
 
         this.topQuestion = service.getTopQuestion();
         this.questionCard = createQuestionCard(topQuestion);
-        questionCardPanel.add(this.questionCard);
 
         var iconBtn = new IconButton(BundleUtils.i18nHelper("翻转卡片", "flip card"), IconLoader.getIcon("/icons/flip.svg", DailyPlanTabPanel.class));
         var flipBtn = new JButton(iconBtn);
-        flipBtn.setBorder(JBUI.Borders.empty(0, 5, 0, 5));
+        flipBtn.setBorder(JBUI.Borders.empty(0, 5));
         flipBtn.addActionListener(doFlip(flipBtn, topQuestion));
 
         add(flipBtn, BorderLayout.NORTH);
-        add(questionCardPanel, BorderLayout.CENTER);
+        add(this.questionCard, BorderLayout.CENTER);
     }
 
 
-    private Component createQuestionCard(ReviewQuestion rq) {
-        JPanel jPanel = new JPanel();
-        jPanel.setLayout(new BorderLayout());
-
+    private JPanel createQuestionCard(ReviewQuestion rq) {
         // 创建内容面板容器
-        contentPanel = new JPanel(new BorderLayout());
+        JPanel jPanel = new JPanel(new BorderLayout());
         if (rq != null) {
-            this.currentCard = createEditorComponent(rq);  // 保存引用
-            contentPanel.add(this.currentCard, BorderLayout.CENTER);
-            jPanel.add(contentPanel, BorderLayout.CENTER);
-
-            JPanel bottomPanel = getjPanel(rq);
-
-            jPanel.add(bottomPanel, BorderLayout.SOUTH);
+            this.currentCard = createEditorComponent(rq);
+            jPanel.add(this.currentCard, BorderLayout.CENTER);
+            if (isShowingSolution) {
+                // 只有显示题解状态才能够显示底层按钮
+                JPanel bottomPanel = getjPanel(topQuestion);
+                jPanel.add(bottomPanel, BorderLayout.SOUTH);
+            }
         } else {
             JEditorPane emptyMessagePane = new JEditorPane();
             emptyMessagePane.setContentType("text/html");
@@ -126,7 +125,7 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
         JPanel bottomPanel = new JPanel();
         // 掌握button
         JButton masterBtn = new JButton(BundleUtils.i18nHelper("掌握", "master"));
-        masterBtn.addActionListener(e -> showMasteryDialog());
+        masterBtn.addActionListener(e -> showMasteryDialog(rq));
 
         // 继续学习button
         JButton deleteBtn = new JButton(BundleUtils.i18nHelper("删除", "delete"));
@@ -174,38 +173,36 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
             "</body></html>";
     }
 
-    /**
-     * 反转按钮, 用于切换题目 -> 题解, 题解 -> 题目
-     * @param rq question
-     * @return JButton
-     */
-    private @NotNull JButton getFlipBtn(ReviewQuestion rq) {
-        JButton flipButton = new JButton(BundleUtils.i18nHelper("查看题解", "solution"));
-
-        // 添加反转按钮的点击事件
-        flipButton.addActionListener(e -> {
-            // 获取当前Question面板的大小
-            if (isShowingSolution) {
-                // isShowingSolution为true, 表示此时面板是显示题解, 需要记录此时的大小
-                globalSize = this.currentCard.getSize();
-            }
-
-            isShowingSolution = !isShowingSolution;
-            // 更新按钮文字
-            flipButton.setText(BundleUtils.i18nHelper(
-                    isShowingSolution ? "查看题目" : "查看题解",
-                    isShowingSolution ? "question" : "solution"
-            ));
-
-            // 替换编辑器组件
-            contentPanel.removeAll();
-            this.currentCard = createEditorComponent(rq);
-            contentPanel.add(this.currentCard, BorderLayout.CENTER);
-            contentPanel.revalidate();
-            contentPanel.repaint();
-        });
-        return flipButton;
-    }
+//    /**
+//     * 反转按钮, 用于切换题目 -> 题解, 题解 -> 题目
+//     * @param rq question
+//     * @return JButton
+//     */
+//    private @NotNull JButton getFlipBtn(ReviewQuestion rq) {
+//        JButton flipButton = new JButton(BundleUtils.i18nHelper("查看题解", "solution"));
+//
+//        // 添加反转按钮的点击事件
+//        flipButton.addActionListener(e -> {
+//            // 获取当前Question面板的大小
+//            if (isShowingSolution) {
+//                // isShowingSolution为true, 表示此时面板是显示题解, 需要记录此时的大小
+//                globalSize = this.currentCard.getSize();
+//            }
+//
+//            isShowingSolution = !isShowingSolution;
+//            // 更新按钮文字
+//            flipButton.setText(BundleUtils.i18nHelper(
+//                    isShowingSolution ? "查看题目" : "查看题解",
+//                    isShowingSolution ? "question" : "solution"
+//            ));
+//
+//            // 替换编辑器组件
+//            remove(this.questionCard);
+//            this.questionCard = createQuestionCard(rq);
+//            add(this.questionCard, BorderLayout.CENTER);
+//        });
+//        return flipButton;
+//    }
 
     private ActionListener doFlip(JButton button, ReviewQuestion rq) {
         return new ActionListener() {
@@ -226,11 +223,9 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
                 ));
 
                 // 替换编辑器组件
-                contentPanel.removeAll();
-                currentCard = createEditorComponent(rq);
-                contentPanel.add(currentCard, BorderLayout.CENTER);
-                contentPanel.revalidate();
-                contentPanel.repaint();
+                remove(questionCard);
+                questionCard = createQuestionCard(rq);
+                add(questionCard, BorderLayout.CENTER);
             }
         };
     }
@@ -239,13 +234,13 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
         service.deleteQuestion(rq.getId());
 
         // 刷新UI
-        this.questionCardPanel.remove(this.questionCard);
+        this.remove(this.questionCard);
         this.topQuestion = service.getTopQuestion();
         this.questionCard = createQuestionCard(this.topQuestion);
 
-        questionCardPanel.add(this.questionCard, BorderLayout.CENTER);
-        questionCardPanel.revalidate();
-        questionCardPanel.repaint();
+        add(this.questionCard, BorderLayout.CENTER);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -253,8 +248,13 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
      * 在dialog中点击确认按钮, 则会同步刷新card数据, 并标记为已完成
      * 同时会向后台发出请求, 更新数据
      */
-    private void showMasteryDialog() {
+    private void showMasteryDialog(ReviewQuestion rq) {
         new AbstractMasteryDialog(this, BundleUtils.i18nHelper("设置掌握程度", "set mastery level")) {
+
+            @Override
+            protected String getNoteText() {
+                return rq.getUserSolution();
+            }
 
             @Override
             protected void setConfirmButtonListener(JButton confirmButton, ButtonGroup group, JTextArea textArea) {
@@ -280,14 +280,14 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
      */
     private void nextQuestion() {
         if (this.questionCard != null) {
-            questionCardPanel.remove(this.questionCard);
+            remove(this.questionCard);
         }
         this.topQuestion = service.getTopQuestion();
         this.questionCard = createQuestionCard(topQuestion);
         // updatePageComp();
-        questionCardPanel.add(this.questionCard, BorderLayout.CENTER);
-        questionCardPanel.revalidate();
-        questionCardPanel.repaint();
+        add(this.questionCard, BorderLayout.CENTER);
+        revalidate();
+        repaint();
     }
 
     private Component createEditorComponent(ReviewQuestion rq) {
