@@ -28,6 +28,14 @@ public interface ReviewQuestionService {
     void rateQuestion(FSRSRating rating, String back);
 
     /**
+     * 为问题评分
+     * @param cardId
+     * @param rating
+     * @param back
+     */
+    void rateQuestionByCardId(Integer cardId, FSRSRating rating, String back);
+
+    /**
      * 创建问题
      * @param question
      */

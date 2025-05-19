@@ -5,9 +5,6 @@ import com.intellij.openapi.ui.popup.IconButton;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.JBUI;
-import com.xhf.leetcode.plugin.exception.FileCreateError;
-import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
-import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
@@ -15,8 +12,7 @@ import com.xhf.leetcode.plugin.review.backend.service.ReviewQuestionService;
 import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
 import com.xhf.leetcode.plugin.review.utils.MessageReceiveInterface;
 import com.xhf.leetcode.plugin.review.utils.ReviewConstants;
-import com.xhf.leetcode.plugin.service.CodeService;
-import com.xhf.leetcode.plugin.service.QuestionService;
+import com.xhf.leetcode.plugin.review.utils.ReviewUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
@@ -53,13 +49,12 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
      */
     private Component currentCard;
 
-    /**
-     * 最大容器, 包含卡片内容+按钮
-     */
-//    private JPanel questionCardPanel;
-
     private Dimension globalSize;
+
     private @Nullable ReviewQuestion topQuestion;
+
+    // 底部按钮panel
+    private JPanel bottomPanel;
 
     public DailyPlanTabPanel(Project project, ReviewEnv env) {
         this.project = project;
@@ -95,13 +90,19 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
     private JPanel createQuestionCard(ReviewQuestion rq) {
         // 创建内容面板容器
         JPanel jPanel = new JPanel(new BorderLayout());
+        // 不论是solution还是empty, 都需要先把底层的按钮panel移除
+        if (bottomPanel != null) {
+            remove(bottomPanel);
+        }
+
         if (rq != null) {
             this.currentCard = createEditorComponent(rq);
             jPanel.add(this.currentCard, BorderLayout.CENTER);
             if (isShowingSolution) {
                 // 只有显示题解状态才能够显示底层按钮
-                JPanel bottomPanel = getjPanel(topQuestion);
-                jPanel.add(bottomPanel, BorderLayout.SOUTH);
+                this.bottomPanel = getjPanel(topQuestion);
+                // 底部按钮容器直接添加当this
+                add(bottomPanel, BorderLayout.SOUTH);
             }
         } else {
             JEditorPane emptyMessagePane = new JEditorPane();
@@ -133,7 +134,7 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
 
         // 解题button
         JButton doItBtn = new JButton(BundleUtils.i18nHelper("做题", "do it"));
-        doItBtn.addActionListener(e -> doIt(rq));
+        doItBtn.addActionListener(e -> ReviewUtils.doIt(rq, project, env));
 
         // 反转button
         // JButton flipButton = getFlipBtn(rq);
@@ -142,20 +143,6 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
         bottomPanel.add(deleteBtn);
         bottomPanel.add(doItBtn);
         return bottomPanel;
-    }
-
-    private void doIt(ReviewQuestion rq) {
-        // 获取当前Question
-        Question q = QuestionService.getInstance(project).getTotalQuestion(project).get(rq.getId());
-        try {
-            CodeService.getInstance(project).openCodeEditor(q);
-        } catch (FileCreateError e) {
-            ConsoleUtils.getInstance(project).showError(BundleUtils.i18nHelper("打开文件失败", "Failed to open file"), true, true, e.getMessage(), "Error", null);
-            LogUtils.warn(e);
-            return;
-        }
-        // 关闭当前窗口
-        env.post("close_window");
     }
 
     private String createHtmlContent() {
@@ -173,42 +160,10 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
             "</body></html>";
     }
 
-//    /**
-//     * 反转按钮, 用于切换题目 -> 题解, 题解 -> 题目
-//     * @param rq question
-//     * @return JButton
-//     */
-//    private @NotNull JButton getFlipBtn(ReviewQuestion rq) {
-//        JButton flipButton = new JButton(BundleUtils.i18nHelper("查看题解", "solution"));
-//
-//        // 添加反转按钮的点击事件
-//        flipButton.addActionListener(e -> {
-//            // 获取当前Question面板的大小
-//            if (isShowingSolution) {
-//                // isShowingSolution为true, 表示此时面板是显示题解, 需要记录此时的大小
-//                globalSize = this.currentCard.getSize();
-//            }
-//
-//            isShowingSolution = !isShowingSolution;
-//            // 更新按钮文字
-//            flipButton.setText(BundleUtils.i18nHelper(
-//                    isShowingSolution ? "查看题目" : "查看题解",
-//                    isShowingSolution ? "question" : "solution"
-//            ));
-//
-//            // 替换编辑器组件
-//            remove(this.questionCard);
-//            this.questionCard = createQuestionCard(rq);
-//            add(this.questionCard, BorderLayout.CENTER);
-//        });
-//        return flipButton;
-//    }
-
     private ActionListener doFlip(JButton button, ReviewQuestion rq) {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 // 获取当前Question面板的大小
                 if (isShowingSolution) {
                     // isShowingSolution为true, 表示此时面板是显示题解, 需要记录此时的大小
@@ -253,7 +208,7 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
 
             @Override
             protected String getNoteText() {
-                return rq.getUserSolution();
+                return rq.getUserNoteText();
             }
 
             @Override
@@ -263,8 +218,8 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
                     String levelStr = group.getSelection().getActionCommand();
 
                     service.rateQuestion(FSRSRating.getById(levelStr), textArea.getText());
-                    // 更新问题状态
-                    nextQuestion();
+                    // 更新DailyPlanTabPanel的问题状态
+                    env.post(ReviewConstants.GET_TOP_QUESTION);
                     // 通知TotalReviewPlan刷新获取新的题目
                     env.post("refresh");
 
@@ -310,7 +265,7 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
         } else {
             // 题解模式 - 使用JTextArea
             var textArea = new JTextArea();
-            textArea.setText(rq.getUserSolution());
+            textArea.setText(rq.getUserNoteText());
             textArea.setEditable(true);
             textArea.setRows(13);
             textArea.setWrapStyleWord(true);

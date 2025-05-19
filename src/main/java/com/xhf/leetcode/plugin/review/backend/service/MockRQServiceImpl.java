@@ -6,10 +6,10 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.QueryDim;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestionModel;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 模拟数据
@@ -112,6 +112,11 @@ public class MockRQServiceImpl implements ReviewQuestionService {
 
     @Override
     public void rateQuestion(FSRSRating rating, String back) {
+
+    }
+
+    @Override
+    public void rateQuestionByCardId(Integer cardId, FSRSRating rating, String back) {
 
     }
 

@@ -74,7 +74,7 @@ public class ReviewQuestionModel implements ReviewQuestion {
     }
 
     @Override
-    public String getUserSolution() {
+    public String getUserNoteText() {
         return this.userSolution;
     }
 
@@ -90,5 +90,19 @@ public class ReviewQuestionModel implements ReviewQuestion {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "ReviewQuestionModel{" +
+                "status='" + status + '\'' +
+                ", title='" + title + '\'' +
+                ", userRate='" + userRate + '\'' +
+                ", lastModify='" + lastModify + '\'' +
+                ", nextReview='" + nextReview + '\'' +
+                ", difficulty='" + difficulty + '\'' +
+                ", userSolution='" + userSolution + '\'' +
+                ", id=" + id +
+                '}';
     }
 }

@@ -47,6 +47,11 @@ public class RQServiceImpl implements ReviewQuestionService {
         api.rateCard(rating.toInt(), back);
     }
 
+    @Override
+    public void rateQuestionByCardId(Integer cardId, FSRSRating rating, String back) {
+        api.rateCardByCardId(cardId, rating.toInt(), back);
+    }
+
 
     @Override
     public void createQuestion(Question question, FSRSRating rating, String back) {

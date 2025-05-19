@@ -180,6 +180,6 @@ public class AlgorithmApp {
 
         this.databaseAdapter.getSqlite().update(updateBack);
         // 数据库操作
-        LogUtils.info("[Cards] 成功update卡片 " + card.getId());
+        LogUtils.simpleDebug("[Cards] 成功update卡片 " + card.getId());
     }
 }
