@@ -1,31 +1,13 @@
 package com.xhf.leetcode.plugin.review.utils;
 
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+
+import javax.swing.*;
+import java.awt.*;
 
 public abstract class AbstractMasteryDialog extends JDialog {
 
@@ -49,14 +31,14 @@ public abstract class AbstractMasteryDialog extends JDialog {
         contentPanel.setBorder(JBUI.Borders.empty(10, 15));
         contentPanel.setBackground(bgColor);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = JBUI.insets(5);
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // 1. 备注标签
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 5;
         JLabel noteLabel = new JLabel(BundleUtils.i18nHelper("备注", "Notes") + ":");
         noteLabel.setFont(Constants.CN_FONT_BOLD);
         noteLabel.setForeground(fgColor);
@@ -65,13 +47,14 @@ public abstract class AbstractMasteryDialog extends JDialog {
         // 2. 备注文本框
         gbc.gridy++;
         gbc.weightx = 1.0;
-        JTextArea noteTextArea = new JTextArea(3, 25);
+        JTextArea noteTextArea = new JTextArea(5, 25);
         noteTextArea.setLineWrap(true);
         noteTextArea.setWrapStyleWord(true);
         noteTextArea.setFont(Constants.CN_FONT);
         noteTextArea.setBackground(UIManager.getColor("TextArea.background"));
         noteTextArea.setForeground(fgColor);
-        JScrollPane noteScrollPane = new JScrollPane(noteTextArea);
+        noteTextArea.setText(getNoteText());
+        var noteScrollPane = new JBScrollPane(noteTextArea);
         noteScrollPane.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(borderColor, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
@@ -115,8 +98,8 @@ public abstract class AbstractMasteryDialog extends JDialog {
         gbc.anchor = GridBagConstraints.EAST;
         JButton confirmButton = new JButton(BundleUtils.i18nHelper("确认", "Confirm"));
         confirmButton.setFont(Constants.CN_FONT_BOLD);
-        confirmButton.setBackground(selectionBg != null ? selectionBg : new Color(70, 130, 180));
-        confirmButton.setForeground(Color.WHITE);
+        confirmButton.setBackground(selectionBg != null ? selectionBg : new JBColor(new Color(70, 130, 180), new Color(70, 130, 180)));
+        confirmButton.setForeground(JBColor.WHITE);
         confirmButton.setFocusPainted(false);
         setConfirmButtonListener(confirmButton, group, noteTextArea);
         contentPanel.add(confirmButton, gbc);
@@ -128,6 +111,10 @@ public abstract class AbstractMasteryDialog extends JDialog {
         // 居中于屏幕
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    protected String getNoteText() {
+        return "";
     }
 
     private JRadioButton createAlignedRadioButton(MasteryLevel level, Color bgColor) {

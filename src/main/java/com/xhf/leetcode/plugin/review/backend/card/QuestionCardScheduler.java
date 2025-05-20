@@ -65,7 +65,7 @@ public class QuestionCardScheduler {
             try {
                 while (resultSet.next()) {
                     QuestionCard dueCard = AlgorithmApp.getInstance(project).getCards().get(resultSet.getInt("card_id"));
-                    LogUtils.info("[CardScheduler] Due time for card " + dueCard.getId());
+                    LogUtils.simpleDebug("[CardScheduler] Due time for card " + dueCard.getId());
                     this.queue.enqueue(dueCard);
                 }
             } catch (SQLException e) {
@@ -90,51 +90,62 @@ public class QuestionCardScheduler {
      */
     public void onRating(int rating, @Nullable String back) {
         QuestionCard ratedCard = this.queue.front();
+        onRatingById(ratedCard.getId(), rating, back);
+    }
 
-        if (ratedCard != null) {
-            // 1.查询数据库
-            String query = "SELECT * FROM cards" + " WHERE card_id = ?";
-            LogUtils.simpleDebug("[CardScheduler] 查询卡片 SQL: " + ratedCard.getId());
+    public void onRatingById(Integer cardId, Integer rating, String back) {
+        // 1.查询数据库
+        String query = "SELECT * FROM cards" + " WHERE card_id = ?";
+        LogUtils.simpleDebug("[CardScheduler] 查询卡片 SQL: " + cardId);
 
-            try (PreparedStatement ps = this.databaseAdapter.getSqlite().prepare(query)) {
-                ps.setInt(1, ratedCard.getId());
-                ResultSet rs = ps.executeQuery();
-                rs.next();
+        try (PreparedStatement ps = this.databaseAdapter.getSqlite().prepare(query)) {
+            ps.setInt(1, cardId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
 
-                // 2.使用算法计算
-                FSRSAlgorithm algorithm = FSRSAlgorithm.builder()
-                        .rating(FSRSRating.values()[rating])
-                        .stability(rs.getFloat("stability"))
-                        .difficulty(rs.getFloat("difficulty"))
-                        .elapsedDays(rs.getInt("elapsed_days"))
-                        .repetitions(rs.getInt("repetitions"))
-                        .state(FSRSState.values()[(rs.getInt("state"))])
-                        .lastReview(rs.getLong("last_review"))
-                        .build();
-                FSRSAlgorithmResult result = algorithm.calc();
+            // 2.使用算法计算
+            FSRSAlgorithm algorithm = FSRSAlgorithm.builder()
+                    .rating(FSRSRating.values()[rating])
+                    .stability(rs.getFloat("stability"))
+                    .difficulty(rs.getFloat("difficulty"))
+                    .elapsedDays(rs.getInt("elapsed_days"))
+                    .repetitions(rs.getInt("repetitions"))
+                    .state(FSRSState.values()[(rs.getInt("state"))])
+                    .lastReview(rs.getLong("last_review"))
+                    .build();
+            FSRSAlgorithmResult result = algorithm.calc();
 
-                // 3.更新数据库
-                String update = "UPDATE cards SET repetitions = ?, difficulty = ?, stability = ?, elapsed_days = ?, state = ?, day_interval = ?, next_repetition = ?, last_review = ?, back = ? WHERE card_id = ?";
-                LogUtils.simpleDebug("[CardScheduler] 更新卡片 SQL: " + ratedCard.getId());
+            // 3.更新数据库
+            String update = String.format(
+                    "UPDATE cards SET " +
+                            "repetitions = %d, " +
+                            "difficulty = %.2f, " +
+                            "stability = %.2f, " +
+                            "elapsed_days = %d, " +
+                            "state = %d, " +
+                            "day_interval = %d, " +
+                            "next_repetition = %d, " +
+                            "last_review = %d, " +
+                            "back = '%s' " +
+                            "WHERE card_id = %d",
+                    result.getRepetitions(),
+                    result.getDifficulty(),
+                    result.getStability(),
+                    result.getElapsedDays(),
+                    result.getState().toInt(),
+                    result.getInterval(),
+                    result.getNextRepetitionTime(),
+                    result.getLastReview(),
+                    back == null ? rs.getString("back") : back.replace("'", "''"), // 防止 SQL 注入问题
+                    cardId
+            );
 
-                try (PreparedStatement db = this.databaseAdapter.getSqlite().prepare(update)) {
-                    db.setLong(1, result.getRepetitions());
-                    db.setFloat(2, result.getDifficulty());
-                    db.setFloat(3, result.getStability());
-                    db.setInt(4, result.getElapsedDays());
-                    db.setInt(5, result.getState().toInt());
-                    db.setInt(6, result.getInterval());
-                    db.setLong(7, result.getNextRepetitionTime());
-                    db.setLong(8, result.getLastReview());
-                    db.setInt(9, ratedCard.getId());
-                    db.setString(10, back == null ? rs.getString("back") : back);
-                    db.execute();
-                }
+            LogUtils.simpleDebug("[CardScheduler] 更新卡片 SQL: " + update);
+            this.databaseAdapter.getSqlite().update(update);
 
-                LogUtils.info("[CardScheduler] 卡片 " + " 评分为 " + rating);
-            } catch (Exception e) {
-                LogUtils.warn(DebugUtils.getStackTraceAsString(e));
-            }
+            LogUtils.simpleDebug("[CardScheduler] 卡片 " + " 评分为 " + rating);
+        } catch (Exception e) {
+            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
         this.queue.dequeue();
         if (this.queue.isEmpty()) {

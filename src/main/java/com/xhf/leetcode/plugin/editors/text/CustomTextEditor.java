@@ -28,6 +28,7 @@ import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
+import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
 import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
 import com.xhf.leetcode.plugin.service.CodeService;
@@ -46,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 import java.util.Objects;
 
 public class CustomTextEditor implements TextEditor {
@@ -96,19 +98,44 @@ public class CustomTextEditor implements TextEditor {
     private void showMasteryDialog() {
         new AbstractMasteryDialog(this.getComponent(), BundleUtils.i18nHelper("设置掌握程度", "set mastery level")) {
 
+            ;
+
             @Override
             protected void setConfirmButtonListener(JButton confirmButton, ButtonGroup group, JTextArea textArea) {
                 confirmButton.addActionListener(e -> {
                     // 获取选中的掌握程度
                     String levelStr = group.getSelection().getActionCommand();
 
-                    service.createQuestion(ViewUtils.getQuestionByVFile(file, project), FSRSRating.getById(levelStr), textArea.getText());
+                    Question question = ViewUtils.getQuestionByVFile(file, project);
+                    service.createQuestion(question, FSRSRating.getById(levelStr), textArea.getText());
 
                     // 关闭对话框
                     this.dispose();
                 });
             }
+
+            @Override
+            protected String getNoteText() {
+                try {
+                    List<ReviewQuestion> allQuestions = service.getAllQuestions();
+
+                    Question question = ViewUtils.getQuestionByVFile(file, project);
+                    int id = Question.getIdx(question, project);
+                    
+                    // 判断当前文件题目是否被包含
+                    for (ReviewQuestion rq : allQuestions) {
+                        if (rq.getId() == id) {
+                            return rq.getUserNoteText();
+                        }
+                    }
+                    return "";
+                } catch (Exception e) {
+                    LogUtils.warn(e);
+                    return "";
+                }
+            }
         };
+
     }
 
     public void setToolbar() {
