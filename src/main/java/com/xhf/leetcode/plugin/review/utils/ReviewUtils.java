@@ -10,6 +10,7 @@ import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author feigebuge
@@ -17,7 +18,10 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
  */
 public class ReviewUtils {
 
-    public static void doIt(ReviewQuestion rq, Project project, ReviewEnv env) {
+    public static void doIt(@Nullable ReviewQuestion rq, Project project, ReviewEnv env) {
+        if (rq == null) {
+            return;
+        }
         // 获取当前Question
         Question q = QuestionService.getInstance(project).getTotalQuestion(project).get(rq.getId());
         try {
