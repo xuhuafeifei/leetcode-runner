@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.review.front;
 
+import com.google.gson.Gson;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
@@ -16,6 +17,7 @@ import com.xhf.leetcode.plugin.review.utils.ReviewUtils;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,7 +105,7 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
         // 设置复习时间的颜色渲染器
         setColumnOneColor(reviewTable);
         // 添加鼠标点击监听器
-        addClickEventListener(reviewTable);
+        // addClickEventListener(reviewTable);
         // 添加鼠标右击监听器
         addRightClickEventListener(reviewTable);
 
@@ -128,11 +130,16 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
                     JPopupMenu popupMenu = new JPopupMenu();
 
                     // 创建菜单项：修改备注
-                    JMenuItem editNoteItem = new JMenuItem("修改备注");
+                    JMenuItem editNoteItem = new JMenuItem(BundleUtils.i18nHelper("修改备注", "edit note"));
                     editNoteItem.addActionListener(evt -> showEditNoteDialog(reviewTable, row));
+
+                    // 创建菜单项: 做题
+                    JMenuItem doItItem = new JMenuItem(BundleUtils.i18nHelper("做题", "do it"));
+                    doItItem.addActionListener(evt -> ReviewUtils.doIt(getReviewQuestionByRow(row), project, env));
 
                     // 添加到菜单
                     popupMenu.add(editNoteItem);
+                    popupMenu.add(doItItem);
 
                     // 显示菜单
                     popupMenu.show(reviewTable, e.getX(), e.getY());
@@ -152,6 +159,9 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
                     String levelStr = group.getSelection().getActionCommand();
 
                     ReviewQuestion rq = getReviewQuestionByRow(row);
+                    if (rq == null) {
+                        throw new RuntimeException("Can not find review question by row: " + row + "\ntotal questions is: " + GsonUtils.toJsonStr(reviewQuestions));
+                    }
                     service.rateQuestionByCardId(rq.getId(), FSRSRating.getById(levelStr), textArea.getText());
                     // 更新DailyPlanTabPanel的问题状态
                     env.post(ReviewConstants.GET_TOP_QUESTION);
@@ -198,6 +208,8 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
         return buttonPanel;
     }
 
+    // 弃用
+    @Deprecated
     private void addClickEventListener(JBTable reviewTable) {
         reviewTable.addMouseListener(new MouseAdapter() {
             @Override

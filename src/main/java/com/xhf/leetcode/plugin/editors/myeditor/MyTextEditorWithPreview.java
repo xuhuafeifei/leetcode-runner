@@ -357,7 +357,9 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
     if (myToolbarWrapper != null) {
       myToolbarWrapper.refresh();
     }
-    myComponent.repaint();
+    if (myComponent != null) {
+      myComponent.repaint();
+    }
 
     final JComponent focusComponent = getPreferredFocusedComponent();
     Component focusOwner = IdeFocusManager.findInstance().getFocusOwner();
