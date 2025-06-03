@@ -75,6 +75,7 @@ public class ReviewWindow extends JFrame implements Disposable, MessageReceiveIn
         // tabs
         tabs.addTab(createDailyPlanTabInfo(env));
         tabs.addTab(createTotalReviewPlanTabInfo(env));
+        tabs.addTab(createSettingsTabInfo(env));
 
         mainPanel.add(tabs, BorderLayout.CENTER);
 
@@ -94,13 +95,19 @@ public class ReviewWindow extends JFrame implements Disposable, MessageReceiveIn
         tabInfo.setText(BundleUtils.i18n("action.leetcode.review.dailyPlan"));
         return tabInfo;
     }
+private TabInfo createTotalReviewPlanTabInfo(ReviewEnv env) {
+    JPanel panel  = new TotalReviewPlanTabPanel(project, env);
+    TabInfo tabInfo = new TabInfo(panel);
+    tabInfo.setText(BundleUtils.i18n("action.leetcode.review.totalReview"));
+    return tabInfo;
+}
 
-    private TabInfo createTotalReviewPlanTabInfo(ReviewEnv env) {
-        JPanel panel  = new TotalReviewPlanTabPanel(project, env);
-        TabInfo tabInfo = new TabInfo(panel);
-        tabInfo.setText(BundleUtils.i18n("action.leetcode.review.totalReview"));
-        return tabInfo;
-    }
+private TabInfo createSettingsTabInfo(ReviewEnv env) {
+    JPanel panel = new SettingsTabPanel(project);
+    TabInfo tabInfo = new TabInfo(panel);
+    tabInfo.setText(BundleUtils.i18nHelper("设置", "Settings"));
+    return tabInfo;
+}
 
 
     private void centerWindow() {
@@ -111,6 +118,7 @@ public class ReviewWindow extends JFrame implements Disposable, MessageReceiveIn
         );
     }
 
+    
     @Override
     public void dispose() {
         Disposer.dispose(this);

@@ -1,7 +1,12 @@
 package com.xhf.leetcode.plugin.review.backend.database;
 
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
+import com.xhf.leetcode.plugin.review.backend.entity.Card;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
@@ -245,5 +250,153 @@ public class Sqlite {
      */
     public boolean isConnected() {
         return connection != null;
+    }
+
+    /**
+     * 开始事务
+     */
+    public void beginTransaction() {
+        checkConnection();
+        try {
+            connection.setAutoCommit(false);
+            LogUtils.info("[Database] 事务开始");
+        } catch (SQLException e) {
+            LogUtils.warn("[Database] 开始事务失败: " + e.getMessage());
+            throw new RuntimeException("开始事务失败", e);
+        }
+    }
+
+    /**
+     * 提交事务
+     */
+    public void commitTransaction() {
+        checkConnection();
+        try {
+            connection.commit();
+            connection.setAutoCommit(true);
+            LogUtils.info("[Database] 事务提交成功");
+        } catch (SQLException e) {
+            LogUtils.warn("[Database] 提交事务失败: " + e.getMessage());
+            throw new RuntimeException("提交事务失败", e);
+        }
+    }
+
+    /**
+     * 回滚事务
+     */
+    public void rollbackTransaction() {
+        checkConnection();
+        try {
+            connection.rollback();
+            connection.setAutoCommit(true);
+            LogUtils.info("[Database] 事务回滚成功");
+        } catch (SQLException e) {
+            LogUtils.warn("[Database] 回滚事务失败: " + e.getMessage());
+            throw new RuntimeException("回滚事务失败", e);
+        }
+    }
+
+
+
+    /**
+     * 执行查询并返回List<Map>结果
+     * @param query SQL查询语句
+     * @return 包含查询结果的List<Map>
+     */
+    public List<Map<String, Object>> queryForList(String query) {
+        checkConnection();
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery()) {
+
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            while (resultSet.next()) {
+                Map<String, Object> row = new HashMap<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    row.put(metaData.getColumnName(i), resultSet.getObject(i));
+                }
+                resultList.add(row);
+            }
+        } catch (SQLException e) {
+            LogUtils.warn("[Database] 查询失败: " + e.getMessage());
+            throw new RuntimeException("查询失败", e);
+        }
+        return resultList;
+    }
+
+    /**
+     * 执行查询并返回List<Card>结果
+     * @param query SQL查询语句
+     * @return 包含查询结果的List<Card>
+     */
+    public List<Card> queryForCards(String query) {
+        checkConnection();
+        List<Card> resultList = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                Card card = new Card();
+                card.setCardId(resultSet.getInt("card_id"));
+                card.setFront(resultSet.getString("front"));
+                card.setBack(resultSet.getString("back"));
+                card.setCreated(resultSet.getLong("created"));
+                card.setStability(resultSet.getFloat("stability"));
+                card.setDifficulty(resultSet.getFloat("difficulty"));
+                card.setElapsedDays(resultSet.getInt("elapsed_days"));
+                card.setRepetitions(resultSet.getInt("repetitions"));
+                card.setDayInterval(resultSet.getInt("day_interval"));
+                card.setState(resultSet.getInt("state"));
+                card.setNextRepetition(resultSet.getLong("next_repetition"));
+                card.setLastReview(resultSet.getLong("last_review"));
+                resultList.add(card);
+            }
+        } catch (SQLException e) {
+            LogUtils.warn("[Database] 查询失败: " + e.getMessage());
+            throw new RuntimeException("查询失败", e);
+        }
+        return resultList;
+    }
+
+    /**
+     * 向表中插入数据
+     * @param tableName 表名
+     * @param data 包含字段名和值的Map
+     */
+    public void insert(String tableName, Map<String, Object> data) {
+        checkConnection();
+        if (data == null || data.isEmpty()) {
+            throw new IllegalArgumentException("插入数据不能为空");
+        }
+
+        StringBuilder columns = new StringBuilder();
+        StringBuilder values = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            if (columns.length() > 0) {
+                columns.append(", ");
+                values.append(", ");
+            }
+            columns.append(entry.getKey());
+            values.append("?");
+            params.add(entry.getValue());
+        }
+
+        String sql = String.format("INSERT INTO %s (%s) VALUES (%s)",
+            tableName, columns.toString(), values.toString());
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            statement.executeUpdate();
+            LogUtils.info("[Database] 成功插入数据到表: " + tableName);
+        } catch (SQLException e) {
+            LogUtils.warn("[Database] 插入数据失败: " + e.getMessage());
+            throw new RuntimeException("插入数据失败", e);
+        }
     }
 }
