@@ -153,6 +153,11 @@ public final class ConsoleUtils implements Disposable {
     }
 
     @Safe
+    public void showError(String content) {
+        showError(content, false, false, null, null, ConsoleDialog.ERROR);
+    }
+
+    @Safe
     public void showError(String content, boolean clear) {
         showError(content, clear, false, null, null, ConsoleDialog.ERROR);
     }
