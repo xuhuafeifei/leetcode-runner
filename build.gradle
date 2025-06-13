@@ -3,6 +3,7 @@ plugins {
 //    id 'org.jetbrains.intellij' version '1.7.0'
     id 'org.jetbrains.intellij' version '1.17.4'
     id 'idea'
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 patchPluginXml {
@@ -28,8 +29,6 @@ test {
 group 'com.xhf'
 version '3.7.2'
 
-sourceCompatibility = 11
-targetCompatibility = 11
 
 repositories {
     mavenCentral()
@@ -67,6 +66,7 @@ tasks.jar {
 
 dependencies {
     testImplementation 'junit:junit:4.13.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 dependencies {
@@ -89,4 +89,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-jexl3', version: '3.2.1'
     // 核心SQLite依赖
     implementation 'org.xerial:sqlite-jdbc:3.8.11.2'
+}
+kotlin {
+    jvmToolchain(11)
 }
