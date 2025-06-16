@@ -18,6 +18,7 @@ import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.groovy.util.Maps;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.jetbrains.annotations.NotNull;
@@ -830,7 +831,7 @@ public class LeetcodeClient {
     }
 
     /**
-     * 查询用户问题提交历史记录
+     * 查询用户问题提交历史记录. 这个不做缓存, 因为每隔一段时间, 数据信息都会变化
      * @return
      */
     public UserProgressQuestionList queryUserProgressQuestionList() {
@@ -841,12 +842,7 @@ public class LeetcodeClient {
 
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_PROGRESS_QUESTION_LIST_QUERY);
-        body.setBySearchParams(
-            new GraphqlReqBody.SearchParams.ParamsBuilder()
-                .setSkip(0)
-                .setLimit(50)
-                .build()
-        );
+        body.addVariable("filters", Maps.of("limit", 20, "skip", 0));
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
                 .setBody(body.toJsonStr())

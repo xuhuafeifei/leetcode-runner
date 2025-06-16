@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.personal
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.IconLoader.*
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLoadingPanel
@@ -8,6 +10,8 @@ import com.intellij.ui.components.JBScrollPane
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient
 import com.xhf.leetcode.plugin.model.*
+import com.xhf.leetcode.plugin.service.CodeService
+import com.xhf.leetcode.plugin.service.QuestionService
 import com.xhf.leetcode.plugin.utils.BundleUtils
 import com.xhf.leetcode.plugin.utils.TaskCenter
 import java.awt.*
@@ -34,7 +38,12 @@ class QuestionTableModel(private val data: List<QuestionRecord>) : AbstractTable
         val q = data[rowIndex]
         return when (columnIndex) {
             0 -> "${q.frontendId}. ${q.translatedTitle}"
-            1 -> q.difficulty
+            1 -> when (q.difficulty) {
+                "EASY" -> BundleUtils.i18nHelper("简单", "easy")
+                "MEDIUM" -> BundleUtils.i18nHelper("中等", "medium")
+                "HARD" -> BundleUtils.i18nHelper("困难", "hard")
+                else -> BundleUtils.i18nHelper("未知", "unknown")
+            }
             2 -> q.formatRelativeTime()
             3 -> q.numSubmitted
             else -> null
@@ -78,11 +87,6 @@ fun UserQuestionProgress.getHardTotalCount(): Int {
     return numAcceptedQuestions.first { it.difficulty == "HARD" }.count + numFailedQuestions.first { it.difficulty == "HARD" }.count + numUntouchedQuestions.first { it.difficulty == "HARD" }.count
 }
 
-// 辅助函数, 获取题目总数
-fun UserQuestionProgress.getTotalQuestions(): Int {
-    return numAcceptedQuestions.sumOf { it.count } + numFailedQuestions.sumOf { it.count } + numUntouchedQuestions.sumOf { it.count }
-}
-
 // 辅助函数: 格式化做题进度
 fun UserQuestionProgress.formatEasyProgress(): String {
     return numAcceptedQuestions.first { it.difficulty == "EASY" }.let { "${it.count} / ${getEasyTotalCount()}" }
@@ -96,8 +100,7 @@ fun UserQuestionProgress.formatHardProgress(): String {
     return numAcceptedQuestions.first { it.difficulty == "HARD" }.let { "${it.count} / ${getHardTotalCount()}" }
 }
 
-class PersonalWindow(project: Project) : JFrame() {
-
+class PersonalWindow(private val project: Project) : JFrame(), Disposable {
 
     private val client = LeetcodeClient.getInstance(project)
 
@@ -118,7 +121,7 @@ class PersonalWindow(project: Project) : JFrame() {
 
     init {
         title = BundleUtils.i18nHelper("个人中心", "Personal Center")
-        size = Dimension(500, 650)
+        size = Dimension(600, 650)
         setLocationRelativeTo(null)
         layout = BorderLayout()
 
@@ -128,7 +131,7 @@ class PersonalWindow(project: Project) : JFrame() {
             }
         })
 
-        contentPanel.add(loadingPanel, BorderLayout.CENTER)
+        contentPanel.add(loadingPanel)
         add(JBScrollPane(contentPanel), BorderLayout.CENTER)
         isVisible = true
 
@@ -246,34 +249,23 @@ class PersonalWindow(project: Project) : JFrame() {
             )
         }
 
-        // 竞赛数据行
-        val contestRow = JPanel().apply {
-            layout = FlowLayout(FlowLayout.CENTER, 15, 0)
+        val gridPanel = JPanel().apply {
+            layout = GridLayout(2, 3, 10, 15)  // 横向 10px 间隔，纵向 15px 间隔
             background = JBColor.PanelBackground
-            alignmentX = Component.CENTER_ALIGNMENT
-            maximumSize = Dimension(Int.MAX_VALUE, 70)
+            maximumSize = Dimension(Int.MAX_VALUE, 160)  // 给定最大尺寸控制整体宽度（可调）
         }
 
-        contestRow.add(createStatBlock("竞赛分数", userContestRanks.rating.toInt().toString()))
-        contestRow.add(createStatBlock("全球排名", userContestRanks.formatGlobalRank()))
-        contestRow.add(createStatBlock("全国排名", userContestRanks.formatLocalRank()))
+        // 第一行 竞赛数据
+        gridPanel.add(createStatBlock(BundleUtils.i18nHelper("竞赛分数", "contest score"), userContestRanks.rating.toInt().toString()))
+        gridPanel.add(createStatBlock(BundleUtils.i18nHelper("全球排名", "global rank"), userContestRanks.formatGlobalRank()))
+        gridPanel.add(createStatBlock(BundleUtils.i18nHelper("全国排名", "local rank"), userContestRanks.formatLocalRank()))
 
-        // 解题数据行
-        val solvedRow = JPanel().apply {
-            layout = FlowLayout(FlowLayout.CENTER, 15, 0)
-            background = JBColor.PanelBackground
-            alignmentX = Component.CENTER_ALIGNMENT
-            maximumSize = Dimension(Int.MAX_VALUE, 70)
-            border = BorderFactory.createEmptyBorder(10, 0, 0, 0)
-        }
+        // 第二行 解题数据
+        gridPanel.add(createColoredStatBlock(BundleUtils.i18nHelper("简单", "easy"), userQuestionProgress.formatEasyProgress(), JBColor(0x3FB950, 0x56D364)))
+        gridPanel.add(createColoredStatBlock(BundleUtils.i18nHelper("中等", "medium"), userQuestionProgress.formatMediumProgress(), JBColor(0xD29922, 0xE3B341)))
+        gridPanel.add(createColoredStatBlock(BundleUtils.i18nHelper("困难", "hard"), userQuestionProgress.formatHardProgress(), JBColor(0xDA3633, 0xFF6B6B)))
 
-        solvedRow.add(createColoredStatBlock("简单", userQuestionProgress.formatEasyProgress(), JBColor(0x3FB950, 0x56D364)))
-        solvedRow.add(createColoredStatBlock("中等", userQuestionProgress.formatMediumProgress(), JBColor(0xD29922, 0xE3B341)))
-        solvedRow.add(createColoredStatBlock("困难", userQuestionProgress.formatHardProgress(), JBColor(0xDA3633, 0xFF6B6B)))
-
-        panel.add(contestRow)
-        panel.add(Box.createVerticalStrut(15))
-        panel.add(solvedRow)
+        panel.add(gridPanel)
 
         return panel
     }
@@ -361,34 +353,45 @@ class PersonalWindow(project: Project) : JFrame() {
                     font = Font("微软雅黑", Font.BOLD, 12)
 
                     when (value.toString()) {
-                        "EASY" -> foreground = JBColor(0x3FB950, 0x56D364)
-                        "MEDIUM" -> foreground = JBColor(0xD29922, 0xE3B341)
-                        "HARD" -> foreground = JBColor(0xDA3633, 0xFF6B6B)
+                        "简单" -> foreground = JBColor(0x3FB950, 0x56D364)
+                        "中等" -> foreground = JBColor(0xD29922, 0xE3B341)
+                        "困难" -> foreground = JBColor(0xDA3633, 0xFF6B6B)
                     }
 
                     border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
                     return this
                 }
             }
+
+            // 添加双击事件
+            addMouseListener(object : java.awt.event.MouseAdapter() {
+                override fun mouseClicked(e: java.awt.event.MouseEvent) {
+                    if (e.clickCount == 2) {
+                        val row = rowAtPoint(e.point)
+                        if (row >= 0) {
+                            // 打开对应题目
+                            val titleSlug = model.getValueAt(row, 0) as String
+                            titleSlug.split(". ")[0].apply {
+                                QuestionService.getInstance(project).getQuestionByFid(this, project).apply {
+                                    CodeService.getInstance(project).openCodeEditor(this)
+                                    ActionUtils.disposePersonalWindow()
+                                }
+                            }
+                        }
+                    }
+                }
+            })
         }
 
         // 列宽设置
         with(table.columnModel) {
-            getColumn(0).preferredWidth = 200  // 题目
-            getColumn(1).preferredWidth = 80   // 难度
-            getColumn(2).preferredWidth = 120  // 最近提交
-            getColumn(3).preferredWidth = 80   // 提交次数
+            getColumn(0).preferredWidth = 250  // 题目
+            getColumn(1).preferredWidth = 40   // 难度
+            getColumn(2).preferredWidth = 50  // 最近提交
+            getColumn(3).preferredWidth = 25   // 提交次数
         }
 
-        // 滚动面板
-        val scrollPane = JScrollPane(table).apply {
-            background = JBColor.PanelBackground
-            border = BorderFactory.createEmptyBorder()
-            viewportBorder = BorderFactory.createEmptyBorder()
-            verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
-        }
-
-        panel.add(scrollPane, BorderLayout.CENTER)
+        panel.add(JBScrollPane(table), BorderLayout.CENTER)
         return panel
     }
 
@@ -415,5 +418,10 @@ class PersonalWindow(project: Project) : JFrame() {
                 g2d.drawImage(it, x, y, diameter, diameter, this)
             }
         }
+    }
+
+    override fun dispose() {
+        Disposer.dispose(this)
+        super.dispose()
     }
 }

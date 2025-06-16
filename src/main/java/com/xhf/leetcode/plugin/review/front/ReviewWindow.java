@@ -8,7 +8,6 @@ import com.intellij.openapi.wm.impl.IdeGlassPaneImpl;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.tabs.TabInfo;
 import com.intellij.ui.tabs.impl.JBEditorTabs;
-import com.intellij.ui.tabs.impl.JBTabsImpl;
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
 import com.xhf.leetcode.plugin.review.utils.MessageReceiveInterface;
 import com.xhf.leetcode.plugin.review.utils.ReviewConstants;
@@ -95,30 +94,30 @@ public class ReviewWindow extends JFrame implements Disposable, MessageReceiveIn
         tabInfo.setText(BundleUtils.i18n("action.leetcode.review.dailyPlan"));
         return tabInfo;
     }
-private TabInfo createTotalReviewPlanTabInfo(ReviewEnv env) {
-    JPanel panel  = new TotalReviewPlanTabPanel(project, env);
-    TabInfo tabInfo = new TabInfo(panel);
-    tabInfo.setText(BundleUtils.i18n("action.leetcode.review.totalReview"));
-    return tabInfo;
-}
+    private TabInfo createTotalReviewPlanTabInfo(ReviewEnv env) {
+        JPanel panel  = new TotalReviewPlanTabPanel(project, env);
+        TabInfo tabInfo = new TabInfo(panel);
+        tabInfo.setText(BundleUtils.i18n("action.leetcode.review.totalReview"));
+        return tabInfo;
+    }
 
-private TabInfo createSettingsTabInfo(ReviewEnv env) {
-    JPanel panel = new SettingsTabPanel(project);
-    TabInfo tabInfo = new TabInfo(panel);
-    tabInfo.setText(BundleUtils.i18nHelper("设置", "Settings"));
-    return tabInfo;
-}
+    private TabInfo createSettingsTabInfo(ReviewEnv env) {
+        JPanel panel = new SettingsTabPanel(project);
+        TabInfo tabInfo = new TabInfo(panel);
+        tabInfo.setText(BundleUtils.i18nHelper("设置", "Settings"));
+        return tabInfo;
+    }
 
 
     private void centerWindow() {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         setLocation(
-                (screen.width - getWidth()) / 2,
-                (screen.height - getHeight()) / 4
+            (screen.width - getWidth()) / 2,
+            (screen.height - getHeight()) / 4
         );
     }
 
-    
+
     @Override
     public void dispose() {
         Disposer.dispose(this);
