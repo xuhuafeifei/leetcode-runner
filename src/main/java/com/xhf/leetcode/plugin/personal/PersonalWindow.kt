@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader.*
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLoadingPanel
-import com.intellij.ui.components.JBScrollBar
 import com.intellij.ui.components.JBScrollPane
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient
@@ -119,7 +118,6 @@ class PersonalWindow(project: Project) : JFrame() {
 
     init {
         title = BundleUtils.i18nHelper("个人中心", "Personal Center")
-        defaultCloseOperation = DO_NOTHING_ON_CLOSE
         size = Dimension(500, 650)
         setLocationRelativeTo(null)
         layout = BorderLayout()
