@@ -24,6 +24,10 @@ public class UserStatus {
      */
     String realName;
 
+    /**
+     * userSlug
+     */
+    String userSlug;
 
     public boolean getIsPremium() {
         return isPremium;
@@ -55,5 +59,13 @@ public class UserStatus {
 
     public void setIsSignedIn(boolean signedIn) {
         isSignedIn = signedIn;
+    }
+
+    public String getUserSlug() {
+        return userSlug;
+    }
+
+    public void setUserSlug(String userSlug) {
+        this.userSlug = userSlug;
     }
 }

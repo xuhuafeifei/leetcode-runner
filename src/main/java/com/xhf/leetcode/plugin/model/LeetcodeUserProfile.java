@@ -19,10 +19,7 @@ public class LeetcodeUserProfile {
     private String asciiCode;
     private String userAvatar;
     private String gender;
-    private List<String> websites;
-    private List<String> skillTags;
     private String ipRegion;
-    private Date birthday;
     private String location;
     private boolean useDefaultAvatar;
     private String certificationLevel;
@@ -30,9 +27,6 @@ public class LeetcodeUserProfile {
     private School school;
     private String company;
     private String job;
-    private GlobalLocation globalLocation;
-    private List<String> socialAccounts;
-    private SkillSet skillSet;
     public void setUserSlug(String userSlug) {
         this.userSlug = userSlug;
     }
@@ -76,32 +70,11 @@ public class LeetcodeUserProfile {
         return gender;
     }
 
-    public void setWebsites(List<String> websites) {
-        this.websites = websites;
-    }
-    public List<String> getWebsites() {
-        return websites;
-    }
-
-    public void setSkillTags(List<String> skillTags) {
-        this.skillTags = skillTags;
-    }
-    public List<String> getSkillTags() {
-        return skillTags;
-    }
-
     public void setIpRegion(String ipRegion) {
         this.ipRegion = ipRegion;
     }
     public String getIpRegion() {
         return ipRegion;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-    public Date getBirthday() {
-        return birthday;
     }
 
     public void setLocation(String location) {
@@ -152,26 +125,4 @@ public class LeetcodeUserProfile {
     public String getJob() {
         return job;
     }
-
-    public void setGlobalLocation(GlobalLocation globalLocation) {
-        this.globalLocation = globalLocation;
-    }
-    public GlobalLocation getGlobalLocation() {
-        return globalLocation;
-    }
-
-    public void setSocialAccounts(List<String> socialAccounts) {
-        this.socialAccounts = socialAccounts;
-    }
-    public List<String> getSocialAccounts() {
-        return socialAccounts;
-    }
-
-    public void setSkillSet(SkillSet skillSet) {
-        this.skillSet = skillSet;
-    }
-    public SkillSet getSkillSet() {
-        return skillSet;
-    }
-
 }

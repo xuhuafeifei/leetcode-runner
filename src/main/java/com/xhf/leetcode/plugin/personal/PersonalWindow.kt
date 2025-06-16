@@ -1,8 +1,11 @@
 package com.xhf.leetcode.plugin.personal
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.IconLoader.*
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
+import com.xhf.leetcode.plugin.io.http.LeetcodeClient
+import com.xhf.leetcode.plugin.model.LeetcodeUserProfile
 import java.awt.*
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
@@ -12,6 +15,9 @@ import javax.imageio.ImageIO
 import javax.swing.*
 
 class PersonalWindow(private val project: Project) : JFrame() {
+
+    private val userProfile = LeetcodeClient.getInstance(project).queryUserProfile()
+    private val userStatus  = LeetcodeClient.getInstance(project).queryUserStatus()
 
     init {
         title = "个人中心"
@@ -55,7 +61,7 @@ class PersonalWindow(private val project: Project) : JFrame() {
         // 异步加载图片
         Thread {
             try {
-                val imageUrl = URL("https://assets.leetcode.cn/aliyun-lc-upload/users/bu-chuan-nei-ku-d/avatar_1749806465.png")
+                val imageUrl = URL(userProfile.userAvatar)
                 val image = ImageIO.read(imageUrl)?.getScaledInstance(150, 150, Image.SCALE_SMOOTH)
 
                 SwingUtilities.invokeLater {
@@ -80,20 +86,21 @@ class PersonalWindow(private val project: Project) : JFrame() {
             alignmentX = Component.CENTER_ALIGNMENT
         }
 
-        val nameLabel = JLabel("飞哥不鸽").apply {
+        val nameLabel = JLabel(userProfile.realName).apply {
             font = Font("微软雅黑", Font.BOLD, 18)
             foreground = JBColor.foreground()
         }
 
-        // 加载 svg 图标
-        val icon = com.intellij.openapi.util.IconLoader.getIcon("/icons/plusX2.svg", javaClass)
-
-        val iconLabel = JLabel(icon).apply {
-            preferredSize = Dimension(44, 24)
-        }
-
         namePanel.add(nameLabel)
-        namePanel.add(iconLabel)
+        if (userStatus.isPremium) {
+            // 加载 svg 图标
+            getIcon("/icons/plusX2.svg", javaClass).apply {
+                JLabel(this).apply {
+                    preferredSize = Dimension(44, 24)
+                    namePanel.add(this)
+                }
+            }
+        }
 
         panel.add(namePanel)
 
