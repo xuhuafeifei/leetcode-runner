@@ -3,12 +3,13 @@ package com.xhf.leetcode.plugin.personal
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader.*
 import com.intellij.ui.JBColor
-import com.intellij.ui.components.JBList
+import com.intellij.ui.components.JBLoadingPanel
+import com.intellij.ui.components.JBScrollBar
+import com.intellij.ui.components.JBScrollPane
+import com.xhf.leetcode.plugin.actions.utils.ActionUtils
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient
-import com.xhf.leetcode.plugin.model.UserContestRanking
-import com.xhf.leetcode.plugin.model.UserQuestionProgress
+import com.xhf.leetcode.plugin.model.*
 import com.xhf.leetcode.plugin.utils.BundleUtils
-import com.xhf.leetcode.plugin.utils.Constants
 import com.xhf.leetcode.plugin.utils.TaskCenter
 import java.awt.*
 import java.awt.event.WindowAdapter
@@ -17,6 +18,40 @@ import java.awt.image.BufferedImage
 import java.net.URL
 import javax.imageio.ImageIO
 import javax.swing.*
+
+import javax.swing.table.AbstractTableModel
+import javax.swing.table.DefaultTableCellRenderer
+
+class QuestionTableModel(private val data: List<QuestionRecord>) : AbstractTableModel() {
+
+    private val columnNames = arrayOf("编号 & 题目", "难度", "最近提交", "提交次数")
+
+    override fun getRowCount(): Int = data.size
+    override fun getColumnCount(): Int = columnNames.size
+
+    override fun getColumnName(column: Int): String = columnNames[column]
+
+    override fun getValueAt(rowIndex: Int, columnIndex: Int): Any? {
+        val q = data[rowIndex]
+        return when (columnIndex) {
+            0 -> "${q.frontendId}. ${q.translatedTitle}"
+            1 -> q.difficulty
+            2 -> q.formatRelativeTime()
+            3 -> q.numSubmitted
+            else -> null
+        }
+    }
+
+    override fun getColumnClass(columnIndex: Int): Class<*> {
+        return when (columnIndex) {
+            0, 1, 2 -> String::class.java
+            3 -> Int::class.java
+            else -> Object::class.java
+        }
+    }
+
+    override fun isCellEditable(p0: Int, p1: Int): Boolean = false
+}
 
 // 辅助函数：数字加千分位
 fun Int.toLocaleString(): String {
@@ -62,37 +97,82 @@ fun UserQuestionProgress.formatHardProgress(): String {
     return numAcceptedQuestions.first { it.difficulty == "HARD" }.let { "${it.count} / ${getHardTotalCount()}" }
 }
 
-class PersonalWindow(private val project: Project) : JFrame() {
+class PersonalWindow(project: Project) : JFrame() {
 
-    private val userProfile          = LeetcodeClient.getInstance(project).queryUserProfile()
-    private val userStatus           = LeetcodeClient.getInstance(project).queryUserStatus()
-    private val userQuestionProgress = LeetcodeClient.getInstance(project).queryUserQuestionProgress()
-    private val userContestRanks     = LeetcodeClient.getInstance(project).queryUserContestRanking()
+
+    private val client = LeetcodeClient.getInstance(project)
+
+    // 延迟初始化，先不做耗时请求
+    private lateinit var userProfile: LeetcodeUserProfile
+    private lateinit var userStatus: UserStatus
+    private lateinit var userQuestionProgress: UserQuestionProgress
+    private lateinit var userContestRanks: UserContestRanking
+    private lateinit var userProgressQuestions: UserProgressQuestionList
+
+    private val contentPanel = JPanel().apply {
+        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        background = JBColor.PanelBackground
+        border = BorderFactory.createEmptyBorder(15, 15, 15, 15)
+    }
+
+    private val loadingPanel = JBLoadingPanel(BorderLayout(), project)
 
     init {
         title = BundleUtils.i18nHelper("个人中心", "Personal Center")
         defaultCloseOperation = DO_NOTHING_ON_CLOSE
-        size = Dimension(450, 750)
+        size = Dimension(500, 650)
         setLocationRelativeTo(null)
         layout = BorderLayout()
 
         addWindowListener(object : WindowAdapter() {
             override fun windowClosing(e: WindowEvent?) {
-                dispose()
+                ActionUtils.disposePersonalWindow()
             }
         })
 
-        val content = JPanel(BorderLayout()).apply {
-            background = JBColor.PanelBackground
-            border = BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        }
-
-        content.add(createCircularImagePanel(), BorderLayout.NORTH)
-        content.add(createStatsPanel(), BorderLayout.CENTER)
-        content.add(createListPanel(), BorderLayout.SOUTH)
-
-        add(content)
+        contentPanel.add(loadingPanel, BorderLayout.CENTER)
+        add(JBScrollPane(contentPanel), BorderLayout.CENTER)
         isVisible = true
+
+        loadDataAsync()
+    }
+
+    private fun loadDataAsync() {
+        loadingPanel.startLoading()
+
+        TaskCenter.getInstance().createTask {
+            val userProfileFuture = TaskCenter.getInstance().createFutureTask {
+                userProfile = client.queryUserProfile()
+                userStatus = client.queryUserStatus()
+            }
+
+            val userStatsFuture = TaskCenter.getInstance().createFutureTask {
+                userQuestionProgress = client.queryUserQuestionProgress()
+                userContestRanks = client.queryUserContestRanking()
+                userProgressQuestions = client.queryUserProgressQuestionList()
+            }
+
+            userProfileFuture.invokeAndGet()
+            userStatsFuture.invokeAndGet()
+
+            SwingUtilities.invokeLater {
+                updateUIAfterDataLoaded()
+            }
+        }.invokeLater()
+    }
+
+    private fun updateUIAfterDataLoaded() {
+        contentPanel.removeAll()
+
+        contentPanel.add(createCircularImagePanel())
+        contentPanel.add(Box.createVerticalStrut(20))
+        contentPanel.add(createStatsPanel())
+        contentPanel.add(Box.createVerticalStrut(20))
+        contentPanel.add(createTablePanel())
+
+        contentPanel.revalidate()
+        contentPanel.repaint()
+        loadingPanel.stopLoading()
     }
 
     private fun createCircularImagePanel(): JPanel {
@@ -161,28 +241,41 @@ class PersonalWindow(private val project: Project) : JFrame() {
         val panel = JPanel().apply {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
             background = JBColor.PanelBackground
+            alignmentX = Component.CENTER_ALIGNMENT
+            border = BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, JBColor.border()),
+                BorderFactory.createEmptyBorder(0, 0, 15, 0)
+            )
         }
 
-        // 第一行
-        val contestPanel = JPanel(GridLayout(1, 3, 15, 10)).apply {
+        // 竞赛数据行
+        val contestRow = JPanel().apply {
+            layout = FlowLayout(FlowLayout.CENTER, 15, 0)
             background = JBColor.PanelBackground
-            add(createStatBlock("竞赛分数", userContestRanks.rating.toInt().toString()))
-            add(createStatBlock("全球排名", userContestRanks.formatGlobalRank()))
-            add(createStatBlock("全国排名", userContestRanks.formatLocalRank()))
+            alignmentX = Component.CENTER_ALIGNMENT
+            maximumSize = Dimension(Int.MAX_VALUE, 70)
         }
 
-        // 第二行（这里加入颜色差异）
-        val solvePanel = JPanel(GridLayout(1, 3, 15, 10)).apply {
+        contestRow.add(createStatBlock("竞赛分数", userContestRanks.rating.toInt().toString()))
+        contestRow.add(createStatBlock("全球排名", userContestRanks.formatGlobalRank()))
+        contestRow.add(createStatBlock("全国排名", userContestRanks.formatLocalRank()))
+
+        // 解题数据行
+        val solvedRow = JPanel().apply {
+            layout = FlowLayout(FlowLayout.CENTER, 15, 0)
             background = JBColor.PanelBackground
-            add(createColoredStatBlock("简单", userQuestionProgress.formatEasyProgress()  , JBColor(0x3FB950, 0x56D364))) // 绿色
-            add(createColoredStatBlock("中等", userQuestionProgress.formatMediumProgress(), JBColor(0xD29922, 0xE3B341))) // 黄色
-            add(createColoredStatBlock("困难", userQuestionProgress.formatHardProgress()  , JBColor(0xDA3633, 0xFF6B6B))) // 红色
+            alignmentX = Component.CENTER_ALIGNMENT
+            maximumSize = Dimension(Int.MAX_VALUE, 70)
+            border = BorderFactory.createEmptyBorder(10, 0, 0, 0)
         }
 
-        panel.add(contestPanel)
-        panel.add(Box.createVerticalStrut(20))
-        panel.add(solvePanel)
-        panel.add(Box.createVerticalStrut(20))
+        solvedRow.add(createColoredStatBlock("简单", userQuestionProgress.formatEasyProgress(), JBColor(0x3FB950, 0x56D364)))
+        solvedRow.add(createColoredStatBlock("中等", userQuestionProgress.formatMediumProgress(), JBColor(0xD29922, 0xE3B341)))
+        solvedRow.add(createColoredStatBlock("困难", userQuestionProgress.formatHardProgress(), JBColor(0xDA3633, 0xFF6B6B)))
+
+        panel.add(contestRow)
+        panel.add(Box.createVerticalStrut(15))
+        panel.add(solvedRow)
 
         return panel
     }
@@ -225,26 +318,76 @@ class PersonalWindow(private val project: Project) : JFrame() {
         return bufferedImage
     }
 
-    private fun createListPanel(): JPanel {
+    private fun createTablePanel(): JPanel {
         val panel = JPanel(BorderLayout()).apply {
-            border = BorderFactory.createEmptyBorder(10, 0, 0, 0)
-            preferredSize = Dimension(400, 300)
             background = JBColor.PanelBackground
         }
 
-        val listModel = DefaultListModel<String>().apply {
-            for (i in 1..20) {
-                addElement("练习记录 $i")
+        val tableModel = QuestionTableModel(userProgressQuestions.questions)
+        val table = JTable(tableModel).apply {
+            // 表格样式
+            setShowGrid(false)
+            intercellSpacing = Dimension(0, 0)
+            rowHeight = 32
+            selectionBackground = JBColor(0xE7F5FF, 0x2D333B)
+            selectionForeground = JBColor.foreground()
+
+            // 表头样式
+            tableHeader.apply {
+                font = Font("微软雅黑", Font.BOLD, 13)
+                background = JBColor(0xF6F8FA, 0x2D333B)
+                foreground = JBColor.foreground()
+                border = BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 1, 0, JBColor.border()),
+                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                )
+            }
+
+            // 默认单元格渲染器
+            DefaultTableCellRenderer().apply {
+                font = Font("微软雅黑", Font.PLAIN, 13)
+                background = JBColor.PanelBackground
+                foreground = JBColor.foreground()
+                border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            }
+
+            // 难度列特殊样式
+            columnModel.getColumn(1).cellRenderer = object : DefaultTableCellRenderer() {
+                override fun getTableCellRendererComponent(
+                    table: JTable, value: Any, isSelected: Boolean,
+                    hasFocus: Boolean, row: Int, column: Int
+                ): Component {
+                    super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+
+                    horizontalAlignment = SwingConstants.CENTER
+                    font = Font("微软雅黑", Font.BOLD, 12)
+
+                    when (value.toString()) {
+                        "EASY" -> foreground = JBColor(0x3FB950, 0x56D364)
+                        "MEDIUM" -> foreground = JBColor(0xD29922, 0xE3B341)
+                        "HARD" -> foreground = JBColor(0xDA3633, 0xFF6B6B)
+                    }
+
+                    border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                    return this
+                }
             }
         }
 
-        val jbList = JBList(listModel).apply {
-            selectionMode = ListSelectionModel.SINGLE_SELECTION
-            font = Font("微软雅黑", Font.PLAIN, 13)
+        // 列宽设置
+        with(table.columnModel) {
+            getColumn(0).preferredWidth = 200  // 题目
+            getColumn(1).preferredWidth = 80   // 难度
+            getColumn(2).preferredWidth = 120  // 最近提交
+            getColumn(3).preferredWidth = 80   // 提交次数
         }
 
-        val scrollPane = JScrollPane(jbList).apply {
-            verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_ALWAYS
+        // 滚动面板
+        val scrollPane = JScrollPane(table).apply {
+            background = JBColor.PanelBackground
+            border = BorderFactory.createEmptyBorder()
+            viewportBorder = BorderFactory.createEmptyBorder()
+            verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
         }
 
         panel.add(scrollPane, BorderLayout.CENTER)

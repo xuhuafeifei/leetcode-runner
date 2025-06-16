@@ -787,6 +787,10 @@ public class LeetcodeClient {
         return GsonUtils.fromJson(jsonElement, UserQuestionProgress.class);
     }
 
+    /**
+     * 查询用户竞赛分数以及排名, 这个接口不做二级缓存
+     * @return
+     */
     public UserContestRanking queryUserContestRanking() {
         String url = LeetcodeApiUtils.getLeetcodeReqNOJUrl();
 
@@ -805,5 +809,34 @@ public class LeetcodeClient {
         JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
             .get("userContestRanking");
         return GsonUtils.fromJson(jsonElement, UserContestRanking.class);
+    }
+
+    /**
+     * 查询用户问题提交历史记录
+     * @return
+     */
+    public UserProgressQuestionList queryUserProgressQuestionList() {
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_PROGRESS_QUESTION_LIST_QUERY);
+        body.setBySearchParams(
+            new GraphqlReqBody.SearchParams.ParamsBuilder()
+                .setSkip(0)
+                .setLimit(50)
+                .build()
+        );
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+        String resp = httpResponse.getBody();
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
+            .get("userProgressQuestionList");
+        return GsonUtils.fromJson(jsonElement, UserProgressQuestionList.class);
     }
 }
