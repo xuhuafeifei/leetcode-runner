@@ -15,6 +15,7 @@ public class LeetcodeApiUtils {
     private static final String leetcodeUrl = "https://";
     private static String leetcodeGraphql = "/graphql";
     private static String leetcodeLogin = "/accounts/login/";
+    private static String nojGo = "/noj-go";
 
     public static final String PROBLEM_SET_QUERY = "\n    query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $filters: QuestionListFilterInput) {\n  problemsetQuestionList(\n    categorySlug: $categorySlug\n    limit: $limit\n    skip: $skip\n    filters: $filters\n  ) {\n    hasMore\n    total\n    questions {\n      acRate\n      difficulty\n      freqBar\n      frontendQuestionId\n      isFavor\n      paidOnly\n      solutionNum\n      status\n      title\n      titleCn\n      titleSlug\n      topicTags {\n        name\n        nameTranslated\n        id\n        slug\n      }\n      extra {\n        hasVideoSolution\n        topCompanyTags {\n          imgUrl\n          slug\n          numSubscribed\n        }\n      }\n    }\n  }\n}\n    ";
     public static final String QUESTION_DATA_QUERY = "query questionData($titleSlug: String!) {\n  question(titleSlug: $titleSlug) {\n    questionId\n    questionFrontendId\n    categoryTitle\n    boundTopicId\n    title\n    titleSlug\n    content\n    translatedTitle\n    translatedContent\n    isPaidOnly\n    difficulty\n    likes\n    dislikes\n    isLiked\n    similarQuestions\n    contributors {\n      username\n      profileUrl\n      avatarUrl\n      __typename\n    }\n    langToValidPlayground\n    topicTags {\n      name\n      slug\n      translatedName\n      __typename\n    }\n    companyTagStats\n    codeSnippets {\n      lang\n      langSlug\n      code\n      __typename\n    }\n    stats\n    hints\n    solution {\n      id\n      canSeeDetail\n      __typename\n    }\n    status\n    sampleTestCase\n    metaData\n    judgerAvailable\n    judgeType\n    mysqlSchemas\n    enableRunCode\n    envInfo\n    book {\n      id\n      bookName\n      pressName\n      source\n      shortDescription\n      fullDescription\n      bookImgUrl\n      pressImgUrl\n      productUrl\n      __typename\n    }\n    isSubscribed\n    isDailyQuestion\n    dailyRecordStatus\n    editorType\n    ugcQuestionId\n    style\n    exampleTestcases\n    __typename\n  }\n}\n";
@@ -33,6 +34,8 @@ public class LeetcodeApiUtils {
     public static final String CALENDAR_SUBMIT_RECORD_QUERY = "\n    query calendarSubmitRecord {\n  calendarSubmitRecord {\n    dailySubmitStreakCount\n    dailyQuestionStreakCount\n    monthlyAcCount\n  }\n}\n    ";
 
     public static final String USER_PROFILE_PUBLIC_QUERY = "\n    query userProfilePublicProfile($userSlug: String!) {\n  userProfilePublicProfile(userSlug: $userSlug) {\n    haveFollowed\n    siteRanking\n    profile {\n      userSlug\n      realName\n      aboutMe\n      asciiCode\n      userAvatar\n      gender\n      websites\n      skillTags\n      ipRegion\n      birthday\n      location\n      useDefaultAvatar\n      certificationLevel\n      github\n      school: schoolV2 {\n        schoolId\n        logo\n        name\n      }\n      company: companyV2 {\n        id\n        logo\n        name\n      }\n      job\n      globalLocation {\n        country\n        province\n        city\n        overseasCity\n      }\n      socialAccounts {\n        provider\n        profileUrl\n      }\n      skillSet {\n        langLevels {\n          langName\n          langVerboseName\n          level\n        }\n        topics {\n          slug\n          name\n          translatedName\n        }\n        topicAreaScores {\n          score\n          topicArea {\n            name\n            slug\n          }\n        }\n      }\n    }\n    educationRecordList {\n      unverifiedOrganizationName\n    }\n    occupationRecordList {\n      unverifiedOrganizationName\n      jobTitle\n    }\n  }\n}\n    ";
+    public static final String USER_QUESTION_PROGRESS_QUERY = "\n    query userProfileUserQuestionProgressV2($userSlug: String!) {\n  userProfileUserQuestionProgressV2(userSlug: $userSlug) {\n    numAcceptedQuestions {\n      count\n      difficulty\n    }\n    numFailedQuestions {\n      count\n      difficulty\n    }\n    numUntouchedQuestions {\n      count\n      difficulty\n    }\n    userSessionBeatsPercentage {\n      difficulty\n      percentage\n    }\n    totalQuestionBeatsPercentage\n  }\n}\n    ";
+    public static final String USER_CONTEST_RANKING_QUERY = "\n    query userContestRankingInfo($userSlug: String!) {\n  userContestRanking(userSlug: $userSlug) {\n    attendedContestsCount\n    rating\n    globalRanking\n    localRanking\n    globalTotalParticipants\n    localTotalParticipants\n    topPercentage\n  }\n  userContestRankingHistory(userSlug: $userSlug) {\n    attended\n    totalProblems\n    trendingDirection\n    finishTimeInSeconds\n    rating\n    score\n    ranking\n    contest {\n      title\n      titleCn\n      startTime\n    }\n  }\n}\n    ";
 
     public static String getLeetcodeHost() {
         return leetcodecn;
@@ -64,6 +67,14 @@ public class LeetcodeApiUtils {
 
     public static String getLeetcodeReqUrl() {
         return getLeetcodeUrl() + leetcodeGraphql;
+    }
+
+    /**
+     * 有个奇葩接口需要单独处理
+     * @return
+     */
+    public static String getLeetcodeReqNOJUrl() {
+        return getLeetcodeUrl() + leetcodeGraphql + nojGo;
     }
 
     public static String getLeetcodeLogin() {

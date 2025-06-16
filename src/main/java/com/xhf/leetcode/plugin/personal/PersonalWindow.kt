@@ -5,7 +5,11 @@ import com.intellij.openapi.util.IconLoader.*
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBList
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient
-import com.xhf.leetcode.plugin.model.LeetcodeUserProfile
+import com.xhf.leetcode.plugin.model.UserContestRanking
+import com.xhf.leetcode.plugin.model.UserQuestionProgress
+import com.xhf.leetcode.plugin.utils.BundleUtils
+import com.xhf.leetcode.plugin.utils.Constants
+import com.xhf.leetcode.plugin.utils.TaskCenter
 import java.awt.*
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
@@ -14,13 +18,59 @@ import java.net.URL
 import javax.imageio.ImageIO
 import javax.swing.*
 
+// 辅助函数：数字加千分位
+fun Int.toLocaleString(): String {
+    return this.toString().reversed().chunked(3).joinToString(",").reversed()
+}
+
+// 辅助函数：格式化竞赛排名
+fun UserContestRanking.formatGlobalRank(): String {
+    return "${globalRanking.toLocaleString()} / ${globalTotalParticipants.toLocaleString()}"
+}
+
+fun UserContestRanking.formatLocalRank(): String {
+    return "${localRanking.toLocaleString()} / ${localTotalParticipants.toLocaleString()}"
+}
+
+fun UserQuestionProgress.getEasyTotalCount(): Int {
+    return numAcceptedQuestions.first { it.difficulty == "EASY" }.count + numFailedQuestions.first { it.difficulty == "EASY" }.count + numUntouchedQuestions.first { it.difficulty == "EASY" }.count
+}
+
+fun UserQuestionProgress.getMediumTotalCount(): Int {
+    return numAcceptedQuestions.first { it.difficulty == "MEDIUM" }.count + numFailedQuestions.first { it.difficulty == "MEDIUM" }.count + numUntouchedQuestions.first { it.difficulty == "MEDIUM" }.count
+}
+
+fun UserQuestionProgress.getHardTotalCount(): Int {
+    return numAcceptedQuestions.first { it.difficulty == "HARD" }.count + numFailedQuestions.first { it.difficulty == "HARD" }.count + numUntouchedQuestions.first { it.difficulty == "HARD" }.count
+}
+
+// 辅助函数, 获取题目总数
+fun UserQuestionProgress.getTotalQuestions(): Int {
+    return numAcceptedQuestions.sumOf { it.count } + numFailedQuestions.sumOf { it.count } + numUntouchedQuestions.sumOf { it.count }
+}
+
+// 辅助函数: 格式化做题进度
+fun UserQuestionProgress.formatEasyProgress(): String {
+    return numAcceptedQuestions.first { it.difficulty == "EASY" }.let { "${it.count} / ${getEasyTotalCount()}" }
+}
+
+fun UserQuestionProgress.formatMediumProgress(): String {
+    return numAcceptedQuestions.first { it.difficulty == "MEDIUM" }.let { "${it.count} / ${getMediumTotalCount()}" }
+}
+
+fun UserQuestionProgress.formatHardProgress(): String {
+    return numAcceptedQuestions.first { it.difficulty == "HARD" }.let { "${it.count} / ${getHardTotalCount()}" }
+}
+
 class PersonalWindow(private val project: Project) : JFrame() {
 
-    private val userProfile = LeetcodeClient.getInstance(project).queryUserProfile()
-    private val userStatus  = LeetcodeClient.getInstance(project).queryUserStatus()
+    private val userProfile          = LeetcodeClient.getInstance(project).queryUserProfile()
+    private val userStatus           = LeetcodeClient.getInstance(project).queryUserStatus()
+    private val userQuestionProgress = LeetcodeClient.getInstance(project).queryUserQuestionProgress()
+    private val userContestRanks     = LeetcodeClient.getInstance(project).queryUserContestRanking()
 
     init {
-        title = "个人中心"
+        title = BundleUtils.i18nHelper("个人中心", "Personal Center")
         defaultCloseOperation = DO_NOTHING_ON_CLOSE
         size = Dimension(450, 750)
         setLocationRelativeTo(null)
@@ -59,7 +109,7 @@ class PersonalWindow(private val project: Project) : JFrame() {
         }
 
         // 异步加载图片
-        Thread {
+        TaskCenter.getInstance().createTask {
             try {
                 val imageUrl = URL(userProfile.userAvatar)
                 val image = ImageIO.read(imageUrl)?.getScaledInstance(150, 150, Image.SCALE_SMOOTH)
@@ -74,7 +124,7 @@ class PersonalWindow(private val project: Project) : JFrame() {
                     imageLabel.repaint()
                 }
             }
-        }.start()
+        }.invokeLater()
 
         panel.add(imageLabel)
         // 头像与用户名之间间隔
@@ -116,17 +166,17 @@ class PersonalWindow(private val project: Project) : JFrame() {
         // 第一行
         val contestPanel = JPanel(GridLayout(1, 3, 15, 10)).apply {
             background = JBColor.PanelBackground
-            add(createStatBlock("竞赛分数", "1792"))
-            add(createStatBlock("全球排名", "54,435 / 705,821"))
-            add(createStatBlock("全国排名", "14,769 / 145,281"))
+            add(createStatBlock("竞赛分数", userContestRanks.rating.toInt().toString()))
+            add(createStatBlock("全球排名", userContestRanks.formatGlobalRank()))
+            add(createStatBlock("全国排名", userContestRanks.formatLocalRank()))
         }
 
         // 第二行（这里加入颜色差异）
         val solvePanel = JPanel(GridLayout(1, 3, 15, 10)).apply {
             background = JBColor.PanelBackground
-            add(createColoredStatBlock("简单", "311 / 1000", JBColor(0x3FB950, 0x56D364))) // 绿色
-            add(createColoredStatBlock("中等", "476 / 2056", JBColor(0xD29922, 0xE3B341))) // 黄色
-            add(createColoredStatBlock("困难", "123 / 912", JBColor(0xDA3633, 0xFF6B6B))) // 红色
+            add(createColoredStatBlock("简单", userQuestionProgress.formatEasyProgress()  , JBColor(0x3FB950, 0x56D364))) // 绿色
+            add(createColoredStatBlock("中等", userQuestionProgress.formatMediumProgress(), JBColor(0xD29922, 0xE3B341))) // 黄色
+            add(createColoredStatBlock("困难", userQuestionProgress.formatHardProgress()  , JBColor(0xDA3633, 0xFF6B6B))) // 红色
         }
 
         panel.add(contestPanel)

@@ -743,6 +743,9 @@ public class LeetcodeClient {
         return httpClient.getCookies();
     }
 
+    /**
+     * 这块的数据就不做缓存了，因为它是实时获取的，用户可能会做改变，而且也没有必要做缓存, 毕竟请求频率不高
+     */
     public LeetcodeUserProfile queryUserProfile() {
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
@@ -760,5 +763,47 @@ public class LeetcodeClient {
         JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
             .get("userProfilePublicProfile").getAsJsonObject().get("profile");
         return GsonUtils.fromJson(jsonElement, LeetcodeUserProfile.class);
+    }
+
+    /**
+     * 这块的数据就不做缓存了，因为它是实时获取的，用户可能会做改变，而且也没有必要做缓存, 毕竟请求频率不高
+     */
+    public UserQuestionProgress queryUserQuestionProgress() {
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_QUESTION_PROGRESS_QUERY);
+        body.addVariable("userSlug", queryUserStatus().getUserSlug());
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+        String resp = httpResponse.getBody();
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
+            .get("userProfileUserQuestionProgressV2");
+        return GsonUtils.fromJson(jsonElement, UserQuestionProgress.class);
+    }
+
+    public UserContestRanking queryUserContestRanking() {
+        String url = LeetcodeApiUtils.getLeetcodeReqNOJUrl();
+
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_CONTEST_RANKING_QUERY);
+        body.addVariable("userSlug", queryUserStatus().getUserSlug());
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+        String resp = httpResponse.getBody();
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
+            .get("userContestRanking");
+        return GsonUtils.fromJson(jsonElement, UserContestRanking.class);
     }
 }
