@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.io.file.StoreService;
@@ -17,6 +18,7 @@ import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.groovy.util.Maps;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +31,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 // 订阅clearCache事件, 当该事件触发后, 清除cookie和ql(List<Question>, 是题目数据的二级缓存)
-@LCSubscriber(events = {ClearCacheEvent.class})
+@LCSubscriber(events = {ClearCacheEvent.class, CodeSubmitEvent.class})
 public class LeetcodeClient {
 
     private Project project;
@@ -37,7 +39,10 @@ public class LeetcodeClient {
     private UserStatus userStatus;
     private static boolean first = true;
     private static volatile LeetcodeClient instance;
-
+    private LeetcodeUserProfile leetcodeUserProfile = null;
+    private UserQuestionProgress userQuestionProgress;
+    private UserContestRanking userContestRanking;
+    private UserProgressQuestionList userProgressQuestionList;
 
     private LeetcodeClient(Project project) {
         this.project = project;
@@ -191,7 +196,7 @@ public class LeetcodeClient {
             JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
             JsonObject dataObject = jsonObject.getAsJsonObject("data");
             JsonObject userStatusObject = dataObject.getAsJsonObject("userStatus");
-            userStatus = GsonUtils.fromJson(userStatusObject, UserStatus.class);
+            this.userStatus = GsonUtils.fromJson(userStatusObject, UserStatus.class);
             return userStatus;
         } catch (Exception e) {
             LogUtils.error(e);
@@ -661,20 +666,7 @@ public class LeetcodeClient {
     public SubmissionDetail getSubmissionDetail(String submissionId) {
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SUBMISSION_CONTENT_QUERY);
-        body.addVariable("submissionId", submissionId);
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-
-        String resp = httpResponse.getBody();
-
-        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+        JsonObject jsonObject = querySubmissionCodeForJsonObject(submissionId, url);
         JsonObject submissionDetail = jsonObject.getAsJsonObject("data").getAsJsonObject("submissionDetail");
 
         return GsonUtils.fromJson(submissionDetail, SubmissionDetail.class);
@@ -682,8 +674,15 @@ public class LeetcodeClient {
 
     @Deprecated
     public String getSubmissionCode(String submissionId) {
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        String url;
+        url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
+        JsonObject jsonObject = querySubmissionCodeForJsonObject(submissionId, url);
+
+        return jsonObject.getAsJsonObject("data").getAsJsonObject("submissionDetail").get("code").getAsString();
+    }
+
+    private JsonObject querySubmissionCodeForJsonObject(String submissionId, String url) {
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SUBMISSION_CONTENT_QUERY);
         body.addVariable("submissionId", submissionId);
 
@@ -696,9 +695,7 @@ public class LeetcodeClient {
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
         String resp = httpResponse.getBody();
-        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-
-        return jsonObject.getAsJsonObject("data").getAsJsonObject("submissionDetail").get("code").getAsString();
+        return JsonParser.parseString(resp).getAsJsonObject();
     }
 
     public void cacheQuestionList(List<Question> totalQuestion) {
@@ -749,5 +746,122 @@ public class LeetcodeClient {
 
     public List<Cookie> getLeetcodeSession() {
         return httpClient.getCookies();
+    }
+
+    /**
+     * 还是决定做个二级缓存, 因为Personal界面需要查询大量内容, 不做个缓存太耗时了
+     */
+    public LeetcodeUserProfile queryUserProfile() {
+        if (leetcodeUserProfile != null) {
+            return leetcodeUserProfile;
+        }
+
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_PROFILE_PUBLIC_QUERY);
+        body.addVariable("userSlug", queryUserStatus().getUserSlug());
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+        String resp = httpResponse.getBody();
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
+            .get("userProfilePublicProfile").getAsJsonObject().get("profile");
+        leetcodeUserProfile = GsonUtils.fromJson(jsonElement, LeetcodeUserProfile.class);
+        return leetcodeUserProfile;
+    }
+
+    /**
+     * 还是得做二级缓存, 查询用户做题进度
+     */
+    public UserQuestionProgress queryUserQuestionProgress() {
+        if (userQuestionProgress != null) {
+            return userQuestionProgress;
+        }
+
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_QUESTION_PROGRESS_QUERY);
+        body.addVariable("userSlug", queryUserStatus().getUserSlug());
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+        String resp = httpResponse.getBody();
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
+            .get("userProfileUserQuestionProgressV2");
+        userQuestionProgress = GsonUtils.fromJson(jsonElement, UserQuestionProgress.class);
+        return userQuestionProgress;
+    }
+
+    /**
+     * 查询用户竞赛分数以及排名, 还是得做二级缓存
+     * @return
+     */
+    public UserContestRanking queryUserContestRanking() {
+        if (userContestRanking != null) {
+            return userContestRanking;
+        }
+        String url = LeetcodeApiUtils.getLeetcodeReqNOJUrl();
+
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_CONTEST_RANKING_QUERY);
+        body.addVariable("userSlug", queryUserStatus().getUserSlug());
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+        String resp = httpResponse.getBody();
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
+            .get("userContestRanking");
+        userContestRanking = GsonUtils.fromJson(jsonElement, UserContestRanking.class);
+        return userContestRanking;
+    }
+
+    /**
+     * 查询用户问题提交历史记录. 这个不做缓存, 因为每隔一段时间, 数据信息都会变化
+     * @return
+     */
+    public UserProgressQuestionList queryUserProgressQuestionList() {
+        if (userProgressQuestionList != null) {
+            return userProgressQuestionList;
+        }
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_PROGRESS_QUESTION_LIST_QUERY);
+        body.addVariable("filters", Maps.of("limit", 20, "skip", 0));
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+        String resp = httpResponse.getBody();
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
+            .get("userProgressQuestionList");
+        userProgressQuestionList = GsonUtils.fromJson(jsonElement, UserProgressQuestionList.class);
+        return userProgressQuestionList;
+    }
+
+    @Subscribe
+    public void subscribeCodeSubmitEvent(CodeSubmitEvent event) {
+        // clear cache
+        this.userProgressQuestionList = null;
+        this.userQuestionProgress = null;
     }
 }

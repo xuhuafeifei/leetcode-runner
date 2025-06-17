@@ -2,6 +2,7 @@ package com.xhf.leetcode.plugin.actions.utils;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.personal.PersonalWindow;
 import com.xhf.leetcode.plugin.review.front.ReviewWindow;
 import com.xhf.leetcode.plugin.window.TimerWindow;
 
@@ -52,6 +53,24 @@ public class ActionUtils {
         if (reviewWindow != null) {
             reviewWindow.dispose();
             reviewWindow = null;
+        }
+    }
+
+    private static PersonalWindow personalWindow;
+
+    public static void createPersonalWindow(Project project) {
+        if (personalWindow == null) {
+            personalWindow = new PersonalWindow(project);
+            personalWindow.setVisible(true);
+        } else {
+            disposePersonalWindow();
+        }
+    }
+
+    public static void disposePersonalWindow() {
+        if (personalWindow != null) {
+            personalWindow.dispose();
+            personalWindow = null;
         }
     }
 }

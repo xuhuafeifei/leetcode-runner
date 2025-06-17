@@ -80,6 +80,9 @@
         <action id="leetcode.plugin.ReviewAction" class="com.xhf.leetcode.plugin.actions.ReviewAction"
                 icon="/icons/review.svg">
         </action>
+        <action id="leetcode.plugin.PersonalInfoAction" class="com.xhf.leetcode.plugin.actions.PersonalInfoAction"
+                icon="/icons/person.svg">
+        </action>
 
         <group id="leetcode.plugin.lcActionsToolbar">
             <reference id="leetcode.plugin.LoginAction"/>
@@ -97,6 +100,7 @@
             <reference id="leetcode.plugin.StarAction"/>
             <separator/>
             <reference id="leetcode.plugin.ReviewAction"/>
+            <reference id="leetcode.plugin.PersonalInfoAction"/>
         </group>
 
         <group id="leetcode.plugin.consoleToolbar">

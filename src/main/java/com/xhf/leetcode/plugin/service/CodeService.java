@@ -562,7 +562,8 @@ public class CodeService {
                 AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr, project);
                 boolean correctAnswer = scrb.isCorrectAnswer();
                 if (correctAnswer) {
-                    String todaySlug = StoreService.getInstance(project).getCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, String.class);
+                    String todaySlug = StoreService.getInstance(project)
+                        .getCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, String.class);
                     if (StringUtils.isNotBlank(todaySlug) && todaySlug.equals(runCode.getTitleSlug())) {
                         // 延迟两秒发送事件, 异步刷新. 放置跟新太快导致查询到Leetcode的老数据
                         // todo: 延迟刷新会不会存在问题? 需要测试
@@ -575,18 +576,21 @@ public class CodeService {
                             LCEventBus.getInstance().post(new TodayQuestionOkEvent());
                         }).invokeLater();
                     }
-                    ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("leetcode.status.ac"), true, true, BundleUtils.i18n("leetcode.status.ac"), BundleUtils.i18n("leetcode.result"), ConsoleDialog.INFO);
+                    ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("leetcode.status.ac"), true, true,
+                        BundleUtils.i18n("leetcode.status.ac"), BundleUtils.i18n("leetcode.result"),
+                        ConsoleDialog.INFO);
                 } else {
-                    ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("leetcode.status.notac"), true, true, "Oh No! " + BundleUtils.i18n("leetcode.status.notac"), BundleUtils.i18n("leetcode.result"), ConsoleDialog.INFO);
+                    ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("leetcode.status.notac"), true, true,
+                        "Oh No! " + BundleUtils.i18n("leetcode.status.notac"), BundleUtils.i18n("leetcode.result"),
+                        ConsoleDialog.INFO);
                 }
 
                 ConsoleUtils.getInstance(project).showInfo(scrb.build());
                 // update question
-                boolean update = QuestionService.getInstance(project).updateQuestionStatusByFqid(project, runCode.getFrontendQuestionId(), scrb.isCorrectAnswer());
+                QuestionService.getInstance(project)
+                    .updateQuestionStatusByFqid(project, runCode.getFrontendQuestionId(), scrb.isCorrectAnswer());
                 // post
-                if (update) {
-                    LCEventBus.getInstance().post(new CodeSubmitEvent(project));
-                }
+                LCEventBus.getInstance().post(new CodeSubmitEvent(project));
             }
         });
     }
