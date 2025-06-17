@@ -4,6 +4,8 @@ import com.intellij.openapi.project.Project
 import com.xhf.leetcode.plugin.service.QuestionService
 import java.time.Instant
 import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 
@@ -35,11 +37,22 @@ fun QuestionRecord.toQuestion(project: Project): Question {
     return QuestionService.getInstance(project).getQuestionByFid(frontendId, project)
 }
 
-// 扩展函数写在类外部或 companion object 中都可以
 fun QuestionRecord.formatRelativeTime(): String {
     if (lastSubmittedAt == null) return "未知"
 
-    val submitted = Instant.parse(lastSubmittedAt)
+    // 使用 DateTimeFormatter 来解析带有时区的时间字符串
+    val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+    val submitted = try {
+        ZonedDateTime.parse(lastSubmittedAt, formatter).toInstant()
+    } catch (e: Exception) {
+        // 如果带时区的解析失败，尝试直接解析为 Instant
+        try {
+            Instant.parse(lastSubmittedAt)
+        } catch (e: Exception) {
+            return "未知时间"
+        }
+    }
+
     val now = Instant.now()
     val hoursAgo = ChronoUnit.HOURS.between(submitted, now)
 
@@ -52,6 +65,7 @@ fun QuestionRecord.formatRelativeTime(): String {
         }
     }
 }
+
 
 fun QuestionRecord.toFormattedString(): String {
     val relativeTime = formatRelativeTime()
