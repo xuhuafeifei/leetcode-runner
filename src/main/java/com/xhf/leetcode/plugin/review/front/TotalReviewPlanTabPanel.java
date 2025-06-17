@@ -193,9 +193,7 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
             int selectedRow = reviewTable.getSelectedRow();
             if (selectedRow >= 0) {
                 // 删除按钮的逻辑
-                String fid = Question.parseFrontendQuestionId((String) tableModel.getValueAt(selectedRow, 0));
-                Question question = QuestionService.getInstance(project).getQuestionByFid(fid, project);
-                int id = Question.getIdx(question, project);
+                Integer id = (Integer) tableModel.getValueAt(selectedRow, 0);
 
                 service.deleteQuestion(id);
                 LogUtils.info("Delete row: " + selectedRow);
