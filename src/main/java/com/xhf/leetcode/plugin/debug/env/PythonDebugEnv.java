@@ -232,7 +232,8 @@ public class PythonDebugEnv extends AbstractDebugEnv {
                 "import math\n" +
                 "import sys\n" +
                 "from ListNode import ListNode\n" +
-                "from TreeNode import TreeNode\n"
+                "from TreeNode import TreeNode\n" +
+                "from math import *\n"
                 ;
         // 设置偏移量, 后期debug的时候需要通过offset对齐
         this.offset = commonPackage.split("\n").length;

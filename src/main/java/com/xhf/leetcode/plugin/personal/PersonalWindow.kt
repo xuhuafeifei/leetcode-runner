@@ -8,6 +8,7 @@ import com.intellij.openapi.util.IconLoader.*
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLoadingPanel
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.util.ui.UIUtil
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient
 import com.xhf.leetcode.plugin.model.*
@@ -156,8 +157,12 @@ class PersonalWindow(private val project: Project) : JFrame(), Disposable {
                 userProgressQuestions = client.queryUserProgressQuestionList()
             }
 
-            userProfileFuture.invokeAndGet()
-            userStatsFuture.invokeAndGet()
+            try {
+                userProfileFuture.invokeAndGet()
+                userStatsFuture.invokeAndGet()
+            } catch (e: Exception) {
+                throw e
+            }
 
             SwingUtilities.invokeLater {
                 updateUIAfterDataLoaded()
