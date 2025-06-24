@@ -17,6 +17,7 @@ import com.xhf.leetcode.plugin.model.*;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
+import java.time.LocalDate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.groovy.util.Maps;
 import org.apache.http.cookie.Cookie;
@@ -856,6 +857,32 @@ public class LeetcodeClient {
             .get("userProgressQuestionList");
         userProgressQuestionList = GsonUtils.fromJson(jsonElement, UserProgressQuestionList.class);
         return userProgressQuestionList;
+    }
+
+    UserCalendar userCalendar;
+
+    public UserCalendar queryUserCalendar() {
+        if (userCalendar != null) {
+            return userCalendar;
+        }
+        String url = LeetcodeApiUtils.getLeetcodeReqNOJUrl();
+        // build graphql req
+        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_PROFILE_CALENDAR_QUERY);
+        body.addVariable("userSlug", queryUserStatus().getUserSlug());
+        body.addVariable("year", LocalDate.now().getYear());
+
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
+
+        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
+        String resp = httpResponse.getBody();
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
+            .get("userCalendar");
+        userCalendar = GsonUtils.fromJson(jsonElement, UserCalendar.class);
+        return userCalendar;
     }
 
     @Subscribe

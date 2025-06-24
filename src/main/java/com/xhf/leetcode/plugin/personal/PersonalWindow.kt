@@ -1,5 +1,6 @@
 package com.xhf.leetcode.plugin.personal
 
+import CalendarContributionPanel
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
@@ -110,6 +111,7 @@ class PersonalWindow(private val project: Project) : JFrame(), Disposable {
     private lateinit var userQuestionProgress: UserQuestionProgress
     private lateinit var userContestRanks: UserContestRanking
     private lateinit var userProgressQuestions: UserProgressQuestionList
+    private lateinit var userCalendar: UserCalendar
 
     private val contentPanel = JPanel().apply {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
@@ -145,6 +147,7 @@ class PersonalWindow(private val project: Project) : JFrame(), Disposable {
             val userProfileFuture = TaskCenter.getInstance().createFutureTask {
                 userProfile = client.queryUserProfile()
                 userStatus = client.queryUserStatus()
+                userCalendar = client.queryUserCalendar()
             }
 
             val userStatsFuture = TaskCenter.getInstance().createFutureTask {
@@ -169,11 +172,17 @@ class PersonalWindow(private val project: Project) : JFrame(), Disposable {
         contentPanel.add(Box.createVerticalStrut(20))
         contentPanel.add(createStatsPanel())
         contentPanel.add(Box.createVerticalStrut(20))
+        contentPanel.add(createCalendarPanel())
+        contentPanel.add(Box.createVerticalStrut(20))
         contentPanel.add(createTablePanel())
 
         contentPanel.revalidate()
         contentPanel.repaint()
         loadingPanel.stopLoading()
+    }
+
+    private fun createCalendarPanel(): JPanel {
+        return CalendarContributionPanel(userCalendar.submissionCalendar)
     }
 
     private fun createCircularImagePanel(): JPanel {
