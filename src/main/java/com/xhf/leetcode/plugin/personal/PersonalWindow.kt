@@ -186,8 +186,11 @@ class PersonalWindow(private val project: Project) : JFrame(), Disposable {
         loadingPanel.stopLoading()
     }
 
-    private fun createCalendarPanel(): JPanel {
-        return CalendarContributionPanel(userCalendar.submissionCalendar)
+    private fun createCalendarPanel(): JComponent {
+        val scrollPane = JScrollPane(CalendarContributionPanel(userCalendar.submissionCalendar))
+        scrollPane.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+//        scrollPane.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_ALWAYS
+        return scrollPane
     }
 
     private fun createCircularImagePanel(): JPanel {
