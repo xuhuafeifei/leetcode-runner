@@ -869,7 +869,6 @@ public class LeetcodeClient {
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_PROFILE_CALENDAR_QUERY);
         body.addVariable("userSlug", queryUserStatus().getUserSlug());
-        body.addVariable("year", LocalDate.now().getYear());
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
                 .setBody(body.toJsonStr())

@@ -33,6 +33,7 @@ class CalendarContributionPanel(data: Map<Long, Int>) : JPanel() {
 
     init {
         toolTipText = ""
+        ToolTipManager.sharedInstance().initialDelay = 200
 
         // 1. 计算起止范围
         val dates = data.keys.map { Date(it * 1000) }.sorted()
@@ -88,7 +89,7 @@ class CalendarContributionPanel(data: Map<Long, Int>) : JPanel() {
     }
 
     private fun getColor(count: Int): Color = when {
-        count == 0 -> JBColor.GRAY
+        count == 0 -> JBColor(Color(210, 208, 208), Color(187, 186, 186))
         count < 2 -> Color(200, 255, 150)
         count < 6 -> Color(140, 210, 100)
         count < 11 -> Color(88, 163, 89)
