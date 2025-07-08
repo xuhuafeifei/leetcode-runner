@@ -26,16 +26,23 @@ import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.reader.InstSource;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.*;
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.DataKeys;
+import com.xhf.leetcode.plugin.utils.HotKeyUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author feigebuge
@@ -87,7 +94,6 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         // Register the consoleView for disposal when the panel is disposed
         // 解决console关闭时的内存泄露问题
         Disposer.register(this, consoleView);
-
 
         // 创建选项卡 (基于 JBEditorTabs)
         tabs = new JBEditorTabs(project, IdeFocusManager.getInstance(project), this);
@@ -151,7 +157,6 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         HotKeyUtils.bindKey(inputField, KeyEvent.VK_DOWN, "moveDown", down);  // 下移
         HotKeyUtils.bindKey(inputField, KeyEvent.VK_KP_DOWN, "moveDown", down);  // 下移
 
-
         // 使用 JSplitPane 创建分割面板
         jbSplitter = new JBSplitter();
         jbSplitter.setFirstComponent(tabs);
@@ -162,9 +167,10 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         LCEventBus.getInstance().register(this);
 
         // 添加工具栏(具有debug的功能)
-        DefaultActionGroup ag = (DefaultActionGroup) ActionManager.getInstance().getAction("leetcode.plugin.consoleToolbar");
+        DefaultActionGroup ag = (DefaultActionGroup) ActionManager.getInstance()
+            .getAction("leetcode.plugin.consoleToolbar");
         ActionToolbar toolbar = ActionManager.getInstance()
-                .createActionToolbar("LCConsoleToolbar", ag, true);
+            .createActionToolbar("LCConsoleToolbar", ag, true);
         // 设置工具栏的排列方式为竖向排列
         toolbar.setOrientation(SwingConstants.VERTICAL);  // 设置竖直排列
         // 设置目标组件
@@ -174,7 +180,8 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
 
         // 添加默认工具栏(具有清空, lineWrap等功能)
         DefaultActionGroup consoleGroup = new DefaultActionGroup(consoleView.createConsoleActions());
-        ActionToolbar consoleToolbar = ActionManager.getInstance().createActionToolbar("MyLCConsoleToolbar", consoleGroup, false);
+        ActionToolbar consoleToolbar = ActionManager.getInstance()
+            .createActionToolbar("MyLCConsoleToolbar", consoleGroup, false);
         consoleToolbar.setOrientation(SwingConstants.VERTICAL);  // 设置竖直排列
         consoleToolbar.setTargetComponent(jbSplitter);
         add(consoleToolbar.getComponent(), BorderLayout.EAST);
@@ -196,9 +203,9 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
     private void handleInput(String debugCommand) {
         // 存储用户输入
         boolean flag = InstSource.userCmdInput(debugCommand);
-        if (! flag) {
+        if (!flag) {
             ConsoleUtils.getInstance(project).showError(
-                    BundleUtils.i18n("error.command.write"), false
+                BundleUtils.i18n("error.command.write"), false
             );
         }
         // 清空输入框
@@ -223,63 +230,6 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
     public void dispose() {
         if (consoleView != null) {
             Disposer.dispose(consoleView);
-        }
-    }
-
-    /**
-     * 命令行历史记录
-     */
-    static class HistoryCommand {
-        static class History {
-            String cmd;
-            History pre;
-            History next;
-
-            public History(String cmd) {
-                this.cmd = cmd;
-            }
-
-            public History(String cmd, History pre, History next) {
-                this.cmd = cmd;
-                this.pre = pre;
-                this.next = next;
-            }
-
-            public History() {
-            }
-        }
-
-        History dummyHead = new History();
-        History point = dummyHead;
-
-        /**
-         * 新添加的记录永远是最后一个
-         * @param cmd cmd
-         */
-        public void add(String cmd) {
-            point.next = new History(cmd, point, null);
-            point = point.next;
-        }
-
-        public String moveUp() {
-            if (point.pre == dummyHead) {
-                return point.cmd;
-            }
-            if (point == dummyHead) {
-                return point.cmd;
-            }
-            String res = point.cmd;
-            point = point.pre;
-            return res;
-        }
-
-        public String moveDown() {
-            if (point.next == null) {
-                return point.cmd;
-            }
-            String res = point.next.cmd;
-            point = point.next;
-            return res;
         }
     }
 
@@ -314,6 +264,66 @@ public class LCConsolePanel extends SimpleToolWindowPanel implements DataProvide
         // gc
         if (historyCommand != null) {
             historyCommand = null;
+        }
+    }
+
+    /**
+     * 命令行历史记录
+     */
+    static class HistoryCommand {
+
+        History dummyHead = new History();
+        History point = dummyHead;
+
+        /**
+         * 新添加的记录永远是最后一个
+         *
+         * @param cmd cmd
+         */
+        public void add(String cmd) {
+            point.next = new History(cmd, point, null);
+            point = point.next;
+        }
+
+        public String moveUp() {
+            if (point.pre == dummyHead) {
+                return point.cmd;
+            }
+            if (point == dummyHead) {
+                return point.cmd;
+            }
+            String res = point.cmd;
+            point = point.pre;
+            return res;
+        }
+
+        public String moveDown() {
+            if (point.next == null) {
+                return point.cmd;
+            }
+            String res = point.next.cmd;
+            point = point.next;
+            return res;
+        }
+
+        static class History {
+
+            String cmd;
+            History pre;
+            History next;
+
+            public History(String cmd) {
+                this.cmd = cmd;
+            }
+
+            public History(String cmd, History pre, History next) {
+                this.cmd = cmd;
+                this.pre = pre;
+                this.next = next;
+            }
+
+            public History() {
+            }
         }
     }
 }

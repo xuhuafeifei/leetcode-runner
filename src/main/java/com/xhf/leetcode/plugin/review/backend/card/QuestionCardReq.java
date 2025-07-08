@@ -6,10 +6,12 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
  * @author 文艺倾年
  */
 public class QuestionCardReq {
+
     private Integer id; // 卡片ID
     private QuestionFront front; // 卡片前面题目
     private String back; // 背部答案
     private FSRSRating fsrsRating; // 评分
+
     public QuestionCardReq() {
     }
 

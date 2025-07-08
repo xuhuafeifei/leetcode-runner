@@ -10,17 +10,22 @@ import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.service.LoginService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.*;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.DebugCheck;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.LoginPass;
+import com.xhf.leetcode.plugin.utils.RatePass;
+import com.xhf.leetcode.plugin.utils.SettingPass;
+import javax.swing.Icon;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public abstract class AbstractAction extends AnAction {
+
     public AbstractAction(String s, String s1, Icon icon) {
         super(s, s1, icon);
     }
@@ -40,7 +45,8 @@ public abstract class AbstractAction extends AnAction {
         RatePass ratePass = this.getClass().getAnnotation(RatePass.class);
         if (ratePass == null) {
             if (!ActionUtils.get()) {
-                ConsoleUtils.getInstance(e.getProject()).showInfo(BundleUtils.i18n("action.leetcode.actions.frequency.info"), false, true);
+                ConsoleUtils.getInstance(e.getProject())
+                    .showInfo(BundleUtils.i18n("action.leetcode.actions.frequency.info"), false, true);
                 return;
             }
         }
@@ -58,16 +64,17 @@ public abstract class AbstractAction extends AnAction {
         LoginPass annotation = this.getClass().getAnnotation(LoginPass.class);
         if (annotation == null) {
             boolean login = LoginService.getInstance(project).isLogin();
-            if (! login) {
-                ConsoleUtils.getInstance(e.getProject()).showWaring(BundleUtils.i18n("action.leetcode.actions.login.info"), false);
+            if (!login) {
+                ConsoleUtils.getInstance(e.getProject())
+                    .showWaring(BundleUtils.i18n("action.leetcode.actions.login.info"), false);
                 // LoginService.getInstance(project).doLogin();
                 Messages.showOkCancelDialog(
-                        project,
-                        BundleUtils.i18n("action.leetcode.actions.login.info"),
-                        "INFO",
-                        Messages.getOkButton(),
-                        Messages.getCancelButton(),
-                        Messages.getQuestionIcon()
+                    project,
+                    BundleUtils.i18n("action.leetcode.actions.login.info"),
+                    "INFO",
+                    Messages.getOkButton(),
+                    Messages.getCancelButton(),
+                    Messages.getQuestionIcon()
                 );
                 return;
             }
@@ -80,11 +87,11 @@ public abstract class AbstractAction extends AnAction {
             // reader 检测
             if (StringUtils.isBlank(appSettings.getReadTypeName())) {
                 Messages.showInfoMessage(
-                        BundleUtils.i18nHelper(
-                                "Debug设置模块 '读取类型' 没有设置, 请前往设置界面",
-                                "Debug setting 'read type' is not set, please go to the setting interface"
-                        ),
-                        "INFO"
+                    BundleUtils.i18nHelper(
+                        "Debug设置模块 '读取类型' 没有设置, 请前往设置界面",
+                        "Debug setting 'read type' is not set, please go to the setting interface"
+                    ),
+                    "INFO"
                 );
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
@@ -92,11 +99,11 @@ public abstract class AbstractAction extends AnAction {
             // output 检测
             if (StringUtils.isBlank(appSettings.getOutputTypeName())) {
                 Messages.showInfoMessage(
-                        BundleUtils.i18nHelper(
-                                "Debug设置模块 '输出类型' 没有设置, 请前往设置界面",
-                                "Debug setting 'output type' is not set, please go to the setting interface"
-                        ),
-                        "INFO"
+                    BundleUtils.i18nHelper(
+                        "Debug设置模块 '输出类型' 没有设置, 请前往设置界面",
+                        "Debug setting 'output type' is not set, please go to the setting interface"
+                    ),
+                    "INFO"
                 );
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
                 return;
@@ -105,7 +112,8 @@ public abstract class AbstractAction extends AnAction {
             DebugCheck.CheckType value = debugCheck.value();
             if (value == DebugCheck.CheckType.STATUS) {
                 if (!DebugManager.getInstance(project).isDebug()) {
-                    ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("action.leetcode.actions.debug.nodebug"), false, true);
+                    ConsoleUtils.getInstance(project)
+                        .showWaring(BundleUtils.i18n("action.leetcode.actions.debug.nodebug"), false, true);
                     return;
                 }
             }
@@ -114,7 +122,8 @@ public abstract class AbstractAction extends AnAction {
             doActionPerformed(project, e);
         } catch (Exception ex) {
             LogUtils.error(ex);
-            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.unknown.error") + "\n" + ex.getMessage(), false, true);
+            ConsoleUtils.getInstance(project)
+                .showError(BundleUtils.i18n("action.leetcode.unknown.error") + "\n" + ex.getMessage(), false, true);
         }
     }
 

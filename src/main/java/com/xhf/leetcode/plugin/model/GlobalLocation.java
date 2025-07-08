@@ -1,6 +1,6 @@
 /**
-  * Copyright 2025 json.cn 
-  */
+ * Copyright 2025 json.cn
+ */
 package com.xhf.leetcode.plugin.model;
 
 /**
@@ -15,32 +15,37 @@ public class GlobalLocation {
     private String province;
     private String city;
     private boolean overseasCity;
+
+    public String getCountry() {
+        return country;
+    }
+
     public void setCountry(String country) {
-         this.country = country;
-     }
-     public String getCountry() {
-         return country;
-     }
+        this.country = country;
+    }
+
+    public String getProvince() {
+        return province;
+    }
 
     public void setProvince(String province) {
-         this.province = province;
-     }
-     public String getProvince() {
-         return province;
-     }
+        this.province = province;
+    }
+
+    public String getCity() {
+        return city;
+    }
 
     public void setCity(String city) {
-         this.city = city;
-     }
-     public String getCity() {
-         return city;
-     }
+        this.city = city;
+    }
+
+    public boolean getOverseasCity() {
+        return overseasCity;
+    }
 
     public void setOverseasCity(boolean overseasCity) {
-         this.overseasCity = overseasCity;
-     }
-     public boolean getOverseasCity() {
-         return overseasCity;
-     }
+        this.overseasCity = overseasCity;
+    }
 
 }

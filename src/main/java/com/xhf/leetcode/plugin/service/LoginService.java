@@ -7,7 +7,12 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
-import com.xhf.leetcode.plugin.bus.*;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LCSubscriber;
+import com.xhf.leetcode.plugin.bus.LoginEvent;
+import com.xhf.leetcode.plugin.bus.LogoutEvent;
+import com.xhf.leetcode.plugin.bus.SecretKeyUpdateEvent;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
@@ -17,19 +22,26 @@ import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.WindowConstants;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.cef.browser.CefBrowser;
 import org.cef.handler.CefLoadHandlerAdapter;
 import org.cef.network.CefCookieManager;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author feigebuge
@@ -38,9 +50,12 @@ import java.util.Objects;
 @LCSubscriber(events = {ClearCacheEvent.class})
 public final class LoginService {
 
-    private final Project project;
-
     private static volatile LoginService instance;
+    private final Project project;
+    /**
+     * 只要用户的Cookie存在且合法, 插件就默认登录, 无需用户再次点击
+     */
+    private boolean loginFlag = Boolean.FALSE;
 
     private LoginService(Project project) {
         this.project = project;
@@ -70,8 +85,10 @@ public final class LoginService {
         try {
             jcefLoginWindow.start();
         } catch (Exception e) {
-            String msg = BundleUtils.i18nHelper("JCEF登录失败, 错误原因为: " + e.getMessage() + "\n请尝试重启idea, 否则系统将采用cookie登录",
-                    "JCEF login failed, the reason is: " + e.getMessage() + "\nPlease try to restart idea, otherwise the system will use cookie login");
+            String msg = BundleUtils.i18nHelper(
+                "JCEF登录失败, 错误原因为: " + e.getMessage() + "\n请尝试重启idea, 否则系统将采用cookie登录",
+                "JCEF login failed, the reason is: " + e.getMessage()
+                    + "\nPlease try to restart idea, otherwise the system will use cookie login");
             ConsoleUtils.getInstance(project).showInfo(msg);
             LogUtils.error("JCEF Login Failed, Start Cookie Login...", e);
             // 失败则启动 Cookie 登录
@@ -79,7 +96,7 @@ public final class LoginService {
         }
     }
 
-    public void doLoginAfter () {
+    public void doLoginAfter() {
         loginSuccessAfter(project, false);
     }
 
@@ -100,18 +117,14 @@ public final class LoginService {
         if (info) {
             LogUtils.info("登录成功, 正在查询数据...");
             // 此处不能弹出对话框, 因为对话框会凝固线程. 登录逻辑涉及不少多线程问题, 不适合弹框
-            ConsoleUtils.getInstance(Objects.requireNonNull(project)).showInfo(BundleUtils.i18nHelper("登录成功...", "Login Success..."), false);
+            ConsoleUtils.getInstance(Objects.requireNonNull(project))
+                .showInfo(BundleUtils.i18nHelper("登录成功...", "Login Success..."), false);
         }
         // post event
         LCEventBus.getInstance().post(new LoginEvent(project));
         // load data
         QuestionService.getInstance(project).loadAllQuestionData(project);
     }
-
-    /**
-     * 只要用户的Cookie存在且合法, 插件就默认登录, 无需用户再次点击
-     */
-    private boolean loginFlag = Boolean.FALSE;
 
     /**
      * 判断系统是否登录
@@ -135,8 +148,36 @@ public final class LoginService {
         return isPremium;
     }
 
+    // 清除本地登陆状态的标志位
+    @Subscribe
+    public void logoutEventListeners(LogoutEvent event) {
+        loginFlag = false;
+        LeetcodeClient.getInstance(project).clearCookies();
+    }
+
+    @Subscribe
+    public void secretUpdateEventListener(SecretKeyUpdateEvent event) {
+        // 重新加密登录cookie
+        LeetcodeClient instance = LeetcodeClient.getInstance(project);
+        // 从客户端中获取session
+        List<Cookie> leetcodeSession = instance.getLeetcodeSession();
+        for (Cookie cookie : leetcodeSession) {
+            // 不是bcc2, 该cookie就不是由Runner创建的, skip
+            if (!(cookie instanceof BasicClientCookie2)) {
+                continue;
+            }
+            if (cookie.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION)) {
+                // 重新加密存储
+                String value = cookie.getValue();
+                StoreService.getInstance(project).addEncryptCache(StoreService.LEETCODE_SESSION_KEY, value, true);
+            }
+        }
+    }
+
     abstract static class BasicWindow {
+
         protected Project project;
+
         //This is a constructor for the BasicWindow class that takes a Project object as a parameter
         public BasicWindow(Project project) {
             //This line assigns the parameter project to the instance variable project
@@ -177,11 +218,11 @@ public final class LoginService {
 
     class CookieLoginWindow extends BasicWindow {
 
-        private JPanel contentPane;
-        private JTextArea textArea;
         private final JButton loginButton;
         private final JButton cancelButton;
         private final JButton helpButton;
+        private JPanel contentPane;
+        private JTextArea textArea;
 
         public CookieLoginWindow(Project project) {
             super(project);
@@ -239,7 +280,8 @@ public final class LoginService {
             loginButton.addActionListener(e -> {
                 String text = textArea.getText();
                 if (text.isEmpty()) {
-                    ViewUtils.getDialogWrapper(contentPane, BundleUtils.i18nHelper("请输入你的cookie", "Please input your cookie"));
+                    ViewUtils.getDialogWrapper(contentPane,
+                        BundleUtils.i18nHelper("请输入你的cookie", "Please input your cookie"));
                     return;
                 }
                 LeetcodeClient instance = LeetcodeClient.getInstance(project);
@@ -248,23 +290,25 @@ public final class LoginService {
                     loginSuccessAfter(project);
                     frame.dispose();
                 } else {
-                    ViewUtils.getDialogWrapper(contentPane, BundleUtils.i18nHelper("Cookie错误, 请重试", "Cookie Error, Please Try Again"));
+                    ViewUtils.getDialogWrapper(contentPane,
+                        BundleUtils.i18nHelper("Cookie错误, 请重试", "Cookie Error, Please Try Again"));
                 }
             });
         }
 
         @Deprecated
         class HelpDialog extends DialogWrapper {
-            @Override
-            protected void init() {
-                super.init();
-                getPeer().getWindow().setSize(new Dimension(600, 500));
-            }
 
             protected HelpDialog(@Nullable Project project, boolean canBeParent) {
                 super(project, canBeParent);
                 init();
                 setTitle("Help");
+            }
+
+            @Override
+            protected void init() {
+                super.init();
+                getPeer().getWindow().setSize(new Dimension(600, 500));
             }
 
             @Override
@@ -321,7 +365,8 @@ public final class LoginService {
             // add cookie listener to check whether the target cookie exists when the page is loaded
             jbCefClient.addLoadHandler(new CefLoadHandlerAdapter() {
                 @Override
-                public void onLoadingStateChange(CefBrowser browser, boolean isLoading, boolean canGoBack, boolean canGoForward) {
+                public void onLoadingStateChange(CefBrowser browser, boolean isLoading, boolean canGoBack,
+                    boolean canGoForward) {
                     List<Cookie> cookieList = new ArrayList<>();
 
                     // visit all cookies
@@ -332,7 +377,8 @@ public final class LoginService {
                         }
                         if (count == total - 1) {
                             // login info exists!
-                            if (cookieList.stream().anyMatch(c -> c.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION))) {
+                            if (cookieList.stream()
+                                .anyMatch(c -> c.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION))) {
                                 LogUtils.simpleDebug("login info exists, do login success after...");
                                 try {
                                     // update cookies
@@ -341,7 +387,8 @@ public final class LoginService {
                                     LeetcodeClient.getInstance(project).setCookies(cookieList);
                                     loginSuccessAfter(project);
                                 } catch (Exception e) {
-                                    LogUtils.warn("something wrong when login success after...\n" + DebugUtils.getStackTraceAsString(e));
+                                    LogUtils.warn("something wrong when login success after...\n"
+                                        + DebugUtils.getStackTraceAsString(e));
                                 } finally {
                                     new Thread(() -> {
                                         try {
@@ -361,38 +408,12 @@ public final class LoginService {
                                 cookieList.clear();
                             }
                         }
-                            return Boolean.TRUE;
+                        return Boolean.TRUE;
                     });
                 }
             }, jbcebrowser.getCefBrowser());
 
             frame.add(jbcebrowser.getComponent(), BorderLayout.CENTER);
-        }
-    }
-
-    // 清除本地登陆状态的标志位
-    @Subscribe
-    public void logoutEventListeners(LogoutEvent event) {
-        loginFlag = false;
-        LeetcodeClient.getInstance(project).clearCookies();
-    }
-
-    @Subscribe
-    public void secretUpdateEventListener(SecretKeyUpdateEvent event) {
-        // 重新加密登录cookie
-        LeetcodeClient instance = LeetcodeClient.getInstance(project);
-        // 从客户端中获取session
-        List<Cookie> leetcodeSession = instance.getLeetcodeSession();
-        for (Cookie cookie : leetcodeSession) {
-            // 不是bcc2, 该cookie就不是由Runner创建的, skip
-            if (! (cookie instanceof BasicClientCookie2)) {
-                continue;
-            }
-            if (cookie.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION)) {
-                // 重新加密存储
-                String value = cookie.getValue();
-                StoreService.getInstance(project).addEncryptCache(StoreService.LEETCODE_SESSION_KEY, value, true);
-            }
         }
     }
 }

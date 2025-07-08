@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.VirtualFile;
  * @email 2508020102@qq.com
  */
 public class RePositionEvent {
+
     private String langType;
     private VirtualFile file;
     private String frontendQuestionId;

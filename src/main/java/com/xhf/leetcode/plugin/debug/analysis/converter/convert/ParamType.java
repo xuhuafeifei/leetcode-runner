@@ -8,7 +8,7 @@ public enum ParamType {
      * warn: 每一个recognized中的元素尽量不要出现在多个type类型中.
      * 举个例子
      * 类型LIST_STRING可识别的类型有: List<String>, List<str>
-     *    STRING_ARRAY可识别的类型有: String[], List<str>
+     * STRING_ARRAY可识别的类型有: String[], List<str>
      * 对于python来说, 因为没有数组的概念, 因此理论上List<str>既可以属于LIST_STRING, 也可以属于STRING_ARRAY
      * 但通过调用getByType方法, 只会返回其中一个类型, 而后续ConverterFactory将会通过ParamType生成对应的Convertor
      * <p>
@@ -26,9 +26,11 @@ public enum ParamType {
     CHAR("char", new String[]{"char"}, null),
     STRING("String", new String[]{"String", "str", "string"}, new StringConvertor()),
     INT_ARRAY("int_array", new String[]{"int[]", "List[int]", "vector<int>"}, new IntArrayConvertor()),
-    INT_MATRIX("int_matrix", new String[]{"int[][]", "List[List[int]]", "vector<vector<int>>"}, new IntMatrixConvertor()),
+    INT_MATRIX("int_matrix", new String[]{"int[][]", "List[List[int]]", "vector<vector<int>>"},
+        new IntMatrixConvertor()),
     String_ARRAY("String_array", new String[]{"String[]", "List[str]", "vector<string>"}, new StringArrayConvertor()),
-    String_MATRIX("String_matrix", new String[]{"String[][]", "List[List[str]]", "vector<vector<string>>"}, new StringMatrixConvertor()),
+    String_MATRIX("String_matrix", new String[]{"String[][]", "List[List[str]]", "vector<vector<string>>"},
+        new StringMatrixConvertor()),
     LIST_STRING("List_String", new String[]{"List<String>"}, new ListStringConvertor()),
     LIST_LIST_STRING("List_List_String", new String[]{"List<List<String>>"}, new ListListStringConvertor()),
     List_List_INTEGER("List_List_Integer", new String[]{"List<List<Integer>>"}, new ListListIntegerConvertor()),
@@ -57,14 +59,6 @@ public enum ParamType {
         this.convertor = convertor;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public String[] getRecognized() {
-        return recognized;
-    }
-
     /**
      * 通过类型返回ParamType
      */
@@ -78,6 +72,14 @@ public enum ParamType {
             }
         }
         return null;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String[] getRecognized() {
+        return recognized;
     }
 
     public VariableConvertor getConvertor() {

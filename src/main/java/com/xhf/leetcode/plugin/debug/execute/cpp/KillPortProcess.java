@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.debug.execute.cpp;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.UnSafe;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -32,7 +31,8 @@ public class KillPortProcess {
                 // 使用 taskkill 命令根据PID杀死进程
                 String killProcessCommand = "taskkill /PID " + pid + " /F";
                 Process killProcess = DebugUtils.buildProcess(killProcessCommand);
-                BufferedReader killReader = new BufferedReader(new InputStreamReader(killProcess.getInputStream(), "GBK"));
+                BufferedReader killReader = new BufferedReader(
+                    new InputStreamReader(killProcess.getInputStream(), "GBK"));
                 String killOutput;
                 while ((killOutput = killReader.readLine()) != null) {
                     System.out.println(killOutput);

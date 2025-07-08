@@ -10,7 +10,6 @@ import com.xhf.leetcode.plugin.review.backend.card.QuestionCardReq;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionFront;
 import com.xhf.leetcode.plugin.review.backend.database.DatabaseAdapter;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
-
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -19,13 +18,14 @@ import java.util.Map;
 
 /**
  * 每次实例化App后, 必须调用init()方法
+ *
  * @author 文艺倾年
  */
 public class AlgorithmApp {
 
     private static volatile AlgorithmApp instance;
-    private Map<Integer, QuestionCard> cards;
-    private DatabaseAdapter databaseAdapter;
+    private final Map<Integer, QuestionCard> cards;
+    private final DatabaseAdapter databaseAdapter;
 
     /**
      * 实例化 AlgorithmApp。在这里执行启动应用程序所需的重要步骤
@@ -34,6 +34,23 @@ public class AlgorithmApp {
         // 实例化 HashMap，用于存储从数据库加载的卡片
         this.cards = new HashMap<>();
         this.databaseAdapter = DatabaseAdapter.getInstance(project);
+    }
+
+    /**
+     * 获取类的实例
+     *
+     * @return 该类的实例
+     */
+    public static AlgorithmApp getInstance(Project project) {
+        if (instance == null) {
+            synchronized (AlgorithmApp.class) {
+                if (instance == null) {
+                    instance = new AlgorithmApp(project);
+                    instance.loadCards();
+                }
+            }
+        }
+        return instance;
     }
 
     /**
@@ -57,11 +74,11 @@ public class AlgorithmApp {
                     String strFront = resultSet.getString("front");
                     QuestionFront questionFront = GsonUtils.fromJson(strFront, QuestionFront.class);
                     QuestionCard card = new QuestionCard(
-                            resultSet.getInt("card_id"),
-                            questionFront,
-                            resultSet.getString("back"),
-                            resultSet.getLong("created"),
-                            resultSet.getLong("next_repetition")
+                        resultSet.getInt("card_id"),
+                        questionFront,
+                        resultSet.getString("back"),
+                        resultSet.getLong("created"),
+                        resultSet.getLong("next_repetition")
                     );
                     card.setNextReview(resultSet.getLong("next_repetition"));
                     this.cards.put(card.getId(), card);
@@ -75,23 +92,8 @@ public class AlgorithmApp {
     }
 
     /**
-     * 获取类的实例
-     * @return 该类的实例
-     */
-    public static AlgorithmApp getInstance(Project project) {
-        if (instance == null) {
-            synchronized (AlgorithmApp.class) {
-                if (instance == null) {
-                    instance = new AlgorithmApp(project);
-                    instance.loadCards();
-                }
-            }
-        }
-        return instance;
-    }
-
-    /**
      * 获取存储从数据库加载的卡片的 HashMap
+     *
      * @return 存储卡片的 HashMap，可以通过 ID 获取卡片
      */
     public Map<Integer, QuestionCard> getCards() {
@@ -101,6 +103,7 @@ public class AlgorithmApp {
 
     /**
      * 根据卡片ID获取卡片对象
+     *
      * @param id 卡片的ID
      * @return 加载的卡片对象
      */
@@ -120,14 +123,14 @@ public class AlgorithmApp {
         // 根据打分计算参数
         Integer rating = questionCardReq.getFsrsRating().toInt();
         FSRSAlgorithm algorithm = FSRSAlgorithm.builder()
-                .rating(FSRSRating.values()[rating])
-                .stability(0)
-                .difficulty(0)
-                .elapsedDays(0)
-                .repetitions(0)
-                .state(FSRSState.values()[0])
-                .lastReview(0)
-                .build();
+            .rating(FSRSRating.values()[rating])
+            .stability(0)
+            .difficulty(0)
+            .elapsedDays(0)
+            .repetitions(0)
+            .state(FSRSState.values()[0])
+            .lastReview(0)
+            .build();
         FSRSAlgorithmResult result = algorithm.calc();
         Long created = System.currentTimeMillis(); // 当前时间作为创建时间
 
@@ -136,8 +139,7 @@ public class AlgorithmApp {
         LogUtils.simpleDebug("[cards] 插入数据 SQL: " + insert);
 
         try (
-            PreparedStatement ps = this.databaseAdapter.getSqlite().prepare(insert))
-        {
+            PreparedStatement ps = this.databaseAdapter.getSqlite().prepare(insert)) {
             ps.setInt(1, id);
             ps.setString(2, strFront);
             ps.setString(3, back);

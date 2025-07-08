@@ -9,6 +9,11 @@ import com.xhf.leetcode.plugin.model.HttpRequest;
 import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import javax.security.auth.login.LoginException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -27,44 +32,42 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.security.auth.login.LoginException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class HttpClient {
 
-    private HttpClient() {}
+    private static final HttpClient instance = new HttpClient();
+    private final CookieStore cookieStore = new BasicCookieStore();
+    // private final CloseableHttpClient httpClient = HttpClients.createDefault();
+    // 更新为带宽松 cookie 策略的 httpClient, 解决leetcode平台返回的cookie, expire time无法识别的警告
+    private final CloseableHttpClient httpClient = HttpClientBuilder.create()
+        .setDefaultRequestConfig(RequestConfig.custom()
+            .setCookieSpec(CookieSpecs.STANDARD) // 使用宽松的 cookie 解析策略
+            .setConnectTimeout(3000) // 设置连接超时时间
+            .setSocketTimeout(2000) // 设置读取超时时间
+            .build())
+        .setDefaultCookieStore(cookieStore) // 使用自定义的 CookieStore
+        .build();
 
-    private static HttpClient instance = new HttpClient();
+    private HttpClient() {
+    }
 
     public static HttpClient getInstance() {
         return instance;
     }
 
-    private final CookieStore cookieStore = new BasicCookieStore();
-
-    // private final CloseableHttpClient httpClient = HttpClients.createDefault();
-    // 更新为带宽松 cookie 策略的 httpClient, 解决leetcode平台返回的cookie, expire time无法识别的警告
-    private final CloseableHttpClient httpClient = HttpClientBuilder.create()
-            .setDefaultRequestConfig(RequestConfig.custom()
-                    .setCookieSpec(CookieSpecs.STANDARD) // 使用宽松的 cookie 解析策略
-                    .setConnectTimeout(3000) // 设置连接超时时间
-                    .setSocketTimeout(2000) // 设置读取超时时间
-                    .build())
-            .setDefaultCookieStore(cookieStore) // 使用自定义的 CookieStore
-            .build();
-
-
     // 忘了之前为啥把这个方法deprecated了
     // @Deprecated
     public List<Cookie> getCookies() {
         return cookieStore.getCookies();
+    }
+
+    public void setCookies(List<Cookie> cookieList) {
+        for (Cookie cookie : cookieList) {
+            setCookie(cookie);
+        }
     }
 
     public void setCookie(Cookie cookie) {
@@ -136,13 +139,15 @@ public class HttpClient {
             return httpResponse;
         }
         if (StringUtils.equals(error, "User is not authenticated")) {
-             throw new LoginException(BundleUtils.i18nHelper("登录过期, 请重新登陆!", "Login expired, please login again!"));
+            throw new LoginException(
+                BundleUtils.i18nHelper("登录过期, 请重新登陆!", "Login expired, please login again!"));
         }
         return httpResponse;
     }
 
     /**
      * 添加请求头
+     *
      * @param request request
      */
     private void addHeaders(HttpRequestBase request) {
@@ -218,7 +223,9 @@ public class HttpClient {
                 LogUtils.info("response body: " + httpResponse.getBody());
             } else {
                 try {
-                    LogUtils.info("response body is too large. system will record part of it : " + httpResponse.getBody().substring(0, 1000));
+                    LogUtils.info(
+                        "response body is too large. system will record part of it : " + httpResponse.getBody()
+                            .substring(0, 1000));
                 } catch (Exception e) {
                     LogUtils.error("unknown error happened! ", e);
                 }
@@ -228,19 +235,13 @@ public class HttpClient {
         return httpResponse;
     }
 
-    public void setCookies(List<Cookie> cookieList) {
-        for (Cookie cookie : cookieList) {
-            setCookie(cookie);
-        }
-    }
-
     public void clearCookies() {
         cookieStore.clear();
     }
 
     public boolean containsCookie(String key) {
         return cookieStore.getCookies().stream()
-                .anyMatch(cookie -> cookie.getName().equals(key));
+            .anyMatch(cookie -> cookie.getName().equals(key));
     }
 
 }

@@ -8,7 +8,7 @@ import com.intellij.openapi.project.Project;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class CommandLineReader extends CommandReader{
+public class CommandLineReader extends CommandReader {
 
     public CommandLineReader(Project project) {
         super(project, ReadType.COMMAND_IN);

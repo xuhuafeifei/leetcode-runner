@@ -1,13 +1,12 @@
 package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
+import com.xhf.leetcode.plugin.debug.execute.AbstractInstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.debug.execute.AbstractInstExecutor;
 
 /**
  * @author feigebuge
@@ -17,8 +16,9 @@ public abstract class AbstractJavaInstExecutor extends AbstractInstExecutor {
 
     @Override
     public ExecuteResult execute(Instruction inst, ExecuteContext context) {
-        if (! (context instanceof Context) ) {
-            throw new DebugError("context must be instance of com.xhf.leetcode.plugin.debug.execute.java.Context in java executor");
+        if (!(context instanceof Context)) {
+            throw new DebugError(
+                "context must be instance of com.xhf.leetcode.plugin.debug.execute.java.Context in java executor");
         }
         Context ctx = (Context) context;
         if (ctx.getProject() == null) {
@@ -29,7 +29,7 @@ public abstract class AbstractJavaInstExecutor extends AbstractInstExecutor {
         if (ctx.getLocation() == null || ctx.getThread() == null || ctx.getSolutionLocation() == null) {
             ctx.getVm().resume();
             return ExecuteResult.success(Operation.NULL, "ctx核心数据为Location或Thread为NULL, resume targetVM." +
-                    "\nLocation = " + ctx.getLocation() + " Thread = " + ctx.getThread());
+                "\nLocation = " + ctx.getLocation() + " Thread = " + ctx.getThread());
         }
         return doExecute(inst, ctx);
     }

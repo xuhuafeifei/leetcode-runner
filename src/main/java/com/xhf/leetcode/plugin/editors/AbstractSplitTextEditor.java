@@ -1,7 +1,11 @@
 package com.xhf.leetcode.plugin.editors;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
@@ -13,13 +17,14 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
 import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
+import javax.swing.JComponent;
+import javax.swing.JTextPane;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * 抽象分割文本编辑器: 提供分屏显示功能. 当前版本主要用于CodeEditor 和 SolutionEditor的内容构建
@@ -28,6 +33,7 @@ import java.util.Map;
  * @email 2508020102@qq.com
  */
 public abstract class AbstractSplitTextEditor implements FileEditor {
+
     /**
      * idea核心工程对象
      */
@@ -69,15 +75,16 @@ public abstract class AbstractSplitTextEditor implements FileEditor {
      */
     protected final SplitEditorToolbar createToolbarWrapper(JComponent comp) {
         DefaultActionGroup actionGroup = new DefaultActionGroup(new AnAction(
-                BundleUtils.i18n("editor.split.close.problem"),
-                BundleUtils.i18n("editor.split.close.problem.desc"),
-                AllIcons.Actions.Close) {
+            BundleUtils.i18n("editor.split.close.problem"),
+            BundleUtils.i18n("editor.split.close.problem.desc"),
+            AllIcons.Actions.Close) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 closeSplitEditor();
             }
         });
-        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(BundleUtils.i18n("editor.split.toolbar.solution"), actionGroup, true);
+        ActionToolbar actionToolbar = ActionManager.getInstance()
+            .createActionToolbar(BundleUtils.i18n("editor.split.toolbar.solution"), actionGroup, true);
         actionToolbar.setTargetComponent(comp);
         return new SplitEditorToolbar(null, actionToolbar);
     }

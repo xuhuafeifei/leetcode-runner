@@ -1,8 +1,12 @@
 package com.xhf.leetcode.plugin.utils;
 
 import com.intellij.openapi.application.ApplicationManager;
-
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 任务执行中心
@@ -11,13 +15,17 @@ import java.util.concurrent.*;
  * @email 2508020102@qq.com
  */
 public class TaskCenter {
+
     // 创建线程池
-    private final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(4, 8, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10), new ThreadPoolExecutor.CallerRunsPolicy());
+    private final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(4, 8, 60, TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(10), new ThreadPoolExecutor.CallerRunsPolicy());
     // 单例
     private static volatile TaskCenter instance;
+
     private TaskCenter() {
 
     }
+
     public static TaskCenter getInstance() {
         if (instance == null) {
             synchronized (TaskCenter.class) {
@@ -31,6 +39,7 @@ public class TaskCenter {
 
 
     public interface Task<T> {
+
         /**
          * 异步运行task
          */
@@ -44,6 +53,7 @@ public class TaskCenter {
 
         /**
          * 运行task, 并获取task的返回值
+         *
          * @return T
          */
 
@@ -54,6 +64,7 @@ public class TaskCenter {
      * 抽象Task, 内部负责运行runnable, 没有返回值
      */
     public abstract static class AbstractTask implements Task<Void> {
+
         protected final Runnable runnable;
 
         public AbstractTask(Runnable runnable) {
@@ -66,6 +77,7 @@ public class TaskCenter {
      * 抽象FutureTask, 内部负责运行runnable, 有返回值
      */
     public abstract static class AbstractFutureTask<T> implements Task<T> {
+
         protected final Callable<T> callback;
 
         public AbstractFutureTask(Callable<T> callback) {
@@ -153,7 +165,6 @@ public class TaskCenter {
 
     /**
      * 同步的未来任务对象, 串行执行Task任务
-     * @param <T>
      */
     public static class SyncFutureTask<T> extends AbstractFutureTask<T> {
 
@@ -171,7 +182,7 @@ public class TaskCenter {
             try {
                 callback.call();
             } catch (Exception e) {
-               throw new RuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
 
@@ -187,7 +198,6 @@ public class TaskCenter {
 
     /**
      * 异步的未来任务对象, 异步执行Task任务
-     * @param <T>
      */
     public class AsyncFutureTask<T> extends AbstractFutureTask<T> {
 
@@ -324,6 +334,7 @@ public class TaskCenter {
 
     /**
      * 创建异步task任务, 并且任务将被提交到线程池
+     *
      * @param runnable runnable
      * @return Task
      */
@@ -346,9 +357,10 @@ public class TaskCenter {
 
     /**
      * 创建异步Future Task, 并且任务将被提交到线程池
+     *
      * @param callback callback
-     * @return Task
      * @param <T> T
+     * @return Task
      */
     public <T> Task<T> createFutureTask(Callable<T> callback) {
         return createFutureTask(callback, true);
@@ -368,6 +380,7 @@ public class TaskCenter {
 
     /**
      * 创建EDT Task, 并在EDT线程中执行
+     *
      * @param runnable runnable
      * @return Task
      */
@@ -377,9 +390,10 @@ public class TaskCenter {
 
     /**
      * 创建EDT Task, 并在EDT线程中执行, 返回对象支持获取数据
+     *
      * @param callback callback
-     * @return T
      * @param <T> T
+     * @return T
      */
     public <T> Task<T> createEDTFutureTask(Callable<T> callback) {
         return new EDTFutureTask<>(callback);

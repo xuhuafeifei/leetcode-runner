@@ -7,7 +7,11 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
-import com.xhf.leetcode.plugin.bus.*;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LCSubscriber;
+import com.xhf.leetcode.plugin.bus.LoginEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.listener.SubmissionListener;
@@ -21,12 +25,13 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import java.util.Map;
+import javax.swing.JComponent;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
 import org.apache.commons.collections.MapUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.util.Map;
 
 /**
  * 订阅login, clearCache, codeSubmit事件
@@ -47,7 +52,7 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
 
     @Override
     protected void initFirstComp() {
-        if (! LoginService.getInstance(project).isLogin()) {
+        if (!LoginService.getInstance(project).isLogin()) {
             JTextPane jTextPane = this.showNotingTextPane();
             jTextPane.setText(Constants.PLEASE_LOGIN);
             jbSplitter.setFirstComponent(jTextPane);
@@ -85,6 +90,7 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
 
     /**
      * submissionEditor通过获取submission_id, 从storeService中获取submission_detail, 并构建codeEditor
+     *
      * @param content submission_id
      */
     @Override
@@ -101,7 +107,7 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
             return;
         }
         SubmissionDetail submissionDetail = StoreService.getInstance(project).getCache(
-                MapUtils.getString(content, Constants.SUBMISSION_ID), SubmissionDetail.class
+            MapUtils.getString(content, Constants.SUBMISSION_ID), SubmissionDetail.class
         );
         if (submissionDetail == null) {
             LogUtils.error(BundleUtils.i18n("editor.submission.detail.null"));
@@ -115,22 +121,23 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
         centerPanel.addToCenter(createCodePanel(submissionDetail));
         // 如果提交结果不是Accepted，则显示错误信息
         boolean flag = submissionDetail.getStatusDisplay().equals("Accepted");
-        if (! flag) {
+        if (!flag) {
             centerPanel.addToTop(createErrorInfoPanel(submissionDetail));
         }
 
         BorderLayoutPanel secondComponent = JBUI.Panels.simplePanel(centerPanel);
         secondComponent.addToTop(createToolbarWrapper(centerPanel));
         // 如果有错误提交信息, 添加滚轮
-        if (! flag) {
+        if (!flag) {
             jbSplitter.setSecondComponent(new JBScrollPane(secondComponent));
-        }else {
+        } else {
             jbSplitter.setSecondComponent(secondComponent);
         }
     }
 
     /**
      * 创建codeEditor
+     *
      * @param submissionDetail 提交信息
      * @return CodeEditor
      */
@@ -146,6 +153,7 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
 
     /**
      * 创建错误信息editor
+     *
      * @param submissionDetail submission的信息
      * @return ErrorInfoEditor
      */

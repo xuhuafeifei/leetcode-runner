@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
  * @email 2508020102@qq.com
  */
 public class FocusTextEditorProvider implements AsyncFileEditorProvider, DumbAware {
+
     @Override
     public @NotNull Builder createEditorAsync(@NotNull Project project, @NotNull VirtualFile file) {
         return new Builder() {

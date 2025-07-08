@@ -5,54 +5,8 @@ package com.xhf.leetcode.plugin.review.backend.card;
  */
 public class Queue<ContentType> {
 
-    private class QueueNode {
-
-        private ContentType content = null;
-        private QueueNode nextNode = null;
-
-        /**
-         * 创建一个新的 QueueNode<ContentType> 对象。
-         * 内容通过参数设置，初始时下一个节点为空。
-         *
-         * @param pContent 节点的内容，类型为 ContentType
-         */
-        public QueueNode(ContentType pContent) {
-            content = pContent;
-            nextNode = null;
-        }
-
-        /**
-         * 设置下一个节点的引用。
-         *
-         * @param pNext 下一个节点
-         */
-        public void setNext(QueueNode pNext) {
-            nextNode = pNext;
-        }
-
-        /**
-         * 返回当前节点的下一个节点。
-         *
-         * @return 下一个节点，类型为 QueueNode
-         */
-        public QueueNode getNext() {
-            return nextNode;
-        }
-
-        /**
-         * 返回当前节点的内容。
-         *
-         * @return 节点的内容，类型为 ContentType
-         */
-        public ContentType getContent() {
-            return content;
-        }
-
-    }
-
     private QueueNode head;
     private QueueNode tail;
-
     /**
      * 创建一个空队列。
      * 队列中管理的对象必须是 ContentType 类型。
@@ -116,5 +70,50 @@ public class Queue<ContentType> {
         } else {
             return head.getContent();
         }
+    }
+
+    private class QueueNode {
+
+        private ContentType content = null;
+        private QueueNode nextNode = null;
+
+        /**
+         * 创建一个新的 QueueNode<ContentType> 对象。
+         * 内容通过参数设置，初始时下一个节点为空。
+         *
+         * @param pContent 节点的内容，类型为 ContentType
+         */
+        public QueueNode(ContentType pContent) {
+            content = pContent;
+            nextNode = null;
+        }
+
+        /**
+         * 返回当前节点的下一个节点。
+         *
+         * @return 下一个节点，类型为 QueueNode
+         */
+        public QueueNode getNext() {
+            return nextNode;
+        }
+
+        /**
+         * 设置下一个节点的引用。
+         *
+         * @param pNext 下一个节点
+         */
+        public void setNext(QueueNode pNext) {
+            nextNode = pNext;
+        }
+
+        /**
+         * 返回当前节点的内容。
+         *
+         * @return 节点的内容，类型为 ContentType
+         */
+        public ContentType getContent() {
+            return content;
+        }
+
     }
 }

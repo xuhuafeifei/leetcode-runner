@@ -1,10 +1,9 @@
 package com.xhf.leetcode.plugin.comp;
 
 import com.intellij.ui.components.JBList;
-
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.ListModel;
 
 public class MyList<T> extends JBList<T> {
 

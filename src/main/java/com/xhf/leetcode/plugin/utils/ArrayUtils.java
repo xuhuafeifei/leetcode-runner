@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.utils;
  * @email 2508020102@qq.com
  */
 public class ArrayUtils {
+
     public static int binarySearch(int[] arr, int target) {
         int lef = 0, rig = arr.length - 1, mid;
         while (lef <= rig) {

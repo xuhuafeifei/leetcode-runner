@@ -1,7 +1,10 @@
 package com.xhf.leetcode.plugin.utils;
 
-import com.google.gson.*;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +14,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class GsonUtils {
+
     private static final Gson gson = new Gson();
 
 
@@ -46,6 +50,7 @@ public class GsonUtils {
         JsonArray jsonArray = JsonParser.parseString(json).getAsJsonArray();
         return fromJsonArray(jsonArray, clazz);
     }
+
     public static <T> List<T> fromJsonArray(JsonArray jsonArray, Class<T> clazz) {
         Iterator<JsonElement> it = jsonArray.iterator();
         List<T> ans = new ArrayList<>();

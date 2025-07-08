@@ -1,6 +1,12 @@
 package com.xhf.leetcode.plugin.editors.text;
 
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ActionGroup;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.Separator;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
@@ -26,7 +32,11 @@ import com.xhf.leetcode.plugin.editors.SplitTextEditorWithPreview;
 import com.xhf.leetcode.plugin.editors.myeditor.MySplitEditorToolbar;
 import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
-import com.xhf.leetcode.plugin.model.*;
+import com.xhf.leetcode.plugin.model.CompetitionQuestion;
+import com.xhf.leetcode.plugin.model.DeepCodingInfo;
+import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
+import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
@@ -41,16 +51,22 @@ import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 import com.xhf.leetcode.plugin.window.deepcoding.Hot100Panel;
 import com.xhf.leetcode.plugin.window.deepcoding.Interview150Panel;
 import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Objects;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.ListModel;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class CustomTextEditor implements TextEditor {
+
     private final Editor editor;
     private final JPanel component;
     private final VirtualFile file;
@@ -70,7 +86,7 @@ public class CustomTextEditor implements TextEditor {
         editor = EditorFactory.getInstance().createEditor(document, project, file.getFileType(), false);
 
         EditorHighlighter highlighter = EditorHighlighterFactory.getInstance()
-                .createEditorHighlighter(project, file);
+            .createEditorHighlighter(project, file);
         ((EditorEx) editor).setHighlighter(highlighter);
 
         component = new JPanel(new BorderLayout());
@@ -98,8 +114,6 @@ public class CustomTextEditor implements TextEditor {
     private void showMasteryDialog() {
         new AbstractMasteryDialog(this.getComponent(), BundleUtils.i18nHelper("设置掌握程度", "set mastery level")) {
 
-            ;
-
             @Override
             protected void setConfirmButtonListener(JButton confirmButton, ButtonGroup group, JTextArea textArea) {
                 confirmButton.addActionListener(e -> {
@@ -121,7 +135,7 @@ public class CustomTextEditor implements TextEditor {
 
                     Question question = ViewUtils.getQuestionByVFile(file, project);
                     int id = Question.getIdx(question, project);
-                    
+
                     // 判断当前文件题目是否被包含
                     for (ReviewQuestion rq : allQuestions) {
                         if (rq.getId() == id) {
@@ -185,7 +199,8 @@ public class CustomTextEditor implements TextEditor {
         // 兼容悬浮窗显示+非悬浮窗显示
         // 如果flag = false, 不显示悬浮toolbar, 在CustomTextEditor显示
         if (!flag) {
-            ActionGroup action = (ActionGroup) ActionManager.getInstance().getAction("leetcode.plugin.editor.basic.group");
+            ActionGroup action = (ActionGroup) ActionManager.getInstance()
+                .getAction("leetcode.plugin.editor.basic.group");
             ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("custom_text_editor_toolbar",
                 // 如果actionGroup为空, 则不讲他添加到UI
                 actionGroup == null ?
@@ -204,13 +219,16 @@ public class CustomTextEditor implements TextEditor {
 
     /**
      * 创建deep coding 图标. 图标对应deep coding的不同模式入口
+     *
      * @param pattern pattern
      * @return AnAction
      */
     private AnAction createIcon(String pattern) {
         switch (pattern) {
             case Hot100Panel.HOT100:
-                return (new com.xhf.leetcode.plugin.actions.AbstractAction(BundleUtils.i18n("leetcode.hot.100"), BundleUtils.i18n("leetcode.hot.100"), IconLoader.getIcon("/icons/m_hot100.png", Hot100Panel.class)) {
+                return (new com.xhf.leetcode.plugin.actions.AbstractAction(BundleUtils.i18n("leetcode.hot.100"),
+                    BundleUtils.i18n("leetcode.hot.100"),
+                    IconLoader.getIcon("/icons/m_hot100.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
                         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
@@ -218,7 +236,9 @@ public class CustomTextEditor implements TextEditor {
 
                 });
             case Interview150Panel.INTER150:
-                return (new com.xhf.leetcode.plugin.actions.AbstractAction(BundleUtils.i18n("classic.interview.150"), BundleUtils.i18n("classic.interview.150"), IconLoader.getIcon("/icons/m_mianshi150.png", Hot100Panel.class)) {
+                return (new com.xhf.leetcode.plugin.actions.AbstractAction(BundleUtils.i18n("classic.interview.150"),
+                    BundleUtils.i18n("classic.interview.150"),
+                    IconLoader.getIcon("/icons/m_mianshi150.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
                         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
@@ -226,7 +246,9 @@ public class CustomTextEditor implements TextEditor {
 
                 });
             case LCCompetitionPanel.LC_COMPETITION:
-                return (new com.xhf.leetcode.plugin.actions.AbstractAction(BundleUtils.i18n("leetcode.competition"), BundleUtils.i18n("leetcode.competition"), IconLoader.getIcon("/icons/m_LeetCode_Cup.png", Hot100Panel.class)) {
+                return (new com.xhf.leetcode.plugin.actions.AbstractAction(BundleUtils.i18n("leetcode.competition"),
+                    BundleUtils.i18n("leetcode.competition"),
+                    IconLoader.getIcon("/icons/m_LeetCode_Cup.png", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
                         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
@@ -235,7 +257,8 @@ public class CustomTextEditor implements TextEditor {
                 });
             default:
                 LogUtils.warn("什么鬼? pattern 传了个啥? 系统不认识! pattern = " + pattern);
-                return new com.xhf.leetcode.plugin.actions.AbstractAction("Leetcode", "Leetcode", IconLoader.getIcon("/icons/pluginIcon.svg", Hot100Panel.class)) {
+                return new com.xhf.leetcode.plugin.actions.AbstractAction("Leetcode", "Leetcode",
+                    IconLoader.getIcon("/icons/pluginIcon.svg", Hot100Panel.class)) {
                     @Override
                     public void doActionPerformed(Project project, AnActionEvent e) {
                         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Leetcode Runner Setting");
@@ -247,10 +270,13 @@ public class CustomTextEditor implements TextEditor {
 
     /**
      * 创建下一题按钮
+     *
      * @return AnAction
      */
     private AnAction createNextAction() {
-        return new com.xhf.leetcode.plugin.actions.AbstractAction(BundleUtils.i18n("deep.coding.next"), BundleUtils.i18n("deep.coding.next"), IconLoader.getIcon("/icons/right.svg", SplitTextEditorWithPreview.class)) {
+        return new com.xhf.leetcode.plugin.actions.AbstractAction(BundleUtils.i18n("deep.coding.next"),
+            BundleUtils.i18n("deep.coding.next"),
+            IconLoader.getIcon("/icons/right.svg", SplitTextEditorWithPreview.class)) {
 
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
@@ -267,11 +293,13 @@ public class CustomTextEditor implements TextEditor {
                         doOpen(project, cFile, dci, true);
                     } catch (FileCreateError ex) {
                         LogUtils.error(ex);
-                        ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error"), true, true);
+                        ConsoleUtils.getInstance(project)
+                            .showError(BundleUtils.i18n("code.service.file.create.error"), true, true);
                     }
                 } catch (Exception ex) {
                     LogUtils.error(ex);
-                    Objects.requireNonNull(ConsoleUtils.getInstance(e.getProject())).showError("下一道题目打开错误! 错误原因 = " + ex.getMessage(), false, true);
+                    Objects.requireNonNull(ConsoleUtils.getInstance(e.getProject()))
+                        .showError("下一道题目打开错误! 错误原因 = " + ex.getMessage(), false, true);
                 }
             }
 
@@ -281,9 +309,11 @@ public class CustomTextEditor implements TextEditor {
     private MyList<Question> getData(DeepCodingInfo dci, Project project) {
         // 判断当前打开的是何种模式
         if (dci.getPattern().equals(Hot100Panel.HOT100)) {
-            return  LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_DEEP_CODING_HOT_100_QUESTION_LIST);
+            return LCToolWindowFactory.getDataContext(project)
+                .getData(DataKeys.LEETCODE_DEEP_CODING_HOT_100_QUESTION_LIST);
         } else if (dci.getPattern().equals(Interview150Panel.INTER150)) {
-            return  LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST);
+            return LCToolWindowFactory.getDataContext(project)
+                .getData(DataKeys.LEETCODE_DEEP_CODING_INTERVIEW_100_QUESTION_LIST);
         }
         return null;
     }
@@ -317,8 +347,9 @@ public class CustomTextEditor implements TextEditor {
 
          如果dci匹配成功, 则表示dci创建时和点击下一题按钮时的数据模型是一致的, 无需重定位
          */
-        if (! isMatch(curQ, CodeService.getInstance(project).parseTitleSlugFromVFile(cFile))) {
-            ConsoleUtils.getInstance(project).showWaringWithoutConsole("当前题目无法与显示数据匹配, 请重定位当前文件", false, true);
+        if (!isMatch(curQ, CodeService.getInstance(project).parseTitleSlugFromVFile(cFile))) {
+            ConsoleUtils.getInstance(project)
+                .showWaringWithoutConsole("当前题目无法与显示数据匹配, 请重定位当前文件", false, true);
             return;
         }
         // 显示下一道
@@ -328,12 +359,6 @@ public class CustomTextEditor implements TextEditor {
         CodeService.getInstance(project).openCodeEditor(nextQ.toQuestion(project), ndci);
         // 打开对应的界面
         LCEventBus.getInstance().post(new DeepCodingTabChooseEvent(dci.getPattern()));
-    }
-
-    static class DeepCodingQuestions {
-        DeepCodingQuestion curQ;
-        DeepCodingQuestion nextQ;
-        MyList<?> data;
     }
 
     private DeepCodingQuestions getDeepCodingQuestion(int idx, int nextIdx, DeepCodingInfo dci, Project project) {
@@ -349,9 +374,10 @@ public class CustomTextEditor implements TextEditor {
             }
             dcqs.data = data;
             return dcqs;
-        } else  {
+        } else {
             // 获取LC-Competition Question
-            var cq = LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_DEEP_CODING_LC_COMPETITION_QUESTION_LIST);
+            var cq = LCToolWindowFactory.getDataContext(project)
+                .getData(DataKeys.LEETCODE_DEEP_CODING_LC_COMPETITION_QUESTION_LIST);
             if (cq == null) {
                 throw new RuntimeException("data is null!");
             }
@@ -369,6 +395,7 @@ public class CustomTextEditor implements TextEditor {
 
     /**
      * 判断当前idx指向题目的titleSlug是否能和传入的titleSlug匹配
+     *
      * @param titleSlug titleSlug
      * @return boolean
      */
@@ -382,10 +409,12 @@ public class CustomTextEditor implements TextEditor {
 
     /**
      * 创建上一题按钮
+     *
      * @return AnAction
      */
     private AnAction createPreAction() {
-        return new AbstractAction(BundleUtils.i18n("deep.coding.pre"), BundleUtils.i18n("deep.coding.pre"), IconLoader.getIcon("/icons/left.svg", SplitTextEditorWithPreview.class)) {
+        return new AbstractAction(BundleUtils.i18n("deep.coding.pre"), BundleUtils.i18n("deep.coding.pre"),
+            IconLoader.getIcon("/icons/left.svg", SplitTextEditorWithPreview.class)) {
             @Override
             public void doActionPerformed(Project project, AnActionEvent e) {
                 try {
@@ -399,17 +428,18 @@ public class CustomTextEditor implements TextEditor {
                     doOpen(project, cFile, dci, false);
                 } catch (Exception ex) {
                     LogUtils.error(ex);
-                    String msg = BundleUtils.i18nHelper("上一道题目打开错误! 错误原因 = " + ex.getMessage(), "Previous question open error! Reason: " + ex.getMessage());
+                    String msg = BundleUtils.i18nHelper("上一道题目打开错误! 错误原因 = " + ex.getMessage(),
+                        "Previous question open error! Reason: " + ex.getMessage());
                     Objects.requireNonNull(ConsoleUtils.getInstance(e.getProject())).showError(msg, false, true);
                 } catch (FileCreateError ex) {
                     LogUtils.error(ex);
-                    ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error"), true, true);
+                    ConsoleUtils.getInstance(project)
+                        .showError(BundleUtils.i18n("code.service.file.create.error"), true, true);
                 }
             }
 
         };
     }
-
 
     // TextEditor 接口特有
     @Override
@@ -442,8 +472,13 @@ public class CustomTextEditor implements TextEditor {
         EditorFactory.getInstance().releaseEditor(editor);
     }
 
-    @Override public void selectNotify() {}
-    @Override public void deselectNotify() {}
+    @Override
+    public void selectNotify() {
+    }
+
+    @Override
+    public void deselectNotify() {
+    }
 
     @Override
     public void addPropertyChangeListener(@NotNull PropertyChangeListener listener) {
@@ -455,8 +490,15 @@ public class CustomTextEditor implements TextEditor {
 
     }
 
-    @Override public boolean isModified() { return false; }
-    @Override public boolean isValid() { return true; }
+    @Override
+    public boolean isModified() {
+        return false;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 
     @Override
     public boolean canNavigateTo(@NotNull Navigatable navigatable) {
@@ -485,10 +527,18 @@ public class CustomTextEditor implements TextEditor {
 
     /**
      * 别删除, 返回null. 否则无法适配低版本IntelliJ IDEA
+     *
      * @return null
      */
     @Override
     public @Nullable FileEditorLocation getCurrentLocation() {
         return null;
+    }
+
+    static class DeepCodingQuestions {
+
+        DeepCodingQuestion curQ;
+        DeepCodingQuestion nextQ;
+        MyList<?> data;
     }
 }

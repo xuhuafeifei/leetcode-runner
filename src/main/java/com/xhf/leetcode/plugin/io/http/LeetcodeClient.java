@@ -13,19 +13,35 @@ import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.http.utils.HttpClient;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
-import com.xhf.leetcode.plugin.model.*;
+import com.xhf.leetcode.plugin.model.Article;
+import com.xhf.leetcode.plugin.model.CalendarSubmitRecord;
+import com.xhf.leetcode.plugin.model.GraphqlReqBody;
+import com.xhf.leetcode.plugin.model.HttpRequest;
+import com.xhf.leetcode.plugin.model.HttpResponse;
+import com.xhf.leetcode.plugin.model.LeetcodeUserProfile;
+import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.model.RunCode;
+import com.xhf.leetcode.plugin.model.RunCodeResult;
+import com.xhf.leetcode.plugin.model.Solution;
+import com.xhf.leetcode.plugin.model.Submission;
+import com.xhf.leetcode.plugin.model.SubmissionDetail;
+import com.xhf.leetcode.plugin.model.SubmitCodeResult;
+import com.xhf.leetcode.plugin.model.TodayRecord;
+import com.xhf.leetcode.plugin.model.UserCalendar;
+import com.xhf.leetcode.plugin.model.UserContestRanking;
+import com.xhf.leetcode.plugin.model.UserProgressQuestionList;
+import com.xhf.leetcode.plugin.model.UserQuestionProgress;
+import com.xhf.leetcode.plugin.model.UserStatus;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.groovy.util.Maps;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author feigebuge
@@ -35,15 +51,18 @@ import java.util.List;
 @LCSubscriber(events = {ClearCacheEvent.class, CodeSubmitEvent.class})
 public class LeetcodeClient {
 
-    private Project project;
-    private final HttpClient httpClient;
-    private UserStatus userStatus;
     private static boolean first = true;
     private static volatile LeetcodeClient instance;
+    private final HttpClient httpClient;
+    UserCalendar userCalendar;
+    private Project project;
+    private UserStatus userStatus;
     private LeetcodeUserProfile leetcodeUserProfile = null;
     private UserQuestionProgress userQuestionProgress;
     private UserContestRanking userContestRanking;
     private UserProgressQuestionList userProgressQuestionList;
+    // second cache
+    private List<Question> ql;
 
     private LeetcodeClient(Project project) {
         this.project = project;
@@ -52,27 +71,17 @@ public class LeetcodeClient {
         LCEventBus.getInstance().register(this);
     }
 
-    @Subscribe
-    public void clearCacheListener(ClearCacheEvent event) {
-        clearCookies();
-        ql = null;
-    }
 
-    private void loadCache(Project project) {
-        StoreService storeService = StoreService.getInstance(project);
-        String LEETCODE_SESSION = storeService.getCacheJson(StoreService.LEETCODE_SESSION_KEY);
-        if (LEETCODE_SESSION == null) {
-            return;
-        }
-        // load cookie
-        this.setCookie(new BasicClientCookie2(LeetcodeApiUtils.LEETCODE_SESSION, LEETCODE_SESSION), false);
-        // load question
-        this.loadQuestionCache();
+    // this method used for test
+    @Deprecated
+    private LeetcodeClient() {
+        httpClient = HttpClient.getInstance();
     }
-
 
     public static LeetcodeClient getInstance(Project project) {
-        if (instance != null) return instance;
+        if (instance != null) {
+            return instance;
+        }
         synchronized (LeetcodeClient.class) {
             if (instance == null) {
                 instance = new LeetcodeClient(project);
@@ -80,13 +89,6 @@ public class LeetcodeClient {
             }
         }
         return instance;
-    }
-
-
-    // this method used for test
-    @Deprecated
-    private LeetcodeClient() {
-        httpClient = HttpClient.getInstance();
     }
 
     @Deprecated // this method used for test
@@ -113,6 +115,23 @@ public class LeetcodeClient {
         }
     }
 
+    @Subscribe
+    public void clearCacheListener(ClearCacheEvent event) {
+        clearCookies();
+        ql = null;
+    }
+
+    private void loadCache(Project project) {
+        StoreService storeService = StoreService.getInstance(project);
+        String LEETCODE_SESSION = storeService.getCacheJson(StoreService.LEETCODE_SESSION_KEY);
+        if (LEETCODE_SESSION == null) {
+            return;
+        }
+        // load cookie
+        this.setCookie(new BasicClientCookie2(LeetcodeApiUtils.LEETCODE_SESSION, LEETCODE_SESSION), false);
+        // load question
+        this.loadQuestionCache();
+    }
 
     private void setCookie(Cookie cookie, boolean needCache) {
         if (cookie.getName().equals(LeetcodeApiUtils.LEETCODE_SESSION)) {
@@ -127,7 +146,6 @@ public class LeetcodeClient {
 
     /**
      * set and persist cookie if cookie name equals to LEETCODE_SESSION, which represent the user info
-     * @param cookie
      */
     public void setCookie(Cookie cookie) {
         setCookie(cookie, true);
@@ -141,11 +159,12 @@ public class LeetcodeClient {
 
     /**
      * 判断登录状态
+     *
      * @return boolean
      */
     public boolean isLogin() {
         UserStatus userStatus = queryUserStatus();
-        if(userStatus == null) {
+        if (userStatus == null) {
             return false;
         }
         return userStatus.getIsSignedIn();
@@ -156,7 +175,7 @@ public class LeetcodeClient {
      */
     public boolean isPremium() {
         UserStatus userStatus = queryUserStatus();
-        if(userStatus == null) {
+        if (userStatus == null) {
             return false;
         }
         return userStatus.getIsPremium();
@@ -164,11 +183,12 @@ public class LeetcodeClient {
 
     /**
      * 查询用户状态信息
+     *
      * @return UserStatus
      */
     public UserStatus queryUserStatus() {
         // check LEETCODE_SESSION
-        if (! httpClient.containsCookie(LeetcodeApiUtils.LEETCODE_SESSION)) {
+        if (!httpClient.containsCookie(LeetcodeApiUtils.LEETCODE_SESSION)) {
             return null;
         }
 
@@ -183,10 +203,10 @@ public class LeetcodeClient {
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_STATUS_QUERY);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -210,13 +230,12 @@ public class LeetcodeClient {
         String url = LeetcodeApiUtils.getLeetcodeReqUrl();
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .addJsonBody("username", username)
-                .addJsonBody("password", password)
-                .build();
+            .addJsonBody("username", username)
+            .addJsonBody("password", password)
+            .build();
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
         return httpResponse.getStatusCode() == 200 ? Boolean.TRUE : Boolean.FALSE;
     }
-
 
     public boolean updateQuestionStatusByFqid(String fqid, boolean correctAnswer) {
         if (ql == null) {
@@ -227,7 +246,7 @@ public class LeetcodeClient {
                 String status = question.getStatus();
                 if (correctAnswer) {
                     question.setStatus("AC");
-                }else if (status.equals("NOT_STARTED")) {
+                } else if (status.equals("NOT_STARTED")) {
                     question.setStatus("TRIED");
                 }
                 return true;
@@ -282,17 +301,17 @@ public class LeetcodeClient {
         int skip = 0, limit = 100;
         while (flag) {
             GraphqlReqBody.SearchParams params = new GraphqlReqBody.SearchParams.ParamsBuilder()
-                    .setCategorySlug("all-code-essentials")
-                    .setLimit(limit)
-                    .setSkip(skip)
-                    .build();
+                .setCategorySlug("all-code-essentials")
+                .setLimit(limit)
+                .setSkip(skip)
+                .build();
             body.setBySearchParams(params);
 
             HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                    .setBody(body.toJsonStr())
-                    .setContentType("application/json")
-                    .addBasicHeader()
-                    .build();
+                .setBody(body.toJsonStr())
+                .setContentType("application/json")
+                .addBasicHeader()
+                .build();
 
             HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
             String resp = httpResponse.getBody();
@@ -302,7 +321,7 @@ public class LeetcodeClient {
             JsonObject pql = jsonObject.getAsJsonObject("data").getAsJsonObject("problemsetQuestionList");
 
             // no questions left
-            if (! pql.get("hasMore").getAsBoolean()) {
+            if (!pql.get("hasMore").getAsBoolean()) {
                 flag = false;
             }
             // parse json array
@@ -318,9 +337,6 @@ public class LeetcodeClient {
         return ans;
     }
 
-    // second cache
-    private List<Question> ql;
-
     private List<Question> loadQuestionCache() {
         if (ql == null) {
             // if the second cache is null, search the first cache
@@ -330,7 +346,7 @@ public class LeetcodeClient {
             }
             ql = GsonUtils.fromJsonToList(questionListJson, Question.class);
             return ql;
-        }else {
+        } else {
             return ql;
         }
     }
@@ -346,10 +362,10 @@ public class LeetcodeClient {
         body.setBySearchParams(params);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -358,8 +374,8 @@ public class LeetcodeClient {
         // parse json to array
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
         JsonArray jsonArray = jsonObject.getAsJsonObject("data")
-                .getAsJsonObject("problemsetQuestionList")
-                .getAsJsonArray("questions");
+            .getAsJsonObject("problemsetQuestionList")
+            .getAsJsonArray("questions");
 
         return GsonUtils.fromJsonArray(jsonArray, Question.class);
     }
@@ -372,7 +388,6 @@ public class LeetcodeClient {
      * query question info, which contains more info such as code snippets, translated content, etc.
      * <p>
      * more important, title slug is required, if not, the code will throw exception
-     *
      */
     public String queryQuestionInfoJson(GraphqlReqBody.SearchParams params) {
         if (StringUtils.isBlank(params.getTitleSlug())) {
@@ -385,10 +400,10 @@ public class LeetcodeClient {
         body.setBySearchParams(params);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         return httpClient.executePost(httpRequest, project).getBody();
     }
@@ -416,10 +431,10 @@ public class LeetcodeClient {
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.QUESTION_OF_TODAY_QUERY);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -454,15 +469,14 @@ public class LeetcodeClient {
 
     /**
      * run code by leetcode platform
-     *
      */
     public RunCodeResult runCode(RunCode runCodeModel) {
         /* check params */
-        if (StringUtils.isBlank(runCodeModel.getQuestionId())||
-                StringUtils.isBlank(runCodeModel.getLang())||
-                StringUtils.isBlank(runCodeModel.getDataInput())||
-                StringUtils.isBlank(runCodeModel.getTypeCode())||
-                StringUtils.isBlank(runCodeModel.getTitleSlug())
+        if (StringUtils.isBlank(runCodeModel.getQuestionId()) ||
+            StringUtils.isBlank(runCodeModel.getLang()) ||
+            StringUtils.isBlank(runCodeModel.getDataInput()) ||
+            StringUtils.isBlank(runCodeModel.getTypeCode()) ||
+            StringUtils.isBlank(runCodeModel.getTitleSlug())
         ) {
             throw new RuntimeException("missing params " + runCodeModel);
         }
@@ -470,11 +484,11 @@ public class LeetcodeClient {
         String url = LeetcodeApiUtils.getRunCodeUrl(runCodeModel.getTitleSlug());
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(GsonUtils.toJsonStr(runCodeModel))
-                .addHeader("Accept", "application/json")
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(GsonUtils.toJsonStr(runCodeModel))
+            .addHeader("Accept", "application/json")
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -487,16 +501,15 @@ public class LeetcodeClient {
         return GsonUtils.fromJson(resp, RunCodeResult.class);
     }
 
-
     /**
      * submit code
      */
     public SubmitCodeResult submitCode(RunCode runCodeModel) {
         /* check params */
-        if (StringUtils.isBlank(runCodeModel.getQuestionId())||
-                StringUtils.isBlank(runCodeModel.getLang())||
-                StringUtils.isBlank(runCodeModel.getTypeCode())||
-                StringUtils.isBlank(runCodeModel.getTitleSlug())
+        if (StringUtils.isBlank(runCodeModel.getQuestionId()) ||
+            StringUtils.isBlank(runCodeModel.getLang()) ||
+            StringUtils.isBlank(runCodeModel.getTypeCode()) ||
+            StringUtils.isBlank(runCodeModel.getTitleSlug())
         ) {
             throw new RuntimeException("missing params " + runCodeModel);
         }
@@ -504,11 +517,11 @@ public class LeetcodeClient {
         String url = LeetcodeApiUtils.getSubmitCodeUrl(runCodeModel.getTitleSlug());
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(GsonUtils.toJsonStr(runCodeModel))
-                .addHeader("Accept", "application/json")
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(GsonUtils.toJsonStr(runCodeModel))
+            .addHeader("Accept", "application/json")
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -540,7 +553,7 @@ public class LeetcodeClient {
         持续调用checkLeetcodeReady方法, 如果该方法返回false, 则表示数据还未完成准备
         循环调用, 直到Leetcode服务端将数据准备完成
          */
-        while (! checkLeetcodeReady(httpResponse)) {
+        while (!checkLeetcodeReady(httpResponse)) {
             httpResponse = httpClient.executeGet(httpRequest, project);
         }
 
@@ -567,11 +580,8 @@ public class LeetcodeClient {
         // 判断字段个数, 目前为止, 大于1就意味着数据准备完成
         // todo:? 大于1, 就一定意味着数据准备完成吗?
         int size = jsonObject.asMap().size();
-        if (size > 2) {
-            // 保险点, 大于2就认为返回的是真是的数据
-            return true;
-        }
-        return false;
+        // 保险点, 大于2就认为返回的是真是的数据
+        return size > 2;
     }
 
     public List<Solution> querySolutionList(String questionSlug) {
@@ -580,18 +590,18 @@ public class LeetcodeClient {
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SOLUTION_LIST_QUERY);
         // build by params
         body.setBySearchParams(new GraphqlReqBody.SearchParams.ParamsBuilder()
-                .setQuestionSlug(questionSlug)
-                .setSkip(0)
-                .setFirst(50)
-                .setOrderBy("DEFAULT")
-                .build()
+            .setQuestionSlug(questionSlug)
+            .setSkip(0)
+            .setFirst(50)
+            .setOrderBy("DEFAULT")
+            .build()
         );
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -600,8 +610,8 @@ public class LeetcodeClient {
         // parse json to array
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
         JsonArray jsonArray = jsonObject.getAsJsonObject("data")
-                .getAsJsonObject("questionSolutionArticles")
-                .getAsJsonArray("edges");
+            .getAsJsonObject("questionSolutionArticles")
+            .getAsJsonArray("edges");
 
         List<Solution> res = new ArrayList<>(15);
         for (JsonElement element : jsonArray) {
@@ -620,10 +630,10 @@ public class LeetcodeClient {
         body.addVariable("slug", solutionSlug);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -632,13 +642,13 @@ public class LeetcodeClient {
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
 
         return jsonObject.getAsJsonObject("data")
-                .getAsJsonObject("solutionArticle")
-                .get("content")
-                .getAsString();
+            .getAsJsonObject("solutionArticle")
+            .get("content")
+            .getAsString();
     }
 
     public List<Submission> getSubmissionList(String slug) {
-          String url = LeetcodeApiUtils.getLeetcodeReqUrl();
+        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SUBMISSION_LIST_QUERY);
         body.addVariable("questionSlug", slug);
@@ -646,10 +656,10 @@ public class LeetcodeClient {
         body.addVariable("limit", 50);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -658,8 +668,8 @@ public class LeetcodeClient {
         JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
 
         JsonArray jsonArray = jsonObject.getAsJsonObject("data")
-                .getAsJsonObject("submissionList")
-                .getAsJsonArray("submissions");
+            .getAsJsonObject("submissionList")
+            .getAsJsonArray("submissions");
 
         return GsonUtils.fromJsonArray(jsonArray, Submission.class);
     }
@@ -688,10 +698,10 @@ public class LeetcodeClient {
         body.addVariable("submissionId", submissionId);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -713,10 +723,10 @@ public class LeetcodeClient {
         body.addVariable("uuid", uuid);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
 
@@ -733,14 +743,15 @@ public class LeetcodeClient {
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.CALENDAR_SUBMIT_RECORD_QUERY);
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
         String resp = httpResponse.getBody();
-        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject().get("calendarSubmitRecord");
+        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
+            .get("calendarSubmitRecord");
 
         return GsonUtils.fromJson(jsonElement, CalendarSubmitRecord.class);
     }
@@ -763,10 +774,10 @@ public class LeetcodeClient {
         body.addVariable("userSlug", queryUserStatus().getUserSlug());
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
         String resp = httpResponse.getBody();
@@ -790,10 +801,10 @@ public class LeetcodeClient {
         body.addVariable("userSlug", queryUserStatus().getUserSlug());
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
         String resp = httpResponse.getBody();
@@ -805,7 +816,6 @@ public class LeetcodeClient {
 
     /**
      * 查询用户竞赛分数以及排名, 还是得做二级缓存
-     * @return
      */
     public UserContestRanking queryUserContestRanking() {
         if (userContestRanking != null) {
@@ -833,7 +843,6 @@ public class LeetcodeClient {
 
     /**
      * 查询用户问题提交历史记录. 这个不做缓存, 因为每隔一段时间, 数据信息都会变化
-     * @return
      */
     public UserProgressQuestionList queryUserProgressQuestionList() {
         if (userProgressQuestionList != null) {
@@ -846,10 +855,10 @@ public class LeetcodeClient {
         body.addVariable("filters", Maps.of("limit", 20, "skip", 0));
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
         String resp = httpResponse.getBody();
@@ -858,8 +867,6 @@ public class LeetcodeClient {
         userProgressQuestionList = GsonUtils.fromJson(jsonElement, UserProgressQuestionList.class);
         return userProgressQuestionList;
     }
-
-    UserCalendar userCalendar;
 
     public UserCalendar queryUserCalendar() {
         if (userCalendar != null) {
@@ -871,10 +878,10 @@ public class LeetcodeClient {
         body.addVariable("userSlug", queryUserStatus().getUserSlug());
 
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
+            .setBody(body.toJsonStr())
+            .setContentType("application/json")
+            .addBasicHeader()
+            .build();
 
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
         String resp = httpResponse.getBody();

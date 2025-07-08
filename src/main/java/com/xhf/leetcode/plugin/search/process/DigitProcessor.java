@@ -9,6 +9,7 @@ import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
  * @email 2508020102@qq.com
  */
 public class DigitProcessor implements Processor {
+
     private final StringBuilder sb;
 
     public DigitProcessor() {
@@ -48,8 +49,8 @@ public class DigitProcessor implements Processor {
      * 枚举给定 StringBuilder 中的所有连续子串，并直接添加到 Context 中。
      * 考虑到该方法会被频繁调用, 因此内部采用StringBuilder进行优化
      *
-     * @param sb   包含要处理的数字字符串的 StringBuilder
-     * @param ctx  上下文对象，用于添加生成的标记
+     * @param sb 包含要处理的数字字符串的 StringBuilder
+     * @param ctx 上下文对象，用于添加生成的标记
      */
     public void enumerateSubstrings(StringBuilder sb, Context ctx) {
         int length = sb.length();

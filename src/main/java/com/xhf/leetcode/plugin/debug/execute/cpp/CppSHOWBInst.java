@@ -4,16 +4,16 @@ import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbArray;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbElement;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class CppSHOWBInst extends AbstractCppInstExecutor {
+
     @Override
     protected String getGdbCommand(@NotNull Instruction inst, CppContext pCtx) {
         return "-break-list";
@@ -24,8 +24,9 @@ public class CppSHOWBInst extends AbstractCppInstExecutor {
         var cppGdbInfo = super.getCppGdbInfo(r);
         // gdb执行没有错误
         if (super.handleError(r, cppGdbInfo)) {
-            GdbElement gdbElement =  this.gdbParser.parse(cppGdbInfo.getResultRecord());
-            GdbArray body = gdbElement.getAsGdbObject().get("BreakpointTable").getAsGdbObject().get("body").getAsGdbArray();
+            GdbElement gdbElement = this.gdbParser.parse(cppGdbInfo.getResultRecord());
+            GdbArray body = gdbElement.getAsGdbObject().get("BreakpointTable").getAsGdbObject().get("body")
+                .getAsGdbArray();
             StringBuilder sb = new StringBuilder();
             if (body.size() == 0) {
                 sb.append("No breakpoints");

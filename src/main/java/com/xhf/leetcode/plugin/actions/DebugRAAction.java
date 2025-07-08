@@ -34,8 +34,9 @@ public class DebugRAAction extends AbstractAction {
         if (DebugManager.getInstance(project).isDebug()) {
             // 写指令到阻塞队列中
             boolean flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.RBA, ""));
-            if (! flag) {
-                ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
+            if (!flag) {
+                ConsoleUtils.getInstance(project)
+                    .showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
             }
         } else {
             DebugUtils.removeCurrentVFileAllBreakpoint(project);

@@ -8,7 +8,6 @@ import com.intellij.openapi.util.IconLoader;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.TodayIconStatusEnum;
-import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -58,11 +57,11 @@ public class TodayQuestionAction extends AbstractAction {
             // 获取当日连击次数
             String cnt = instance.getTodayQuestionCount();
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction") + " " +
-                    BundleUtils.i18nHelper("坚持了" + cnt + "天", " Streak for " + cnt + " days")
+                BundleUtils.i18nHelper("坚持了" + cnt + "天", " Streak for " + cnt + " days")
             );
 
             instance.modified();
-        } else if (instance.todayQuestionSolved() == TodayIconStatusEnum.NOT_SOLVED){
+        } else if (instance.todayQuestionSolved() == TodayIconStatusEnum.NOT_SOLVED) {
             presentation.setIcon(IconLoader.getIcon("/icons/daily.svg", this.getClass()));
             presentation.setText(BundleUtils.i18n("action.leetcode.plugin.TodayQuestionAction"));
             instance.modified();

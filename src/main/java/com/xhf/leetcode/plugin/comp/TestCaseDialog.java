@@ -6,10 +6,15 @@ import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.FlowLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
 
 /**
  * @author feigebuge
@@ -18,10 +23,10 @@ import java.awt.*;
 public class TestCaseDialog extends DialogWrapper {
 
     private final String dataInput;
-    private JTextArea textArea;
     // java file path, which is used for a key in cache
     private final String path;
     private final Project project;
+    private JTextArea textArea;
 
     public TestCaseDialog(String dataInput, String path, Project project) {
         super(true);
@@ -62,14 +67,13 @@ public class TestCaseDialog extends DialogWrapper {
             // get default data
             LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
             if (lc == null) {
-                ViewUtils.getDialogWrapper( BundleUtils.i18n("comp.leetcode.testcase.fetch.failed"));
+                ViewUtils.getDialogWrapper(BundleUtils.i18n("comp.leetcode.testcase.fetch.failed"));
                 return;
             }
             String defaultTestcases = lc.getDefaultTestcases();
             textArea.setText(defaultTestcases);
         });
         buttonPanel.add(resetButton);
-
 
         JButton okButton = new JButton(BundleUtils.i18n("action.leetcode.plugin.ok"));
         okButton.addActionListener(e -> doOKAction());
@@ -89,7 +93,7 @@ public class TestCaseDialog extends DialogWrapper {
         // update data
         LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
         if (lc == null) {
-            ViewUtils.getDialogWrapper( BundleUtils.i18n("comp.leetcode.testcase.set.failed"));
+            ViewUtils.getDialogWrapper(BundleUtils.i18n("comp.leetcode.testcase.set.failed"));
             return;
         }
         lc.setExampleTestcases(inputText);

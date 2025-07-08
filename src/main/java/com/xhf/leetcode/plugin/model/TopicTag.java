@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.model;
  * @email 2508020102@qq.com
  */
 public class TopicTag {
+
     private String id;
     private String name;
     private String slug;

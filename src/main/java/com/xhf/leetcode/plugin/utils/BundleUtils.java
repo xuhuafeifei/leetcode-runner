@@ -2,15 +2,15 @@ package com.xhf.leetcode.plugin.utils;
 
 import com.xhf.leetcode.plugin.model.I18nTypeEnum;
 import com.xhf.leetcode.plugin.setting.AppSettings;
+import java.util.ResourceBundle;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.PropertyKey;
-
-import java.util.ResourceBundle;
 
 /**
  * @author 文艺倾年
  */
 public class BundleUtils {
+
     @NonNls
     public static final String I18N = "messages/info";
     private static volatile ResourceBundle bundle;

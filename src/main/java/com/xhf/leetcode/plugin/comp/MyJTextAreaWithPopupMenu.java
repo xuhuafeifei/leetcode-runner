@@ -1,18 +1,21 @@
 package com.xhf.leetcode.plugin.comp;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.JPopupMenu;
+import javax.swing.JTextArea;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class MyJTextAreaWithPopupMenu extends JTextArea {
+
     protected JPopupMenu popupMenu;
+
     public MyJTextAreaWithPopupMenu() {
         popupMenu = new JPopupMenu();
         // 添加鼠标监听器

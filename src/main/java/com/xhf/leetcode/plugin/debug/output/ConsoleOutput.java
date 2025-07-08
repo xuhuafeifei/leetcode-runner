@@ -9,7 +9,7 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class ConsoleOutput extends IOOutput{
+public class ConsoleOutput extends IOOutput {
 
     private final ConsoleUtils console;
 

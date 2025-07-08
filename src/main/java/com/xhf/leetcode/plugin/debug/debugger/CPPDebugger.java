@@ -10,7 +10,12 @@ import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.CppDebugEnv;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.execute.cpp.*;
+import com.xhf.leetcode.plugin.debug.execute.cpp.AbstractCppInstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.cpp.CppBInst;
+import com.xhf.leetcode.plugin.debug.execute.cpp.CppClient;
+import com.xhf.leetcode.plugin.debug.execute.cpp.CppContext;
+import com.xhf.leetcode.plugin.debug.execute.cpp.CppInstFactory;
+import com.xhf.leetcode.plugin.debug.execute.cpp.KillPortProcess;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.CppGdbInfo;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbElement;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbParser;
@@ -22,11 +27,14 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.*;
-import org.jetbrains.annotations.NotNull;
-
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.GsonUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.OSHandler;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import java.util.List;
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author feigebuge
@@ -54,7 +62,7 @@ public class CPPDebugger extends AbstractDebugger {
     public void start() {
         this.env = new CppDebugEnv(project);
         boolean flag = super.envPrepare(env);
-        if (! flag) {
+        if (!flag) {
             return;
         }
         // 需要开启新线程, 否则指令读取操作会阻塞idea渲染UI的主线程
@@ -112,7 +120,9 @@ public class CPPDebugger extends AbstractDebugger {
             CppGdbInfo cppGdbInfo = GsonUtils.fromJson(r.getMoreInfo(), CppGdbInfo.class);
             // 异常判断
             if (cppGdbInfo == null) {
-                DebugUtils.simpleDebug(BundleUtils.i18nHelper("cpp debug出现异常, 终止debug", "some error happen in cpp debug, the flow will stop soon"), project, ConsoleViewContentType.ERROR_OUTPUT, true);
+                DebugUtils.simpleDebug(BundleUtils.i18nHelper("cpp debug出现异常, 终止debug",
+                        "some error happen in cpp debug, the flow will stop soon"), project,
+                    ConsoleViewContentType.ERROR_OUTPUT, true);
                 DebugManager.getInstance(project).stopDebugger();
                 return;
             }
@@ -125,7 +135,7 @@ public class CPPDebugger extends AbstractDebugger {
                     if (reason != null) {
                         String output = reason.getAsGdbPrimitive().getAsString();
                         // 不是因为breakpoint终止, 那么就是GDB完成运行或者出现异常, 需要停止debug
-                        if (! "breakpoint-hit".equals(output)) {
+                        if (!"breakpoint-hit".equals(output)) {
                             DebugManager.getInstance(project).stopDebugger();
                         }
                     }
@@ -145,7 +155,7 @@ public class CPPDebugger extends AbstractDebugger {
         // ui读取模式下, 初始化断点
         if (AppSettings.getInstance().isUIReader()) {
             uiBreakpointInit();
-        }else {
+        } else {
             commandBreakpointInit();
         }
     }
@@ -191,7 +201,7 @@ public class CPPDebugger extends AbstractDebugger {
 
         String cmd = sb.toString();
         // 如果是mac/linux, 先修改权限, 添加执行权限
-        if (! OSHandler.isWin()) {
+        if (!OSHandler.isWin()) {
             cmd = "chmod 744 " + serverMainExePath + " && " + cmd;
         }
 
@@ -201,7 +211,8 @@ public class CPPDebugger extends AbstractDebugger {
             this.exec = OSHandler.buildProcess(cmd);
             DebugUtils.printProcess(exec, true, project);
         } catch (Exception e) {
-            throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed") + "\n" + e.getCause() + "\n" + BundleUtils.i18n("debug.leetcode.instruction") + " = " + cmd);
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed") + "\n" + e.getCause() + "\n"
+                + BundleUtils.i18n("debug.leetcode.instruction") + " = " + cmd);
         }
 
         // 五次检测连接(3s还连接不上, 挂了)

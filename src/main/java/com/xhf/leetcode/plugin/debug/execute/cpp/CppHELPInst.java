@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
  * @email 2508020102@qq.com
  */
 public class CppHELPInst extends AbstractCppInstExecutor {
+
     @Override
     protected ExecuteResult doExecute(Instruction inst, CppContext pCtx, String gdbCommand) {
         return ExecuteResult.success(inst.getOperation(), Constants.HELP_INFO);

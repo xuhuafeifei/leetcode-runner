@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.utils;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -12,6 +11,7 @@ import java.util.Date;
  * @email 2508020102@qq.com
  */
 public class LogUtils {
+
     private static final Logger IDEA_LOGGER = Logger.getInstance(LogUtils.class);
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -51,6 +51,7 @@ public class LogUtils {
     private static void consoleLog(String message, String info) {
         System.out.print(formatLogMessage(message, info, 3));
     }
+
     public static void info(String message) {
         IDEA_LOGGER.info(message);
         consoleLog(message, "INFO");
@@ -69,7 +70,8 @@ public class LogUtils {
     private static void simpleConsoleLog(String message, String level) {
         // 获取当前时间
         String timestamp = DATE_FORMAT.format(new Date());
-        String formatted = String.format("%s [%s] [%s] %s", timestamp, Thread.currentThread().getName(), level, message);
+        String formatted = String.format("%s [%s] [%s] %s", timestamp, Thread.currentThread().getName(), level,
+            message);
         System.out.println(formatted);
         IDEA_LOGGER.debug(formatted);
     }

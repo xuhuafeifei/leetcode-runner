@@ -32,11 +32,13 @@ public class DebugSTEP_OUTAction extends AbstractAction {
         // 写指令到阻塞队列中
         boolean flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.STEP, "out"));
         if (!flag) {
-            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
+            ConsoleUtils.getInstance(project)
+                .showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
         }
         flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, ""));
         if (!flag) {
-            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
+            ConsoleUtils.getInstance(project)
+                .showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
         }
     }
 

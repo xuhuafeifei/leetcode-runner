@@ -11,7 +11,11 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
-import com.xhf.leetcode.plugin.bus.*;
+import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.RePositionEvent;
+import com.xhf.leetcode.plugin.bus.TimeStopEvent;
+import com.xhf.leetcode.plugin.bus.TodayQuestionOkEvent;
 import com.xhf.leetcode.plugin.comp.TestCaseDialog;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.AnalysisResult;
 import com.xhf.leetcode.plugin.debug.analysis.analyzer.JavaCodeAnalyzer;
@@ -24,16 +28,23 @@ import com.xhf.leetcode.plugin.io.console.utils.ConsoleDialog;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
-import com.xhf.leetcode.plugin.model.*;
+import com.xhf.leetcode.plugin.model.BaseCodeResult;
+import com.xhf.leetcode.plugin.model.DeepCodingInfo;
+import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.model.Question;
+import com.xhf.leetcode.plugin.model.RunCode;
+import com.xhf.leetcode.plugin.model.RunCodeResult;
+import com.xhf.leetcode.plugin.model.SubmitCodeResult;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.setting.LanguageConvertor;
-import com.xhf.leetcode.plugin.utils.*;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.Safe;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
+import com.xhf.leetcode.plugin.utils.UnSafe;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.TimerWindow;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,12 +52,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class CodeService {
+
     public static String DIR = "temp";
 
     // 单例
@@ -76,7 +91,7 @@ public class CodeService {
      */
     public void openCodeEditor(Question question) throws FileCreateError {
         // 判断题目是否付费，以及用户VIP身份
-        if(question.getIsPaidOnly() && !LoginService.getInstance(project).isPremium()) {
+        if (question.getIsPaidOnly() && !LoginService.getInstance(project).isPremium()) {
             ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("vip.question"), false, true);
             return;
         }
@@ -97,6 +112,7 @@ public class CodeService {
 
     /**
      * deep coding 模式 创建代码
+     *
      * @param question question
      * @param deepCodingInfo dci
      */
@@ -116,7 +132,8 @@ public class CodeService {
         });
     }
 
-    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question, @Nullable DeepCodingInfo deepCodingInfo) throws FileCreateError {
+    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question,
+        @Nullable DeepCodingInfo deepCodingInfo) throws FileCreateError {
         String codeFilePath = createCodeFile(question);
         analysisAndCreateFile(question);
 
@@ -143,7 +160,8 @@ public class CodeService {
      * @param fileLangType 文件代表的语言类型
      * @return 文件存储路径
      */
-    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question, @Nullable DeepCodingInfo deepCodingInfo, String fileLangType) throws FileCreateError {
+    private String storeLeetcodeEditorAndGetStorePath(@NotNull Question question,
+        @Nullable DeepCodingInfo deepCodingInfo, String fileLangType) throws FileCreateError {
         AppSettings app = AppSettings.getInstance();
         String reposition = app.getReposition();
         String fileName = question.getFileName();
@@ -154,14 +172,17 @@ public class CodeService {
         } else {
             LangType langType = LangType.getType(app.getLangType());
             if (langType == null) {
-                LogUtils.error(BundleUtils.i18n("leetcode.status.unknown") + " langType! langType = " + app.getLangType());
+                LogUtils.error(
+                    BundleUtils.i18n("leetcode.status.unknown") + " langType! langType = " + app.getLangType());
                 fileName = fileName + app.getFileTypeSuffix();
             } else {
                 if (LanguageConvertor.isEqual(reposition, AppSettings.REPOSITION_DEFAULT)) {
                     langType = LangType.getType(fileLangType);
                     if (langType == null) {
-                        String msg = BundleUtils.i18nHelper("当前打开文件代表的fileLangType无法识别! fileLangType = " + fileLangType,
-                                "Current file represents the fileLangType cannot be recognized! fileLangType = " + fileLangType);
+                        String msg = BundleUtils.i18nHelper(
+                            "当前打开文件代表的fileLangType无法识别! fileLangType = " + fileLangType,
+                            "Current file represents the fileLangType cannot be recognized! fileLangType = "
+                                + fileLangType);
                         LogUtils.error(msg);
                         // event 传入的文件langType有问题, 回退到系统默认文件后缀
                         fileName = fileName + app.getFileTypeSuffix();
@@ -171,7 +192,9 @@ public class CodeService {
                 } else if (LanguageConvertor.isEqual(reposition, AppSettings.REPOSITION_SETTING)) {
                     fileName = fileName + langType.getSuffix();
                 } else {
-                    LogUtils.error(BundleUtils.i18n("leetcode.status.unknown") + " reposition! reposition = " + reposition + "\n" + AppSettings.getInstance().toString());
+                    LogUtils.error(
+                        BundleUtils.i18n("leetcode.status.unknown") + " reposition! reposition = " + reposition + "\n"
+                            + AppSettings.getInstance().toString());
                     fileName = fileName + app.getFileTypeSuffix();
                 }
             }
@@ -195,6 +218,7 @@ public class CodeService {
     /**
      * 分析代码, 同时创建文件
      * 主要服务于包含ListNode, TreeNode的题目
+     *
      * @param question question
      */
     private void analysisAndCreateFile(Question question) {
@@ -212,19 +236,23 @@ public class CodeService {
             case JAVA:
                 AnalysisResult a1 = new JavaCodeAnalyzer(project).analyze(codeSnippets);
                 if (contains(a1, "ListNode")) {
-                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/java/ListNode.java")), "ListNode.java");
+                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/java/ListNode.java")),
+                        "ListNode.java");
                 }
                 if (contains(a1, "TreeNode")) {
-                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/java/TreeNode.java")), "TreeNode.java");
+                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/java/TreeNode.java")),
+                        "TreeNode.java");
                 }
                 return;
             case PYTHON3:
                 AnalysisResult a2 = new PythonCodeAnalyzer(project).analyze(codeSnippets);
                 if (contains(a2, "ListNode")) {
-                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/python/ListNode.py")), "ListNode.py");
+                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/python/ListNode.py")),
+                        "ListNode.py");
                 }
                 if (contains(a2, "TreeNode")) {
-                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/python/TreeNode.py")), "TreeNode.py");
+                    createCodeFile(FileUtils.readContentFromFile(getClass().getResource("/debug/python/TreeNode.py")),
+                        "TreeNode.py");
                 }
                 return;
             default:
@@ -255,7 +283,8 @@ public class CodeService {
         openCodeEditor(file, codeFilePath);
     }
 
-    public void reOpenCodeEditor(Question question, VirtualFile file, String langType, DeepCodingInfo deepCodingInfo) throws FileCreateError {
+    public void reOpenCodeEditor(Question question, VirtualFile file, String langType, DeepCodingInfo deepCodingInfo)
+        throws FileCreateError {
         QuestionService.getInstance(project).fillQuestion(question, project);
 
         // restore
@@ -298,9 +327,9 @@ public class CodeService {
     private String createContentFile(Question question) {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)
-                .append("content")
-                .append(question.getFileName() + ".md")
-                .build();
+            .append("content")
+            .append(question.getFileName() + ".md")
+            .build();
 
         try {
             if (FileUtils.fileExists(filePath)) {
@@ -324,9 +353,9 @@ public class CodeService {
     private String createCodeFile(String content, String fileName) {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)
-                // .append("temp")
-                .append(fileName)
-                .build();
+            // .append("temp")
+            .append(fileName)
+            .build();
 
         try {
             FileUtils.createAndWriteFile(filePath, content);
@@ -341,9 +370,9 @@ public class CodeService {
     private String createCodeFile(Question question) throws FileCreateError {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)
-                // .append("temp")
-                .append(getCodeFileName(question))
-                .build();
+            // .append("temp")
+            .append(getCodeFileName(question))
+            .build();
 
         try {
             if (FileUtils.fileExists(filePath)) {
@@ -360,8 +389,8 @@ public class CodeService {
     private String createCodeFile(Question question, String fileName) throws FileCreateError {
         String filePath = AppSettings.getInstance().getFilePath();
         filePath = new FileUtils.PathBuilder(filePath)
-                .append(fileName)
-                .build();
+            .append(fileName)
+            .build();
 
         try {
             if (FileUtils.fileExists(filePath)) {
@@ -377,6 +406,7 @@ public class CodeService {
 
     /**
      * 通过question创建文件名
+     *
      * @param question question
      * @return 获取文件名
      */
@@ -386,6 +416,7 @@ public class CodeService {
 
     /**
      * 通过文件名称反解析question.fid
+     *
      * @param filePath 打开的虚拟文件的路径
      * @return frontedQuestionId
      */
@@ -397,6 +428,7 @@ public class CodeService {
 
     /**
      * 通过vFile反解析question.fid
+     *
      * @param file idea打开的虚拟文件
      * @return frontedQuestionId
      */
@@ -407,6 +439,7 @@ public class CodeService {
 
     /**
      * 通过文件名称反解析question.titleSlug
+     *
      * @param filePath 打开的虚拟文件的路径
      * @return 解析出titleSlug
      */
@@ -418,6 +451,7 @@ public class CodeService {
 
     /**
      * 通过vFile反解析question.titleSlug
+     *
      * @param file idea打开的虚拟文件
      * @return 解析titleSlug
      */
@@ -428,6 +462,7 @@ public class CodeService {
 
     /**
      * 通过文件名反解析question的langType
+     *
      * @param filePath 打开的虚拟文件的路径
      */
     private String parseLangType(String filePath) {
@@ -438,6 +473,7 @@ public class CodeService {
 
     /**
      * 通过vFile反解析langType
+     *
      * @param file idea打开的虚拟文件
      * @return langType
      */
@@ -449,6 +485,7 @@ public class CodeService {
 
     /**
      * 通过当前打开的vFile 反解析langType
+     *
      * @param project project
      * @return langType
      */
@@ -456,7 +493,7 @@ public class CodeService {
     public String parseLangTypeFromCVFile(Project project) {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
-            ViewUtils.getDialogWrapper( BundleUtils.i18n("code.service.no.file.open"));
+            ViewUtils.getDialogWrapper(BundleUtils.i18n("code.service.no.file.open"));
             return null;
         }
         return parseLangTypeFromVFile(cFile);
@@ -499,35 +536,41 @@ public class CodeService {
         if (lc == null) {
             String msg = BundleUtils.i18n("code.service.no.leetcode.editor.open");
             ConsoleUtils.getInstance(project).showWaring(
-                    msg,
-                    false,
-                    true,
-                    msg,
-                    BundleUtils.i18n("action.leetcode.unknown.error"),
-                    ConsoleDialog.ERROR
+                msg,
+                false,
+                true,
+                msg,
+                BundleUtils.i18n("action.leetcode.unknown.error"),
+                ConsoleDialog.ERROR
             );
             return;
         }
         RunCode runCode = buildRunCode(lc, codeContent);
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, BundleUtils.i18n("action.leetcode.plugin.editor.RunCodeAction"), false){
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                // todo: 记得删除
-                LogUtils.simpleDebug("run code: " + runCode);
-                RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(runCode);
-                // todo: 记得删除
-                LogUtils.simpleDebug("rcr = " + rcr);
-                // show it
-                AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(runCode.getDataInput(), rcr, project);
-                boolean correctAnswer = rcrb.isCorrectAnswer();
-                if (correctAnswer) {
-                    ConsoleUtils.getInstance(project).showInfo(rcrb.build(), true, true, BundleUtils.i18n("leetcode.status.ac"), BundleUtils.i18n("leetcode.result"), ConsoleDialog.INFO);
-                } else {
-                    ConsoleUtils.getInstance(project).showInfo(rcrb.build(), true, true, "Oh No! " + BundleUtils.i18n("leetcode.status.notac"), BundleUtils.i18n("leetcode.result"), ConsoleDialog.ERROR);
+        ProgressManager.getInstance().run(
+            new Task.Backgroundable(project, BundleUtils.i18n("action.leetcode.plugin.editor.RunCodeAction"), false) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    // todo: 记得删除
+                    LogUtils.simpleDebug("run code: " + runCode);
+                    RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(runCode);
+                    // todo: 记得删除
+                    LogUtils.simpleDebug("rcr = " + rcr);
+                    // show it
+                    AbstractResultBuilder<RunCodeResult> rcrb = createRunCodeResultBuilder(runCode.getDataInput(), rcr,
+                        project);
+                    boolean correctAnswer = rcrb.isCorrectAnswer();
+                    if (correctAnswer) {
+                        ConsoleUtils.getInstance(project)
+                            .showInfo(rcrb.build(), true, true, BundleUtils.i18n("leetcode.status.ac"),
+                                BundleUtils.i18n("leetcode.result"), ConsoleDialog.INFO);
+                    } else {
+                        ConsoleUtils.getInstance(project)
+                            .showInfo(rcrb.build(), true, true, "Oh No! " + BundleUtils.i18n("leetcode.status.notac"),
+                                BundleUtils.i18n("leetcode.result"), ConsoleDialog.ERROR);
+                    }
                 }
-            }
-        });
+            });
     }
 
     public void submitCode() {
@@ -541,12 +584,12 @@ public class CodeService {
         if (lc == null) {
             String msg = BundleUtils.i18n("code.service.no.leetcode.editor.open");
             ConsoleUtils.getInstance(project).showWaring(
-                    msg,
-                    false,
-                    true,
-                    msg,
-                    BundleUtils.i18n("leetcode.error"),
-                    ConsoleDialog.ERROR
+                msg,
+                false,
+                true,
+                msg,
+                BundleUtils.i18n("leetcode.error"),
+                ConsoleDialog.ERROR
             );
             return;
         }
@@ -554,45 +597,49 @@ public class CodeService {
         // build run code
         RunCode runCode = buildRunCode(lc, codeContent);
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, BundleUtils.i18n("action.leetcode.plugin.editor.SubmitCodeAction"), false){
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(runCode);
-                // show it
-                AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr, project);
-                boolean correctAnswer = scrb.isCorrectAnswer();
-                if (correctAnswer) {
-                    String todaySlug = StoreService.getInstance(project)
-                        .getCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, String.class);
-                    if (StringUtils.isNotBlank(todaySlug) && todaySlug.equals(runCode.getTitleSlug())) {
-                        // 延迟两秒发送事件, 异步刷新. 放置跟新太快导致查询到Leetcode的老数据
-                        // todo: 延迟刷新会不会存在问题? 需要测试
-                        TaskCenter.getInstance().createTask(() -> {
-                            try {
-                                Thread.sleep(2000);
-                            } catch (InterruptedException ignored) {
-                            }
-                            // 通知
-                            LCEventBus.getInstance().post(new TodayQuestionOkEvent());
-                        }).invokeLater();
+        ProgressManager.getInstance().run(
+            new Task.Backgroundable(project, BundleUtils.i18n("action.leetcode.plugin.editor.SubmitCodeAction"),
+                false) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(runCode);
+                    // show it
+                    AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr, project);
+                    boolean correctAnswer = scrb.isCorrectAnswer();
+                    if (correctAnswer) {
+                        String todaySlug = StoreService.getInstance(project)
+                            .getCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, String.class);
+                        if (StringUtils.isNotBlank(todaySlug) && todaySlug.equals(runCode.getTitleSlug())) {
+                            // 延迟两秒发送事件, 异步刷新. 放置跟新太快导致查询到Leetcode的老数据
+                            // todo: 延迟刷新会不会存在问题? 需要测试
+                            TaskCenter.getInstance().createTask(() -> {
+                                try {
+                                    Thread.sleep(2000);
+                                } catch (InterruptedException ignored) {
+                                }
+                                // 通知
+                                LCEventBus.getInstance().post(new TodayQuestionOkEvent());
+                            }).invokeLater();
+                        }
+                        ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("leetcode.status.ac"), true, true,
+                            BundleUtils.i18n("leetcode.status.ac"), BundleUtils.i18n("leetcode.result"),
+                            ConsoleDialog.INFO);
+                    } else {
+                        ConsoleUtils.getInstance(project)
+                            .showInfo(BundleUtils.i18n("leetcode.status.notac"), true, true,
+                                "Oh No! " + BundleUtils.i18n("leetcode.status.notac"),
+                                BundleUtils.i18n("leetcode.result"),
+                                ConsoleDialog.INFO);
                     }
-                    ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("leetcode.status.ac"), true, true,
-                        BundleUtils.i18n("leetcode.status.ac"), BundleUtils.i18n("leetcode.result"),
-                        ConsoleDialog.INFO);
-                } else {
-                    ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("leetcode.status.notac"), true, true,
-                        "Oh No! " + BundleUtils.i18n("leetcode.status.notac"), BundleUtils.i18n("leetcode.result"),
-                        ConsoleDialog.INFO);
-                }
 
-                ConsoleUtils.getInstance(project).showInfo(scrb.build());
-                // update question
-                QuestionService.getInstance(project)
-                    .updateQuestionStatusByFqid(project, runCode.getFrontendQuestionId(), scrb.isCorrectAnswer());
-                // post
-                LCEventBus.getInstance().post(new CodeSubmitEvent(project));
-            }
-        });
+                    ConsoleUtils.getInstance(project).showInfo(scrb.build());
+                    // update question
+                    QuestionService.getInstance(project)
+                        .updateQuestionStatusByFqid(project, runCode.getFrontendQuestionId(), scrb.isCorrectAnswer());
+                    // post
+                    LCEventBus.getInstance().post(new CodeSubmitEvent(project));
+                }
+            });
     }
 
     /**
@@ -601,7 +648,7 @@ public class CodeService {
     public void rePosition() {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
-            ViewUtils.getDialogWrapper( BundleUtils.i18n("code.service.no.file.open"));
+            ViewUtils.getDialogWrapper(BundleUtils.i18n("code.service.no.file.open"));
             return;
         }
         String filePath = ViewUtils.getUnifyFilePathByVFile(cFile);
@@ -627,21 +674,21 @@ public class CodeService {
         // 获取当前打开文件的语言类型
         String langType = parseLangTypeFromVFile(cFile);
         if (fid == null || titleSlug == null) {
-            ViewUtils.getDialogWrapper( BundleUtils.i18n("code.service.not.support.reposition"));
+            ViewUtils.getDialogWrapper(BundleUtils.i18n("code.service.not.support.reposition"));
             return;
         }
-        if (! LangType.contains(langType)) {
+        if (!LangType.contains(langType)) {
             String msg = BundleUtils.i18nHelper("当前文件类型不支持. 你的文件类型是 = " + langType
                     + "\n"
                     + "支持的文件类型是 : " + LangType.getAllLangType() + "\n"
                     + "请移除当前文件并重新选择问题",
-                    "Unsupported File Type. Your File Type is = " + langType
+                "Unsupported File Type. Your File Type is = " + langType
                     + "\n"
                     + "Supported File Types are : " + LangType.getAllLangType() + "\n"
                     + "Please Remove Current File And Reselect Question"
                     + "\n"
-                    );
-            ViewUtils.getDialogWrapper( msg);
+            );
+            ViewUtils.getDialogWrapper(msg);
             return;
         }
         // 遍历myList
@@ -652,12 +699,11 @@ public class CodeService {
      * 获取默认代码, 并写入当前打开文件
      * <p>
      * 该方法会通过当前打开的文件解析出fid和titleSlug, 并且根据这两个值获取默认代码
-     *
      */
     public void getDefaultContent() {
         VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
         if (cFile == null) {
-            ViewUtils.getDialogWrapper( BundleUtils.i18n("code.service.no.file.open"));
+            ViewUtils.getDialogWrapper(BundleUtils.i18n("code.service.no.file.open"));
             return;
         }
         String titleSlug = parseTitleSlugFromVFile(cFile);
@@ -666,33 +712,32 @@ public class CodeService {
         String settingLangType = AppSettings.getInstance().getLangType();
 
         // 文件所代表的code类型
-        if (! LangType.contains(langType)) {
+        if (!LangType.contains(langType)) {
             String msg = BundleUtils.i18nHelper(
-                    "当前代码文件类型无法识别." +
+                "当前代码文件类型无法识别." +
                     " \r\n" +
                     "插件将从插件设置中加载代码类型.\r\n你的代码文件类型 = " + langType +
                     "\r\n设置的语言类型 = " + settingLangType,
-                   "current code file type can not be identified." +
+                "current code file type can not be identified." +
                     "\r\n" +
                     "plugin will load content type from your plugin setting.\r\nyour code file type = " + langType +
                     "Setting LangType = " + settingLangType
             );
-            ViewUtils.getDialogWrapper( msg);
-        }
-        else if (! LangType.equals(langType, settingLangType)) {
+            ViewUtils.getDialogWrapper(msg);
+        } else if (!LangType.equals(langType, settingLangType)) {
             String msg = BundleUtils.i18nHelper(
-                    "你确定要加载插件设置中的代码类型? " + "\r\n" +
+                "你确定要加载插件设置中的代码类型? " + "\r\n" +
                     "你的代码文件类型 = " + langType + "\r\n" +
                     "设置的语言类型 = " + settingLangType + "\r\n"
-                    ,
-                    "Are you sure to load content from setting?" + "\r\n" +
+                ,
+                "Are you sure to load content from setting?" + "\r\n" +
                     "Your code file type = " + langType + "\r\n" +
                     "Setting LangType = " + settingLangType + "\r\n"
             );
 
             int result = ViewUtils.getDialogWrapper(
-                    msg,
-                    BundleUtils.i18n("code.service.load.default.title")
+                msg,
+                BundleUtils.i18n("code.service.load.default.title")
             ).getExitCode();
 
             if (result == DialogWrapper.OK_EXIT_CODE) {
@@ -711,18 +756,227 @@ public class CodeService {
             boolean flag = ViewUtils.writeContentToVFile(cFile, defaultCode);
             if (flag) {
                 String msg = BundleUtils.i18nHelper("加载默认代码成功!", "load default content success!");
-                ViewUtils.getDialogWrapper( msg);
-            }else {
+                ViewUtils.getDialogWrapper(msg);
+            } else {
                 String msg = BundleUtils.i18nHelper("加载默认代码失败!", "load default content error!");
-                ViewUtils.getDialogWrapper( msg);
+                ViewUtils.getDialogWrapper(msg);
             }
 
         } else {
-            String msg = BundleUtils.i18nHelper("未找到题目信息, 重定位失败!", "question not found, reposition failed!");
-            ViewUtils.getDialogWrapper( msg + titleSlug);
+            String msg = BundleUtils.i18nHelper("未找到题目信息, 重定位失败!",
+                "question not found, reposition failed!");
+            ViewUtils.getDialogWrapper(msg + titleSlug);
         }
     }
 
+    /**
+     * 创建负责输出RunCode结果的类
+     *
+     * @param dataInput 输入测试案例
+     * @param cr RunCode结果, 来自于leetcode platform
+     * @return 返回builder, 用于build创建string, 输出到LCConsole
+     */
+    private AbstractResultBuilder<RunCodeResult> createRunCodeResultBuilder(String dataInput, RunCodeResult cr,
+        Project project) {
+        return new AbstractResultBuilder<>(cr, project) {
+            @Override
+            protected void createBody() {
+                String totalTestcases = cr.getTotalTestcases();
+                if (StringUtils.isBlank(totalTestcases)) {
+                    return;
+                }
+                int total = Integer.parseInt(totalTestcases);
+                for (int i = 0; i < total; i++) {
+                    sb.append(splitter).append(BundleUtils.i18nHelper("测试案例 ", "test case ")).append(i + 1)
+                        .append(": ").append(cr.getCompareResult().charAt(i) == '1' ? "✅" : "❌").append(splitter)
+                        .append("\n");
+                    // extract std_output
+                    extractStdoutput(i);
+                    // extract input
+                    extractInput(i, total);
+                    // extract answer
+                    extractAnswer(i);
+                    // extract expected answer
+                    extractExpectedAnswer(i);
+                }
+            }
+
+            private void extractExpectedAnswer(int i) {
+                List<String> expectedCodeAnswer = cr.getExpectedCodeAnswer();
+                if (i >= expectedCodeAnswer.size()) {
+                    return;
+                }
+
+                sb.append(BundleUtils.i18nHelper("期待的答案:", "expected answer:")).append("\n");
+                sb.append(expectedCodeAnswer.get(i)).append("\n");
+            }
+
+            private void extractAnswer(int i) {
+                List<String> codeAnswer = cr.getCodeAnswer();
+                if (i >= codeAnswer.size()) {
+                    return;
+                }
+
+                sb.append(BundleUtils.i18nHelper("运行结果:", "result:")).append("\n");
+                sb.append(codeAnswer.get(i)).append("\n");
+            }
+
+            private void extractStdoutput(int i) {
+                List<String> stdOutputList = cr.getStdOutputList();
+                if (i >= stdOutputList.size()) {
+                    return;
+                }
+                if (StringUtils.isBlank(stdOutputList.get(i))) {
+                    return;
+                }
+
+                sb.append(BundleUtils.i18nHelper("标准输出:", "std output:")).append("\n");
+                sb.append(stdOutputList.get(i)).append("\n");
+            }
+
+            private void extractInput(int i, int total) {
+                if (StringUtils.isBlank(dataInput)) {
+                    return;
+                }
+                String[] input = dataInput.split("\n");
+                if (i >= input.length) {
+                    return;
+                }
+
+                sb.append(BundleUtils.i18nHelper("输入:", "input:")).append("\n");
+                int size = input.length / total;
+                int start = i * size, end = start + size;
+                for (int k = start; k < end; ++k) {
+                    sb.append(input[k]).append("\n");
+                }
+            }
+        };
+    }
+
+    /**
+     * 创建负责输出SubmitCode结果的类
+     *
+     * @param scr SubmitCodeResult, 来自于leetcode platform
+     * @return 返回builder, 用于build创建string, 输出到LCConsole
+     */
+    private AbstractResultBuilder<SubmitCodeResult> createSubmitCodeResultBuilder(SubmitCodeResult scr,
+        Project project) {
+        return new AbstractResultBuilder<>(scr, project) {
+            @Override
+            protected void createBody() {
+                boolean correctAnswer = isCorrectAnswer();
+                if (correctAnswer) {
+                    return;
+                }
+                sb.append(splitter).append(BundleUtils.i18nHelper("上一个测试案例", "last test case")).append(": ")
+                    .append("❌").append(splitter).append("\n");
+                // extract std_output
+                extractStdoutput();
+                // extract input
+                extractInput();
+                // extract answer
+                extractAnswer();
+                // extract expected answer
+                extractExpectedAnswer();
+            }
+
+            @Override
+            protected void appendToCorrectHeadAfter() {
+                LCEventBus.getInstance().post(new TimeStopEvent());
+                TimerWindow timerWindow = ActionUtils.getTimerWindow();
+                if (timerWindow != null) {
+                    sb.append(BundleUtils.i18nHelper("解题花费时间: ", "solve time: ")).append(timerWindow.getTime())
+                        .append("\n");
+                }
+            }
+
+            private void extractExpectedAnswer() {
+                String expectedOutput = cr.getExpectedOutput();
+                if (StringUtils.isBlank(expectedOutput)) {
+                    return;
+                }
+
+                sb.append(BundleUtils.i18nHelper("期待的答案:", "expected answer:")).append("\n");
+                sb.append(expectedOutput).append("\n");
+            }
+
+            private void extractAnswer() {
+                String codeOutput = cr.getCodeOutput();
+                if (StringUtils.isBlank(codeOutput)) {
+                    return;
+                }
+
+                sb.append(BundleUtils.i18nHelper("运行结果:", "result:")).append("\n");
+                sb.append(codeOutput).append("\n");
+            }
+
+            private void extractStdoutput() {
+                String stdOutput = cr.getStdOutput();
+                if (StringUtils.isBlank(stdOutput)) {
+                    return;
+                }
+
+                sb.append(BundleUtils.i18nHelper("标准输出:", "std output:")).append("\n");
+                sb.append(stdOutput).append("\n");
+            }
+
+            private void extractInput() {
+                String lastTestcase = cr.getLastTestcase();
+                if (StringUtils.isBlank(lastTestcase)) {
+                    return;
+                }
+
+                String[] split = lastTestcase.split("\n");
+                sb.append(BundleUtils.i18nHelper("输入:", "input:")).append("\n");
+                for (String s : split) {
+                    sb.append(s).append("\n");
+                }
+            }
+        };
+    }
+
+    /**
+     * open test case dialog
+     */
+    public void openTestCasesDialog() {
+        /* get file editor */
+        SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
+
+        // get example test cases
+        String path = ViewUtils.getUnifyFilePathByVFile(Objects.requireNonNull(editor.getFile()));
+        LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
+
+        if (lc == null) {
+            String msg = BundleUtils.i18n("code.service.no.leetcode.editor.open");
+            ConsoleUtils.getInstance(project).showWaring(
+                msg,
+                false,
+                true,
+                msg,
+                BundleUtils.i18nHelper("测试案例设置错误", "Test Cases Set Error"),
+                ConsoleDialog.ERROR
+            );
+            return;
+        }
+
+        // check testcase data input
+        if (lc.getExampleTestcases() == null || lc.getDefaultTestcases() == null) {
+            // load example
+            Question q = QuestionService.getInstance(project).queryQuestionInfo(lc.getTitleSlug(), project);
+            if (StringUtils.isBlank(q.getExampleTestcases())) {
+                throw new RuntimeException("No example test cases found...");
+            }
+            lc.setExampleTestcases(q.getExampleTestcases());
+            lc.setDefaultTestcases(q.getExampleTestcases());
+            // restore
+            StoreService.getInstance(project).addCache(path, lc);
+        }
+
+        // create dialog
+        new TestCaseDialog(
+            lc.getExampleTestcases(), path, project
+        ).show();
+    }
 
     /**
      * 抽象结果构建器，用于构建结果字符串以在控制台显示RunCode/SubmitCode的结果
@@ -730,18 +984,17 @@ public class CodeService {
      * RunCodeResult 封装了在 leetcode 平台上运行提交的解决方案代码所获得的结果。
      * <p>
      * 然而，为了确保可扩展性，在设计中提取了一个抽象类，以适应 SubmitCodeResult 和 RunCodeResult 的输出需求。
-     *
-     * @param <T>
      */
     private abstract static class AbstractResultBuilder<T extends BaseCodeResult> {
-        private final Project project;
-        protected T cr; // code result
+
         protected final StringBuilder sb = new StringBuilder();
         protected final String splitter = "--------------";
+        private final Project project;
         private final String codeTypeSplitter = "===============";
         private final Pattern pattern = Pattern.compile("Line (\\d+):");
+        protected T cr; // code result
 
-        public AbstractResultBuilder (T cr, Project project) {
+        public AbstractResultBuilder(T cr, Project project) {
             this.cr = cr;
             this.project = project;
         }
@@ -754,8 +1007,8 @@ public class CodeService {
 
         protected boolean isCorrectAnswer() {
             return Objects.equals(cr.getTotalCorrect(), cr.getTotalTestcases()) &&
-                    StringUtils.isNotBlank(cr.getTotalCorrect()) &&
-                    StringUtils.isNotBlank(cr.getTotalTestcases());
+                StringUtils.isNotBlank(cr.getTotalCorrect()) &&
+                StringUtils.isNotBlank(cr.getTotalTestcases());
         }
 
         /*
@@ -783,33 +1036,43 @@ public class CodeService {
          */
         private void createHead() {
             boolean correctAnswer = isCorrectAnswer();
-            sb.append("\n").append(codeTypeSplitter).append(" ").append("⚙ ").append(BundleUtils.i18nHelper("设置的代码类型", "setting code type")).append(" : ").append(AppSettings.getInstance().getLangType()).append(" ").append(codeTypeSplitter).append("\n\n");
+            sb.append("\n").append(codeTypeSplitter).append(" ").append("⚙ ")
+                .append(BundleUtils.i18nHelper("设置的代码类型", "setting code type")).append(" : ")
+                .append(AppSettings.getInstance().getLangType()).append(" ").append(codeTypeSplitter).append("\n\n");
             if (correctAnswer) {
                 // true
                 sb.append("✅ ").append(BundleUtils.i18nHelper("通过", "Accept")).append("...").append("\n");
-                sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" ms ").append(" 💽: ").append(cr.getStatusMemory()).append("\n");
-                sb.append(BundleUtils.i18nHelper("全部的测试案例数量", "total test cases number")).append(": ").append(cr.getTotalTestcases()).append("\n");
-                sb.append(BundleUtils.i18nHelper("通过的测试案例数量", "total ac   cases number")).append(": ").append(cr.getTotalCorrect()).append("\n");
+                sb.append("⏰: ").append(cr.getDisplayRuntime()).append(" ms ").append(" 💽: ")
+                    .append(cr.getStatusMemory()).append("\n");
+                sb.append(BundleUtils.i18nHelper("全部的测试案例数量", "total test cases number")).append(": ")
+                    .append(cr.getTotalTestcases()).append("\n");
+                sb.append(BundleUtils.i18nHelper("通过的测试案例数量", "total ac   cases number")).append(": ")
+                    .append(cr.getTotalCorrect()).append("\n");
                 appendToCorrectHeadAfter();
             } else {
                 boolean runSuccess = cr.getRunSuccess();
                 if (runSuccess) {
                     // true
                     sb.append("❌ ").append(BundleUtils.i18nHelper("错误", "Wrong Answer")).append(" ...").append("\n");
-                    sb.append(BundleUtils.i18nHelper("全部的测试案例数量", "total test cases number")).append(": ").append(cr.getTotalTestcases()).append("\n");
-                    sb.append(BundleUtils.i18nHelper("通过的测试案例数量", "total ac   cases number")).append(": ").append(cr.getTotalCorrect()).append("\n");
-                }else {
+                    sb.append(BundleUtils.i18nHelper("全部的测试案例数量", "total test cases number")).append(": ")
+                        .append(cr.getTotalTestcases()).append("\n");
+                    sb.append(BundleUtils.i18nHelper("通过的测试案例数量", "total ac   cases number")).append(": ")
+                        .append(cr.getTotalCorrect()).append("\n");
+                } else {
                     // run error
                     if ("Runtime Error".equals(cr.getStatusMsg())) {
                         sb.append("❌ ").append(BundleUtils.i18n("leetcode.status.re")).append("...").append("\n");
-                        sb.append(DebugUtils.matchLines(cr.getFullRuntimeError(), Question.getLineUpperOffset(project))).append("\n");
-                    }else if ("Compile Error".equals(cr.getStatusMsg())) {
+                        sb.append(DebugUtils.matchLines(cr.getFullRuntimeError(), Question.getLineUpperOffset(project)))
+                            .append("\n");
+                    } else if ("Compile Error".equals(cr.getStatusMsg())) {
                         sb.append("❌ ").append(BundleUtils.i18n("leetcode.status.ce")).append("...").append("\n");
-                        sb.append(DebugUtils.matchLines(cr.getFullCompileError(), Question.getLineUpperOffset(project))).append("\n");
-                    }else if ("Time Limit Exceeded".equals(cr.getStatusMsg())) {
+                        sb.append(DebugUtils.matchLines(cr.getFullCompileError(), Question.getLineUpperOffset(project)))
+                            .append("\n");
+                    } else if ("Time Limit Exceeded".equals(cr.getStatusMsg())) {
                         sb.append("❌ ").append(BundleUtils.i18n("leetcode.status.tle")).append("...").append("\n");
-                        sb.append(DebugUtils.matchLines(cr.getFullCompileError(), Question.getLineUpperOffset(project))).append("\n");
-                    }else {
+                        sb.append(DebugUtils.matchLines(cr.getFullCompileError(), Question.getLineUpperOffset(project)))
+                            .append("\n");
+                    } else {
                         // throw new RuntimeException("unknown leetcode error...");
                         sb.append("❌ ").append(cr.getStatusMsg()).append("\n");
                     }
@@ -828,12 +1091,9 @@ public class CodeService {
          * 处理错误行信息: 比如
          * ❌ Compile Error...
          * Line 36: error: not a statement
-         *         a
-         *         ^
+         * a
+         * ^
          * 我要提取 Line 36, 然后对36进行行号校正. 因为存在注释偏移
-         *
-         * @param error
-         * @return
          */
         private String handleErrorInfo(String error) {
             // 正则表达式提取行号
@@ -903,191 +1163,5 @@ public class CodeService {
          * null
          */
         protected abstract void createBody();
-    }
-
-    /**
-     * 创建负责输出RunCode结果的类
-     *
-     * @param dataInput 输入测试案例
-     * @param cr RunCode结果, 来自于leetcode platform
-     * @return 返回builder, 用于build创建string, 输出到LCConsole
-     */
-    private AbstractResultBuilder<RunCodeResult> createRunCodeResultBuilder(String dataInput, RunCodeResult cr, Project project) {
-        return new AbstractResultBuilder<>(cr, project) {
-            @Override
-            protected void createBody() {
-                String totalTestcases = cr.getTotalTestcases();
-                if (StringUtils.isBlank(totalTestcases)) {
-                    return;
-                }
-                int total = Integer.parseInt(totalTestcases);
-                for (int i = 0; i < total; i++) {
-                    sb.append(splitter).append(BundleUtils.i18nHelper("测试案例 ", "test case ")).append(i + 1).append(": ").append(cr.getCompareResult().charAt(i) == '1' ? "✅" : "❌").append(splitter).append("\n");
-                    // extract std_output
-                    extractStdoutput(i);
-                    // extract input
-                    extractInput(i, total);
-                    // extract answer
-                    extractAnswer(i);
-                    // extract expected answer
-                    extractExpectedAnswer(i);
-                }
-            }
-
-            private void extractExpectedAnswer(int i) {
-                List<String> expectedCodeAnswer = cr.getExpectedCodeAnswer();
-                if (i >= expectedCodeAnswer.size()) return;
-
-                sb.append(BundleUtils.i18nHelper("期待的答案:", "expected answer:")).append("\n");
-                sb.append(expectedCodeAnswer.get(i)).append("\n");
-            }
-
-            private void extractAnswer(int i) {
-                List<String> codeAnswer = cr.getCodeAnswer();
-                if (i >= codeAnswer.size()) return;
-
-                sb.append(BundleUtils.i18nHelper("运行结果:", "result:")).append("\n");
-                sb.append(codeAnswer.get(i)).append("\n");
-            }
-
-            private void extractStdoutput(int i) {
-                List<String> stdOutputList = cr.getStdOutputList();
-                if (i >= stdOutputList.size()) return;
-                if (StringUtils.isBlank(stdOutputList.get(i))) return;
-
-                sb.append(BundleUtils.i18nHelper("标准输出:", "std output:")).append("\n");
-                sb.append(stdOutputList.get(i)).append("\n");
-            }
-
-            private void extractInput(int i, int total) {
-                if (StringUtils.isBlank(dataInput)) {
-                    return;
-                }
-                String[] input = dataInput.split("\n");
-                if (i >= input.length) return;
-
-                sb.append(BundleUtils.i18nHelper("输入:", "input:")).append("\n");
-                int size = input.length / total;
-                int start = i * size, end = start + size;
-                for (int k = start; k < end; ++k) {
-                    sb.append(input[k]).append("\n");
-                }
-            }
-        };
-    }
-
-    /**
-     * 创建负责输出SubmitCode结果的类
-     *
-     * @param scr SubmitCodeResult, 来自于leetcode platform
-     * @return 返回builder, 用于build创建string, 输出到LCConsole
-     */
-    private AbstractResultBuilder<SubmitCodeResult> createSubmitCodeResultBuilder(SubmitCodeResult scr, Project project) {
-        return new AbstractResultBuilder<>(scr, project) {
-            @Override
-            protected void createBody() {
-                boolean correctAnswer = isCorrectAnswer();
-                if (correctAnswer) {
-                    return;
-                }
-                sb.append(splitter).append(BundleUtils.i18nHelper("上一个测试案例", "last test case")).append(": ").append("❌").append(splitter).append("\n");
-                // extract std_output
-                extractStdoutput();
-                // extract input
-                extractInput();
-                // extract answer
-                extractAnswer();
-                // extract expected answer
-                extractExpectedAnswer();
-            }
-
-            @Override
-            protected void appendToCorrectHeadAfter() {
-                LCEventBus.getInstance().post(new TimeStopEvent());
-                TimerWindow timerWindow = ActionUtils.getTimerWindow();
-                if (timerWindow != null) {
-                    sb.append(BundleUtils.i18nHelper("解题花费时间: ", "solve time: ")).append(timerWindow.getTime()).append("\n");
-                }
-            }
-
-            private void extractExpectedAnswer() {
-                String expectedOutput = cr.getExpectedOutput();
-                if (StringUtils.isBlank(expectedOutput)) return;
-
-                sb.append(BundleUtils.i18nHelper("期待的答案:", "expected answer:")).append("\n");
-                sb.append(expectedOutput).append("\n");
-            }
-
-            private void extractAnswer() {
-                String codeOutput = cr.getCodeOutput();
-                if (StringUtils.isBlank(codeOutput)) return;
-
-                sb.append(BundleUtils.i18nHelper("运行结果:", "result:")).append("\n");
-                sb.append(codeOutput).append("\n");
-            }
-
-            private void extractStdoutput() {
-                String stdOutput = cr.getStdOutput();
-                if (StringUtils.isBlank(stdOutput)) return;
-
-                sb.append(BundleUtils.i18nHelper("标准输出:", "std output:")).append("\n");
-                sb.append(stdOutput).append("\n");
-            }
-
-            private void extractInput() {
-                String lastTestcase = cr.getLastTestcase();
-                if (StringUtils.isBlank(lastTestcase)) return;
-
-                String[] split = lastTestcase.split("\n");
-                sb.append(BundleUtils.i18nHelper("输入:", "input:")).append("\n");
-                for (String s : split) {
-                    sb.append(s).append("\n");
-                }
-            }
-        };
-    }
-
-
-    /**
-     * open test case dialog
-     */
-    public void openTestCasesDialog() {
-        /* get file editor */
-        SplitTextEditorWithPreview editor = ViewUtils.getFileEditor(project, SplitTextEditorWithPreview.class);
-
-        // get example test cases
-        String path = ViewUtils.getUnifyFilePathByVFile(Objects.requireNonNull(editor.getFile()));
-        LeetcodeEditor lc = StoreService.getInstance(project).getCache(path, LeetcodeEditor.class);
-
-        if (lc == null) {
-            String msg = BundleUtils.i18n("code.service.no.leetcode.editor.open");
-            ConsoleUtils.getInstance(project).showWaring(
-                    msg,
-                    false,
-                    true,
-                    msg,
-                    BundleUtils.i18nHelper("测试案例设置错误", "Test Cases Set Error"),
-                    ConsoleDialog.ERROR
-            );
-            return;
-        }
-
-        // check testcase data input
-        if (lc.getExampleTestcases() == null || lc.getDefaultTestcases() == null) {
-            // load example
-            Question q = QuestionService.getInstance(project).queryQuestionInfo(lc.getTitleSlug(), project);
-            if (StringUtils.isBlank(q.getExampleTestcases())) {
-                throw new RuntimeException("No example test cases found...");
-            }
-            lc.setExampleTestcases(q.getExampleTestcases());
-            lc.setDefaultTestcases(q.getExampleTestcases());
-            // restore
-            StoreService.getInstance(project).addCache(path, lc);
-        }
-
-        // create dialog
-        new TestCaseDialog(
-                lc.getExampleTestcases(), path, project
-        ).show();
     }
 }

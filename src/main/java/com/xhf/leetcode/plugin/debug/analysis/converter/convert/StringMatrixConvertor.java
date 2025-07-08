@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
  * {@link ParamType#String_MATRIX}
  */
 public class StringMatrixConvertor extends AbstractVariableConvertor {
+
     @Override
     protected String doCpp(String testcase, String variableName) {
         // 处理 vector<vector<string>>

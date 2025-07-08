@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.model;
  * @email 2508020102@qq.com
  */
 public class CalendarSubmitRecord {
+
     /**
      * 连续提交天数
      */

@@ -7,8 +7,7 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.ReviewStatus;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-
-import java.awt.*;
+import java.awt.Color;
 import java.util.Objects;
 
 /**
@@ -18,6 +17,7 @@ import java.util.Objects;
  * @email 2508020102@qq.com
  */
 public class CssBuilder {
+
     private String status = "";
     private String title = "";
     private String difficulty = "";
@@ -30,9 +30,7 @@ public class CssBuilder {
 
     /**
      * status: 当前题目复习状态[未开始/逾期/已完成]
-     *                      [not start/over time/done]
-     * @param status
-     * @return
+     * [not start/over time/done]
      */
     public CssBuilder addStatus(String status) {
         if (status == null) {
@@ -102,15 +100,18 @@ public class CssBuilder {
     }
 
     private String handleNextReview(String template) {
-        return template.replace("{{nextReview-content}}", BundleUtils.i18nHelper("下一次复习时间: ", "next review time: ") + nextReview);
+        return template.replace("{{nextReview-content}}",
+            BundleUtils.i18nHelper("下一次复习时间: ", "next review time: ") + nextReview);
     }
 
     private String handleLastModify(String template) {
-        return template.replace("{{lastModify-content}}", BundleUtils.i18nHelper("上一次做题时间: ", "last handle time: ") + lastModify);
+        return template.replace("{{lastModify-content}}",
+            BundleUtils.i18nHelper("上一次做题时间: ", "last handle time: ") + lastModify);
     }
 
     private String handleUserRate(String template) {
-        if (Objects.equals(this.userRate, FSRSRating.AGAIN.getName()) || Objects.equals(this.userRate, FSRSRating.HARD.getName())) {
+        if (Objects.equals(this.userRate, FSRSRating.AGAIN.getName()) || Objects.equals(this.userRate,
+            FSRSRating.HARD.getName())) {
             template = template.replace("{{difficulty-color}}", "#F60B0BFF");
         } else if (Objects.equals(this.userRate, FSRSRating.GOOD.getName())) {
             template = template.replace("{{difficulty-color}}", "#FF8C00FF");
@@ -141,11 +142,14 @@ public class CssBuilder {
     private String createTemplate(String status) {
         String tmp;
         String theme = getTheme();
-        if (Objects.equals(status, ReviewStatus.NOT_START.getCnName()) || Objects.equals(status, ReviewStatus.NOT_START.getEnName())) {
+        if (Objects.equals(status, ReviewStatus.NOT_START.getCnName()) || Objects.equals(status,
+            ReviewStatus.NOT_START.getEnName())) {
             tmp = Objects.equals(theme, "light") ? getCommon() : getCommonDark();
-        } else if (Objects.equals(status, ReviewStatus.OVER_TIME.getCnName()) || Objects.equals(status, ReviewStatus.OVER_TIME.getEnName())) {
+        } else if (Objects.equals(status, ReviewStatus.OVER_TIME.getCnName()) || Objects.equals(status,
+            ReviewStatus.OVER_TIME.getEnName())) {
             tmp = Objects.equals(theme, "light") ? getOvertime() : getOvertimeDark();
-        } else if (Objects.equals(status, ReviewStatus.DONE.getCnName()) || Objects.equals(status, ReviewStatus.DONE.getEnName())) {
+        } else if (Objects.equals(status, ReviewStatus.DONE.getCnName()) || Objects.equals(status,
+            ReviewStatus.DONE.getEnName())) {
             // tmp = Objects.equals(theme, "light") ? getDone() : getDoneDark();
             tmp = Objects.equals(theme, "light") ? getCommon() : getCommonDark(); // 废弃done状态
         } else {
@@ -166,7 +170,8 @@ public class CssBuilder {
     }
 
     public String getCommonDark() {
-        return "<html><body style='margin:0;padding:0;background:#202124;font-family:Arial;width:280px;color:#e8eaed'>" +
+        return "<html><body style='margin:0;padding:0;background:#202124;font-family:Arial;width:280px;color:#e8eaed'>"
+            +
             "<div style='padding:12px'>" +
             "    <p style='margin:6px 0;color:#8ab4f8;font-weight:bold;font-size:14px'>{{status-content}}</p>" +
             "    <p style='margin:6px 0;font-weight:bold;font-size:15px;color:{{title-color}}'>{{title-content}}</p>" +
@@ -188,7 +193,8 @@ public class CssBuilder {
     }
 
     public String getOvertimeDark() {
-        return "<html><body style='margin:0;padding:0;background:#3c1f1f;font-family:Arial;width:280px;color:#f28b82'>" +
+        return "<html><body style='margin:0;padding:0;background:#3c1f1f;font-family:Arial;width:280px;color:#f28b82'>"
+            +
             "<div style='padding:12px'>" +
             "    <p style='margin:6px 0;font-weight:bold;font-size:14px'>{{status-content}}</p>" +
             "    <p style='margin:6px 0;font-weight:bold;font-size:15px'>{{title-content}}</p>" +

@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.search.process;
 import com.xhf.leetcode.plugin.search.Context;
 import com.xhf.leetcode.plugin.search.utils.CharType;
 import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
-
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -13,7 +12,10 @@ import java.lang.reflect.InvocationTargetException;
 public class ProcessorFactory {
 
     private static volatile ProcessorFactory instance = null;
-    private ProcessorFactory() {}
+
+    private ProcessorFactory() {
+    }
+
     public static ProcessorFactory getInstance() {
         if (instance == null) {
             synchronized (ProcessorFactory.class) {
@@ -52,7 +54,8 @@ public class ProcessorFactory {
     public Processor createProcessor(CharType charType) {
         try {
             return charType.getProcessor().getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

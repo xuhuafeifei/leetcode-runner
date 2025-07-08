@@ -20,21 +20,27 @@ import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-
 import java.io.File;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class AbstractDebugger implements Debugger{
+public abstract class AbstractDebugger implements Debugger {
+
     protected final Project project;
     protected InstReader reader;
     protected ExecuteContext basicContext;
     protected Output output;
     protected InstructionFactory instFactory;
+    /**
+     * 存储两个工作线程, 分别捕获std out/ std error
+     */
+    Thread[] threads = new Thread[2];
+    long[] preSize = new long[2];
 
-    public AbstractDebugger(Project project, ExecuteContext context, DebugConfig config, InstructionFactory instFactory) {
+    public AbstractDebugger(Project project, ExecuteContext context, DebugConfig config,
+        InstructionFactory instFactory) {
         this.project = project;
         this.basicContext = context;
         this.reader = config.getReader();
@@ -56,24 +62,31 @@ public abstract class AbstractDebugger implements Debugger{
         switch (outputType) {
             case CONSOLE_OUT:
             case STD_OUT:
-                DebugUtils.simpleDebug(readType.getType() + BundleUtils.i18n("debug.leetcode.command.error"), this.project);
+                DebugUtils.simpleDebug(readType.getType() + BundleUtils.i18n("debug.leetcode.command.error"),
+                    this.project);
                 break;
             case UI_OUT:
-                ConsoleUtils.getInstance(project).showWaring(readType.getType() + BundleUtils.i18n("debug.leetcode.instruction.error"), false, true);
-                LogUtils.warn(readType.getType() + BundleUtils.i18n("debug.leetcode.instruction.error") + " inst = " + inst);
+                ConsoleUtils.getInstance(project)
+                    .showWaring(readType.getType() + BundleUtils.i18n("debug.leetcode.instruction.error"), false, true);
+                LogUtils.warn(
+                    readType.getType() + BundleUtils.i18n("debug.leetcode.instruction.error") + " inst = " + inst);
                 break;
             default:
                 ConsoleUtils instance = ConsoleUtils.getInstance(project);
                 if (instance != null) {
-                    instance.showWaring("outputType" + BundleUtils.i18n("action.leetcode.unknown.error") + ": " + outputType.getType(), false, true);
+                    instance.showWaring(
+                        "outputType" + BundleUtils.i18n("action.leetcode.unknown.error") + ": " + outputType.getType(),
+                        false, true);
                 }
-                LogUtils.warn("outputType" + BundleUtils.i18n("action.leetcode.unknown.error") + ": " + outputType.getType());
+                LogUtils.warn(
+                    "outputType" + BundleUtils.i18n("action.leetcode.unknown.error") + ": " + outputType.getType());
                 break;
         }
     }
 
     /**
      * 接受用户输入，处理并执行对应的debug指令，并进行输出
+     *
      * @return ProcessResult
      */
     protected ProcessResult processDebugCommand() {
@@ -104,14 +117,15 @@ public abstract class AbstractDebugger implements Debugger{
             DebugManager.getInstance(project).stopDebugger();
             return new ProcessResult(true, false, true, inst, null);
         }
-        if (! inst.isSuccess()) {
+        if (!inst.isSuccess()) {
             doFailed(inst);
             return new ProcessResult(false, true, false, inst, null);
         }
 
         InstExecutor instExecutor = instFactory.create(inst);
         if (instExecutor == null) {
-            DebugUtils.simpleDebug("指令执行异常: " + inst + ". 指令对应的执行器InstExecutor创建为null, 请检查!", project);
+            DebugUtils.simpleDebug("指令执行异常: " + inst + ". 指令对应的执行器InstExecutor创建为null, 请检查!",
+                project);
             return new ProcessResult(false, true, false, inst, null);
         }
 
@@ -143,7 +157,7 @@ public abstract class AbstractDebugger implements Debugger{
             LogUtils.error(e);
             return new ProcessResult(false, true, false, inst, null);
         }
-        if (! r.isSuccess()) {
+        if (!r.isSuccess()) {
             // 错误结果日志记录
             LogUtils.simpleDebug(r.getMsg());
         }
@@ -159,7 +173,6 @@ public abstract class AbstractDebugger implements Debugger{
 
     /**
      * 允许子类重写该方法, 执行某些操作
-     * @param inst
      */
     protected void doAfterReadInstruction(final Instruction inst) {
 
@@ -183,31 +196,8 @@ public abstract class AbstractDebugger implements Debugger{
         return true;
     }
 
-    protected static class ProcessResult {
-        boolean isSuccess;
-        boolean isContinue;
-        boolean isReturn;
-        Instruction inst;
-        ExecuteResult r;
-
-        public ProcessResult(boolean isSuccess, boolean isContinue, boolean isReturn, Instruction inst, ExecuteResult r) {
-            this.isSuccess = isSuccess;
-            this.isContinue = isContinue;
-            this.isReturn = isReturn;
-            this.inst = inst;
-            this.r = r;
-        }
-    }
-
-    /**
-     * 存储两个工作线程, 分别捕获std out/ std error
-     */
-    Thread[] threads = new Thread[2];
-    long[] preSize = new long[2];
-
     /**
      * 监控stdout/stderr
-     * @param name
      */
     protected void captureStd(String name, int idx, String path, OutputHelper outputHelper) {
         // 存储文件之前的大小
@@ -295,5 +285,23 @@ public abstract class AbstractDebugger implements Debugger{
             }
         }, name);
         threads[idx].start();
+    }
+
+    protected static class ProcessResult {
+
+        boolean isSuccess;
+        boolean isContinue;
+        boolean isReturn;
+        Instruction inst;
+        ExecuteResult r;
+
+        public ProcessResult(boolean isSuccess, boolean isContinue, boolean isReturn, Instruction inst,
+            ExecuteResult r) {
+            this.isSuccess = isSuccess;
+            this.isContinue = isContinue;
+            this.isReturn = isReturn;
+            this.inst = inst;
+            this.r = r;
+        }
     }
 }

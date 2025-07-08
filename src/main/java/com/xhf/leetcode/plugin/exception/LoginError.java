@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.exception;
  * @email 2508020102@qq.com
  */
 public class LoginError extends Throwable {
+
     public LoginError(String message) {
         super(message);
     }

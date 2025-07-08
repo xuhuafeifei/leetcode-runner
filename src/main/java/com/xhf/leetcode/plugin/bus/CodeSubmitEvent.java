@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project;
  * @email 2508020102@qq.com
  */
 public class CodeSubmitEvent {
+
     public CodeSubmitEvent(Project project) {
     }
 }

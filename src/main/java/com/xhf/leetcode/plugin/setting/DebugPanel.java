@@ -5,13 +5,15 @@ import com.intellij.ui.components.JBRadioButton;
 import com.xhf.leetcode.plugin.debug.output.OutputType;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
+import java.awt.FlowLayout;
 import java.util.Enumeration;
+import javax.swing.AbstractButton;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
-public class DebugPanel extends JPanel{
+public class DebugPanel extends JPanel {
 
     private ButtonGroup readTypeGroup;
     private ButtonGroup outputType;
@@ -45,10 +47,12 @@ public class DebugPanel extends JPanel{
         }
 
         JPanel targetComponent = InnerHelpTooltip
-                .FlowLayout(FlowLayout.LEFT)
-                .add(panel)
-                .addHelp(BundleUtils.i18nHelper("设置debug模式下, 调试内容显示位置。推荐使用UI显示。标准输出显示/console显示适合熟悉命令行的开发人员", "Set the position of the debug content in debug mode. UI display is recommended. Standard output display/console display are suitable for developers who are familiar with command line."))
-                .getTargetComponent();
+            .FlowLayout(FlowLayout.LEFT)
+            .add(panel)
+            .addHelp(BundleUtils.i18nHelper(
+                "设置debug模式下, 调试内容显示位置。推荐使用UI显示。标准输出显示/console显示适合熟悉命令行的开发人员",
+                "Set the position of the debug content in debug mode. UI display is recommended. Standard output display/console display are suitable for developers who are familiar with command line."))
+            .getTargetComponent();
 
         targetComponent.setBorder(new TitledBorder(title));
         return targetComponent;
@@ -75,10 +79,12 @@ public class DebugPanel extends JPanel{
         }
 
         JPanel targetComponent = InnerHelpTooltip
-                .FlowLayout(FlowLayout.LEFT)
-                .add(panel)
-                .addHelp(BundleUtils.i18nHelper("设置debug模式下, 指令输入来源。推荐使用UI指令读取。标准输入读取指令/命令行读取指令适合熟悉命令行的开发人员", "Set the source of instruction input in debug mode. UI instruction reading is recommended. Standard input reading instruction/command line reading instruction are suitable for developers who are familiar with command line."))
-                .getTargetComponent();
+            .FlowLayout(FlowLayout.LEFT)
+            .add(panel)
+            .addHelp(BundleUtils.i18nHelper(
+                "设置debug模式下, 指令输入来源。推荐使用UI指令读取。标准输入读取指令/命令行读取指令适合熟悉命令行的开发人员",
+                "Set the source of instruction input in debug mode. UI instruction reading is recommended. Standard input reading instruction/command line reading instruction are suitable for developers who are familiar with command line."))
+            .getTargetComponent();
 
         targetComponent.setBorder(new TitledBorder(title));
         return targetComponent;
@@ -88,29 +94,33 @@ public class DebugPanel extends JPanel{
         return getString(readTypeGroup);
     }
 
-    public String getOutputTypeName() {
-        return getString(outputType);
-    }
-
-    private String getString(ButtonGroup outputType) {
-        if (outputType == null) return "";
-        for (Enumeration<AbstractButton> buttons = outputType.getElements(); buttons.hasMoreElements();) {
+    public void setReadTypeName(String readTypeName) {
+        // 已选择的取消设置
+        this.readTypeGroup.setSelected(this.readTypeGroup.getSelection(), false);
+        // 选择
+        for (Enumeration<AbstractButton> buttons = this.readTypeGroup.getElements(); buttons.hasMoreElements(); ) {
             AbstractButton button = buttons.nextElement();
-            if (button.isSelected()) {
-                return button.getText();
+            if (
+                LanguageConvertor.isEqual(readTypeName, button.getText())
+            ) {
+                button.setSelected(true);
+                break;
             }
         }
-        return "";
+    }
+
+    public String getOutputTypeName() {
+        return getString(outputType);
     }
 
     public void setOutputTypeName(String outputTypeName) {
         // 已选择的取消设置
         this.outputType.setSelected(this.outputType.getSelection(), false);
         // 选择
-        for (Enumeration<AbstractButton> buttons = this.outputType.getElements(); buttons.hasMoreElements();) {
+        for (Enumeration<AbstractButton> buttons = this.outputType.getElements(); buttons.hasMoreElements(); ) {
             AbstractButton button = buttons.nextElement();
             if (
-                    LanguageConvertor.isEqual(outputTypeName, button.getText())
+                LanguageConvertor.isEqual(outputTypeName, button.getText())
             ) {
                 button.setSelected(true);
                 break;
@@ -118,18 +128,16 @@ public class DebugPanel extends JPanel{
         }
     }
 
-    public void setReadTypeName(String readTypeName) {
-        // 已选择的取消设置
-        this.readTypeGroup.setSelected(this.readTypeGroup.getSelection(), false);
-        // 选择
-        for (Enumeration<AbstractButton> buttons = this.readTypeGroup.getElements(); buttons.hasMoreElements();) {
+    private String getString(ButtonGroup outputType) {
+        if (outputType == null) {
+            return "";
+        }
+        for (Enumeration<AbstractButton> buttons = outputType.getElements(); buttons.hasMoreElements(); ) {
             AbstractButton button = buttons.nextElement();
-            if (
-                    LanguageConvertor.isEqual(readTypeName, button.getText())
-            ) {
-                button.setSelected(true);
-                break;
+            if (button.isSelected()) {
+                return button.getText();
             }
         }
+        return "";
     }
 }

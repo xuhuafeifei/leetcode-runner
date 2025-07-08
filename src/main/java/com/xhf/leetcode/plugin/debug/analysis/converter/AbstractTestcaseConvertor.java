@@ -11,17 +11,18 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
 
 /**
  * 测试案例转换器, 可以将测试案例转换为对应语言的代码
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
+public abstract class AbstractTestcaseConvertor implements TestcaseConvertor {
+
     protected final String instanceName;
     protected final AnalysisResult result;
     private final ConverterFactory cf;
-    private int count = 0;
-
     private final Project project;
     protected String[] varNames;
+    private int count = 0;
 
     public AbstractTestcaseConvertor(String instanceName, AnalysisResult result, Project project) {
         this.instanceName = instanceName;
@@ -32,6 +33,7 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
 
     /**
      * 自动获取当前打文件处理的question的测试样例, 并转换为对应的调用代码
+     *
      * @return 转换后的代码
      */
     @Override
@@ -54,10 +56,12 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
         int len = testCases.length;
         // 判断测试输入和参数个数是否匹配
         if (len != result.getParameterTypes().length) {
-            throw new DebugError(BundleUtils.i18n("debug.leetcode.testcase.number") + " " + result.getMethodName() + " " + BundleUtils.i18n("debug.leetcode.input.param.number")
-                    + " " + BundleUtils.i18n("debug.leetcode.notmatch") + "\r\n" +
-                    BundleUtils.i18n("debug.leetcode.testcase.number") + " = " + len + "\n"
-                    + result.getMethodName() + BundleUtils.i18n("debug.leetcode.input.param.number") + " = " + result.getParameterTypes().length);
+            throw new DebugError(BundleUtils.i18n("debug.leetcode.testcase.number") + " " + result.getMethodName() + " "
+                + BundleUtils.i18n("debug.leetcode.input.param.number")
+                + " " + BundleUtils.i18n("debug.leetcode.notmatch") + "\r\n" +
+                BundleUtils.i18n("debug.leetcode.testcase.number") + " = " + len + "\n"
+                + result.getMethodName() + BundleUtils.i18n("debug.leetcode.input.param.number") + " = "
+                + result.getParameterTypes().length);
         }
         // 参数类型
         this.varNames = new String[len];
@@ -78,6 +82,7 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
 
     /**
      * 处理调用代码的转换
+     *
      * @param varNames 参数变量名
      * @param instanceName 实例名
      * @return String
@@ -86,6 +91,7 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
 
     /**
      * 获取变量名
+     *
      * @return vName
      */
     protected String vName() {
@@ -96,6 +102,7 @@ public abstract class AbstractTestcaseConvertor implements TestcaseConvertor{
     /**
      * 将testcase转换为Java代码
      * 比如 "[1,2,3]" 转换为 "int[] a{count} = new int[]{1,2,3}"
+     *
      * @param testcase 测试案例
      * @param paramType 入参类型
      * @return 转换后的代码

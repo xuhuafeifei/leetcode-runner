@@ -15,28 +15,29 @@ public class FileTreePrinter extends TreePrinter {
         super(root);
     }
 
+    public static void main(String[] args) {
+        System.out.println(
+            new FileTreePrinter(new File("E:\\java_code\\leetcode-runner\\src\\main\\resources")).visitAndReturn());
+    }
+
     @Override
     public Object[] getChild(Object obj) {
-        File file=(File)obj;
+        File file = (File) obj;
         return file.listFiles();
     }
 
     @Override
     public String getValue(Object obj) {
         try {
-            return ((File)obj).getCanonicalFile().getName();
+            return ((File) obj).getCanonicalFile().getName();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return ((File)obj).getName();
+        return ((File) obj).getName();
     }
 
     @Override
     public boolean isLeaf(Object obj) {
-        return ((File)obj).isFile();
-    }
-
-    public static void main(String[] args) {
-        System.out.println(new FileTreePrinter(new File("E:\\java_code\\leetcode-runner\\src\\main\\resources")).visitAndReturn());
+        return ((File) obj).isFile();
     }
 }

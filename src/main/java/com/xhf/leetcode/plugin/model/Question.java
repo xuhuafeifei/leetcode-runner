@@ -7,40 +7,40 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class Question implements DeepCodingQuestion {
+
+    public static final String lineStart = "lc-start-line";
+    public static final String lineEnd = "lc-end-line";
+    private static final String basicComment = "do not modify or remove start-line comment and end-line comment and including this comment";
+    private static final Pattern pattern = Pattern.compile("\\[(.*?)]");
     private String questionId;
     private String frontendQuestionId;
     private Double acRate;
-
     /**
      * EASY
      * MEDIUM
      * HARD
      */
     private String difficulty;
-
     /**
      * 是否付费
      */
     private boolean paidOnly;
-
     /**
      * 是否解锁，默认解锁
      */
     private boolean isLock = false;
-
     /**
      * AC
      * TRIED
@@ -57,13 +57,8 @@ public class Question implements DeepCodingQuestion {
     private String codeSnippets;
     private String exampleTestcases;
 
-    public static final String lineStart = "lc-start-line";
-    public static final String lineEnd = "lc-end-line";
-    private static final String basicComment = "do not modify or remove start-line comment and end-line comment and including this comment";
-
     /**
      * 目前只在class上方增加两行注释(下方offset暂不考虑)
-     * @return
      */
     public static int getLineUpperOffset() {
         return 2;
@@ -96,25 +91,21 @@ public class Question implements DeepCodingQuestion {
      * // do not .....
      * ...code
      * // lc-end-line
+     *
      * @param code 代码片段
      * @return 处理后的代码片段
      */
     public static String handleCodeSnippets(String code, String langType) {
         String commentSymbol = LangType.getCommentSymbol(langType);
         return
-                commentSymbol + basicComment  + "\n" +
+            commentSymbol + basicComment + "\n" +
                 commentSymbol + lineStart + "\n" +
                 code + "\n" +
                 commentSymbol + lineEnd + "\n";
     }
 
-
     /**
      * 核心代码截取
-     *
-     * @param codeSnippets
-     * @param langType
-     * @return
      */
     public static String getCoreCodeSnippets(String codeSnippets, String langType) {
         StringBuilder sb = new StringBuilder();
@@ -144,7 +135,7 @@ public class Question implements DeepCodingQuestion {
      * @param content 需要替换的内容
      * @return 替换后的内容
      */
-    public static String replaceCodeSnippets(@Nullable  String curContent, @NotNull String content) {
+    public static String replaceCodeSnippets(@Nullable String curContent, @NotNull String content) {
         // 如果当前内容为空, 或者不包含start 或 end, 直接返回被替换的内容
         if (StringUtils.isBlank(curContent) || !curContent.contains(lineStart) || !curContent.contains(lineEnd)) {
             return content;
@@ -170,7 +161,7 @@ public class Question implements DeepCodingQuestion {
                 continue;
             }
             // 只有不在核心代码区域内, 才会添加
-            if (! inCoreCode) {
+            if (!inCoreCode) {
                 sb.append(line).append("\n");
             }
         }
@@ -179,6 +170,7 @@ public class Question implements DeepCodingQuestion {
 
     /**
      * 移除Runner系统增加的注释
+     *
      * @param content content
      * @return string
      */
@@ -203,6 +195,7 @@ public class Question implements DeepCodingQuestion {
 
     /**
      * 增加Runner系统注释
+     *
      * @param content content
      * @return content
      */
@@ -215,7 +208,7 @@ public class Question implements DeepCodingQuestion {
         if (content == null) {
             content = "";
         }
-        if (! content.endsWith("\n")) {
+        if (!content.endsWith("\n")) {
             content += "\n";
         }
         sb.append(basic).append(start).append(content).append(end);
@@ -249,6 +242,34 @@ public class Question implements DeepCodingQuestion {
         throw new IllegalArgumentException("question not found");
     }
 
+    public static String parseFrontendQuestionId(String fileName) {
+        Matcher matcher = pattern.matcher(fileName);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null; // 如果没有找到匹配的内容，返回 null 或者其他适当的值
+    }
+
+    public static String parseTitleSlug(String fileName) {
+        int closingBracketIndex = fileName.indexOf(']');
+        if (closingBracketIndex != -1 && closingBracketIndex < fileName.length() - 1) {
+            fileName = fileName.substring(closingBracketIndex + 1);
+        }
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex != -1) {
+            return fileName.substring(0, dotIndex);
+        }
+        return null; // 如果没有找到匹配的内容，返回 null 或者其他适当的值
+    }
+
+    public static String parseLangType(String fileName) {
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex != -1) {
+            return LangType.convertBySuffix(fileName.substring(dotIndex));
+        }
+        return null;
+    }
+
     public List<TopicTag> getTopicTags() {
         return topicTags;
     }
@@ -257,12 +278,12 @@ public class Question implements DeepCodingQuestion {
         this.topicTags = topicTags;
     }
 
-    public void setExampleTestcases(String exampleTestcases) {
-        this.exampleTestcases = exampleTestcases;
-    }
-
     public String getExampleTestcases() {
         return exampleTestcases;
+    }
+
+    public void setExampleTestcases(String exampleTestcases) {
+        this.exampleTestcases = exampleTestcases;
     }
 
     public String getQuestionId() {
@@ -273,12 +294,12 @@ public class Question implements DeepCodingQuestion {
         this.questionId = questionId;
     }
 
-    public void setFrontendQuestionId(String frontendQuestionId) {
-        this.frontendQuestionId = frontendQuestionId;
-    }
-
     public String getFrontendQuestionId() {
         return frontendQuestionId;
+    }
+
+    public void setFrontendQuestionId(String frontendQuestionId) {
+        this.frontendQuestionId = frontendQuestionId;
     }
 
     public Double getAcRate() {
@@ -333,13 +354,13 @@ public class Question implements DeepCodingQuestion {
         return titleSlug;
     }
 
+    public void setTitleSlug(String titleSlug) {
+        this.titleSlug = titleSlug;
+    }
+
     @Override
     public Question toQuestion(Project project) {
         return this;
-    }
-
-    public void setTitleSlug(String titleSlug) {
-        this.titleSlug = titleSlug;
     }
 
     @Override
@@ -357,16 +378,15 @@ public class Question implements DeepCodingQuestion {
             sb.append("   ");
         }
         sb.append("[")
-                .append(frontendQuestionId)
-                .append("]")
-                .append(" ").append(getTitleCn());
+            .append(frontendQuestionId)
+            .append("]")
+            .append(" ").append(getTitleCn());
 
         // 添加 VIP 标记
         if (paidOnly) {
             sb.append(" 【👑 vip】");
         }
-//                .append(AppSettings.getInstance().isZh() ? " " + getTitleCn() : " " + getTitle())
-        ;
+        //                .append(AppSettings.getInstance().isZh() ? " " + getTitleCn() : " " + getTitle())
         return sb.toString();
     }
 
@@ -403,7 +423,7 @@ public class Question implements DeepCodingQuestion {
     }
 
     public String getFileName() {
-        return  "[" + getFrontendQuestionId() + "]" + getTitleSlug();
+        return "[" + getFrontendQuestionId() + "]" + getTitleSlug();
     }
 
     public boolean getIsPaidOnly() {
@@ -420,34 +440,5 @@ public class Question implements DeepCodingQuestion {
 
     public void setLock(boolean lock) {
         isLock = lock;
-    }
-
-    private static final Pattern pattern = Pattern.compile("\\[(.*?)]");
-    public static String parseFrontendQuestionId(String fileName) {
-        Matcher matcher = pattern.matcher(fileName);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null; // 如果没有找到匹配的内容，返回 null 或者其他适当的值
-    }
-
-    public static String parseTitleSlug(String fileName) {
-        int closingBracketIndex = fileName.indexOf(']');
-        if (closingBracketIndex != -1 && closingBracketIndex < fileName.length() - 1) {
-            fileName = fileName.substring(closingBracketIndex + 1);
-        }
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex != -1) {
-            return fileName.substring(0, dotIndex);
-        }
-        return null; // 如果没有找到匹配的内容，返回 null 或者其他适当的值
-    }
-
-    public static String parseLangType(String fileName) {
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex != -1) {
-            return LangType.convertBySuffix(fileName.substring(dotIndex));
-        }
-        return null;
     }
 }

@@ -7,23 +7,26 @@ import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils.PathBuilder;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author 文艺倾年
  */
 public class DatabaseAdapter {
+
+    // 单例
+    private static volatile DatabaseAdapter instance = null;
     private Sqlite sqlite;
-    private String dbFolder, dbName;
+    private final String dbFolder;
+    private final String dbName;
 
     /**
      * 数据库适配器的构造函数，从配置文件中读取所有数据并建立数据库连接。
      * 此外，还会创建所有必要的表。
      */
     private DatabaseAdapter(Project project) {
-        this.dbFolder  = PathManager.getSystemPath();
+        this.dbFolder = PathManager.getSystemPath();
         this.dbName = "memory.db";
         String path = new PathBuilder(dbFolder).append(dbName).build();
         try {
@@ -32,8 +35,9 @@ public class DatabaseAdapter {
             // 弹框提示
             ConsoleUtils.getInstance(project).showError(
                 BundleUtils.i18nHelper(
-                "无法创建数据库文件, 路径为: " + path + ", 请检查权限。错误信息: " + e.getMessage(),
-                "Failed to create database file, path: " + path + ", please check your permission. Error message: " + e.getMessage()
+                    "无法创建数据库文件, 路径为: " + path + ", 请检查权限。错误信息: " + e.getMessage(),
+                    "Failed to create database file, path: " + path + ", please check your permission. Error message: "
+                        + e.getMessage()
                 ),
                 true,
                 true
@@ -47,9 +51,6 @@ public class DatabaseAdapter {
         // 创建数据库表
         this.createTables();
     }
-
-    // 单例
-    private static volatile DatabaseAdapter instance = null;
 
     public static DatabaseAdapter getInstance(Project project) {
         if (instance == null) {
@@ -99,10 +100,11 @@ public class DatabaseAdapter {
         LogUtils.simpleDebug("[cards] create table: " + create);
 
         this.sqlite.queryUpdate(create);
-   }
+    }
 
     /**
      * 获取用于建立数据库连接的Sqlite对象
+     *
      * @return Sqlite对象
      */
     public @NotNull Sqlite getSqlite() {
@@ -110,7 +112,7 @@ public class DatabaseAdapter {
     }
 
     public void dispose() {
-        if (this.sqlite!= null) {
+        if (this.sqlite != null) {
             this.sqlite.disconnect();
         }
         this.sqlite = null;

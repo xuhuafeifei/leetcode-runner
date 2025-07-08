@@ -9,7 +9,8 @@ import com.xhf.leetcode.plugin.debug.instruction.Instruction;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class UIReader extends AbstractInstReader{
+public class UIReader extends AbstractInstReader {
+
     public UIReader(Project project) {
         super(project, ReadType.UI_IN);
     }

@@ -9,7 +9,12 @@ import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.env.DebugEnv;
 import com.xhf.leetcode.plugin.debug.env.PythonDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.execute.python.*;
+import com.xhf.leetcode.plugin.debug.execute.python.AbstractPythonInstExecutor;
+import com.xhf.leetcode.plugin.debug.execute.python.PyClient;
+import com.xhf.leetcode.plugin.debug.execute.python.PyContext;
+import com.xhf.leetcode.plugin.debug.execute.python.PythonBInst;
+import com.xhf.leetcode.plugin.debug.execute.python.PythonInstFactory;
+import com.xhf.leetcode.plugin.debug.execute.python.PythonRBAInst;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.output.OutputHelper;
@@ -20,8 +25,10 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.*;
-
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,31 +36,31 @@ import java.util.Objects;
  * Python Debugger 断点原理
  * <p>
  * 1. 启动python服务, 同时通过sys.settrace()方法, 执行断点逻辑.
- *      1.1. python服务和断点程序:
- *           python服务和断点程序分别属于两个不同的线程, 他们只见通过阻塞队列通信.
+ * 1.1. python服务和断点程序:
+ * python服务和断点程序分别属于两个不同的线程, 他们只见通过阻塞队列通信.
  * <p>
- *      1.2. python服务与断点服务通信:
- *           python服务接受客户端的指令, 处理并将指令存入A-BlockingQueue
- *           断点服务从A-BlockingQueue读取指令, 并执行指令, 获取数据后将数据存入B-BlockingQueue
- *           python服务从B-BlockingQueue读取数据, 并将数据发送给客户端
+ * 1.2. python服务与断点服务通信:
+ * python服务接受客户端的指令, 处理并将指令存入A-BlockingQueue
+ * 断点服务从A-BlockingQueue读取指令, 并执行指令, 获取数据后将数据存入B-BlockingQueue
+ * python服务从B-BlockingQueue读取数据, 并将数据发送给客户端
  * <p>
  * 2. PythonDebugger与Python服务通信:
- *      2.1 PythonDebugger接受来自用户的指令, 指令可以来自于commandline, ui. 不论何种来源, python debugger
- *          都会处理成对应指令, 最终将指令通过HTTP请求的方式发送给python服务.
- *          而python服务内部会处理指令, 并通知断点线程执行相应操作, 最后通过HTTP Response返回处理结果
+ * 2.1 PythonDebugger接受来自用户的指令, 指令可以来自于commandline, ui. 不论何种来源, python debugger
+ * 都会处理成对应指令, 最终将指令通过HTTP请求的方式发送给python服务.
+ * 而python服务内部会处理指令, 并通知断点线程执行相应操作, 最后通过HTTP Response返回处理结果
  * <p>
- *      2.2 PythonDebugger接受python服务返回的数据, 数据处理后通过Output模块进行可视化展示, 不论是UI展示亦或是Console展示
+ * 2.2 PythonDebugger接受python服务返回的数据, 数据处理后通过Output模块进行可视化展示, 不论是UI展示亦或是Console展示
  * <p>
  * 3. PythonDebugger和JavaDebugger的区别:
  * <p>
- *     3.1. PythonDebugger的底层执行语言是python, JavaDebugger的底层执行语言是Java
+ * 3.1. PythonDebugger的底层执行语言是python, JavaDebugger的底层执行语言是Java
  * <p>
- *     3.2. PythonDebugger采用HTTP请求的方式进行数据通信, 换句话说, PythonDebugger是主动获取数据. 由PythonDebugger通知python服务处理指令, 获取数据
- *          而JavaDebugger采用事件处理的方式处理数据, 由底层Java代码执行断点逻辑后, 通过event返回给JavaDebugger. 换句话说, JavaDebugger是被动获取数据.
- *          JavaDebugger通过event获取数据, 然后进一步显示
+ * 3.2. PythonDebugger采用HTTP请求的方式进行数据通信, 换句话说, PythonDebugger是主动获取数据. 由PythonDebugger通知python服务处理指令, 获取数据
+ * 而JavaDebugger采用事件处理的方式处理数据, 由底层Java代码执行断点逻辑后, 通过event返回给JavaDebugger. 换句话说, JavaDebugger是被动获取数据.
+ * JavaDebugger通过event获取数据, 然后进一步显示
  * <p>
- *     3.3. PythonDebugger, 底层断点执行逻辑无法通知PythonDebugger(因为HTTP是单向沟通)
- *          JavaDebugger, 底层断点执行逻辑可以通知JavaDebugger, 并采用event封装数据
+ * 3.3. PythonDebugger, 底层断点执行逻辑无法通知PythonDebugger(因为HTTP是单向沟通)
+ * JavaDebugger, 底层断点执行逻辑可以通知JavaDebugger, 并采用event封装数据
  *
  * @author feigebuge
  * @email 2508020102@qq.com
@@ -63,15 +70,15 @@ public class PythonDebugger extends AbstractDebugger {
     private final PythonDebugConfig config;
     private PythonDebugEnv env;
 
-    private InstReader reader;
+    private final InstReader reader;
 
-    private Output output;
-    private PyContext context;
+    private final Output output;
+    private final PyContext context;
     /**
      * 启动python服务的Process
      */
     private Process exec;
-    private OutputHelper outputHelper;
+    private final OutputHelper outputHelper;
 
     public PythonDebugger(Project project, PythonDebugConfig config) {
         super(project, new PyContext(project), config, PythonInstFactory.getInstance());
@@ -82,11 +89,22 @@ public class PythonDebugger extends AbstractDebugger {
         this.outputHelper = new OutputHelper(project);
     }
 
+    /**
+     * 检查指定端口是否已经启动
+     *
+     * @param host 主机地址，例如 "localhost" 或 "127.0.0.1"
+     * @param port 端口号
+     * @return 如果端口已经启动，返回 true；否则返回 false
+     */
+    public static boolean isPortAvailable(String host, int port) {
+        return DebugUtils.isPortAvailable(host, port);
+    }
+
     @Override
     public void start() {
         this.env = new PythonDebugEnv(project, this.config);
         boolean flag = super.envPrepare(env);
-        if (! flag) {
+        if (!flag) {
             return;
         }
         // 需要开启新线程, 否则指令读取操作会阻塞idea渲染UI的主线程
@@ -125,7 +143,6 @@ public class PythonDebugger extends AbstractDebugger {
         doRun();
     }
 
-
     private void doRun() {
         while (DebugManager.getInstance(project).isDebug()) {
             ProcessResult pR = processDebugCommand();
@@ -135,13 +152,17 @@ public class PythonDebugger extends AbstractDebugger {
                 return;
             }
             if (!pR.isSuccess) {
-                LogUtils.simpleDebug(BundleUtils.i18nHelper("未知异常! debug 指令执行错误!", "unknown error! debug command execute error!"));
-                ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.unknown.error"), false, true);
+                LogUtils.simpleDebug(BundleUtils.i18nHelper("未知异常! debug 指令执行错误!",
+                    "unknown error! debug command execute error!"));
+                ConsoleUtils.getInstance(project)
+                    .showError(BundleUtils.i18n("action.leetcode.unknown.error"), false, true);
                 continue;
             }
             if (Constants.PY_SERVER_DISCONNECT.equals(pR.r.getMoreInfo())) {
-                LogUtils.simpleDebug(BundleUtils.i18nHelper("python服务断开连接, debug结束!", "python server disconnect, debug end!"));
-                ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("debug.leetcode.debug.server.stop"), false, true);
+                LogUtils.simpleDebug(
+                    BundleUtils.i18nHelper("python服务断开连接, debug结束!", "python server disconnect, debug end!"));
+                ConsoleUtils.getInstance(project)
+                    .showInfo(BundleUtils.i18n("debug.leetcode.debug.server.stop"), false, true);
                 break;
             }
         }
@@ -151,7 +172,7 @@ public class PythonDebugger extends AbstractDebugger {
         // ui读取模式下, 初始化断点
         if (AppSettings.getInstance().isUIReader()) {
             uiBreakpointInit();
-        }else {
+        } else {
             commandBreakpointInit();
         }
     }
@@ -213,7 +234,8 @@ public class PythonDebugger extends AbstractDebugger {
      */
     private void startPythonService() {
         String python = env.getPython();
-        DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.server.start.cmd")  + ": " + python + " " + env.getMainPyPath(), project);
+        DebugUtils.simpleDebug(
+            BundleUtils.i18n("debug.leetcode.server.start.cmd") + ": " + python + " " + env.getMainPyPath(), project);
 
         try {
             // fix #40
@@ -243,17 +265,6 @@ public class PythonDebugger extends AbstractDebugger {
         }
          */
         throw new DebugError(BundleUtils.i18n("debug.leetcode.server.connect.failed"));
-    }
-
-    /**
-     * 检查指定端口是否已经启动
-     *
-     * @param host 主机地址，例如 "localhost" 或 "127.0.0.1"
-     * @param port 端口号
-     * @return 如果端口已经启动，返回 true；否则返回 false
-     */
-    public static boolean isPortAvailable(String host, int port) {
-        return DebugUtils.isPortAvailable(host, port);
     }
 
     @Override

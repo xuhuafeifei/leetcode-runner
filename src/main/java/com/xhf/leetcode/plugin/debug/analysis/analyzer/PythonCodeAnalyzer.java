@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -17,16 +16,16 @@ import java.util.regex.Pattern;
  * @email 2508020102@qq.com
  */
 public class PythonCodeAnalyzer extends AbstractCodeAnalyzer {
-    public PythonCodeAnalyzer(Project project) {
-        super(project);
-    }
 
     /*
         (\w+) 捕获组, 匹配字母数字下划线
      */
     private static final String methodPattern = "def\\s+(\\w+)\\s*\\(([^)]*)\\)";
+    private static final Pattern pattern = Pattern.compile(methodPattern);
 
-    private static final Pattern pattern  = Pattern.compile(methodPattern);
+    public PythonCodeAnalyzer(Project project) {
+        super(project);
+    }
 
     @Override
     public AnalysisResult analyze(String code) {

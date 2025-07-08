@@ -16,21 +16,22 @@ import com.xhf.leetcode.plugin.window.StdPanel;
  * 该类非常特殊, 他只负责处理debug 代码的std信息, 不负责处理其他内容. 因此该类
  * 无法集成到OutputType中.
  * <p>
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class OutputHelper {
 
-    private final Project project;
-    private final StdPanel stdPanel;
-
     public static final String STD_OUT = "STD_OUT";
     public static final String STD_ERROR = "STD_ERROR";
+    private final Project project;
+    private final StdPanel stdPanel;
 
     public OutputHelper(Project project) {
         this.project = project;
         this.stdPanel = LCConsoleWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_DEBUG_STDPANEL);
     }
+
     public void output(ExecuteResult r) {
         output(r, true);
     }
@@ -47,7 +48,8 @@ public class OutputHelper {
                         stdPanel.setStdoutContent(r.getResult());
                     }
                 } else if (setting.isConsoleOutput()) {
-                    ConsoleUtils.getInstance(project).simpleShowConsole(r.getResult(),  ConsoleViewContentType.LOG_WARNING_OUTPUT, true);
+                    ConsoleUtils.getInstance(project)
+                        .simpleShowConsole(r.getResult(), ConsoleViewContentType.LOG_WARNING_OUTPUT, true);
                 }
                 break;
             case STD_ERROR:
@@ -58,7 +60,8 @@ public class OutputHelper {
                         stdPanel.setStderrContent(r.getResult());
                     }
                 } else if (setting.isConsoleOutput()) {
-                    ConsoleUtils.getInstance(project).simpleShowConsole(r.getResult(),  ConsoleViewContentType.ERROR_OUTPUT, true);
+                    ConsoleUtils.getInstance(project)
+                        .simpleShowConsole(r.getResult(), ConsoleViewContentType.ERROR_OUTPUT, true);
                 }
                 break;
             default:

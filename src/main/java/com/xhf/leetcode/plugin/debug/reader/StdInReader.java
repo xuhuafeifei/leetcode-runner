@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.debug.reader;
 
 import com.intellij.openapi.project.Project;
-
 import java.util.Scanner;
 
 /**
@@ -10,7 +9,7 @@ import java.util.Scanner;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class StdInReader extends CommandReader{
+public class StdInReader extends CommandReader {
 
     public StdInReader(Project project) {
         super(project, ReadType.STD_IN);

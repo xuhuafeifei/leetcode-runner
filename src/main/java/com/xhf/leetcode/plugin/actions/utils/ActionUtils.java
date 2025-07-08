@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.personal.PersonalWindow;
 import com.xhf.leetcode.plugin.review.front.ReviewWindow;
 import com.xhf.leetcode.plugin.window.TimerWindow;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,9 +12,12 @@ import java.util.concurrent.TimeUnit;
  * @email 2508020102@qq.com
  */
 public class ActionUtils {
-    private static RateLimiter rateLimiter = RateLimiter.create(1, 500, TimeUnit.MILLISECONDS);
+
+    private static final RateLimiter rateLimiter = RateLimiter.create(1, 500, TimeUnit.MILLISECONDS);
 
     private static TimerWindow windowInstance;
+    private static ReviewWindow reviewWindow;
+    private static PersonalWindow personalWindow;
 
     public synchronized static boolean get() {
         return rateLimiter.tryAcquire();
@@ -38,8 +40,6 @@ public class ActionUtils {
         }
     }
 
-    private static ReviewWindow reviewWindow;
-
     public static void createReviewWindow(Project project) {
         if (reviewWindow == null) {
             reviewWindow = new ReviewWindow(project);
@@ -55,8 +55,6 @@ public class ActionUtils {
             reviewWindow = null;
         }
     }
-
-    private static PersonalWindow personalWindow;
 
     public static void createPersonalWindow(Project project) {
         if (personalWindow == null) {

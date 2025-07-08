@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.debug.reader;
 
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -15,13 +14,23 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @email 2508020102@qq.com
  */
 public class InstSource {
+
     /**
      * 阻塞队列, 存储用户输入的命令信息, 并等待消费者消费
      */
-    private static final BlockingQueue<String> commandBQ =  new LinkedBlockingQueue<>();
+    private static final BlockingQueue<String> commandBQ = new LinkedBlockingQueue<>();
+    /**
+     * 存储正在消费数据的线程
+     */
+    private static final Set<Thread> consumerThreadSet = new HashSet<>();
+    /**
+     * 阻塞队列, 存储用户通过UI界面输入的指令信息, 并等待消费者消费
+     */
+    private static final BlockingQueue<Instruction> uiBQ = new LinkedBlockingQueue<>();
 
     /**
      * 读取用户输入的命令
+     *
      * @param cmd debug cmd
      */
     public static boolean userCmdInput(String cmd) {
@@ -29,12 +38,8 @@ public class InstSource {
     }
 
     /**
-     * 存储正在消费数据的线程
-     */
-    private static final Set<Thread> consumerThreadSet = new HashSet<>();
-
-    /**
      * 消费命令
+     *
      * @return cmd
      */
     public static String consumeCmd() {
@@ -50,12 +55,8 @@ public class InstSource {
     }
 
     /**
-     * 阻塞队列, 存储用户通过UI界面输入的指令信息, 并等待消费者消费
-     */
-    private static final BlockingQueue<Instruction> uiBQ =  new LinkedBlockingQueue<>();
-
-    /**
      * 存储指令
+     *
      * @param instruction 指令信息
      * @return 是否存储成功
      */
@@ -66,6 +67,7 @@ public class InstSource {
     /**
      * 消费指令
      * 不能给方法上锁, 因为take()方法是阻塞的
+     *
      * @return 指令信息
      */
     public static Instruction consumeInst() {

@@ -6,16 +6,16 @@ import com.xhf.leetcode.plugin.bus.DebugStartEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Deque;
 import java.util.LinkedList;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public abstract class AbstractExecuteContext implements ExecuteContext {
+
     /**
      * 监控池, 存储被watch的表达式
      */

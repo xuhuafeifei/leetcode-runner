@@ -10,14 +10,14 @@ import java.util.Queue;
  * @email 2508020102@qq.com
  */
 public class Context {
+
     private final SourceManager sm;
+    // tokens
+    private final Queue<Token> tokens = new LinkedList<>();
     // 当前处理的字符
     private char c;
     // 迭代器
     private Iterator iterator;
-    // tokens
-    private final Queue<Token> tokens = new LinkedList<>();
-
 
 
     public Context(Character c, Iterator itr, SourceManager sm) {
@@ -43,8 +43,9 @@ public class Context {
     }
 
     public boolean hasToken() {
-        return ! tokens.isEmpty();
+        return !tokens.isEmpty();
     }
+
     public Token getToken() {
         return tokens.poll();
     }

@@ -17,12 +17,13 @@ public enum MarkdownContentType {
     MarkdownContentType(String type) {
         this.type = type;
     }
+
     private final String type;
 
     @Override
     public String toString() {
         return "MarkdownContentType{" +
-                "type='" + type + '\'' +
-                '}';
+            "type='" + type + '\'' +
+            '}';
     }
 }

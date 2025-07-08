@@ -9,6 +9,7 @@ import com.google.gson.annotations.SerializedName;
  * @email 2508020102@qq.com
  */
 public class CppGdbInfo {
+
     @SerializedName("stopped_reason")
     private String stoppedReason;
     @SerializedName("console_output")

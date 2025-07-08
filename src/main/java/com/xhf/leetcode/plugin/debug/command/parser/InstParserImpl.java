@@ -10,7 +10,8 @@ import com.xhf.leetcode.plugin.debug.reader.ReadType;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class InstParserImpl implements InstParser{
+public class InstParserImpl implements InstParser {
+
     @Override
     public Instruction parse(String command, ReadType readType) {
         if (command == null || command.trim().isEmpty()) {

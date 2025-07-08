@@ -3,12 +3,11 @@ package com.xhf.leetcode.plugin.search.engine;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
-import org.apache.lucene.queryParser.ParseException;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.lucene.queryParser.ParseException;
 
 /**
  * CompetitionQuestion问题查询引擎, 索引问题题目. 对外提供题目搜索能力
@@ -20,9 +19,14 @@ import java.util.stream.Collectors;
  * @email 2508020102@qq.com
  */
 public class CompetitionQuestionEngine implements SearchEngine<CompetitionQuestion> {
+
     // 单例
     private static volatile CompetitionQuestionEngine instance;
     private final QuestionEngine questionEngine;
+
+    private CompetitionQuestionEngine(Project project) {
+        this.questionEngine = QuestionEngine.getInstance(project);
+    }
 
     public static CompetitionQuestionEngine getInstance(Project project) {
         if (instance == null) {
@@ -33,10 +37,6 @@ public class CompetitionQuestionEngine implements SearchEngine<CompetitionQuesti
             }
         }
         return instance;
-    }
-
-    private CompetitionQuestionEngine(Project project) {
-        this.questionEngine = QuestionEngine.getInstance(project);
     }
 
     @Override

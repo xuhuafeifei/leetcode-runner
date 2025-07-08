@@ -5,21 +5,22 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.AlgorithmApp;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardReq;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardScheduler;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author 文艺倾年
  */
 public class AlgorithmAPI {
-    private AlgorithmApp app;
-    private QuestionCardScheduler cardScheduler;
+
+    private final AlgorithmApp app;
+    private final QuestionCardScheduler cardScheduler;
 
     /**
      * 一定是先初始化app, 再初始化cardScheduler
+     *
      * @param project project
      */
     public AlgorithmAPI(Project project) {
@@ -81,7 +82,7 @@ public class AlgorithmAPI {
      */
     public void rateCard(Integer rating, String back) {
         // 内存队列操作，无需更新
-        if(rating != -1) {
+        if (rating != -1) {
             this.cardScheduler.onRating(rating, back);
             updateQueue();
         }

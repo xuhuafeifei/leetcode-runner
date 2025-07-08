@@ -11,9 +11,8 @@ import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import javax.swing.JPanel;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
 
 /**
  * 深度刷题面板
@@ -22,6 +21,7 @@ import javax.swing.*;
  * @email 2508020102@qq.com
  */
 public class DeepCodingPanel extends JPanel {
+
     /**
      * 承载不同tab的容器
      */

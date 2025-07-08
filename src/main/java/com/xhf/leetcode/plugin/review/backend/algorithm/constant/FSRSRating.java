@@ -26,19 +26,18 @@ public enum FSRSRating {
     EASY(3, BundleUtils.i18nHelper("小菜一碟", "a piece of cake"));
 
 
+    private final Integer id;
+    private final String name;
     /**
      * 构造函数
      *
-     * @param id   评分的ID（0-3）
+     * @param id 评分的ID（0-3）
      * @param name name
      */
     FSRSRating(Integer id, String name) {
         this.id = id;
         this.name = name;
     }
-
-    private final Integer id;
-    private final String name;
 
     public static String toName(Integer userRate) {
         for (FSRSRating rating : FSRSRating.values()) {
@@ -61,6 +60,7 @@ public enum FSRSRating {
 
     /**
      * 获取评分的整数值
+     *
      * @return 评分的ID
      */
     public Integer toInt() {

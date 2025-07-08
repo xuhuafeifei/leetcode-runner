@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.model;
 
 import com.xhf.leetcode.plugin.utils.GsonUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
@@ -15,8 +14,9 @@ import java.util.Map;
  * @email 2508020102@qq.com
  */
 public class GraphqlReqBody {
-    private String query;
+
     private final Map<String, Object> variables = new HashMap<>();
+    private String query;
     private String operationNames = "";
 
     public GraphqlReqBody(String query) {
@@ -77,7 +77,9 @@ public class GraphqlReqBody {
             }
         }
         // add filters
-        if (filters.isEmpty()) return;
+        if (filters.isEmpty()) {
+            return;
+        }
         addVariable("filters", filters);
     }
 
@@ -91,11 +93,6 @@ public class GraphqlReqBody {
      */
     public static class SearchParams {
 
-        @Retention(RetentionPolicy.RUNTIME)
-        public @interface Filters {
-
-        }
-
         private String categorySlug;
         private Integer skip;
         private Integer limit;
@@ -103,6 +100,9 @@ public class GraphqlReqBody {
         private String questionSlug;
         private Integer first;
         private String orderBy;
+        // filters content
+        @Filters
+        private String searchKeywords;
 
         public String getQuestionSlug() {
             return questionSlug;
@@ -127,11 +127,6 @@ public class GraphqlReqBody {
         public void setOrderBy(String orderBy) {
             this.orderBy = orderBy;
         }
-
-        // filters content
-        @Filters
-        private String searchKeywords;
-
 
         public String getTitleSlug() {
             return titleSlug;
@@ -173,7 +168,13 @@ public class GraphqlReqBody {
             this.searchKeywords = searchKeywords;
         }
 
+        @Retention(RetentionPolicy.RUNTIME)
+        public @interface Filters {
+
+        }
+
         public static class ParamsBuilder {
+
             private String categorySlug;
             private Integer skip;
             private Integer limit;
@@ -190,6 +191,7 @@ public class GraphqlReqBody {
                 this.questionSlug = questionSlug;
                 return this;
             }
+
             public ParamsBuilder setFirst(Integer first) {
                 this.first = first;
                 return this;

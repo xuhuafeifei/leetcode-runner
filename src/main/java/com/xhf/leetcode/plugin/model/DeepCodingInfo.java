@@ -8,6 +8,7 @@ package com.xhf.leetcode.plugin.model;
  * @email 2508020102@qq.com
  */
 public class DeepCodingInfo {
+
     // 模式, 表示是deep coding的哪种方式进入编码
     private final String pattern;
     private final int idx;

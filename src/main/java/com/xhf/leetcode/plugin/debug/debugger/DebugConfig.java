@@ -4,6 +4,7 @@ import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.reader.InstReader;
 
 public interface DebugConfig {
+
     InstReader getReader();
 
     void setReader(InstReader reader);

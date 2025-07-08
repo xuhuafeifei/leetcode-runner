@@ -1,9 +1,13 @@
 package com.xhf.leetcode.plugin.debug.execute.java.p;
 
 
-import java.io.File;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.BLUE;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.GREEN;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.RESET;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.WHITE;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.YELLOW;
 
-import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.*;
+import java.io.File;
 
 
 /**
@@ -13,6 +17,7 @@ import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.*;
  * 因此把老哥抽象出来的TreePrinter copy过来, 结合我的项目需求稍微改改
  */
 public class FileTreePrinterColored extends FileTreePrinter {
+
     private Color folderColor = BLUE;
     private Color hiddenFolderColor = YELLOW;
     private Color executableFileColor = GREEN;
@@ -27,16 +32,17 @@ public class FileTreePrinterColored extends FileTreePrinter {
         File file = (File) obj;
         if (file.isDirectory()) {
 
-            if (file.isHidden())
+            if (file.isHidden()) {
                 return hiddenFolderColor + super.getValue(obj) + RESET;
+            }
 
             return folderColor + super.getValue(obj) + RESET;
 
-        } else if (file.canExecute())
+        } else if (file.canExecute()) {
             return executableFileColor + super.getValue(obj) + RESET;
-
-        else
+        } else {
             return nonExecutableFileColor + super.getValue(obj) + RESET;
+        }
     }
 
     public void setFolderColor(Color folderColor) {

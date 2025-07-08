@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
  * @email 2508020102@qq.com
  */
 public class ClearCacheEvent {
+
     public ClearCacheEvent(Project project) {
     }
 }

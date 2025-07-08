@@ -13,12 +13,12 @@ import com.xhf.leetcode.plugin.debug.reader.ReadType;
  * @email 2508020102@qq.com
  */
 public class PythonDebugConfig extends AbstractDebugConfig {
-    public PythonDebugConfig(InstReader reader, Output output) {
-        super(reader, output);
-    }
 
     private ReadType readType;
     private OutputType outputType;
+    public PythonDebugConfig(InstReader reader, Output output) {
+        super(reader, output);
+    }
 
     public ReadType getReadType() {
         return readType;
@@ -37,6 +37,7 @@ public class PythonDebugConfig extends AbstractDebugConfig {
     }
 
     public static class Builder extends AbstractDebugConfig.Builder<PythonDebugConfig> {
+
         public Builder(Project project) {
             super(project);
         }

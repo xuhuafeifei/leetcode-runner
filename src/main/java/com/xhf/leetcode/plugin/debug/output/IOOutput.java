@@ -7,7 +7,8 @@ import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class IOOutput extends AbstractOutput{
+public abstract class IOOutput extends AbstractOutput {
+
     public IOOutput(Project project) {
         super(project);
     }
@@ -33,6 +34,7 @@ public abstract class IOOutput extends AbstractOutput{
 
     /**
      * 允许子类确定不同的输出位置
+     *
      * @param output 输出内容
      */
     protected abstract void outputTo(String output);

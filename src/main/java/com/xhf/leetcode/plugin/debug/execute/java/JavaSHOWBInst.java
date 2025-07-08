@@ -5,9 +5,8 @@ import com.sun.jdi.request.BreakpointRequest;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * show b: 显示所有断点
@@ -16,6 +15,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class JavaSHOWBInst extends AbstractJavaInstExecutor {
+
     @Override
     public ExecuteResult doExecute(Instruction inst, Context context) {
         List<BreakpointRequest> breakpointRequests = context.getBreakpointRequests();
@@ -39,10 +39,11 @@ public class JavaSHOWBInst extends AbstractJavaInstExecutor {
             String methodName = location.method().name();
             int lineNumber = location.lineNumber();
             // 只有开启的断点才有效
-            if (! breakpointRequest.isEnabled()) {
+            if (!breakpointRequest.isEnabled()) {
                 continue;
             }
-            sb.append(BundleUtils.i18nHelper("断点在 ", "Breakpoint at ")).append(className).append(".").append(methodName).append(BundleUtils.i18nHelper(" 第" + lineNumber + "行", " line "  + lineNumber));
+            sb.append(BundleUtils.i18nHelper("断点在 ", "Breakpoint at ")).append(className).append(".")
+                .append(methodName).append(BundleUtils.i18nHelper(" 第" + lineNumber + "行", " line " + lineNumber));
             if (i != breakpointRequests.size() - 1) {
                 sb.append("\n");
             }

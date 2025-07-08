@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.exception;
  * @email 2508020102@qq.com
  */
 public class IllegalOperationException extends Throwable {
+
     public IllegalOperationException(String msg) {
         super(msg, null);
     }

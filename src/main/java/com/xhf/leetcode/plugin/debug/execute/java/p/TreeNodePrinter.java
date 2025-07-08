@@ -1,18 +1,22 @@
 package com.xhf.leetcode.plugin.debug.execute.java.p;
 
-import com.xhf.leetcode.plugin.debug.analysis.converter.convert.TreeNode;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.BLUE;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.GREEN;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.WHITE;
+import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.YELLOW;
 
-import static com.xhf.leetcode.plugin.debug.execute.java.p.Color.*;
+import com.xhf.leetcode.plugin.debug.analysis.converter.convert.TreeNode;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class TreeNodePrinter extends TreePrinter {
-    private Color folderColor = BLUE;
-    private Color hiddenFolderColor = YELLOW;
-    private Color executableFileColor = GREEN;
-    private Color nonExecutableFileColor = WHITE;
+
+    private final Color folderColor = BLUE;
+    private final Color hiddenFolderColor = YELLOW;
+    private final Color executableFileColor = GREEN;
+    private final Color nonExecutableFileColor = WHITE;
 
     public TreeNodePrinter(Object root) {
         super(root);

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
  * @email 2508020102@qq.com
  */
 public class StringArrayConvertor extends AbstractVariableConvertor {
+
     @Override
     protected String doJava(String testcase, String variableName) {
         StringBuilder sb = new StringBuilder();

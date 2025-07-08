@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.utils;
 
 import com.sun.jdi.Value;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,8 @@ import java.util.Map;
  * @email 2508020102@qq.com
  */
 public class MapUtils {
-    public static <K,V> Map<K, V> getMapFromList(List<K> a, List<V> b) {
+
+    public static <K, V> Map<K, V> getMapFromList(List<K> a, List<V> b) {
         HashMap<K, V> map = new HashMap<>();
         if (a.size() != b.size()) {
             throw new RuntimeException("key list and value list size not equal");
@@ -31,7 +31,7 @@ public class MapUtils {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Object> entry : content.entrySet()) {
             sb.append(entry.getKey()).append("=").append(GsonUtils.toJsonStr(
-                    entry.getValue().toString()
+                entry.getValue().toString()
             )).append("\n");
         }
         return sb.toString();

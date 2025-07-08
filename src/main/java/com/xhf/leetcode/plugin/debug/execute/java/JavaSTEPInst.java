@@ -17,6 +17,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
  * @email 2508020102@qq.com
  */
 public class JavaSTEPInst extends AbstractJavaInstExecutor {
+
     @Override
     public ExecuteResult doExecute(Instruction inst, Context context) {
         // 这里设置原因和N Inst一致

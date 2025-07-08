@@ -3,26 +3,33 @@ package com.xhf.leetcode.plugin.review.backend.database;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.review.backend.entity.Card;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
-import java.sql.*;
 import java.util.function.Consumer;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  * @author 文艺倾年
  */
 public class Sqlite {
-    private String dbFolder, dbName;
+
+    private final String dbFolder;
+    private final String dbName;
     private Connection connection;
 
     /**
      * Sqlite类的构造函数，用于设置数据库连接的相关信息
-     *
      */
     public Sqlite(String dbFolder, String dbName) {
         this.dbFolder = dbFolder;
@@ -31,6 +38,7 @@ public class Sqlite {
 
     /**
      * 连接到Sqlite数据库
+     *
      * @return Sqlite对象
      */
     public Sqlite connect() {
@@ -45,8 +53,8 @@ public class Sqlite {
             LogUtils.info("[Database] 成功连接到数据库");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(new JFrame(),
-                    "SQLLite错误: " + e,
-                    "建立数据库连接时发生错误", JOptionPane.ERROR_MESSAGE);
+                "SQLLite错误: " + e,
+                "建立数据库连接时发生错误", JOptionPane.ERROR_MESSAGE);
             LogUtils.info("[Database] 无法连接到数据库: " + e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -65,7 +73,7 @@ public class Sqlite {
             boolean created = dir.mkdirs();
             if (!created) {
                 throw new RuntimeException("无法创建数据库目录: " +
-                        dbFolder + " (权限不足或路径无效)");
+                    dbFolder + " (权限不足或路径无效)");
             }
         }
 
@@ -76,7 +84,7 @@ public class Sqlite {
                 boolean created = dbFile.createNewFile();
                 if (!created) {
                     throw new RuntimeException("无法创建数据库文件: " +
-                            dbName + " (可能已被其他进程占用)");
+                        dbName + " (可能已被其他进程占用)");
                 }
                 LogUtils.info("[Database] 自动创建新数据库文件: " + dbFile.getAbsolutePath());
             } catch (IOException e) {
@@ -99,6 +107,7 @@ public class Sqlite {
 
     /**
      * 使用PreparedStatement更新数据库
+     *
      * @param statement PreparedStatement对象
      */
     public void update(PreparedStatement statement) {
@@ -108,6 +117,7 @@ public class Sqlite {
 
     /**
      * 使用字符串形式的Statement更新数据库
+     *
      * @param statement SQL语句
      */
     public void update(String statement) {
@@ -117,6 +127,7 @@ public class Sqlite {
 
     /**
      * 同步更新数据库，使用字符串形式的Statement
+     *
      * @param statement SQL语句
      */
     public void syncUpdate(String statement) {
@@ -126,8 +137,9 @@ public class Sqlite {
 
     /**
      * 执行数据库查询，使用PreparedStatement
+     *
      * @param statement PreparedStatement对象
-     * @param consumer  处理ResultSet的消费者
+     * @param consumer 处理ResultSet的消费者
      */
     public void query(PreparedStatement statement, Consumer<ResultSet> consumer) {
         checkConnection();
@@ -137,8 +149,9 @@ public class Sqlite {
 
     /**
      * 执行数据库查询，使用字符串形式的Statement
+     *
      * @param statement SQL语句
-     * @param consumer  处理ResultSet的消费者
+     * @param consumer 处理ResultSet的消费者
      */
     public void query(String statement, Consumer<ResultSet> consumer) {
         checkConnection();
@@ -148,6 +161,7 @@ public class Sqlite {
 
     /**
      * 使用字符串形式的查询执行查询
+     *
      * @param query 查询语句
      * @return ResultSet对象
      */
@@ -163,6 +177,7 @@ public class Sqlite {
 
     /**
      * 使用PreparedStatement执行查询
+     *
      * @param statement PreparedStatement对象
      * @return ResultSet对象
      */
@@ -178,8 +193,9 @@ public class Sqlite {
 
     /**
      * 同步执行数据库查询，使用字符串形式的Statement
+     *
      * @param statement SQL语句
-     * @param consumer  处理ResultSet的消费者
+     * @param consumer 处理ResultSet的消费者
      */
     public void syncQuery(String statement, Consumer<ResultSet> consumer) {
         ResultSet result = this.query(statement);
@@ -188,6 +204,7 @@ public class Sqlite {
 
     /**
      * 准备PreparedStatement
+     *
      * @param query 查询语句
      * @return PreparedStatement对象
      */
@@ -203,6 +220,7 @@ public class Sqlite {
 
     /**
      * 使用字符串形式的查询更新数据库
+     *
      * @param query 查询语句
      */
     public void queryUpdate(String query) {
@@ -216,6 +234,7 @@ public class Sqlite {
 
     /**
      * 使用PreparedStatement更新数据库
+     *
      * @param preparedStatement PreparedStatement对象
      */
     public void queryUpdate(PreparedStatement preparedStatement) {
@@ -238,7 +257,9 @@ public class Sqlite {
      */
     private void checkConnection() {
         try {
-            if (this.connection == null || this.connection.isClosed()) connect();
+            if (this.connection == null || this.connection.isClosed()) {
+                connect();
+            }
         } catch (Exception e) {
             LogUtils.warn(DebugUtils.getStackTraceAsString(e));
         }
@@ -246,6 +267,7 @@ public class Sqlite {
 
     /**
      * 返回数据库连接是否有效
+     *
      * @return 连接状态布尔值
      */
     public boolean isConnected() {
@@ -297,9 +319,9 @@ public class Sqlite {
     }
 
 
-
     /**
      * 执行查询并返回List<Map>结果
+     *
      * @param query SQL查询语句
      * @return 包含查询结果的List<Map>
      */
@@ -328,6 +350,7 @@ public class Sqlite {
 
     /**
      * 执行查询并返回List<Card>结果
+     *
      * @param query SQL查询语句
      * @return 包含查询结果的List<Card>
      */
@@ -362,6 +385,7 @@ public class Sqlite {
 
     /**
      * 向表中插入数据
+     *
      * @param tableName 表名
      * @param data 包含字段名和值的Map
      */
@@ -386,7 +410,7 @@ public class Sqlite {
         }
 
         String sql = String.format("INSERT INTO %s (%s) VALUES (%s)",
-            tableName, columns.toString(), values.toString());
+            tableName, columns, values);
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             for (int i = 0; i < params.size(); i++) {

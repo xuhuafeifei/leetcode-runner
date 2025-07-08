@@ -18,6 +18,7 @@ import com.xhf.leetcode.plugin.search.dict.Hit;
  * @email 2508020102@qq.com
  */
 public class CNProcessor implements Processor {
+
     private final DictTree dt;
 
     private final SimpleHitStack hs;
@@ -38,7 +39,7 @@ public class CNProcessor implements Processor {
         Hit preHit = dt.match(searchC);
         hs.add(preHit);
         // 如果未命中, 直接返回
-        if (! preHit.isHit()) {
+        if (!preHit.isHit()) {
             setContext(context);
             return;
         }
@@ -50,11 +51,11 @@ public class CNProcessor implements Processor {
             preHit = hit;
         }
         // 弹出未命中的hit
-        while (hs.getTotalSize() != 1 && ! hs.peek().isHit()) {
+        while (hs.getTotalSize() != 1 && !hs.peek().isHit()) {
             hs.pop();
         }
         // 弹出直到最后一个是结尾的Hit
-        while (hs.getTotalSize() != 1 && ! hs.peek().isEnd()) {
+        while (hs.getTotalSize() != 1 && !hs.peek().isEnd()) {
             hs.pop();
         }
         // 返回Token
@@ -80,10 +81,12 @@ public class CNProcessor implements Processor {
     }
 
     public static class SimpleHitStack {
+
         private final Hit[] stack;
-        private int top;
         private final int size = 15;
         private final StringBuilder sb;
+        private int top;
+
         public SimpleHitStack() {
             stack = new Hit[size];
             top = -1;
@@ -99,8 +102,9 @@ public class CNProcessor implements Processor {
         }
 
         public void add(Hit hit) {
-            if (full())
+            if (full()) {
                 throw new RuntimeException("stack is full !");
+            }
             top += 1;
             stack[top] = hit;
         }
@@ -110,16 +114,18 @@ public class CNProcessor implements Processor {
         }
 
         public Hit pop() {
-            if (empty())
+            if (empty()) {
                 throw new RuntimeException("stack is empty !");
+            }
             Hit res = stack[top];
             top -= 1;
             return res;
         }
 
         public Hit peek() {
-            if (empty())
+            if (empty()) {
                 throw new RuntimeException("stack is empty !");
+            }
             Hit res = stack[top];
             return res;
         }
@@ -131,7 +137,7 @@ public class CNProcessor implements Processor {
         public String getToken() {
             sb.delete(0, sb.length());
             for (int i = 0; i <= top; ++i) {
-                sb.append(stack[i].getC()) ;
+                sb.append(stack[i].getC());
             }
             return sb.toString();
         }

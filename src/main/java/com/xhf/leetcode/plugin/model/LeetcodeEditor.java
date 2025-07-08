@@ -7,6 +7,7 @@ package com.xhf.leetcode.plugin.model;
  * @email 2508020102@qq.com
  */
 public class LeetcodeEditor {
+
     private String questionId;
     private String lang;
     private String exampleTestcases;
@@ -115,20 +116,20 @@ public class LeetcodeEditor {
         this.markdownPath = markdownPath;
     }
 
-    public void setDifficulty(String difficulty) {
-        this.difficulty = difficulty;
-    }
-
     public String getDifficulty() {
         return difficulty;
     }
 
-    public void setSolutionSlug(String solutionSlug) {
-        this.solutionSlug = solutionSlug;
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
     }
 
     public String getSolutionSlug() {
         return solutionSlug;
+    }
+
+    public void setSolutionSlug(String solutionSlug) {
+        this.solutionSlug = solutionSlug;
     }
 
     public String getDebugTestcase() {
@@ -142,35 +143,35 @@ public class LeetcodeEditor {
     @Override
     public String toString() {
         return "LeetcodeEditor{" +
-                "questionId='" + questionId + '\'' +
-                ", lang='" + lang + '\'' +
-                ", exampleTestcases='" + exampleTestcases + '\'' +
-                ", frontendQuestionId='" + frontendQuestionId + '\'' +
-                ", translatedTitle='" + translatedTitle + '\'' +
-                ", markdownPath='" + markdownPath + '\'' +
-                ", markdownContent='" + markdownContent + '\'' +
-                ", titleSlug='" + titleSlug + '\'' +
-                ", defaultTestcases='" + defaultTestcases + '\'' +
-                ", difficulty='" + difficulty + '\'' +
-                ", topicId='" + topicId + '\'' +
-                ", solutionSlug='" + solutionSlug + '\'' +
-                '}';
-    }
-
-    public void setDeepCodingInfo(DeepCodingInfo deepCodingInfo) {
-        this.deepCodingInfo = deepCodingInfo;
+            "questionId='" + questionId + '\'' +
+            ", lang='" + lang + '\'' +
+            ", exampleTestcases='" + exampleTestcases + '\'' +
+            ", frontendQuestionId='" + frontendQuestionId + '\'' +
+            ", translatedTitle='" + translatedTitle + '\'' +
+            ", markdownPath='" + markdownPath + '\'' +
+            ", markdownContent='" + markdownContent + '\'' +
+            ", titleSlug='" + titleSlug + '\'' +
+            ", defaultTestcases='" + defaultTestcases + '\'' +
+            ", difficulty='" + difficulty + '\'' +
+            ", topicId='" + topicId + '\'' +
+            ", solutionSlug='" + solutionSlug + '\'' +
+            '}';
     }
 
     public DeepCodingInfo getDeepCodingInfo() {
         return deepCodingInfo;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setDeepCodingInfo(DeepCodingInfo deepCodingInfo) {
+        this.deepCodingInfo = deepCodingInfo;
     }
 
     public String getStatus() {
         return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public boolean getIsPaidOnly() {

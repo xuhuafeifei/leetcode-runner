@@ -1,6 +1,6 @@
 /**
-  * Copyright 2025 json.cn 
-  */
+ * Copyright 2025 json.cn
+ */
 package com.xhf.leetcode.plugin.model;
 
 /**
@@ -14,25 +14,29 @@ public class LangLevels {
     private String langName;
     private String langVerboseName;
     private int level;
+
+    public String getLangName() {
+        return langName;
+    }
+
     public void setLangName(String langName) {
-         this.langName = langName;
-     }
-     public String getLangName() {
-         return langName;
-     }
+        this.langName = langName;
+    }
+
+    public String getLangVerboseName() {
+        return langVerboseName;
+    }
 
     public void setLangVerboseName(String langVerboseName) {
-         this.langVerboseName = langVerboseName;
-     }
-     public String getLangVerboseName() {
-         return langVerboseName;
-     }
+        this.langVerboseName = langVerboseName;
+    }
+
+    public int getLevel() {
+        return level;
+    }
 
     public void setLevel(int level) {
-         this.level = level;
-     }
-     public int getLevel() {
-         return level;
-     }
+        this.level = level;
+    }
 
 }

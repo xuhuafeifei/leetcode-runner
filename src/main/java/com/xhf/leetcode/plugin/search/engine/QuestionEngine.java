@@ -8,6 +8,12 @@ import com.xhf.leetcode.plugin.search.lucence.LCAnalyzer;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
@@ -22,9 +28,6 @@ import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
-import java.io.IOException;
-import java.util.*;
-
 /**
  * Question问题查询引擎, 索引问题题目. 对外提供题目搜索能力
  *
@@ -32,14 +35,13 @@ import java.util.*;
  * @email 2508020102@qq.com
  */
 public class QuestionEngine implements SearchEngine<Question> {
+
+    // 单例
+    private static volatile QuestionEngine instance;
     /**
      * 文本分析器
      */
     private final LCAnalyzer analyzer;
-    /**
-     * 索引目录
-     */
-    private Directory directory;
     /**
      * idea 项目
      */
@@ -48,8 +50,29 @@ public class QuestionEngine implements SearchEngine<Question> {
      * 题目排序比较器
      */
     private final QuestionCompare questionCompare;
-    // 单例
-    private static volatile QuestionEngine instance;
+    /**
+     * 索引目录
+     */
+    private Directory directory;
+
+    private QuestionEngine(Project project) {
+        this.analyzer = new LCAnalyzer();
+        try {
+            String path = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("lucence")
+                .build();
+            this.directory = new NIOFSDirectory(FileUtils.createAndGetDirectory(path));
+        } catch (Exception e) {
+            LogUtils.warn("QuestionEngine create NIOSDirectory failed! the reason is " + e.getMessage()
+                + "\nthis may cause memory pressure on the user's computer! "
+            );
+            this.directory = new RAMDirectory();
+        }
+        this.project = project;
+        this.questionCompare = new QuestionCompare();
+        // 提前初始化字典树
+        DictTree.init();
+    }
+
     public static QuestionEngine getInstance(Project project) {
         if (instance == null) {
             synchronized (QuestionEngine.class) {
@@ -61,26 +84,9 @@ public class QuestionEngine implements SearchEngine<Question> {
         return instance;
     }
 
-    private QuestionEngine(Project project) {
-        this.analyzer = new LCAnalyzer();
-        try {
-            String path = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("lucence").build();
-            this.directory = new NIOFSDirectory(FileUtils.createAndGetDirectory(path));
-        } catch (Exception e) {
-            LogUtils.warn("QuestionEngine create NIOSDirectory failed! the reason is " + e.getMessage()
-                    + "\nthis may cause memory pressure on the user's computer! "
-            );
-            this.directory = new RAMDirectory();
-        }
-        this.project = project;
-        this.questionCompare = new QuestionCompare();
-        // 提前初始化字典树
-        DictTree.init();
-    }
-
     @Override
     public void buildIndex(List<Question> sources) throws Exception {
-        IndexWriter iwriter = new IndexWriter(directory, analyzer, true , IndexWriter.MaxFieldLength.LIMITED);
+        IndexWriter iwriter = new IndexWriter(directory, analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
 
         for (int i = 0; i < sources.size(); i++) {
             Document doc = new Document();
@@ -104,9 +110,9 @@ public class QuestionEngine implements SearchEngine<Question> {
 
         TopDocs topDocs = isearcher.search(query, 100);
 
-//        long start = System.currentTimeMillis();
+        //        long start = System.currentTimeMillis();
         List<Question> questions = normalSort(topDocs, isearcher);
-//        LogUtils.debug("normalSort花费时间: " + (System.currentTimeMillis() - start));
+        //        LogUtils.debug("normalSort花费时间: " + (System.currentTimeMillis() - start));
 
         return questions;
     }
@@ -135,10 +141,6 @@ public class QuestionEngine implements SearchEngine<Question> {
      * 按照题目序号从小打到排序
      * <p>
      * 1~2 millis second. 效率极高, 无需堆排序优化
-     * @param topDocs
-     * @param isearcher
-     * @return
-     * @throws IOException
      */
     private List<Question> normalSort(TopDocs topDocs, IndexSearcher isearcher) throws IOException {
         List<Question> totalQuestion = QuestionService.getInstance(project).getTotalQuestion(project);
@@ -160,7 +162,16 @@ public class QuestionEngine implements SearchEngine<Question> {
         return ans;
     }
 
+    @Override
+    public void close() throws IOException {
+        // directory.close();
+        // 暂时没想好关闭操作. 一开始想着如果长期不查询就可以关闭, 但是这样会丢失索引.
+        // 下一次查询操作时, 需要重新加载索引. 但重新加载索引的行为不太好设计, 因此暂不考虑
+        throw new UnsupportedOperationException("not support close operation in QuestionEngie");
+    }
+
     static class QuestionCompare implements Comparator<Question> {
+
         private final String[] types;
 
         public QuestionCompare() {
@@ -212,13 +223,5 @@ public class QuestionEngine implements SearchEngine<Question> {
             }
             return -1; // 默认返回-1
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-        // directory.close();
-        // 暂时没想好关闭操作. 一开始想着如果长期不查询就可以关闭, 但是这样会丢失索引.
-        // 下一次查询操作时, 需要重新加载索引. 但重新加载索引的行为不太好设计, 因此暂不考虑
-        throw new UnsupportedOperationException("not support close operation in QuestionEngie");
     }
 }

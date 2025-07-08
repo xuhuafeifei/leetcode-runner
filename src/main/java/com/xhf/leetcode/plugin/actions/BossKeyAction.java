@@ -4,7 +4,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.xhf.leetcode.plugin.utils.*;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.LoginPass;
+import com.xhf.leetcode.plugin.utils.RatePass;
+import com.xhf.leetcode.plugin.utils.SettingPass;
 import com.xhf.leetcode.plugin.window.LCConsoleWindowFactory;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
 

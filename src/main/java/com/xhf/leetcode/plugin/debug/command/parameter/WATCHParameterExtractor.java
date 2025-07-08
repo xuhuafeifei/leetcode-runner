@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.debug.command.parameter;
  * @email 2508020102@qq.com
  */
 public class WATCHParameterExtractor implements ParameterExtractor {
+
     @Override
     public String extract(String inst) {
         String param = inst.replaceFirst("watch", "").trim();

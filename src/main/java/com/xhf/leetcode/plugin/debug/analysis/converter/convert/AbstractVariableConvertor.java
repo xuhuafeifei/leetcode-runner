@@ -4,7 +4,6 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
-
 import java.util.Objects;
 
 /**
@@ -13,13 +12,14 @@ import java.util.Objects;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class AbstractVariableConvertor implements VariableConvertor{
+public abstract class AbstractVariableConvertor implements VariableConvertor {
+
     protected final AppSettings appSettings = AppSettings.getInstance();
 
     @Override
     public final String convert(String testcase, String variableName) {
         LangType langType = LangType.getType(appSettings.getLangType());
-        switch(Objects.requireNonNull(langType)) {
+        switch (Objects.requireNonNull(langType)) {
             case JAVA:
                 return doJava(testcase, variableName);
             case PYTHON3:

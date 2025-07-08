@@ -5,9 +5,24 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 public abstract class AbstractMasteryDialog extends JDialog {
 
@@ -98,7 +113,8 @@ public abstract class AbstractMasteryDialog extends JDialog {
         gbc.anchor = GridBagConstraints.EAST;
         JButton confirmButton = new JButton(BundleUtils.i18nHelper("确认", "Confirm"));
         confirmButton.setFont(Constants.CN_FONT_BOLD);
-        confirmButton.setBackground(selectionBg != null ? selectionBg : new JBColor(new Color(70, 130, 180), new Color(70, 130, 180)));
+        confirmButton.setBackground(
+            selectionBg != null ? selectionBg : new JBColor(new Color(70, 130, 180), new Color(70, 130, 180)));
         confirmButton.setForeground(JBColor.WHITE);
         confirmButton.setFocusPainted(false);
         setConfirmButtonListener(confirmButton, group, noteTextArea);

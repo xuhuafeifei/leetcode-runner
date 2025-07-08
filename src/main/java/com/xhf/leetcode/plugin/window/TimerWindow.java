@@ -9,31 +9,47 @@ import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.TimeStopEvent;
 import com.xhf.leetcode.plugin.setting.InnerHelpTooltip;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JWindow;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 /**
  * @author 文艺倾年
  */
 public class TimerWindow extends JWindow {
+
+    private static final float SCALE_PER = 0.02f; // 每次滚动调整的像素值百分比
     // 计时器组件
     private final Timer timer;
+    // jwindow的长/宽比
+    private final float radio = 1.5f;
+    private final int miniHeight = 85;
+    private final String HELP_CONTENT = BundleUtils.i18n("action.leetcode.timer.help");
     private long startTime;
     private long pausedTime;
     private boolean isRunning;
-
     // UI组件
     private JBLabel timeLabel;
     private JButton startOrPauseBtn;
     private Point dragPoint;
-
-    // jwindow的长/宽比
-    private final float radio = 1.5f;
-    private final int miniHeight = 85;
-
-    private final String HELP_CONTENT = BundleUtils.i18n("action.leetcode.timer.help");
     private String lastTime = "00:00:00";
 
     public TimerWindow() {
@@ -58,8 +74,6 @@ public class TimerWindow extends JWindow {
 
         LCEventBus.getInstance().register(this);
     }
-
-    private static final float SCALE_PER = 0.02f; // 每次滚动调整的像素值百分比
 
     private void setupResizeSupport() {
         // 添加鼠标滚轮监听器
@@ -130,7 +144,9 @@ public class TimerWindow extends JWindow {
         JLabel title = new JLabel(BundleUtils.i18n("action.leetcode.timer.title"));
         title.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
-        titleBar.add(InnerHelpTooltip.FlowLayout(FlowLayout.LEADING).add(title).addHelp(this.HELP_CONTENT).getTargetComponent(), BorderLayout.WEST);
+        titleBar.add(
+            InnerHelpTooltip.FlowLayout(FlowLayout.LEADING).add(title).addHelp(this.HELP_CONTENT).getTargetComponent(),
+            BorderLayout.WEST);
         titleBar.add(closeBtn, BorderLayout.EAST);
 
         return titleBar;
@@ -203,8 +219,8 @@ public class TimerWindow extends JWindow {
 
     private void updateButtonStates() {
         startOrPauseBtn.setIcon(IconLoader.getIcon(
-                isRunning ? "/icons/pause.svg" : "/icons/start.svg",
-                getClass()
+            isRunning ? "/icons/pause.svg" : "/icons/start.svg",
+            getClass()
         ));
     }
 
@@ -238,8 +254,8 @@ public class TimerWindow extends JWindow {
     private void centerWindow() {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         setLocation(
-                (screen.width - getWidth()) / 2,
-                (screen.height - getHeight()) / 4
+            (screen.width - getWidth()) / 2,
+            (screen.height - getHeight()) / 4
         );
     }
 
@@ -258,8 +274,8 @@ public class TimerWindow extends JWindow {
     public void TimeStopListeners(TimeStopEvent event) {
         this.pauseTimer();
         startOrPauseBtn.setIcon(IconLoader.getIcon(
-                isRunning ? "/icons/pause.svg" : "/icons/start.svg",
-                getClass()
+            isRunning ? "/icons/pause.svg" : "/icons/start.svg",
+            getClass()
         ));
     }
 }

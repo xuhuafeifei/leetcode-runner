@@ -8,17 +8,17 @@ import com.xhf.leetcode.plugin.debug.reader.ReadType;
 
 /**
  * 没想好要做哪些拓展, 先这么预留着
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class CppDebugConfig extends AbstractDebugConfig {
 
+    private ReadType readType;
+    private OutputType outputType;
     public CppDebugConfig(InstReader reader, Output output) {
         super(reader, output);
     }
-
-    private ReadType readType;
-    private OutputType outputType;
 
     public ReadType getReadType() {
         return readType;
@@ -37,6 +37,7 @@ public class CppDebugConfig extends AbstractDebugConfig {
     }
 
     public static class Builder extends AbstractDebugConfig.Builder<CppDebugConfig> {
+
         public Builder(Project project) {
             super(project);
         }

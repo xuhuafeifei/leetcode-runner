@@ -1,11 +1,9 @@
 package com.xhf.leetcode.plugin.review.front;
 
-import com.google.gson.Gson;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
-import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.service.RQServiceImpl;
@@ -14,35 +12,47 @@ import com.xhf.leetcode.plugin.review.utils.AbstractMasteryDialog;
 import com.xhf.leetcode.plugin.review.utils.MessageReceiveInterface;
 import com.xhf.leetcode.plugin.review.utils.ReviewConstants;
 import com.xhf.leetcode.plugin.review.utils.ReviewUtils;
-import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * 每日复习计划tab
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInterface {
+
     private final ReviewQuestionService service;
     private final ReviewEnv env;
     private final Project project;
     private JBTable reviewTable;
     private DefaultTableModel tableModel;
     private List<ReviewQuestion> reviewQuestions;
-    
+
     public TotalReviewPlanTabPanel(Project project, ReviewEnv env) {
         this.project = project;
         this.service = new RQServiceImpl(project);
@@ -61,12 +71,12 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
     private void loadContent() {
         // 获取复习题目列表
         reviewQuestions = service.getAllQuestions();
-        
+
         // 创建表格模型 - 只有两列
         String[] columnNames = {
-                BundleUtils.i18nHelper("id", "id"),
-                BundleUtils.i18n("review.table.title"),
-                BundleUtils.i18n("review.table.next.review")
+            BundleUtils.i18nHelper("id", "id"),
+            BundleUtils.i18n("review.table.title"),
+            BundleUtils.i18n("review.table.next.review")
         };
 
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -75,7 +85,7 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
                 return false; // 所有单元格不可编辑
             }
         };
-        
+
         // 填充数据
         for (ReviewQuestion question : reviewQuestions) {
             tableModel.addRow(new Object[]{
@@ -84,7 +94,7 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
                 question.getNextReview(),
             });
         }
-        
+
         // 创建表格
         reviewTable = createReviewTable(tableModel);
 
@@ -110,7 +120,7 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
         addRightClickEventListener(reviewTable);
 
         var buttonPanel = createButtonPanel(reviewTable);
-        
+
         // 将表格和按钮添加到面板
         add(new JBScrollPane(reviewTable), BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
@@ -160,7 +170,9 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
 
                     ReviewQuestion rq = getReviewQuestionByRow(row);
                     if (rq == null) {
-                        throw new RuntimeException("Can not find review question by row: " + row + "\ntotal questions is: " + GsonUtils.toJsonStr(reviewQuestions));
+                        throw new RuntimeException(
+                            "Can not find review question by row: " + row + "\ntotal questions is: "
+                                + GsonUtils.toJsonStr(reviewQuestions));
                     }
                     service.rateQuestionByCardId(rq.getId(), FSRSRating.getById(levelStr), textArea.getText());
                     // 更新DailyPlanTabPanel的问题状态
@@ -213,7 +225,9 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
             @Override
             public void mouseClicked(MouseEvent e) {
                 int selectedRow = reviewTable.getSelectedRow();
-                if (selectedRow < 0) return;
+                if (selectedRow < 0) {
+                    return;
+                }
 
                 ReviewQuestion rq = reviewQuestions.get(selectedRow);
                 if (e.getClickCount() == 1) {
@@ -236,7 +250,8 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
             private final Color FUTURE_COLOR = new JBColor(new Color(30, 144, 255), new Color(30, 144, 255)); // 道奇蓝
 
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                 if (!isSelected) {
@@ -262,12 +277,14 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
 
     /**
      * 设置第一列的颜色渲染器
+     *
      * @param reviewTable table
      */
     private void setColumnZeroColor(JBTable reviewTable) {
         reviewTable.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                 if (!isSelected) {
@@ -303,6 +320,7 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
 
     /**
      * 创建复习表格
+     *
      * @param tableModel data
      * @return JBTable
      */
@@ -314,24 +332,24 @@ public class TotalReviewPlanTabPanel extends JPanel implements MessageReceiveInt
                 int row = rowAtPoint(e.getPoint());
 
                 ReviewQuestion question = getReviewQuestionByRow(row);
-                if (question!= null) {
+                if (question != null) {
                     String difficulty = question.getDifficulty();
                     String mastery = question.getUserRate();
                     String userSolution = question.getUserNoteText();
 
                     // 构建详细的 ToolTip 信息
                     return String.format(
-                            "<html><b>题目:</b> %s<br>" +
-                                    "<b>难度:</b> %s<br>" +
-                                    "<b>掌握程度:</b> %s<br>" +
-                                    "<b>下次复习:</b> %s<br>" +
-                                    "<b>用户备注:</b> %s</html>"
-                            ,
-                            question.getTitle(),
-                            difficulty,
-                            mastery,
-                            question.getNextReview(),
-                            userSolution
+                        "<html><b>题目:</b> %s<br>" +
+                            "<b>难度:</b> %s<br>" +
+                            "<b>掌握程度:</b> %s<br>" +
+                            "<b>下次复习:</b> %s<br>" +
+                            "<b>用户备注:</b> %s</html>"
+                        ,
+                        question.getTitle(),
+                        difficulty,
+                        mastery,
+                        question.getNextReview(),
+                        userSolution
                     );
                 } else {
                     return null;

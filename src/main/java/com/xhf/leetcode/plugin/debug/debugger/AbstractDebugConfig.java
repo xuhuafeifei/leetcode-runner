@@ -12,6 +12,7 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
  * @email 2508020102@qq.com
  */
 public abstract class AbstractDebugConfig implements DebugConfig {
+
     private InstReader reader;
     private Output output;
 
@@ -41,6 +42,7 @@ public abstract class AbstractDebugConfig implements DebugConfig {
     }
 
     public static abstract class Builder<T extends AbstractDebugConfig> {
+
         protected final Project project;
         protected InstReader reader;
         protected Output output;
@@ -55,6 +57,7 @@ public abstract class AbstractDebugConfig implements DebugConfig {
             this.reader = reader;
             return this;
         }
+
         public Builder<T> setOutput(Output output) {
             this.output = output;
             return this;
@@ -63,11 +66,11 @@ public abstract class AbstractDebugConfig implements DebugConfig {
         public Builder<T> autoBuild() {
 
             return
-                    setReader(
-                            ReadType.getReaderInstanceByTypeName(appSettings.getReadTypeName(), project)
-                    ).setOutput(
-                            OutputType.getOutputInstanceByTypeName(appSettings.getOutputTypeName(), project)
-                    );
+                setReader(
+                    ReadType.getReaderInstanceByTypeName(appSettings.getReadTypeName(), project)
+                ).setOutput(
+                    OutputType.getOutputInstanceByTypeName(appSettings.getOutputTypeName(), project)
+                );
         }
 
         public abstract T build();

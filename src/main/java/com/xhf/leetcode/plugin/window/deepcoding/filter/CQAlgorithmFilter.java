@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.window.deepcoding.filter;
 
 import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.window.filter.Filter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class CQAlgorithmFilter implements Filter<CompetitionQuestion, String> {
+
     /**
      * 过滤项, 满足条件的题目会被保留
      */

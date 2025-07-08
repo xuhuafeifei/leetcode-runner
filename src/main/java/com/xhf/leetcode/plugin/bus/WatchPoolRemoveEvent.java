@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.bus;
  * @email 2508020102@qq.com
  */
 public class WatchPoolRemoveEvent {
+
     private final String data;
 
     public WatchPoolRemoveEvent(String data) {

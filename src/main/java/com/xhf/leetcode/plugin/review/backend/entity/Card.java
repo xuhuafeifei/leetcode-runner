@@ -6,6 +6,7 @@ import java.util.Objects;
  * 卡片实体类，对应数据库中的cards表
  */
 public class Card {
+
     private int cardId;
     private String front;
     private String back;
@@ -120,8 +121,12 @@ public class Card {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Card card = (Card) o;
         return cardId == card.cardId;
     }

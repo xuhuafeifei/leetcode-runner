@@ -8,7 +8,12 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.bus.*;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LoginEvent;
+import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
+import com.xhf.leetcode.plugin.bus.QLoadStartEvent;
+import com.xhf.leetcode.plugin.bus.TodayQuestionOkEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.FileCreateError;
@@ -25,20 +30,18 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.utils.TodayIconStatusEnum;
 import com.xhf.leetcode.plugin.window.deepcoding.LCCompetitionPanel;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-
 import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * deal with http module and question ui module
@@ -48,13 +51,13 @@ import java.util.function.Consumer;
  */
 public class QuestionService {
 
+    private static QuestionService qs;
     private final Project project;
-
+    AtomicInteger retryCount = new AtomicInteger(0);
     private boolean todaySolved = false;
-
     private boolean needModify = false;
-
     private CalendarSubmitRecord calendarSubmitRecord;
+    private List<CompetitionQuestion> competitionList;
 
     public QuestionService(Project project) {
         this.project = project;
@@ -77,7 +80,9 @@ public class QuestionService {
         LogUtils.info("diff time = " + millisecondsUntilMidnight);
 
         // 数据写入内存, 无需持久化
-        StoreService.getInstance(project).addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, todayQuestion.getTitleSlug(), false, millisecondsUntilMidnight, TimeUnit.MILLISECONDS);
+        StoreService.getInstance(project)
+            .addCache(StoreService.LEETCODE_TODAY_QUESTION_KEY, todayQuestion.getTitleSlug(), false,
+                millisecondsUntilMidnight, TimeUnit.MILLISECONDS);
 
         todaySolved = "FINISH".equalsIgnoreCase(todayRecord.getUserStatus());
         if (todaySolved) {
@@ -89,8 +94,6 @@ public class QuestionService {
         // 注册
         LCEventBus.getInstance().register(this);
     }
-
-    private static QuestionService qs;
 
     public static QuestionService getInstance(Project project) {
         if (project == null) {
@@ -111,8 +114,6 @@ public class QuestionService {
             }
         }
     }
-
-    private List<CompetitionQuestion> competitionList;
 
     /**
      * 从文件中加载CompetitionList数据
@@ -176,6 +177,7 @@ public class QuestionService {
     /**
      * 该方法需要加锁, 因为可能存在多个线程同时调用该方法, 导致数据加载多次
      * 且该方法第一次调用时不会走任何的缓存逻辑, 可能会非常耗时
+     *
      * @param project project
      * @return 题目列表
      */
@@ -224,6 +226,7 @@ public class QuestionService {
 
     /**
      * fill question with code snippets, translated title etc...
+     *
      * @param question question
      */
     public void fillQuestion(Question question, Project project) {
@@ -266,20 +269,20 @@ public class QuestionService {
         String translatedTitle = questionJsonObj.get("translatedTitle").getAsString();
         // translatedContent = "null",解决报错
         String translatedContent = "";
-        if(!questionJsonObj.get("translatedContent").isJsonNull()) {
+        if (!questionJsonObj.get("translatedContent").isJsonNull()) {
             translatedContent = questionJsonObj.get("translatedContent").getAsString().replaceAll("\n\n", "");
         }
         String questionId = questionJsonObj.get("questionId").getAsString();
         String exampleTestcases = questionJsonObj.get("exampleTestcases").getAsString();
         String codeSnippets = null;
 
-        if(!questionJsonObj.get("codeSnippets").isJsonNull()) {
+        if (!questionJsonObj.get("codeSnippets").isJsonNull()) {
             for (JsonElement item : questionJsonObj.getAsJsonArray("codeSnippets")) {
                 JsonObject obj = item.getAsJsonObject();
                 String lang = GsonUtils.fromJson(obj.get("lang"), String.class);
                 if (lt.has(lang)) {
-//            }
-//            if (.equalsIgnoreCase(langType)) {
+                    //            }
+                    //            if (.equalsIgnoreCase(langType)) {
                     codeSnippets = Question.handleCodeSnippets(obj.get("code").getAsString(), langType);
                     break;
                 }
@@ -296,6 +299,7 @@ public class QuestionService {
 
     /**
      * pick on question for random
+     *
      * @param project project
      * @return 返回随即题目
      */
@@ -307,6 +311,7 @@ public class QuestionService {
 
     /**
      * choose daily question
+     *
      * @param project project
      */
     public void todayQuestion(Project project) {
@@ -368,14 +373,14 @@ public class QuestionService {
      * @return 返回1, 表示已经解决. 0表示无需修改图标状态. -1表示需要修改为未解决图标
      */
     public TodayIconStatusEnum todayQuestionSolved() {
-        if (! needModify) {
+        if (!needModify) {
             return TodayIconStatusEnum.NO_NEED_MODIFY;
         }
         return todaySolved ? TodayIconStatusEnum.SOLVED : TodayIconStatusEnum.NOT_SOLVED;
     }
 
     public void modified() {
-        needModify  = false;
+        needModify = false;
     }
 
     /**
@@ -399,17 +404,18 @@ public class QuestionService {
     @Subscribe
     public void clearCacheEvent(ClearCacheEvent event) {
         todaySolved = false;
-        needModify  = true;
+        needModify = true;
     }
 
     /**
      * 监听每日一题完成状态, 接收到该信息, 表明每日一题已被用户解决
+     *
      * @param event event
      */
     @Subscribe
     public void TodayQuestionOkEventListener(TodayQuestionOkEvent event) {
         todaySolved = true;
-        needModify  = true;
+        needModify = true;
         try {
             this.calendarSubmitRecord = LeetcodeClient.getInstance(project).getCalendarSubmitRecord();
         } catch (Exception e) {
@@ -419,25 +425,24 @@ public class QuestionService {
         }
     }
 
-    AtomicInteger retryCount = new AtomicInteger(0);
-
     /**
      * 该方法会被TodayQuestionAction频繁调用, 因此尽可能不要话费太多时间
+     *
      * @return String 今日一题的完成次数
      */
     public String getTodayQuestionCount() {
         if (calendarSubmitRecord == null) {
             // 如果为null, 则尝试异步获取一次
-//            TaskCenter.getInstance().createTask(() -> {
-//                // 如果超过五次都没有获取成功, 则放弃
-//                if (retryCount.get() < 5) {
-//                    TodayQuestionOkEventListener(null);
-//                } else {
-//                    // 终止获取, 同时修改图标状态的标识位
-//                    modified();
-//                }
-//                retryCount.incrementAndGet();
-//            }).invokeLater();
+            //            TaskCenter.getInstance().createTask(() -> {
+            //                // 如果超过五次都没有获取成功, 则放弃
+            //                if (retryCount.get() < 5) {
+            //                    TodayQuestionOkEventListener(null);
+            //                } else {
+            //                    // 终止获取, 同时修改图标状态的标识位
+            //                    modified();
+            //                }
+            //                retryCount.incrementAndGet();
+            //            }).invokeLater();
 
             return "NULL";
         }
@@ -446,6 +451,7 @@ public class QuestionService {
 
     /**
      * 通过fid查询Question对象
+     *
      * @param fid fid
      * @param project project
      * @return Question对象

@@ -12,25 +12,29 @@ import com.xhf.leetcode.plugin.actions.utils.ActionUtils;
 import com.xhf.leetcode.plugin.review.utils.MessageReceiveInterface;
 import com.xhf.leetcode.plugin.review.utils.ReviewConstants;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
 
 /**
  * @author feigebuge
  */
 public class ReviewWindow extends JFrame implements Disposable, MessageReceiveInterface {
+
+    // jwindow的长/宽比
+    public final static float radio = 1.2f;
+    public final static int initHeight = 330;
     private final Project project;
     /**
      * 命令行选项卡
      */
     private final JBEditorTabs tabs;
-
-    // jwindow的长/宽比
-    public final static float radio = 1.2f;
-    public final static int initHeight = 330;
 
     public ReviewWindow(Project project) {
         this.project = project;
@@ -89,13 +93,14 @@ public class ReviewWindow extends JFrame implements Disposable, MessageReceiveIn
     }
 
     private TabInfo createDailyPlanTabInfo(ReviewEnv env) {
-        JPanel panel  = new DailyPlanTabPanel(project, env);
+        JPanel panel = new DailyPlanTabPanel(project, env);
         TabInfo tabInfo = new TabInfo(panel);
         tabInfo.setText(BundleUtils.i18n("action.leetcode.review.dailyPlan"));
         return tabInfo;
     }
+
     private TabInfo createTotalReviewPlanTabInfo(ReviewEnv env) {
-        JPanel panel  = new TotalReviewPlanTabPanel(project, env);
+        JPanel panel = new TotalReviewPlanTabPanel(project, env);
         TabInfo tabInfo = new TabInfo(panel);
         tabInfo.setText(BundleUtils.i18n("action.leetcode.review.totalReview"));
         return tabInfo;

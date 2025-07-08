@@ -11,6 +11,7 @@ import com.google.gson.annotations.SerializedName;
  * @email 2508020102@qq.com
  */
 public class RunCode {
+
     private String lang;
     private String question_id;
     /* code content */
@@ -67,18 +68,18 @@ public class RunCode {
     @Override
     public String toString() {
         return "RunCode{" +
-                "lang='" + lang + '\'' +
-                ", questionId='" + question_id + '\'' +
-                ", typedCode='" + typed_code + '\'' +
-                ", dataInput='" + data_input + '\'' +
-                '}';
-    }
-
-    public void setTitleSlug(String titleSlug) {
-        this.titleSlug = titleSlug;
+            "lang='" + lang + '\'' +
+            ", questionId='" + question_id + '\'' +
+            ", typedCode='" + typed_code + '\'' +
+            ", dataInput='" + data_input + '\'' +
+            '}';
     }
 
     public String getTitleSlug() {
         return this.titleSlug;
+    }
+
+    public void setTitleSlug(String titleSlug) {
+        this.titleSlug = titleSlug;
     }
 }

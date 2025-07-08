@@ -13,6 +13,7 @@ public class RandomUtils {
 
     /**
      * Generates a random integer within a specified range.
+     *
      * @param min the minimum value (inclusive)
      * @param max the maximum value (inclusive)
      * @return a random integer
@@ -26,6 +27,7 @@ public class RandomUtils {
 
     /**
      * Generates a random double within a specified range.
+     *
      * @param min the minimum value (inclusive)
      * @param max the maximum value (inclusive)
      * @return a random double
@@ -39,6 +41,7 @@ public class RandomUtils {
 
     /**
      * Generates a random string of a specified length.
+     *
      * @param length the length of the string
      * @return a random string
      */
@@ -56,6 +59,7 @@ public class RandomUtils {
 
     /**
      * Generates a globally unique UUID.
+     *
      * @return a UUID string
      */
     public static String nextUUID() {
@@ -64,6 +68,7 @@ public class RandomUtils {
 
     /**
      * Generates a random boolean value.
+     *
      * @return a random boolean
      */
     public static boolean nextBoolean() {

@@ -10,6 +10,7 @@ import com.xhf.leetcode.plugin.debug.reader.ReadType;
  * @email 2508020102@qq.com
  */
 public class Instruction {
+
     /**
      * 标记当前指令是以何种方式读入
      */
@@ -93,12 +94,12 @@ public class Instruction {
     @Override
     public String toString() {
         return "Instruction{" +
-                "readType=" + readType.getType() +
-                ", exit=" + exit +
-                ", success=" + success +
-                ", operation=" + operation +
-                ", param='" + param + '\'' +
-                '}';
+            "readType=" + readType.getType() +
+            ", exit=" + exit +
+            ", success=" + success +
+            ", operation=" + operation +
+            ", param='" + param + '\'' +
+            '}';
     }
 
     public Instruction copy() {

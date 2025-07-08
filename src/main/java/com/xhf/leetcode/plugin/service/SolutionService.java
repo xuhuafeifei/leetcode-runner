@@ -12,22 +12,19 @@ import com.xhf.leetcode.plugin.model.Solution;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class SolutionService {
+
     /**
      * 这块就不搞什么事件解耦了, 太麻烦了. 而且这块业务少, 数据量也少, 没必要
-     * @param project
-     * @param myList
-     * @param titleSlug
      */
     public static void loadSolution(Project project, MyList<Solution> myList, String titleSlug) {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, "Loading...", false) {
@@ -43,6 +40,7 @@ public class SolutionService {
 
     /**
      * get solution content and open content editor
+     *
      * @param project project
      * @param solution 需要打开的solution的相关信息
      * @param solutionEditor 用于显示solution的editor
@@ -63,7 +61,7 @@ public class SolutionService {
         }
         if (StringUtils.isNotBlank(lc.getTitleSlug())) {
             map.put(Constants.TITLE_SLUG, lc.getTitleSlug());
-        }else {
+        } else {
             LogUtils.warn("LeetcodeEditor is null or titleSlug is blank... leetcodeEditor = " + lc);
         }
         // 打开第二个面板

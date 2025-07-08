@@ -3,10 +3,12 @@ package com.xhf.leetcode.plugin.comp;
 import com.intellij.openapi.ui.ComboBox;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.window.filter.Filter;
-
-import javax.swing.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /**
  * 封装了搜索条件面板的逻辑. 服务于SearchPanel
@@ -15,22 +17,12 @@ import java.util.Map;
  * @email 2508020102@qq.com
  */
 public abstract class MySearchConditionPanel<T> extends JPanel {
+
     private final Filter<T, String> myFilter;
     private final ComboBox<String> conditionComb;
     private final String defaultText;
-    private String previousSelection;
     private final OptionConvert convert;
-
-    /**
-     * 创建convert, 该方法下放到子类, 由具体实现类进行创建.
-     * 该方法提供转换器, 允许Combox显示的文本和实际过滤的内容不一致
-     */
-    public abstract OptionConvert createConvert();
-
-    /**
-     * 创建不同的过滤器, 执行不同过滤行为
-     */
-    public abstract Filter<T, String> createFilter();
+    private String previousSelection;
 
     /**
      * @param runnable 后置触发的查询事件
@@ -49,16 +41,16 @@ public abstract class MySearchConditionPanel<T> extends JPanel {
         // 设置默认选择项为空 (类似于显示默认文本)
         conditionComb.setSelectedIndex(-1); // 没有选择项时，显示默认文本
 
-//        // 设置 ComboBox 的渲染器，模拟显示提示文本
-//        conditionComb.setRenderer(new DefaultListCellRenderer() {
-//            @Override
-//            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-//                if (index == -1 && value == null) {
-//                    value = "Difficulty"; // 默认显示文本
-//                }
-//                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-//            }
-//        });
+        //        // 设置 ComboBox 的渲染器，模拟显示提示文本
+        //        conditionComb.setRenderer(new DefaultListCellRenderer() {
+        //            @Override
+        //            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        //                if (index == -1 && value == null) {
+        //                    value = "Difficulty"; // 默认显示文本
+        //                }
+        //                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        //            }
+        //        });
 
         conditionComb.addActionListener(e -> {
             String selectedItem = (String) conditionComb.getSelectedItem();
@@ -90,6 +82,17 @@ public abstract class MySearchConditionPanel<T> extends JPanel {
         this.add(conditionComb);
     }
 
+    /**
+     * 创建convert, 该方法下放到子类, 由具体实现类进行创建.
+     * 该方法提供转换器, 允许Combox显示的文本和实际过滤的内容不一致
+     */
+    public abstract OptionConvert createConvert();
+
+    /**
+     * 创建不同的过滤器, 执行不同过滤行为
+     */
+    public abstract Filter<T, String> createFilter();
+
     public Filter<T, String> getFilter() {
         return myFilter;
     }
@@ -115,6 +118,7 @@ public abstract class MySearchConditionPanel<T> extends JPanel {
      * 选项转换器, 服务于ComboBox显示的选项和实际内容之间的转换
      */
     public interface OptionConvert {
+
         void addPair(String option);
 
         /**
@@ -122,11 +126,14 @@ public abstract class MySearchConditionPanel<T> extends JPanel {
          * @param converted 显示选项对应的实际内容
          */
         void addPair(String option, String converted);
+
         String[] getOptions();
+
         String doConvert(String option);
     }
 
     public static class MapOptionConverter implements OptionConvert {
+
         private final Map<String, String> map;
 
         public MapOptionConverter() {
@@ -160,20 +167,10 @@ public abstract class MySearchConditionPanel<T> extends JPanel {
     }
 
     public static class ArrayOptionConverter implements OptionConvert {
-        private static class Pair {
-            String option;
-            String converted;
-
-            public Pair(String option, String converted) {
-                this.option = option;
-                this.converted = converted;
-            }
-        }
 
         private final Pair[] array;
         private int cursor;
         private int actualSize;
-
         public ArrayOptionConverter(int size) {
             if (size > 6) {
                 LogUtils.warn("option may be large, this may lead to slow");
@@ -222,6 +219,17 @@ public abstract class MySearchConditionPanel<T> extends JPanel {
                 }
             }
             throw new IllegalArgumentException("Unknown option: " + option);
+        }
+
+        private static class Pair {
+
+            String option;
+            String converted;
+
+            public Pair(String option, String converted) {
+                this.option = option;
+                this.converted = converted;
+            }
         }
     }
 

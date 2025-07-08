@@ -13,17 +13,17 @@ import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.listener.PopupMenuAdaptor;
 import com.xhf.leetcode.plugin.render.VariablesCellRender;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import javax.swing.JPanel;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class VariablePanel extends JPanel {
+
     /**
      * 存储变量列表
      */
@@ -32,7 +32,8 @@ public class VariablePanel extends JPanel {
      * 输入表达式的文本框
      */
     private final ExtendableTextField expressionField;
-    private final String defaultText = BundleUtils.i18nHelper("计算表达式 (回车) 或添加监视", "Calculate (Enter) or add to watch");
+    private final String defaultText = BundleUtils.i18nHelper("计算表达式 (回车) 或添加监视",
+        "Calculate (Enter) or add to watch");
 
     public VariablePanel() {
         // 设置垂直布局
@@ -71,13 +72,13 @@ public class VariablePanel extends JPanel {
 
         // 按钮（右侧图标按钮）
         ExtendableTextComponent.Extension watchButton = ExtendableTextComponent.Extension.create(
-                AllIcons.Debugger.AddToWatch,
-                AllIcons.Debugger.AddToWatch,
-                BundleUtils.i18nHelper("添加监视", "Add to Watch"),
-                () -> {
-                    String exp = expressionField.getText();
-                    InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.WATCH, exp));
-                });
+            AllIcons.Debugger.AddToWatch,
+            AllIcons.Debugger.AddToWatch,
+            BundleUtils.i18nHelper("添加监视", "Add to Watch"),
+            () -> {
+                String exp = expressionField.getText();
+                InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.WATCH, exp));
+            });
         this.expressionField.addExtension(watchButton);
 
         variableList = new MyList<>();

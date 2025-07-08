@@ -1,12 +1,12 @@
 package com.xhf.leetcode.plugin.utils;
 
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 public class AESUtils {
 
@@ -17,6 +17,7 @@ public class AESUtils {
 
     /**
      * 生成AES密钥
+     *
      * @return 返回Base64编码后的密钥字符串
      */
     public static String generateKey() throws NoSuchAlgorithmException {
@@ -29,6 +30,7 @@ public class AESUtils {
 
     /**
      * 使用AES加密
+     *
      * @param data 待加密的数据
      * @param key Base64编码后的密钥
      * @return 返回Base64编码后的加密数据
@@ -43,6 +45,7 @@ public class AESUtils {
 
     /**
      * 使用AES解密
+     *
      * @param encryptedData Base64编码后的加密数据
      * @param key Base64编码后的密钥
      * @return 返回解密后的原始数据

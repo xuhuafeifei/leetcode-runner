@@ -4,11 +4,10 @@ import CalendarContributionPanel
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.IconLoader.*
+import com.intellij.openapi.util.IconLoader.getIcon
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLoadingPanel
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.util.ui.UIUtil
 import com.xhf.leetcode.plugin.actions.utils.ActionUtils
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient
 import com.xhf.leetcode.plugin.model.*
@@ -23,7 +22,6 @@ import java.awt.image.BufferedImage
 import java.net.URL
 import javax.imageio.ImageIO
 import javax.swing.*
-
 import javax.swing.table.AbstractTableModel
 import javax.swing.table.DefaultTableCellRenderer
 
@@ -46,6 +44,7 @@ class QuestionTableModel(private val data: List<QuestionRecord>) : AbstractTable
                 "HARD" -> BundleUtils.i18nHelper("困难", "hard")
                 else -> BundleUtils.i18nHelper("未知", "unknown")
             }
+
             2 -> q.formatRelativeTime()
             3 -> q.numSubmitted
             else -> null
@@ -273,14 +272,47 @@ class PersonalWindow(private val project: Project) : JFrame(), Disposable {
         }
 
         // 第一行 竞赛数据
-        gridPanel.add(createStatBlock(BundleUtils.i18nHelper("竞赛分数", "contest score"), userContestRanks.rating.toInt().toString()))
-        gridPanel.add(createStatBlock(BundleUtils.i18nHelper("全球排名", "global rank"), userContestRanks.formatGlobalRank()))
-        gridPanel.add(createStatBlock(BundleUtils.i18nHelper("全国排名", "local rank"), userContestRanks.formatLocalRank()))
+        gridPanel.add(
+            createStatBlock(
+                BundleUtils.i18nHelper("竞赛分数", "contest score"),
+                userContestRanks.rating.toInt().toString()
+            )
+        )
+        gridPanel.add(
+            createStatBlock(
+                BundleUtils.i18nHelper("全球排名", "global rank"),
+                userContestRanks.formatGlobalRank()
+            )
+        )
+        gridPanel.add(
+            createStatBlock(
+                BundleUtils.i18nHelper("全国排名", "local rank"),
+                userContestRanks.formatLocalRank()
+            )
+        )
 
         // 第二行 解题数据
-        gridPanel.add(createColoredStatBlock(BundleUtils.i18nHelper("简单", "easy"), userQuestionProgress.formatEasyProgress(), JBColor(0x3FB950, 0x56D364)))
-        gridPanel.add(createColoredStatBlock(BundleUtils.i18nHelper("中等", "medium"), userQuestionProgress.formatMediumProgress(), JBColor(0xD29922, 0xE3B341)))
-        gridPanel.add(createColoredStatBlock(BundleUtils.i18nHelper("困难", "hard"), userQuestionProgress.formatHardProgress(), JBColor(0xDA3633, 0xFF6B6B)))
+        gridPanel.add(
+            createColoredStatBlock(
+                BundleUtils.i18nHelper("简单", "easy"),
+                userQuestionProgress.formatEasyProgress(),
+                JBColor(0x3FB950, 0x56D364)
+            )
+        )
+        gridPanel.add(
+            createColoredStatBlock(
+                BundleUtils.i18nHelper("中等", "medium"),
+                userQuestionProgress.formatMediumProgress(),
+                JBColor(0xD29922, 0xE3B341)
+            )
+        )
+        gridPanel.add(
+            createColoredStatBlock(
+                BundleUtils.i18nHelper("困难", "hard"),
+                userQuestionProgress.formatHardProgress(),
+                JBColor(0xDA3633, 0xFF6B6B)
+            )
+        )
 
         panel.add(gridPanel)
 
@@ -428,7 +460,8 @@ class PersonalWindow(private val project: Project) : JFrame(), Disposable {
             val x = (width - diameter) / 2
             val y = (height - diameter) / 2
 
-            val clipArea = java.awt.geom.Ellipse2D.Double(x.toDouble(), y.toDouble(), diameter.toDouble(), diameter.toDouble())
+            val clipArea =
+                java.awt.geom.Ellipse2D.Double(x.toDouble(), y.toDouble(), diameter.toDouble(), diameter.toDouble())
             g2d.clip = clipArea
 
             image?.let {

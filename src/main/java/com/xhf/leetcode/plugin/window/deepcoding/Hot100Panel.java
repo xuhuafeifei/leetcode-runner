@@ -2,7 +2,13 @@ package com.xhf.leetcode.plugin.window.deepcoding;
 
 import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.bus.*;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LoginEvent;
+import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
+import com.xhf.leetcode.plugin.bus.QLoadStartEvent;
+import com.xhf.leetcode.plugin.bus.RePositionEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
 import com.xhf.leetcode.plugin.model.Question;
@@ -20,17 +26,18 @@ import com.xhf.leetcode.plugin.window.deepcoding.filter.DCAlgorithmFilter;
 import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
 import com.xhf.leetcode.plugin.window.filter.QFilterChain;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * leetcode 经典热题 100道
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class Hot100Panel extends AbstractSearchPanel<Question> {
+
     /**
      * 用于DeepCodingInfo 存储的信息, 表示当前通过deep coding哪个模式创建的文件
      */
@@ -76,7 +83,11 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
 
     private int[] getHot100() {
         // 缓存100道热题的id
-        return new int[]{0,48,127,282,10,14,41,2,437,559,238,75,52,55,188,237,40,72,53,47,239,159,205,233,140,141,20,1,18,23,24,137,147,22,145,93,103,225,100,542,101,107,97,229,198,113,104,436,235,123,199,993,206,207,45,77,16,38,21,78,130,50,34,73,33,32,152,3,19,154,393,738,83,214,346,294,120,54,44,762,69,117,197,278,321,138,299,151,415,31,61,63,4,1142,71,135,168,74,30,286};
+        return new int[]{0, 48, 127, 282, 10, 14, 41, 2, 437, 559, 238, 75, 52, 55, 188, 237, 40, 72, 53, 47, 239, 159,
+            205, 233, 140, 141, 20, 1, 18, 23, 24, 137, 147, 22, 145, 93, 103, 225, 100, 542, 101, 107, 97, 229, 198,
+            113, 104, 436, 235, 123, 199, 993, 206, 207, 45, 77, 16, 38, 21, 78, 130, 50, 34, 73, 33, 32, 152, 3, 19,
+            154, 393, 738, 83, 214, 346, 294, 120, 54, 44, 762, 69, 117, 197, 278, 321, 138, 299, 151, 415, 31, 61, 63,
+            4, 1142, 71, 135, 168, 74, 30, 286};
     }
 
     @Override
@@ -221,7 +232,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void rePositionEventListeners(RePositionEvent event) {
-        if (! super.doCheck(HOT_100_TEXT)) {
+        if (!super.doCheck(HOT_100_TEXT)) {
             return;
         }
         // 这里需要清除Hot100Panel设置的搜索条件, 不然查询到的数据是缺失的
@@ -239,6 +250,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
 
     /**
      * 当数据加载完毕后, 执行渲染逻辑
+     *
      * @param event event
      */
     @Subscribe
@@ -258,7 +270,7 @@ public class Hot100Panel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void codeSubmitEventListener(CodeSubmitEvent event) {
-        if (! super.doCheck(HOT_100_TEXT)) {
+        if (!super.doCheck(HOT_100_TEXT)) {
             return;
         }
         indexLock();

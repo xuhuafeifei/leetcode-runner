@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.model;
  * @email 2508020102@qq.com
  */
 public class TodayRecord {
+
     private String date;
     private String userStatus;
     private Question question;

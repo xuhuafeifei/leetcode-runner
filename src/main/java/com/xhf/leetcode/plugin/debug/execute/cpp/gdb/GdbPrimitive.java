@@ -9,6 +9,7 @@ import com.intellij.openapi.externalSystem.service.execution.NotSupportedExcepti
  * @email 2508020102@qq.com
  */
 public class GdbPrimitive extends GdbElement {
+
     private Object value = null;
 
     public GdbPrimitive(String value) {

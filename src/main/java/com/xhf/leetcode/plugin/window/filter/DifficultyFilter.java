@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.window.filter;
 
 import com.xhf.leetcode.plugin.model.Question;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +11,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class DifficultyFilter implements QFilter {
+
     /**
      * 过滤项, 满足条件的题目会被保留
      */

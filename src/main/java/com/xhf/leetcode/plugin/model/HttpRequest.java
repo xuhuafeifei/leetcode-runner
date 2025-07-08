@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.model;
 import com.xhf.leetcode.plugin.io.http.utils.LeetcodeApiUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.UnSafe;
-
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,15 +13,20 @@ import java.util.Map;
  */
 public class HttpRequest {
 
-    private String url;
+    private final String url;
 
     private String body;
     /**
      * POST
      */
-    private String contentType;
+    private final String contentType;
 
     private Map<String, String> Header = new HashMap<>();
+
+    private HttpRequest(String url, String contentType) {
+        this.url = url;
+        this.contentType = contentType;
+    }
 
     public static HttpRequest get(String url) {
         return new HttpRequest(url, null);
@@ -34,11 +38,6 @@ public class HttpRequest {
 
     public static HttpRequest put(String url, String contentType) {
         return new HttpRequest(url, contentType);
-    }
-
-    private HttpRequest(String url, String contentType) {
-        this.url = url;
-        this.contentType = contentType;
     }
 
     public String getUrl() {
@@ -69,18 +68,29 @@ public class HttpRequest {
         if (body == null || body.isEmpty()) {
             body = key + "=" + value;
         } else {
-            body = body + "&" + key + "=" +value;
+            body = body + "&" + key + "=" + value;
         }
     }
 
+    @UnSafe("body内部存在用户的登录凭证信息, 调用此方法时需小心")
+    public String toStringUnsafe() {
+        return "HttpRequest{" +
+            "url='" + url + '\'' +
+            ", body='" + body + '\'' +
+            ", contentType='" + contentType + '\'' +
+            ", Header=" + Header +
+            '}';
+    }
+
     public static class RequestBuilder {
+
         private String url;
 
         private String contentType;
 
-        private Map<String, String> jsonBody = new HashMap<>();
+        private final Map<String, String> jsonBody = new HashMap<>();
 
-        private Map<String, String> Header = new HashMap<>();
+        private final Map<String, String> Header = new HashMap<>();
 
         private String body;
 
@@ -114,7 +124,8 @@ public class HttpRequest {
         }
 
         public RequestBuilder addBasicHeader() {
-            addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0");
+            addHeader("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0");
             addHeader("Connection", "keep-alive");
             addHeader("Accept", "*/*");
             addHeader("Host", LeetcodeApiUtils.getLeetcodeHost());
@@ -135,15 +146,5 @@ public class HttpRequest {
             return httpRequest;
         }
 
-    }
-
-    @UnSafe("body内部存在用户的登录凭证信息, 调用此方法时需小心")
-    public String toStringUnsafe() {
-        return "HttpRequest{" +
-                "url='" + url + '\'' +
-                ", body='" + body + '\'' +
-                ", contentType='" + contentType + '\'' +
-                ", Header=" + Header +
-                '}';
     }
 }
