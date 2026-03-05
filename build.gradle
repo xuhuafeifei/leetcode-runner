@@ -7,7 +7,7 @@ plugins {
 }
 
 patchPluginXml {
-    sinceBuild = '203'
+    sinceBuild = '222.*'
     untilBuild = '252.*'
 }
 
