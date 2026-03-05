@@ -10,6 +10,7 @@ import com.intellij.openapi.externalSystem.service.execution.NotSupportedExcepti
  * @email 2508020102@qq.com
  */
 public class GdbObject extends GdbElement {
+
     private final LinkedTreeMap<String, GdbElement> members = new LinkedTreeMap<>(false);
 
     public void add(String key, GdbElement value) {

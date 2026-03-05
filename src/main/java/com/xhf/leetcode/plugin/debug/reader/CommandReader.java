@@ -12,7 +12,8 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class CommandReader extends AbstractInstReader{
+public abstract class CommandReader extends AbstractInstReader {
+
     public CommandReader(Project project, ReadType readType) {
         super(project, readType);
     }
@@ -38,6 +39,7 @@ public abstract class CommandReader extends AbstractInstReader{
 
     /**
      * 返回读取到的命令, 允许子类从不同的来源读取
+     *
      * @return 命令
      */
     protected abstract String readCommand();

@@ -13,16 +13,20 @@ import org.apache.commons.lang3.StringUtils;
  * @email 2508020102@qq.com
  */
 public class GdbParser {
+
     // 单例
     private static final GdbParser INSTANCE = new GdbParser();
+
     private GdbParser() {
     }
+
     public static GdbParser getInstance() {
         return INSTANCE;
     }
 
     /**
      * 预处理GDB的输出, 如果GDB的输出是a=b,c=d这样连续的键值对, 而没有使用{}或[]等符号, 那么最终解析得不到正确的结果
+     *
      * @return s
      */
     public String preHandle(String basic) {
@@ -92,7 +96,7 @@ public class GdbParser {
 
     private GdbElement parseGdbObject(String input) {
         GdbObject gdbObject = new GdbObject();
-        if (! input.startsWith("{")) {
+        if (!input.startsWith("{")) {
             // key - value
             int len = CharacterHelper.startVNameLen(input);
             String key = input.substring(0, len);
@@ -115,6 +119,7 @@ public class GdbParser {
 
     /**
      * 递归解析数组, 通过传出参数来实现返回解析出的内容
+     *
      * @param arr 需要解析的内容
      * @param ele 解析结果
      */
@@ -133,7 +138,9 @@ public class GdbParser {
                      */
                     break;
                 }
-                for (int j = i; j < end; j++) {sb.append(arr[j]);}
+                for (int j = i; j < end; j++) {
+                    sb.append(arr[j]);
+                }
                 i = end - 1;
             } else if (arr[i] == '[') {
                 int end;
@@ -142,7 +149,9 @@ public class GdbParser {
                 } catch (DebugError ignored) {
                     break;
                 }
-                for (int j = i; j < end; j++) {sb.append(arr[j]);}
+                for (int j = i; j < end; j++) {
+                    sb.append(arr[j]);
+                }
                 i = end - 1;
             } else if (arr[i] == ',') {
                 doAdd(sb, ele);
@@ -152,7 +161,9 @@ public class GdbParser {
                 while (j < arr.length && arr[j] != '"') {
                     ++j;
                 }
-                for (int k = i; k <= j; k++) {sb.append(arr[k]);}
+                for (int k = i; k <= j; k++) {
+                    sb.append(arr[k]);
+                }
                 i = j;
             } else {
                 sb.append(arr[i]);
@@ -165,6 +176,7 @@ public class GdbParser {
 
     /**
      * 真正添加的方法, 判断ele类型
+     *
      * @param sb sb
      * @param ele ele
      */

@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
  * @email 2508020102@qq.com
  */
 public class StringConvertor extends AbstractVariableConvertor {
+
     @Override
     protected String doCpp(String testcase, String variableName) {
         testcase = testcase.replace("\"", "");

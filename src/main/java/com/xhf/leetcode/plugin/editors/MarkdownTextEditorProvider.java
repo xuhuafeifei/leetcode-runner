@@ -12,10 +12,9 @@ import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.MarkdownContentType;
 import com.xhf.leetcode.plugin.utils.OSHandler;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import java.util.HashMap;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
 
 /**
  * @author feigebuge

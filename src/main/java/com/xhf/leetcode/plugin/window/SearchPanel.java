@@ -4,7 +4,14 @@ import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;
-import com.xhf.leetcode.plugin.bus.*;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LCSubscriber;
+import com.xhf.leetcode.plugin.bus.LoginEvent;
+import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
+import com.xhf.leetcode.plugin.bus.QLoadStartEvent;
+import com.xhf.leetcode.plugin.bus.RePositionEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
 import com.xhf.leetcode.plugin.listener.QuestionListener;
@@ -18,8 +25,7 @@ import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
 import com.xhf.leetcode.plugin.window.filter.QFilterChain;
-
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,8 +33,10 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * 搜索面板, 提供题目搜索的能力. 内部封装了一个搜索引擎, 提供高效的搜索能力
  */
-@LCSubscriber(events = {LoginEvent.class, ClearCacheEvent.class, CodeSubmitEvent.class, QLoadStartEvent.class, QLoadEndEvent.class})
+@LCSubscriber(events = {LoginEvent.class, ClearCacheEvent.class, CodeSubmitEvent.class, QLoadStartEvent.class,
+    QLoadEndEvent.class})
 public class SearchPanel extends AbstractSearchPanel<Question> {
+
     private final QuestionEngine engine;
     private final Project project;
     private final QFilterChain filterChain;
@@ -119,6 +127,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
 
     /**
      * 当数据加载完毕后, 执行渲染逻辑
+     *
      * @param event event
      */
     @Subscribe
@@ -138,7 +147,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
             state.set(LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE));
         });
         // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
-        if (! Boolean.TRUE.equals(state.get())) {
+        if (!Boolean.TRUE.equals(state.get())) {
             return;
         }
         indexLock();
@@ -164,7 +173,7 @@ public class SearchPanel extends AbstractSearchPanel<Question> {
             state.set(LCToolWindowFactory.getDataContext(project).getData(DataKeys.LEETCODE_CODING_STATE));
         });
         // state为true, 正常显示; 否则是deep coding显示模式, 不能在SearchPanel定位
-        if (! Boolean.TRUE.equals(state.get())) {
+        if (!Boolean.TRUE.equals(state.get())) {
             return;
         }
         // 这里需要清除searchPanel设置的搜索条件, 不然查询到的数据是缺失的

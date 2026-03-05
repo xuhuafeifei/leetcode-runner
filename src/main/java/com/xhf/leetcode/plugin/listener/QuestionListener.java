@@ -8,8 +8,7 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-
-import java.awt.*;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 /**
@@ -17,6 +16,7 @@ import java.awt.event.MouseEvent;
  * @email 2508020102@qq.com
  */
 public class QuestionListener extends AbstractMouseAdapter {
+
     private final MyList<Question> questionList;
 
     public QuestionListener(MyList<Question> questionList, Project project) {
@@ -26,7 +26,6 @@ public class QuestionListener extends AbstractMouseAdapter {
 
     /**
      * 创建题目
-     * @param e
      */
     @Override
     protected void doubleClicked(MouseEvent e) {
@@ -37,8 +36,8 @@ public class QuestionListener extends AbstractMouseAdapter {
             CodeService.getInstance(project).openCodeEditor(question); // 打开代码编辑器
         } catch (FileCreateError ex) {
             LogUtils.error(ex);
-            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + ex.getMessage(), true, true);
-            return;
+            ConsoleUtils.getInstance(project)
+                .showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + ex.getMessage(), true, true);
         }
     }
 }

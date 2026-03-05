@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 import com.intellij.openapi.externalSystem.service.execution.NotSupportedException;
 
 public class ListListIntegerConvertor extends AbstractVariableConvertor {
+
     @Override
     protected String doCpp(String testcase, String variableName) {
         throw new NotSupportedException("cpp not support to convert List_List_Integer! test case = " + testcase);

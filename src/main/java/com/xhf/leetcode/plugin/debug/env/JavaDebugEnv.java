@@ -16,15 +16,16 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.OSHandler;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-
-import javax.swing.*;
+import javax.swing.JComponent;
 
 /**
  * 启动Java环境的debug
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class JavaDebugEnv extends AbstractDebugEnv {
+
     /**
      * Java编写的Main类路径
      */
@@ -55,14 +56,15 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         super(project);
     }
 
-    @Override
-    protected void initFilePath() {
-        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug").append("java").build();
-    }
-
     @Deprecated // only for test
     public JavaDebugEnv() {
         super(null);
+    }
+
+    @Override
+    protected void initFilePath() {
+        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug")
+            .append("java").build();
     }
 
     /**
@@ -70,23 +72,23 @@ public class JavaDebugEnv extends AbstractDebugEnv {
      */
     @Override
     public boolean prepare() throws DebugError {
-        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyFile() && buildFile();
+        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && copyFile()
+            && buildFile();
     }
 
     @Override
     protected boolean copyFile() {
         return
-                // 不要拷贝/debug/java/test目录下的任何内容
-                copyFileHelper("/debug/java/ListNode.java") &&
+            // 不要拷贝/debug/java/test目录下的任何内容
+            copyFileHelper("/debug/java/ListNode.java") &&
                 copyFileHelper("/debug/java/TreeNode.java");
     }
 
     /**
      * 获取编译工具路径
-     * @return
      */
     @Override
-    protected boolean buildToolPrepare() throws DebugError{
+    protected boolean buildToolPrepare() throws DebugError {
         boolean flag = StoreService.getInstance(project).contains("JAVA_HOME");
 
         TextFieldWithBrowseButton myFileBrowserBtn = new TextFieldWithBrowseButton();
@@ -99,11 +101,12 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         }
 
         JComponent component = InnerHelpTooltip.BoxLayout()
-                .add(myFileBrowserBtn)
-                .addHelp(BundleUtils.i18n("debug.leetcode.java.home.path.tip"))
-                .getTargetComponent();
+            .add(myFileBrowserBtn)
+            .addHelp(BundleUtils.i18n("debug.leetcode.java.home.path.tip"))
+            .getTargetComponent();
 
-        DialogWrapper dialog = ViewUtils.getDialogWrapper(component, BundleUtils.i18nHelper("指定JAVA_HOME路径", "Specify JAVA_HOME path"));
+        DialogWrapper dialog = ViewUtils.getDialogWrapper(component,
+            BundleUtils.i18nHelper("指定JAVA_HOME路径", "Specify JAVA_HOME path"));
 
         int i = dialog.getExitCode();
 
@@ -115,17 +118,19 @@ public class JavaDebugEnv extends AbstractDebugEnv {
         java = OSHandler.getJava(JAVA_HOME);
         javac = OSHandler.getJavac(JAVA_HOME);
         if (!FileUtils.fileExists(java)) {
-            throw new DebugError(OSHandler.getJavaName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + java);
+            throw new DebugError(
+                OSHandler.getJavaName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + java);
         }
         if (!FileUtils.fileExists(javac)) {
-            throw new DebugError(OSHandler.getJavacName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + javac);
+            throw new DebugError(
+                OSHandler.getJavacName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + " = " + javac);
         }
         // 存储正确的javaPath
         StoreService.getInstance(project).addCache("JAVA_HOME", JAVA_HOME);
         return true;
     }
 
-    private boolean buildFile() throws DebugError{
+    private boolean buildFile() throws DebugError {
         // 通过java编译mainJavaPath下的Java类
         try {
             // 获取系统javac路径

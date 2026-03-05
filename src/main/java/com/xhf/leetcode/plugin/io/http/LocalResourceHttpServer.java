@@ -7,7 +7,6 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,6 +20,7 @@ import java.net.URLConnection;
 @Service(Service.Level.PROJECT)
 @Deprecated // no need to start server, because the idea platform will start
 public final class LocalResourceHttpServer {
+
     private final Project project;
     private int port = -1;
     private HttpServer server;
@@ -38,7 +38,6 @@ public final class LocalResourceHttpServer {
     public static LocalResourceHttpServer getInstance(Project project) {
         return project.getService(LocalResourceHttpServer.class);
     }
-
 
 
     private void startServer() throws IOException {
@@ -59,6 +58,11 @@ public final class LocalResourceHttpServer {
 
 
     static class ResourceHandler implements HttpHandler {
+
+        public static void main(String[] args) throws IOException {
+            new LocalResourceHttpServer(null);
+        }
+
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String path = exchange.getRequestURI().getPath().substring(1);
@@ -94,16 +98,13 @@ public final class LocalResourceHttpServer {
             os.close();
         }
 
-        public static void main(String[] args) throws IOException {
-            new LocalResourceHttpServer(null);
-        }
-
         private void setResponseHeaders(HttpExchange exchange, int contentLength, String path) throws IOException {
             exchange.getResponseHeaders().add("Content-Type", getContentType(path));
 
             // 设置 CORS 相关的响应头
             exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*"); // 允许所有来源
-            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"); // 允许的方法
+            exchange.getResponseHeaders()
+                .add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"); // 允许的方法
             exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization"); // 允许的请求头
             exchange.getResponseHeaders().add("Access-Control-Max-Age", "3600"); // 预检请求的有效期（秒）
 

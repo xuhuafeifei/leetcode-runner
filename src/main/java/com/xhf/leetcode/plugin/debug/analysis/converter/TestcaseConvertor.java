@@ -9,9 +9,10 @@ public interface TestcaseConvertor {
 
     /**
      * 自动获取当前打文件处理的question的测试样例, 并转换为对应的调用代码
+     *
      * @return string
      */
-    public String autoConvert() throws DebugError;
+    String autoConvert() throws DebugError;
 
     /**
      * 只负责处理一轮solution方法调用的testcases
@@ -20,5 +21,5 @@ public interface TestcaseConvertor {
      * @param testCases 测试案例
      * @return 转换后的代码
      */
-    public String convert(String[] testCases) throws DebugError;
+    String convert(String[] testCases) throws DebugError;
 }

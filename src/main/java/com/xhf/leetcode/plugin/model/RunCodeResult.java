@@ -2,10 +2,9 @@
  * Copyright 2024 json.cn
  */
 package com.xhf.leetcode.plugin.model;
+
 import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
-
 
 
 /**
@@ -13,6 +12,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class RunCodeResult extends BaseCodeResult {
+
     @SerializedName("code_answer")
     private List<String> codeAnswer;
     /*
@@ -37,51 +37,54 @@ public class RunCodeResult extends BaseCodeResult {
     @SerializedName("correct_answer")
     private boolean correctAnswer;
 
+    public List<String> getCodeAnswer() {
+        return codeAnswer;
+    }
+
     public void setCodeAnswer(List<String> codeAnswer) {
         this.codeAnswer = codeAnswer;
     }
-    public List<String> getCodeAnswer() {
-        return codeAnswer;
+
+    public List<String> getStdOutputList() {
+        return stdOutputList;
     }
 
     public void setStdOutputList(List<String> stdOutputList) {
         this.stdOutputList = stdOutputList;
     }
-    public List<String> getStdOutputList() {
-        return stdOutputList;
+
+    public List<String> getExpectedCodeAnswer() {
+        return expectedCodeAnswer;
     }
 
     public void setExpectedCodeAnswer(List<String> expectedCodeAnswer) {
         this.expectedCodeAnswer = expectedCodeAnswer;
     }
-    public List<String> getExpectedCodeAnswer() {
-        return expectedCodeAnswer;
-    }
 
-
-    public void setExpectedStdOutputList(List<String> expectedStdOutputList) {
-        this.expectedStdOutputList = expectedStdOutputList;
-    }
     public List<String> getExpectedStdOutputList() {
         return expectedStdOutputList;
     }
 
+    public void setExpectedStdOutputList(List<String> expectedStdOutputList) {
+        this.expectedStdOutputList = expectedStdOutputList;
+    }
+
+    public boolean getCorrectAnswer() {
+        return correctAnswer;
+    }
 
     public void setCorrectAnswer(boolean correctAnswer) {
         this.correctAnswer = correctAnswer;
-    }
-    public boolean getCorrectAnswer() {
-        return correctAnswer;
     }
 
     @Override
     public String toString() {
         return "RunCodeResult{" +
-                "codeAnswer=" + codeAnswer +
-                ", stdOutputList=" + stdOutputList +
-                ", expectedCodeAnswer=" + expectedCodeAnswer +
-                ", expectedStdOutputList=" + expectedStdOutputList +
-                ", correctAnswer=" + correctAnswer +
-                '}';
+            "codeAnswer=" + codeAnswer +
+            ", stdOutputList=" + stdOutputList +
+            ", expectedCodeAnswer=" + expectedCodeAnswer +
+            ", expectedStdOutputList=" + expectedStdOutputList +
+            ", correctAnswer=" + correctAnswer +
+            '}';
     }
 }

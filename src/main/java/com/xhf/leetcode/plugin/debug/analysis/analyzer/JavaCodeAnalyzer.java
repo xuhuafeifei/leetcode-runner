@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -16,22 +15,21 @@ import java.util.regex.Pattern;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class JavaCodeAnalyzer extends AbstractCodeAnalyzer{
-
-    public JavaCodeAnalyzer(Project project) {
-        super(project);
-    }
-
-    @Deprecated // only for test
-    public JavaCodeAnalyzer() {
-        super(null);
-    }
+public class JavaCodeAnalyzer extends AbstractCodeAnalyzer {
 
     /*
         (\w+) 捕获组, 匹配字母数字下划线
      */
     public static final String methodPattern = "public\\s+.*\\s+(\\w+)\\s*\\(([^)]*)\\)";
-    public static final Pattern pattern  = Pattern.compile(methodPattern);
+    public static final Pattern pattern = Pattern.compile(methodPattern);
+
+    public JavaCodeAnalyzer(Project project) {
+        super(project);
+    }
+    @Deprecated // only for test
+    public JavaCodeAnalyzer() {
+        super(null);
+    }
 
     public AnalysisResult analyze(String code) {
         LogUtils.simpleDebug(code);

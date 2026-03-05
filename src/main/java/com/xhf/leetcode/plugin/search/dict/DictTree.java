@@ -1,18 +1,21 @@
 package com.xhf.leetcode.plugin.search.dict;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 字典树, 将词组以树的形式存储
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class DictTree {
+
+    // 给我一个懒汉单例
+    private static final DictTree INSTANCE = new DictTree();
     private final DictNode head;
 
     private DictTree() {
@@ -21,15 +24,22 @@ public class DictTree {
         loadExtData();
     }
 
+    public static DictTree getInstance() {
+        return INSTANCE;
+    }
+
+    public static void init() {
+        // 触发类加载, 初始化数据
+    }
+
     /**
      * 加载词典数据
-     * @param path
      */
     private void loadData(String path) {
         try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(
-                        Objects.requireNonNull(DictTree.class.getResourceAsStream(path))
-                ))
+            new InputStreamReader(
+                Objects.requireNonNull(DictTree.class.getResourceAsStream(path))
+            ))
         ) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -51,19 +61,9 @@ public class DictTree {
         loadData("/dict/main.dic");
     }
 
-    // 给我一个懒汉单例
-    private static final DictTree INSTANCE = new DictTree();
-
-    public static DictTree getInstance() {
-        return INSTANCE;
-    }
-
-    public static void init() {
-        // 触发类加载, 初始化数据
-    }
-
     /**
      * 添加词组
+     *
      * @param words 词组
      */
     public void addWords(String words) {
@@ -91,12 +91,13 @@ public class DictTree {
 
     /**
      * 以字符c为开始, 匹配字典树的节点, 并返回Hit
+     *
      * @param c 匹配的字符c
      * @return Hit命中对象, 缓存当前匹配的信息
      */
     public Hit match(char c) {
         DictNode head = this.head;
-        if (! head.contains(c)) {
+        if (!head.contains(c)) {
             return Hit.notHit(c);
         }
         DictNode child = head.getChild(c);
@@ -115,7 +116,7 @@ public class DictTree {
         if (head == null) {
             return Hit.notHit(searchC);
         }
-        if (! head.contains(searchC)) {
+        if (!head.contains(searchC)) {
             return Hit.notHit(searchC);
         }
         DictNode child = head.getChild(searchC);

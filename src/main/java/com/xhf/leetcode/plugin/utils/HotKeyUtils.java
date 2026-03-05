@@ -1,6 +1,8 @@
 package com.xhf.leetcode.plugin.utils;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 
 /**
  * @author feigebuge

@@ -15,13 +15,14 @@ public enum ConverterFactory {
     INSTANCE; // 枚举单例实例
     private final Map<String, VariableConvertor> string2ConvertorMap; // 之前的方式，虚拟机重排序可能会发生问题
 
-    private ConverterFactory() {
+    ConverterFactory() {
         string2ConvertorMap = new HashMap<>();
         // 初始化映射表
         for (ParamType value : ParamType.values()) {
             string2ConvertorMap.put(value.getType(), value.getConvertor());
         }
     }
+
     public static ConverterFactory getInstance() {
         return INSTANCE;
     }
@@ -29,6 +30,7 @@ public enum ConverterFactory {
 
     /**
      * 通过分析器得到的参数类型, 获取对应的converter
+     *
      * @param type type是分析器分析得到的参数类型, 不代表项目对于某一类型的标识
      * @return convertor
      */

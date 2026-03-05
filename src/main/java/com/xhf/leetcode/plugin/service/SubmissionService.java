@@ -8,7 +8,6 @@ import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.Submission;
 import com.xhf.leetcode.plugin.model.SubmissionDetail;
 import com.xhf.leetcode.plugin.utils.Constants;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import java.util.Map;
  * @email 2508020102@qq.com
  */
 public class SubmissionService {
+
     public static void loadSubmission(Project project, MyList<Submission> myList, String slug) {
         // query
         List<Submission> submissionList = LeetcodeClient.getInstance(project).getSubmissionList(slug);

@@ -9,6 +9,7 @@ import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
  * @email 2508020102@qq.com
  */
 public class Hit {
+
     /**
      * 用于查询得到hit的字符c
      */
@@ -50,6 +51,7 @@ public class Hit {
         hit.isEnd = false;
         return hit;
     }
+
     public static Hit hitInEnd(char c, DictNode child) {
         Hit hit = new Hit();
         hit.c = c;

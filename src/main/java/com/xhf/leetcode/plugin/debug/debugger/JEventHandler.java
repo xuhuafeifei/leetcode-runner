@@ -4,8 +4,20 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
-import com.sun.jdi.*;
-import com.sun.jdi.event.*;
+import com.sun.jdi.AbsentInformationException;
+import com.sun.jdi.ClassType;
+import com.sun.jdi.Location;
+import com.sun.jdi.Method;
+import com.sun.jdi.VMDisconnectedException;
+import com.sun.jdi.event.BreakpointEvent;
+import com.sun.jdi.event.ClassPrepareEvent;
+import com.sun.jdi.event.Event;
+import com.sun.jdi.event.EventQueue;
+import com.sun.jdi.event.EventSet;
+import com.sun.jdi.event.LocatableEvent;
+import com.sun.jdi.event.StepEvent;
+import com.sun.jdi.event.VMDisconnectEvent;
+import com.sun.jdi.event.VMStartEvent;
 import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.DebugManager;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
@@ -19,17 +31,18 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * java debug event handler
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class JEventHandler implements Runnable {
+
     private final Context context;
     private final Project project;
     private final JavaDebugEnv env;
@@ -90,7 +103,7 @@ public class JEventHandler implements Runnable {
         // LogUtils.simpleDebug(event.toString()); // 不要删除!!!
 
         // 设置context基本信息. 如果前台触发invokeMethod, 则不update location/thread信息
-        if (event instanceof LocatableEvent && ! context.isInvokeMethodStart()) {
+        if (event instanceof LocatableEvent && !context.isInvokeMethodStart()) {
             setContextBasicInfo((LocatableEvent) event);
         }
 
@@ -108,7 +121,6 @@ public class JEventHandler implements Runnable {
             return true;
         }
     }
-
 
 
     private boolean handleVMDisconnectEvent(VMDisconnectEvent event) {
@@ -132,7 +144,7 @@ public class JEventHandler implements Runnable {
 
          因此如果前台触发invokeMethod方法, 则不能修改location, thread信息. 需要保留处理int a = 10时的stack状态
          */
-        if (! context.isInvokeMethodStart()) {
+        if (!context.isInvokeMethodStart()) {
             context.setLocation(event.location());
             context.setThread(event.thread());
         }
@@ -163,7 +175,8 @@ public class JEventHandler implements Runnable {
         context.setSolutionLocation(location);
 
         // 设置断点
-        new JavaBInst().execute(Instruction.success(ReadType.UI_IN, Operation.B, String.valueOf(location.lineNumber())), context);
+        new JavaBInst().execute(Instruction.success(ReadType.UI_IN, Operation.B, String.valueOf(location.lineNumber())),
+            context);
 
         DebugUtils.simpleDebug("break point set at Solution." + mainMethod + " line " + location.lineNumber(), project);
     }
@@ -187,7 +200,7 @@ public class JEventHandler implements Runnable {
     }
 
     private boolean handleBreakpointEvent(BreakpointEvent event) {
-        if (! context.isInvokeMethodStart()) {
+        if (!context.isInvokeMethodStart()) {
             context.setLocation(event.location());
             context.setThread(event.thread());
             context.setBreakpointEvent(event);
@@ -224,7 +237,7 @@ public class JEventHandler implements Runnable {
 
                 因此, 需要做额外检测, 如果前台调用了InvokeMethodStart, 不产生W, P指令
              */
-            if (! context.isInvokeMethodStart()) {
+            if (!context.isInvokeMethodStart()) {
                 // 输入UI打印指令. UI总是会在遇到断点时打印局部变量. 因此输入P指令
                 InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.P, ""));
                 // 高亮指令
@@ -252,7 +265,7 @@ public class JEventHandler implements Runnable {
             // ui读取模式下, 初始化断点
             if (AppSettings.getInstance().isUIReader()) {
                 uiBreakpointInit(event);
-            }else {
+            } else {
                 commandBreakpointInit(event);
             }
         }

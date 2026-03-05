@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.model;
 
 import com.intellij.openapi.util.Pair;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,14 +9,16 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class HttpResponse {
+
     private int statusCode;
 
     private String body;
 
-    private List<Pair<String, String>> Header = new LinkedList<>();
+    private final List<Pair<String, String>> Header = new LinkedList<>();
     private String msg;
 
-    public HttpResponse() {}
+    public HttpResponse() {
+    }
 
     public HttpResponse(int statusCode) {
         this.statusCode = statusCode;
@@ -57,11 +58,11 @@ public class HttpResponse {
         return list;
     }
 
-    public void setMsg(String reasonPhrase) {
-        this.msg = reasonPhrase;
-    }
-
     public String getMsg() {
         return this.msg;
+    }
+
+    public void setMsg(String reasonPhrase) {
+        this.msg = reasonPhrase;
     }
 }

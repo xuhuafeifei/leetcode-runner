@@ -6,23 +6,23 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.constant.FSRSRating;
 import com.xhf.leetcode.plugin.review.backend.model.QueryDim;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestionModel;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 模拟数据
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class MockRQServiceImpl implements ReviewQuestionService {
 
+    // 单利
+    private static MockRQServiceImpl instance = null;
     private final Project project;
     private final List<ReviewQuestion> res = new ArrayList<>();
     private int idx = 0;
-    // 单利
-    private static MockRQServiceImpl instance = null;
 
     private MockRQServiceImpl(Project project) {
         this.project = project;

@@ -37,10 +37,13 @@ import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.LangType;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.awt.*;
-import java.io.*;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -50,14 +53,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class DebugUtils {
+
+    // 用于存储已添加的高亮
+    private static final Map<Integer, RangeHighlighter> highlighterMap = new HashMap<>();
+
     /**
      * 打印进程输出结果
+     *
      * @param process process
      * @param asyn 是否异步
      */
@@ -102,6 +111,7 @@ public class DebugUtils {
             }
         }
     }
+
     public static String getErrorMessage(Process process) throws IOException {
         return inputStreamToString(process.getErrorStream(), "GBK");
     }
@@ -112,6 +122,7 @@ public class DebugUtils {
 
     /**
      * 将 InputStream 转换为字符串，使用指定的编码
+     *
      * @param inputStream 输入流
      * @param encoding 字符编码
      * @return 转换后的字符串
@@ -130,6 +141,7 @@ public class DebugUtils {
 
     /**
      * 同时写入log和consoleView
+     *
      * @param message message
      * @param project project
      */
@@ -202,6 +214,7 @@ public class DebugUtils {
 
     /**
      * 根据文件路径和行号移除断点
+     *
      * @param project 当前项目
      * @param file 虚拟文件
      * @param lineNumber 行号（0-based）
@@ -216,8 +229,8 @@ public class DebugUtils {
         // 遍历所有断点，找到符合条件的断点
         for (XBreakpoint<?> breakpoint : getAllBreakpoint(project)) {
             if (breakpoint.getSourcePosition() != null
-                    && file.equals(breakpoint.getSourcePosition().getFile())
-                    && lineNumber == breakpoint.getSourcePosition().getLine()) {
+                && file.equals(breakpoint.getSourcePosition().getFile())
+                && lineNumber == breakpoint.getSourcePosition().getLine()) {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ApplicationManager.getApplication().runWriteAction(() -> {
                         // 删除断点
@@ -231,6 +244,7 @@ public class DebugUtils {
 
     /**
      * 根据文件路径移除所有断点
+     *
      * @param project 当前项目
      * @param file 虚拟文件
      */
@@ -245,8 +259,8 @@ public class DebugUtils {
         // 遍历所有断点，找到符合条件的断点
         for (XBreakpoint<?> breakpoint : DebugUtils.getAllBreakpoint(project)) {
             if (breakpoint.getSourcePosition() != null
-                    && file.equals(breakpoint.getSourcePosition().getFile())
-                    ) {
+                && file.equals(breakpoint.getSourcePosition().getFile())
+            ) {
                 res.add(breakpoint);
             }
         }
@@ -289,20 +303,17 @@ public class DebugUtils {
         return Instruction.success(ReadType.UI_IN, Operation.RB, String.valueOf(sp.getLine() + 1));
     }
 
-    // 用于存储已添加的高亮
-    private static final Map<Integer, RangeHighlighter> highlighterMap = new HashMap<>();
-
     public static void highlightLineWithCheck(int lineNumber, String curClassName, Project project) {
         // 如果是cpp debug, 特判一下
         String langType = AppSettings.getInstance().getLangType();
         if (LangType.CPP.getLangType().equals(langType)) {
-            if (! curClassName.endsWith("solution.cpp")) {
+            if (!curClassName.endsWith("solution.cpp")) {
                 DebugUtils.removeHighlightLine(project);
                 return;
             }
         }
         // 如果当前执行的类不是Solution, 则不进行高亮
-        else if (! "Solution".equals(curClassName)) {
+        else if (!"Solution".equals(curClassName)) {
             DebugUtils.removeHighlightLine(project);
             return;
         }
@@ -337,11 +348,11 @@ public class DebugUtils {
         int finalLineNumber = lineNumber;
         ApplicationManager.getApplication().invokeAndWait(() -> {
             RangeHighlighter highlighter = markupModel.addRangeHighlighter(
-                    startOffset,
-                    endOffset,
-                    Integer.MAX_VALUE, // 高亮的层级
-                    textAttributes,
-                    HighlighterTargetArea.LINES_IN_RANGE
+                startOffset,
+                endOffset,
+                Integer.MAX_VALUE, // 高亮的层级
+                textAttributes,
+                HighlighterTargetArea.LINES_IN_RANGE
             );
             // 缓存该高亮
             highlighterMap.put(finalLineNumber, highlighter);
@@ -371,6 +382,7 @@ public class DebugUtils {
 
     /**
      * 根据Location构建行信息
+     *
      * @param location location
      * @return 行信息
      */
@@ -386,7 +398,9 @@ public class DebugUtils {
     }
 
     public static void fillExecuteResultByLocation(ExecuteResult r, Location location) {
-        if (location == null) return;
+        if (location == null) {
+            return;
+        }
         try {
             r.setAddLine(location.lineNumber());
             r.setMethodName(location.method().name());
@@ -396,13 +410,15 @@ public class DebugUtils {
         }
     }
 
-    public static void fillExecuteResultByLocation(ExecuteResult r, String className, String methodName, int lineNumber) {
+    public static void fillExecuteResultByLocation(ExecuteResult r, String className, String methodName,
+        int lineNumber) {
         r.setAddLine(lineNumber);
         r.setMethodName(methodName);
         r.setClassName(className);
     }
 
-    public static void fillExecuteResultByGdbElement(ExecuteResult r, GdbElement className, GdbElement methodName, GdbElement lineNumber) {
+    public static void fillExecuteResultByGdbElement(ExecuteResult r, GdbElement className, GdbElement methodName,
+        GdbElement lineNumber) {
         r.setAddLine(lineNumber.getAsGdbPrimitive().getAsNumber().intValue());
         r.setMethodName(methodName.getAsGdbPrimitive().toString());
         r.setClassName(className.getAsGdbPrimitive().getAsString());
@@ -414,6 +430,7 @@ public class DebugUtils {
 
     /**
      * 获取可用端口
+     *
      * @return port
      */
     public static int findAvailablePort() {
@@ -427,8 +444,9 @@ public class DebugUtils {
 
     /**
      * 服务于变量转换
+     *
      * @param values values
-     * @return  map
+     * @return map
      */
     public static Map<String, Value> convert(Map<LocalVariable, Value> values) {
         Map<String, Value> res = new HashMap<>();
@@ -440,7 +458,8 @@ public class DebugUtils {
 
     /**
      * 哎，不想命名了, 就这吧
-     * @param  values values
+     *
+     * @param values values
      * @return map
      */
     public static Map<String, Value> convert2(Map<Field, Value> values) {
@@ -450,6 +469,7 @@ public class DebugUtils {
         }
         return res;
     }
+
     public static String removeQuotes(String str) {
         // 除去的是字符串两端的双引号
         if (str.startsWith("\"")) {
@@ -520,6 +540,7 @@ public class DebugUtils {
     /**
      * 换了一种判断方式, 如果Java创建ServerSocket失败, 认为端口可用
      * C++的debug场景下, C++服务只支持HTTP, 不支持Socket, 所以这里不采用链接的方式判断
+     *
      * @param host host
      * @param port port
      * @return boolean
@@ -539,6 +560,7 @@ public class DebugUtils {
 
     /**
      * 如果exp没有双引号, 增加双引号, 否则不增加
+     *
      * @param exp exp
      * @return string
      */

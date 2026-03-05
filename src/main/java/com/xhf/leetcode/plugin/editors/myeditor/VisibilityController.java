@@ -1,25 +1,33 @@
 package com.xhf.leetcode.plugin.editors.myeditor;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.Timer;
 
 public abstract class VisibilityController {
+
     private static final int RETENTION_DELAY = 1500;
     private static final int TRANSITION_DELAY = 50;
     private static final int TRANSITION_VALUE = 20;
     private static final int MAX_VALUE = 100;
     private static final int MIN_VALUE = 0;
-
-    private enum State { INVISIBLE, VISIBLE, HIDING, SHOWING }
-
+    private final Timer transitionTimer = new Timer(TRANSITION_DELAY, null);
+    private final Timer retentionTimer = new Timer(RETENTION_DELAY, null);
     private boolean isDisposed = false;
     private int opacityCounter = 0;
     private State state = State.INVISIBLE;
 
-    private final Timer transitionTimer = new Timer(TRANSITION_DELAY, null);
-    private final Timer retentionTimer = new Timer(RETENTION_DELAY, null);
+    {
+        transitionTimer.setRepeats(true);
+        transitionTimer.addActionListener(e -> refresh());
+
+        retentionTimer.setRepeats(false);
+        retentionTimer.addActionListener(e -> {
+            if (isRetention()) {
+                scheduleShow();
+            } else {
+                scheduleHide();
+            }
+        });
+    }
 
     public float getOpacity() {
         synchronized (this) {
@@ -80,7 +88,9 @@ public abstract class VisibilityController {
     }
 
     private void propagateStateChanges() {
-        if (isDisposed) return;
+        if (isDisposed) {
+            return;
+        }
 
         switch (state) {
             case SHOWING:
@@ -103,14 +113,5 @@ public abstract class VisibilityController {
 
     protected abstract boolean isAutoHide();
 
-    {
-        transitionTimer.setRepeats(true);
-        transitionTimer.addActionListener(e -> refresh());
-
-        retentionTimer.setRepeats(false);
-        retentionTimer.addActionListener(e -> {
-            if (isRetention()) scheduleShow();
-            else scheduleHide();
-        });
-    }
+    private enum State {INVISIBLE, VISIBLE, HIDING, SHOWING}
 }

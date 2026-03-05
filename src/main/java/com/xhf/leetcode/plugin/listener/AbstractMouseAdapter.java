@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.listener;
 
 import com.intellij.openapi.project.Project;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -10,9 +9,11 @@ import java.awt.event.MouseEvent;
  * @email 2508020102@qq.com
  */
 public abstract class AbstractMouseAdapter extends MouseAdapter {
+
     protected final Project project;
+
     public AbstractMouseAdapter(Project project) {
-        this.project  = project;
+        this.project = project;
     }
 
     @Override

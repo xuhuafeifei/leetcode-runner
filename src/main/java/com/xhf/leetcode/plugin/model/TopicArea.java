@@ -1,6 +1,6 @@
 /**
-  * Copyright 2025 json.cn 
-  */
+ * Copyright 2025 json.cn
+ */
 package com.xhf.leetcode.plugin.model;
 
 /**
@@ -13,18 +13,21 @@ public class TopicArea {
 
     private String name;
     private String slug;
+
+    public String getName() {
+        return name;
+    }
+
     public void setName(String name) {
-         this.name = name;
-     }
-     public String getName() {
-         return name;
-     }
+        this.name = name;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
 
     public void setSlug(String slug) {
-         this.slug = slug;
-     }
-     public String getSlug() {
-         return slug;
-     }
+        this.slug = slug;
+    }
 
 }

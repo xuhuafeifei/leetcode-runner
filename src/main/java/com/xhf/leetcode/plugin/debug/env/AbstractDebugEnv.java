@@ -17,17 +17,16 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.UnSafe;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import org.apache.commons.lang3.ArrayUtils;
-
-import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import javax.swing.JTextArea;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * DebugEnv父类
@@ -41,18 +40,17 @@ import java.util.jar.JarFile;
  * @email 2508020102@qq.com
  */
 public abstract class AbstractDebugEnv implements DebugEnv {
+
+    protected static boolean isDebug = false;
+    protected final Project project;
     /**
      * 核心存储路径. 所有debug相关文件都存储在filePath指定目录下
      */
     protected String filePath = "";
-
-    protected final Project project;
     /**
      * Solution核心方法名
      */
     protected String methodName;
-
-    protected static boolean isDebug = false;
 
     public AbstractDebugEnv(Project project) {
         this.project = project;
@@ -77,8 +75,8 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         jTextPane.setText(lc.getDebugTestcase());
 
         DialogWrapper dialogWrapper = ViewUtils.getDialogWrapper(
-                new JBScrollPane(jTextPane),
-                BundleUtils.i18n("debug.leetcode.testcase.input"));
+            new JBScrollPane(jTextPane),
+            BundleUtils.i18n("debug.leetcode.testcase.input"));
 
         int i = dialogWrapper.getExitCode();
 
@@ -123,9 +121,9 @@ public abstract class AbstractDebugEnv implements DebugEnv {
         String[] split = resourcePath.split("/");
         String fileName = split[split.length - 1];
         return StoreService.getInstance(project).
-                copyFile(getClass().getResource(resourcePath),
-                        new FileUtils.PathBuilder(filePath).append(fileName).build()
-                );
+            copyFile(getClass().getResource(resourcePath),
+                new FileUtils.PathBuilder(filePath).append(fileName).build()
+            );
     }
 
     /**
@@ -145,8 +143,8 @@ public abstract class AbstractDebugEnv implements DebugEnv {
      * 暴力遍历文件目录, 并copy文件
      *
      * @param resourcePath resource目录下的资源路径, 方法会拷贝目录下所有内容
-     * @param exp          排除的文件名字
-     * @return             是否成功
+     * @param exp 排除的文件名字
+     * @return 是否成功
      */
     @UnSafe("这个方法没有经过各种场景的测试, 可能会存在风险. 目前对于/debug/python资源目录下的内容处理没有问题")
     private boolean forceTraverse(String resourcePath, String[] exp) throws IOException {
@@ -162,7 +160,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
             filePath = filePath.replace("jar:file:", "");
             String jarFilePath = filePath.substring(0, filePath.indexOf("!"));
             jarFilePath = URLDecoder.decode(jarFilePath, StandardCharsets.UTF_8);
-            if (! FileUtils.fileExists(jarFilePath)) {
+            if (!FileUtils.fileExists(jarFilePath)) {
                 throw new DebugError("jar file not found: " + jarFilePath);
             }
 
@@ -174,16 +172,16 @@ public abstract class AbstractDebugEnv implements DebugEnv {
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
                 String entryName = entry.getName();
-                if (! entryName.startsWith("/")) {
+                if (!entryName.startsWith("/")) {
                     entryName = "/" + entryName;
                 }
-                if (! resourcePath.startsWith("/")) {
+                if (!resourcePath.startsWith("/")) {
                     resourcePath = "/" + resourcePath;
                 }
 
                 // 判断条目是否是目标目录下的文件或目录
                 if (entryName.startsWith(resourcePath)) {
-                    if (! entry.isDirectory()) {
+                    if (!entry.isDirectory()) {
                         // 文件
                         String[] split = entryName.split("/");
                         String fileName = split[split.length - 1];
@@ -191,7 +189,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
                         // 判断是否需要排除文件
                         if (!ArrayUtils.contains(exp, fileName)) {
                             // 去除entryName的资源路径名称, 获取相对路径
-                            if (! copyFileHelper(entry, entryName.replace(resourcePath, ""), jarFile) ) {
+                            if (!copyFileHelper(entry, entryName.replace(resourcePath, ""), jarFile)) {
                                 // 复制文件
                                 return false;
                             }
@@ -208,7 +206,7 @@ public abstract class AbstractDebugEnv implements DebugEnv {
     /**
      * 复制文件的辅助方法
      *
-     * @param entry  JAR 文件中的条目
+     * @param entry JAR 文件中的条目
      * @param jarFile JAR 文件
      */
     private boolean copyFileHelper(JarEntry entry, String fileName, JarFile jarFile) throws IOException {

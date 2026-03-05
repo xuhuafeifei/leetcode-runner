@@ -5,10 +5,7 @@ import com.sun.jdi.request.StepRequest;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
-import com.xhf.leetcode.plugin.debug.reader.InstSource;
-import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
-import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 
 /**
@@ -16,6 +13,7 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
  * @email 2508020102@qq.com
  */
 public class JavaNInst extends AbstractJavaInstExecutor {
+
     @Override
     public ExecuteResult doExecute(Instruction inst, Context context) {
         /*
@@ -44,8 +42,8 @@ public class JavaNInst extends AbstractJavaInstExecutor {
          * 至此, 实现了在第13行执行N指令, 高亮显示下一行代码, 也就是14行
          */
         super.doMoreInst(
-            new Operation[] {Operation.W, Operation.P},
-            new String[] {"W", "P"},
+            new Operation[]{Operation.W, Operation.P},
+            new String[]{"W", "P"},
             inst.getReadType()
         );
 
@@ -53,7 +51,9 @@ public class JavaNInst extends AbstractJavaInstExecutor {
         Location location = context.getLocation();
         // debug
         String info = DebugUtils.buildCurrentLineInfoByLocation(location);
-        DebugUtils.simpleDebug(BundleUtils.i18nHelper("N 指令执行时, 处于 ", "N instruction execution, current line is ") + info, context.getProject());
+        DebugUtils.simpleDebug(
+            BundleUtils.i18nHelper("N 指令执行时, 处于 ", "N instruction execution, current line is ") + info,
+            context.getProject());
 
         context.setStepRequest(StepRequest.STEP_LINE, StepRequest.STEP_INTO);
         // 放行

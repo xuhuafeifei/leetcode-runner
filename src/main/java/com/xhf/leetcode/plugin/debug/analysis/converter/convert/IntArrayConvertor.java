@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
  * @email 2508020102@qq.com
  */
 public class IntArrayConvertor extends AbstractVariableConvertor {
+
     @Override
     protected String doCpp(String testcase, String variableName) {
         // 处理 vector<int>
@@ -17,6 +18,7 @@ public class IntArrayConvertor extends AbstractVariableConvertor {
 
     /**
      * 类c语言处理后缀
+     *
      * @param testcase testcase
      * @param sb sb
      * @return String

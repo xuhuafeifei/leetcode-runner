@@ -17,7 +17,6 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.OSHandler;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-
 import java.io.IOException;
 
 /**
@@ -25,6 +24,7 @@ import java.io.IOException;
  * @email 2508020102@qq.com
  */
 public class PythonDebugEnv extends AbstractDebugEnv {
+
     /**
      * python debugger的启动配置
      */
@@ -60,7 +60,8 @@ public class PythonDebugEnv extends AbstractDebugEnv {
 
     @Override
     protected void initFilePath() {
-        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug").append("python").build();
+        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug")
+            .append("python").build();
     }
 
     @Override
@@ -70,29 +71,28 @@ public class PythonDebugEnv extends AbstractDebugEnv {
 
     /**
      * copy python需要的代码
-     * @return
      */
     @Override
     protected boolean copyFile() {
         // copy
         return
-//                copyFileHelper("/debug/python/inst_source.py") &&
-//                copyFileHelper("/debug/python/log_out_helper.py") &&
-//                copyFileHelper("/debug/python/debug_core.py") &&
-//                copyFileHelper("/debug/python/execute_result.py") &&
-//                copyFileHelper("/debug/python/server.py") &&
-//                copyFileHelper("/debug/python/ListNode.py") &&
-//                copyFileHelper("/debug/python/TreeNode.py")
-                copyFileExcept("/debug/python",
-                        new String[]{
-                                "ListNodeConvertor.template",
-                                "TreeNodeConvertor.template",
-                                "test.cmd",
-                                "Main.template",
-                                "Main.py",
-                                "Solution.py"
-                        }
-                );
+            //                copyFileHelper("/debug/python/inst_source.py") &&
+            //                copyFileHelper("/debug/python/log_out_helper.py") &&
+            //                copyFileHelper("/debug/python/debug_core.py") &&
+            //                copyFileHelper("/debug/python/execute_result.py") &&
+            //                copyFileHelper("/debug/python/server.py") &&
+            //                copyFileHelper("/debug/python/ListNode.py") &&
+            //                copyFileHelper("/debug/python/TreeNode.py")
+            copyFileExcept("/debug/python",
+                new String[]{
+                    "ListNodeConvertor.template",
+                    "TreeNodeConvertor.template",
+                    "test.cmd",
+                    "Main.template",
+                    "Main.py",
+                    "Solution.py"
+                }
+            );
     }
 
     @Override
@@ -109,13 +109,13 @@ public class PythonDebugEnv extends AbstractDebugEnv {
         }
 
         int i = ViewUtils.getDialogWrapper(
-                InnerHelpTooltip
-                        .BoxLayout()
-                        .add(myFileBrowserBtn)
-                        .addHelp(BundleUtils.i18n("debug.leetcode.python.home.path.tip"))
-                        .getTargetComponent()
-                ,
-                BundleUtils.i18nHelper("设置python解释器路径", "Set python interpreter path")
+            InnerHelpTooltip
+                .BoxLayout()
+                .add(myFileBrowserBtn)
+                .addHelp(BundleUtils.i18n("debug.leetcode.python.home.path.tip"))
+                .getTargetComponent()
+            ,
+            BundleUtils.i18nHelper("设置python解释器路径", "Set python interpreter path")
         ).getExitCode();
 
         if (i != DialogWrapper.OK_EXIT_CODE) {
@@ -125,13 +125,16 @@ public class PythonDebugEnv extends AbstractDebugEnv {
         String pythonPath = myFileBrowserBtn.getText();
         boolean exist = OSHandler.isPythonInterpreter(pythonPath);
         if (!exist) {
-            throw new DebugError(BundleUtils.i18nHelper("python解释器路径错误! " + pythonPath, "Invalid python interpreter path! ") + pythonPath);
+            throw new DebugError(
+                BundleUtils.i18nHelper("python解释器路径错误! " + pythonPath, "Invalid python interpreter path! ")
+                    + pythonPath);
         }
 
         python = pythonPath;
 
         if (!FileUtils.fileExists(python)) {
-            throw new DebugError(OSHandler.getPythonName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + python);
+            throw new DebugError(
+                OSHandler.getPythonName() + BundleUtils.i18n("action.leetcode.plugin.path.error") + python);
         }
         // 存储正确的javaPath
         StoreService.getInstance(project).addCache("PYTHON_EXE", pythonPath);
@@ -166,20 +169,22 @@ public class PythonDebugEnv extends AbstractDebugEnv {
             FileUtils.createAndWriteFile(this.stdErrDir, "");
         } catch (IOException e) {
             LogUtils.error(e);
-            throw new DebugError(BundleUtils.i18nHelper("python日志文件创建错误!", "Failed to create python log files!") + e);
+            throw new DebugError(
+                BundleUtils.i18nHelper("python日志文件创建错误!", "Failed to create python log files!") + e);
         }
 
         mainContent = mainContent.replace("{{callCode}}", callCode)
-                .replace("{{port}}", String.valueOf(this.pyPort))
-                .replace("{{methodName}}", "\"" + this.methodName + "\"")
-                .replace("{{read_type}}", "\"" + config.getReadType().getType() + "\"")
-                .replace("{{log_dir}}", "\"" + this.logDir + "\"")
-                .replace("{{std_out_dir}}", "\"" + this.stdOutDir + "\"")
-                .replace("{{std_err_dir}}", "\"" + this.stdErrDir + "\"")
-                .replace("{{language_type}}", "\"" + AppSettings.getInstance().getI18nType().getValue() + "\"")
+            .replace("{{port}}", String.valueOf(this.pyPort))
+            .replace("{{methodName}}", "\"" + this.methodName + "\"")
+            .replace("{{read_type}}", "\"" + config.getReadType().getType() + "\"")
+            .replace("{{log_dir}}", "\"" + this.logDir + "\"")
+            .replace("{{std_out_dir}}", "\"" + this.stdOutDir + "\"")
+            .replace("{{std_err_dir}}", "\"" + this.stdErrDir + "\"")
+            .replace("{{language_type}}", "\"" + AppSettings.getInstance().getI18nType().getValue() + "\"")
         ;
         // debug
-        DebugUtils.simpleDebug(BundleUtils.i18nHelper("python服务端口确定: ", "python service port determined: ") + pyPort, project);
+        DebugUtils.simpleDebug(
+            BundleUtils.i18nHelper("python服务端口确定: ", "python service port determined: ") + pyPort, project);
         DebugUtils.simpleDebug(BundleUtils.i18nHelper("核心调用代码: \n", "core call code: \n") + callCode, project);
         DebugUtils.simpleDebug(BundleUtils.i18nHelper("方法名: ", "methodName: ") + methodName, project);
         // 存储文件
@@ -221,7 +226,7 @@ public class PythonDebugEnv extends AbstractDebugEnv {
           通用包
          */
         String commonPackage =
-                "# Common imports for LeetCode problems\n" +
+            "# Common imports for LeetCode problems\n" +
                 "from typing import List, Optional, Tuple, Dict, Set\n" +
                 "from collections import defaultdict, Counter, deque, namedtuple, OrderedDict\n" +
                 "from heapq import heappush, heappop, heapify\n" +
@@ -233,8 +238,7 @@ public class PythonDebugEnv extends AbstractDebugEnv {
                 "import sys\n" +
                 "from ListNode import ListNode\n" +
                 "from TreeNode import TreeNode\n" +
-                "from math import *\n"
-                ;
+                "from math import *\n";
         // 设置偏移量, 后期debug的时候需要通过offset对齐
         this.offset = commonPackage.split("\n").length;
         return commonPackage + content;

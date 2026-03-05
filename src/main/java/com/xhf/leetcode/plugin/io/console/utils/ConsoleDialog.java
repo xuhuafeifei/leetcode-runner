@@ -5,5 +5,4 @@ public enum ConsoleDialog {
     WARNING,
     ERROR,
     UNKNOWN
-    ;
 }

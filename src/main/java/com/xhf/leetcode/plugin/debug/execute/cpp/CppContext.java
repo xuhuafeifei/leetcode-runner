@@ -6,16 +6,16 @@ import com.xhf.leetcode.plugin.debug.env.CppDebugEnv;
 import com.xhf.leetcode.plugin.debug.execute.AbstractExecuteContext;
 import com.xhf.leetcode.plugin.debug.reader.ReadType;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class CppContext extends AbstractExecuteContext {
+
     private CppDebugEnv env;
     private CppClient cppClient;
     private ReadType readType;
@@ -58,11 +58,11 @@ public class CppContext extends AbstractExecuteContext {
         this.cppClient = cppClient;
     }
 
-    public void setReadType(ReadType readType) {
-        this.readType = readType;
-    }
-
     public ReadType getReadType() {
         return this.readType;
+    }
+
+    public void setReadType(ReadType readType) {
+        this.readType = readType;
     }
 }

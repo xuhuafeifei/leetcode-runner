@@ -21,18 +21,20 @@ public enum FSRSState {
      */
     RELEARNING(3);
 
+    private final Integer id;
+
     /**
      * 构造器
+     *
      * @param id 状态的ID (0-3)
      */
     FSRSState(Integer id) {
         this.id = id;
     }
 
-    private Integer id;
-
     /**
      * 获取状态的整数值
+     *
      * @return 状态的ID
      */
     public Integer toInt() {

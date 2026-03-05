@@ -2,7 +2,12 @@ package com.xhf.leetcode.plugin.debug.execute.java;
 
 import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.project.Project;
-import com.sun.jdi.*;
+import com.sun.jdi.ClassType;
+import com.sun.jdi.Location;
+import com.sun.jdi.Method;
+import com.sun.jdi.ThreadReference;
+import com.sun.jdi.Value;
+import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.BreakpointEvent;
 import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
@@ -18,9 +23,6 @@ import com.xhf.leetcode.plugin.debug.output.Output;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -28,14 +30,32 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
  * 指令执行上下文
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class Context extends AbstractExecuteContext {
+
+    /**
+     * 单步请求管理器. 统一管理所有的单步请求
+     */
+    private final StepRequestManager stepRequestManager = new StepRequestManager();
+    /**
+     * 锁
+     */
+    private final Object lock = new Object();
+    /**
+     * 存储调用waitFor的线程
+     */
+    @Deprecated // 打断线程的方式已被废弃. 打断线程存在破坏正在阻塞读取数据线程的风险. 详细查看{@link com.xhf.leetcode.plugin.debug.reader.InstSource}
+    private final Set<Thread> threadSet = new HashSet<>();
+    private final int sleepTime = 70;
     private BreakpointEvent breakpointEvent;
     private EventRequestManager erm;
     private EventSet eventSet;
@@ -53,16 +73,21 @@ public class Context extends AbstractExecuteContext {
      * 专门表示Solution类的location
      */
     private Location solutionLocation;
-    /**
-     * 单步请求管理器. 统一管理所有的单步请求
-     */
-    private final StepRequestManager stepRequestManager = new StepRequestManager();
     private Iterator<Event> itr;
     /**
      * 项目运行之初, 需要等待
      */
     private volatile boolean waitFor = true;
     private Output output;
+    private final AtomicInteger sleepCount = new AtomicInteger(0);
+    private int waitRound = 8;
+    private int waitCount = 0;
+    /**
+     * 存储invoke状态. 该字段记录JavaDebugger在处理指令过程中
+     * 是否触发invokeMethod. invokeMethod底层涉及到很多复杂的操作,
+     * 需要额外进行前后台的协调处理(JavaDebugger和JEventHandler之间的协调)
+     */
+    private InvokeStatus invokeStatus = InvokeStatus.NOT_START;
 
     public Context(Project project) {
         super(project);
@@ -94,12 +119,12 @@ public class Context extends AbstractExecuteContext {
     }
 
     public EventSet getEventSet() {
-		return eventSet;
-	}
+        return eventSet;
+    }
 
     public void setEventSet(EventSet eventSet) {
-		this.eventSet = eventSet;
-	}
+        this.eventSet = eventSet;
+    }
 
     public void setStepRequest(int size, int depth) {
         stepRequestManager.setStepRequest(size, depth);
@@ -120,56 +145,56 @@ public class Context extends AbstractExecuteContext {
         stepRequestManager.enable();
     }
 
+    public VirtualMachine getVm() {
+        return vm;
+    }
+
     public void setVm(VirtualMachine vm) {
         this.vm = vm;
     }
 
-    public VirtualMachine getVm() {
-		return vm;
-	}
+    public JavaDebugEnv getEnv() {
+        return env;
+    }
 
     public void setEnv(JavaDebugEnv env) {
         this.env = env;
     }
 
-    public JavaDebugEnv getEnv() {
-		return env;
-	}
+    public synchronized Location getLocation() {
+        return location;
+    }
 
     public void setLocation(Location location) {
         this.location = location;
     }
-
-    public synchronized Location getLocation() {
-		return location;
-	}
 
     public void setBreakpointRequestList(List<BreakpointRequest> breakpointRequests) {
         this.breakpointRequests = breakpointRequests;
     }
 
     public List<BreakpointRequest> getBreakpointRequests() {
-		return breakpointRequests;
-	}
+        return breakpointRequests;
+    }
 
     public void addBreakpointRequest(BreakpointRequest breakpointRequest) {
         this.breakpointRequests.add(breakpointRequest);
+    }
+
+    public synchronized ThreadReference getThread() {
+        return thread;
     }
 
     public void setThread(ThreadReference thread) {
         this.thread = thread;
     }
 
-    public synchronized ThreadReference getThread() {
-		return thread;
-	}
+    public Project getProject() {
+        return this.project;
+    }
 
     public void setProject(Project project) {
         this.project = project;
-    }
-
-    public Project getProject() {
-        return this.project;
     }
 
     public Location setSolutionLocation(ClassPrepareEvent event) {
@@ -188,20 +213,20 @@ public class Context extends AbstractExecuteContext {
         return location;
     }
 
-    public void setSolutionLocation(Location location) {
-        this.solutionLocation = location;
-    }
-
     public synchronized Location getSolutionLocation() {
         return this.solutionLocation;
     }
 
-    public void setItrEvent(Iterator<Event> itr) {
-        this.itr = itr;
+    public void setSolutionLocation(Location location) {
+        this.solutionLocation = location;
     }
 
     public Iterator<Event> getItrEvent() {
         return this.itr;
+    }
+
+    public void setItrEvent(Iterator<Event> itr) {
+        this.itr = itr;
     }
 
     public void consumeAllEvent() {
@@ -226,51 +251,6 @@ public class Context extends AbstractExecuteContext {
     }
 
     /**
-     * step request管理器, 统一管理step request. 防止
-     * 项目发出多个同一个step request, 导致运行异常
-     */
-    private class StepRequestManager {
-        private StepRequest stepRequest;
-        void setStepRequest(int size, int depth) {
-            if (stepRequest != null) {
-                this.stepRequest.disable();
-            }
-            if (erm == null || thread == null) {
-                throw new DebugError("Context setStepRequest使用错误. 请在使用context对StepRequest进行统一管理前, 先设置erm和thread对象 !");
-            }
-            this.stepRequest = erm.createStepRequest(thread, size, depth);
-            this.stepRequest.enable();
-        }
-        void disable() {
-            if (stepRequest != null) {
-                stepRequest.disable();
-            }
-        }
-
-        public void enable() {
-            if (stepRequest != null) {
-                stepRequest.enable();
-            }
-        }
-    }
-
-    /**
-     * 锁
-     */
-    private final Object lock = new Object();
-    /**
-     * 存储调用waitFor的线程
-     */
-    @Deprecated // 打断线程的方式已被废弃. 打断线程存在破坏正在阻塞读取数据线程的风险. 详细查看{@link com.xhf.leetcode.plugin.debug.reader.InstSource}
-    private final Set<Thread> threadSet = new HashSet<>();
-
-    private AtomicInteger sleepCount = new AtomicInteger(0);
-
-    private int waitRound = 8;
-    private int waitCount = 0;
-    private final int sleepTime = 70;
-
-    /**
      * 自选等待JEventHandler通知, 如果waitFor为False或者被打断/唤醒, 则表明JEventHandler完成处理
      * JavaDebugger可以继续执行
      */
@@ -278,7 +258,7 @@ public class Context extends AbstractExecuteContext {
         // 总是先让出cpu
         Thread.yield();
         // 无需等待
-        if (! waitFor) {
+        if (!waitFor) {
             LogUtils.simpleDebug(name + "无需等待JEventHandler...");
             return;
         }
@@ -290,7 +270,7 @@ public class Context extends AbstractExecuteContext {
                 for (int i = 0; i < waitRound && waitFor; ++i) {
                     Thread.sleep(sleepTime);
                 }
-                if (! waitFor) {
+                if (!waitFor) {
                     LogUtils.simpleDebug("停止等待...");
                     return;
                 }
@@ -301,10 +281,12 @@ public class Context extends AbstractExecuteContext {
                 // 4 * (1 << waitCount)
                 // (1 << 2) * (1 << waitCount)
                 // 1 << (2 + waitCount)
-                if (cnt >= (1 << (2 + waitCount)) ) {
+                if (cnt >= (1 << (2 + waitCount))) {
                     waitRound *= 2;
                     waitCount += 1;
-                    LogUtils.simpleDebug("睡眠时间延长, waitCount = " + waitCount + " waitRound = " + waitRound + " waitTime = " + (waitRound * sleepTime) + "...");
+                    LogUtils.simpleDebug(
+                        "睡眠时间延长, waitCount = " + waitCount + " waitRound = " + waitRound + " waitTime = " + (
+                            waitRound * sleepTime) + "...");
                 }
                 lock.wait();
                 LogUtils.simpleDebug("JEventHandler释放锁, " + name + "执行指令...");
@@ -345,22 +327,6 @@ public class Context extends AbstractExecuteContext {
     }
 
     /**
-     * 存储前台执行invokeMethod的状态
-     */
-    private enum InvokeStatus {
-        NOT_START, // 前台JavaDebugger没有执行invokeMethod, 属于初始状态
-        INVOKE_START, // 前台JavaDebugger开始执行invokeMethod
-        INVOKE_DONE // 前台JavaDebugger执行invokeMethod完成
-    }
-
-    /**
-     * 存储invoke状态. 该字段记录JavaDebugger在处理指令过程中
-     * 是否触发invokeMethod. invokeMethod底层涉及到很多复杂的操作,
-     * 需要额外进行前后台的协调处理(JavaDebugger和JEventHandler之间的协调)
-     */
-    private InvokeStatus invokeStatus = InvokeStatus.NOT_START;
-
-    /**
      * {@link com.xhf.leetcode.plugin.debug.execute.java.p.JavaEvaluatorImpl}准备进行invokeMethod, JEventHandler执行指令时
      * 会检测是否进行invokeMethod, 从而做出不同的处理逻辑
      * <p>
@@ -392,6 +358,7 @@ public class Context extends AbstractExecuteContext {
 
     /**
      * 这个逻辑不能提取到抽象类, 之前脑子被驴踢了, 写到AbstractExecuteContext中了
+     *
      * @param event event
      */
     @Subscribe
@@ -423,5 +390,47 @@ public class Context extends AbstractExecuteContext {
             this.invokeMethodDone();
         }
         return null;
+    }
+
+    /**
+     * 存储前台执行invokeMethod的状态
+     */
+    private enum InvokeStatus {
+        NOT_START, // 前台JavaDebugger没有执行invokeMethod, 属于初始状态
+        INVOKE_START, // 前台JavaDebugger开始执行invokeMethod
+        INVOKE_DONE // 前台JavaDebugger执行invokeMethod完成
+    }
+
+    /**
+     * step request管理器, 统一管理step request. 防止
+     * 项目发出多个同一个step request, 导致运行异常
+     */
+    private class StepRequestManager {
+
+        private StepRequest stepRequest;
+
+        void setStepRequest(int size, int depth) {
+            if (stepRequest != null) {
+                this.stepRequest.disable();
+            }
+            if (erm == null || thread == null) {
+                throw new DebugError(
+                    "Context setStepRequest使用错误. 请在使用context对StepRequest进行统一管理前, 先设置erm和thread对象 !");
+            }
+            this.stepRequest = erm.createStepRequest(thread, size, depth);
+            this.stepRequest.enable();
+        }
+
+        void disable() {
+            if (stepRequest != null) {
+                stepRequest.disable();
+            }
+        }
+
+        public void enable() {
+            if (stepRequest != null) {
+                stepRequest.enable();
+            }
+        }
     }
 }

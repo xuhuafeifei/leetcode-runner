@@ -8,10 +8,12 @@ import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.*;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-
+import com.xhf.leetcode.plugin.utils.AESUtils;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.GsonUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.TaskCenter;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -21,6 +23,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * support cache ability and disk persistence
@@ -31,9 +35,33 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Service(Service.Level.PROJECT)
 public final class StoreService implements Disposable {
-    private Project project;
 
+    public static final String cacheFileName = "app.properties";
+    public static final String LEETCODE_SESSION_KEY = "LEETCODE_SESSION_KEY";
+    public static final String QUESTION_LIST_KEY = "QUESTION_LIST_KEY";
+    public static final String LEETCODE_TODAY_QUESTION_KEY = "LEETCODE_TODAY_QUESTION_KEY";
+    public static final String WATCH_POOL_KEY = "WATCH_POOL_KEY";
+    private final static Cache<String, StoreContent> cache = CacheBuilder.newBuilder().build();
+    // require persistent cache
+    private final static Cache<String, StoreContent> durableCache = CacheBuilder.newBuilder().build();
     private static volatile StoreService instance;
+    @Deprecated
+    private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
+        5, // 核心线程数
+        5, // 最大线程数
+        1, // 线程存活时间
+        TimeUnit.MINUTES,
+        new LinkedBlockingQueue<>(3), // 无界阻塞队列
+        new ThreadPoolExecutor.CallerRunsPolicy() // 拒绝策略：CallerRunsPolicy
+    );
+    /*------------------------------disk---------------------------------*/
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Project project;
+    /**
+     * 计数器
+     */
+    private int cnt = 0;
+    private long last_time = 0;
 
     public StoreService(Project project) {
         this.project = project;
@@ -46,13 +74,6 @@ public final class StoreService implements Disposable {
         // this.filePath = AppSettings.getInstance().getCoreFilePath();
         // this.filePath = "E:\\java_code\\leetcode-runner\\src\\main\\resources\\app.properties";
         this.loadCache();
-    }
-
-    public static final String cacheFileName = "app.properties";
-
-    public String getCacheFilePath() {
-        String path = AppSettings.getInstance().getCoreFilePath();
-        return new FileUtils.PathBuilder(path).append(cacheFileName).build();
     }
 
     public static StoreService getInstance(Project project) {
@@ -68,16 +89,21 @@ public final class StoreService implements Disposable {
         } catch (Exception e) {
             LogUtils.error(e);
             ViewUtils.getDialogWrapper(
-                    BundleUtils.i18nHelper(
+                BundleUtils.i18nHelper(
                     "无法获取全局缓存服务实例, 请重启IDE\n 错误原因: " + e.getMessage(),
                     "cannot get global cache service instance, please restart IDE\n error reason: " + e.getMessage()),
-                    BundleUtils.i18nHelper(
-                            "严重错误",
-                            "fatal error"
-                    )
+                BundleUtils.i18nHelper(
+                    "严重错误",
+                    "fatal error"
+                )
             ).show();
             throw new RuntimeException(e);
         }
+    }
+
+    public String getCacheFilePath() {
+        String path = AppSettings.getInstance().getCoreFilePath();
+        return new FileUtils.PathBuilder(path).append(cacheFileName).build();
     }
 
     @Override
@@ -90,49 +116,6 @@ public final class StoreService implements Disposable {
         durableCache.invalidateAll();
         FileUtils.deleteFile(getCacheFilePath());
     }
-
-    private static class StoreContent {
-        private String contentJson;
-        private long expireTimestamp;
-        private boolean encryptOrNot;
-
-        public String getContentJson() {
-            return contentJson;
-        }
-
-        public long getExpireTimestamp() {
-            return expireTimestamp;
-        }
-
-        public void setContentJson(String contentJson) {
-            this.contentJson = contentJson;
-        }
-
-        public void setExpireTimestamp(long expireTimestamp) {
-            this.expireTimestamp = expireTimestamp;
-        }
-
-        public boolean getEncryptOrNot() {
-            return encryptOrNot;
-        }
-
-        public void setEncryptOrNot(boolean encryptOrNot) {
-            this.encryptOrNot = encryptOrNot;
-        }
-    }
-
-    public static final String LEETCODE_SESSION_KEY = "LEETCODE_SESSION_KEY";
-
-    public static final String QUESTION_LIST_KEY = "QUESTION_LIST_KEY";
-
-    public static final String LEETCODE_TODAY_QUESTION_KEY = "LEETCODE_TODAY_QUESTION_KEY";
-
-    public static final String WATCH_POOL_KEY = "WATCH_POOL_KEY";
-
-    private final static Cache<String, StoreContent> cache = CacheBuilder.newBuilder().build();
-
-    // require persistent cache
-    private final static Cache<String, StoreContent> durableCache = CacheBuilder.newBuilder().build();
 
     public void addCache(String key, Object o, boolean isDurable) {
         addCache(key, GsonUtils.toJsonStr(o), isDurable, -1, null);
@@ -156,12 +139,6 @@ public final class StoreService implements Disposable {
         addEncryptCache(key, GsonUtils.toJsonStr(o), true, -1, null);
     }
 
-    /**
-     * 计数器
-     */
-    private int cnt = 0;
-    private long last_time = 0;
-
     public void addCache(String key, String o, boolean isDurable, long expire, TimeUnit timeUnit) {
         addCache(key, o, isDurable, expire, timeUnit, false);
     }
@@ -173,11 +150,12 @@ public final class StoreService implements Disposable {
         addCache(key, o, isDurable, expire, timeUnit, true);
     }
 
-    public void addCache(String key, String o, boolean isDurable, long expire, TimeUnit timeUnit, boolean encryptOrNot) {
+    public void addCache(String key, String o, boolean isDurable, long expire, TimeUnit timeUnit,
+        boolean encryptOrNot) {
         StoreContent c = new StoreContent();
         if (expire != -1) {
             c.setExpireTimestamp(convertToTimestamp(expire, timeUnit));
-        }else {
+        } else {
             c.setExpireTimestamp(-1);
         }
 
@@ -223,6 +201,7 @@ public final class StoreService implements Disposable {
 
     /**
      * 持久化数据并记录日志
+     *
      * @param info 日志信息, 统计缓存更新次数和频率
      * @param async 是否异步
      */
@@ -230,17 +209,6 @@ public final class StoreService implements Disposable {
         frequentLog(info);
         this.persistCache(async);
     }
-
-    @Deprecated
-    private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
-            5, // 核心线程数
-            5, // 最大线程数
-            1, // 线程存活时间
-            TimeUnit.MINUTES,
-            new LinkedBlockingQueue<>(3), // 无界阻塞队列
-            new ThreadPoolExecutor.CallerRunsPolicy() // 拒绝策略：CallerRunsPolicy
-    );
-
 
     private void frequentLog(final String info) {
         TaskCenter.getInstance().createTask(() -> {
@@ -266,8 +234,6 @@ public final class StoreService implements Disposable {
 
     /**
      * load content json
-     * @param key
-     * @return
      */
     public String getCacheJson(String key) {
         if (key == null) {
@@ -285,7 +251,7 @@ public final class StoreService implements Disposable {
     }
 
     private String handleStoreContent(String key, StoreContent content, String from) {
-        String ifNotExpireTime =  getIfNotExpireTime(content);
+        String ifNotExpireTime = getIfNotExpireTime(content);
         if (ifNotExpireTime == null) {
             removeCache(key);
             return null;
@@ -305,7 +271,7 @@ public final class StoreService implements Disposable {
                 return null;
             }
             // 系统要求不解密, 因此需要覆盖解密数据
-            if (! appSettings.getEncryptOrNot()) {
+            if (!appSettings.getEncryptOrNot()) {
                 try {
                     // 覆盖缓存
                     if ("cache".equals(from)) {
@@ -334,17 +300,15 @@ public final class StoreService implements Disposable {
 
     /**
      * load content and convert it into certain class
-     * @param key
-     * @param clazz
-     * @return
-     * @param <T>
      */
     public <T> T getCache(String key, @NotNull Class<T> clazz) {
         String cacheJson = getCacheJson(key);
-        if (cacheJson == null) return null;
+        if (cacheJson == null) {
+            return null;
+        }
         try {
             return GsonUtils.fromJson(cacheJson, clazz);
-        } catch(Exception e){
+        } catch (Exception e) {
             LogUtils.debug("getCache发生错误! key = " + key + " clazz = " + clazz.getName());
             LogUtils.error(e);
             return null;
@@ -354,8 +318,6 @@ public final class StoreService implements Disposable {
 
     /**
      * get content and check whether it has expired
-     * @param content
-     * @return
      */
     private String getIfNotExpireTime(StoreContent content) {
         long expireTimestamp = content.getExpireTimestamp();
@@ -373,13 +335,9 @@ public final class StoreService implements Disposable {
         return currentTimestamp + expireInMillis;
     }
 
-
-    /*------------------------------disk---------------------------------*/
-    private final ReentrantLock lock = new ReentrantLock();
-
-
     /**
      * persist cache to file
+     *
      * @param async true:异步, false:同步
      */
     private void persistCache(boolean async) {
@@ -415,10 +373,13 @@ public final class StoreService implements Disposable {
         Properties properties = FileUtils.readPropertiesFileContent(getCacheFilePath());
         properties.forEach((k, v) -> {
             try {
-                durableCache.put((String) k, Objects.requireNonNull(GsonUtils.fromJson((String) v, StoreContent.class)));
+                durableCache.put((String) k,
+                    Objects.requireNonNull(GsonUtils.fromJson((String) v, StoreContent.class)));
             } catch (Exception e) {
-                LogUtils.warn("some exception happen during the cache loading...\nthe property key is " + k + " and the value is " + v
-                + "\nthe key will be removed by system soon if exists");
+                LogUtils.warn(
+                    "some exception happen during the cache loading...\nthe property key is " + k + " and the value is "
+                        + v
+                        + "\nthe key will be removed by system soon if exists");
                 if (k != null && durableCache.getIfPresent(k) != null) {
                     durableCache.invalidate(k);
                     LogUtils.info("key = " + k + " has been removed");
@@ -437,7 +398,7 @@ public final class StoreService implements Disposable {
             if (FileUtils.isPath(k)) {
                 // check file exists
                 // String filePath = this.getCache(k, String.class);
-                if (! new File(k).exists()) {
+                if (!new File(k).exists()) {
                     durableCache.invalidate(k);
                 }
             }
@@ -465,5 +426,36 @@ public final class StoreService implements Disposable {
             return false;
         }
         return true;
+    }
+
+    private static class StoreContent {
+
+        private String contentJson;
+        private long expireTimestamp;
+        private boolean encryptOrNot;
+
+        public String getContentJson() {
+            return contentJson;
+        }
+
+        public void setContentJson(String contentJson) {
+            this.contentJson = contentJson;
+        }
+
+        public long getExpireTimestamp() {
+            return expireTimestamp;
+        }
+
+        public void setExpireTimestamp(long expireTimestamp) {
+            this.expireTimestamp = expireTimestamp;
+        }
+
+        public boolean getEncryptOrNot() {
+            return encryptOrNot;
+        }
+
+        public void setEncryptOrNot(boolean encryptOrNot) {
+            this.encryptOrNot = encryptOrNot;
+        }
     }
 }

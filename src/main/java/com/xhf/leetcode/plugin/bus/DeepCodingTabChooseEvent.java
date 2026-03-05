@@ -7,6 +7,7 @@ package com.xhf.leetcode.plugin.bus;
  * @email 2508020102@qq.com
  */
 public class DeepCodingTabChooseEvent {
+
     private final String pattern;
 
     public DeepCodingTabChooseEvent(String pattern) {

@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.model;
  * @email 2508020102@qq.com
  */
 public class Article {
+
     private String title;
     private String content;
 

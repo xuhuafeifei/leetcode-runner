@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.review.backend.model;
  * @email 2508020102@qq.com
  */
 public class ReviewQuestionModel implements ReviewQuestion {
+
     private String status;
     private String title;
     private String userRate;
@@ -15,17 +16,13 @@ public class ReviewQuestionModel implements ReviewQuestion {
     // index
     private Integer id;
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     @Override
     public String getStatus() {
         return this.status;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
@@ -33,8 +30,8 @@ public class ReviewQuestionModel implements ReviewQuestion {
         return this.title;
     }
 
-    public void setUserRate(String userRate) {
-        this.userRate = userRate;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     @Override
@@ -42,8 +39,8 @@ public class ReviewQuestionModel implements ReviewQuestion {
         return this.userRate;
     }
 
-    public void setLastModify(String lastModify) {
-        this.lastModify = lastModify;
+    public void setUserRate(String userRate) {
+        this.userRate = userRate;
     }
 
     @Override
@@ -51,8 +48,8 @@ public class ReviewQuestionModel implements ReviewQuestion {
         return this.lastModify;
     }
 
-    public void setNextReview(String nextReview) {
-        this.nextReview = nextReview;
+    public void setLastModify(String lastModify) {
+        this.lastModify = lastModify;
     }
 
     @Override
@@ -60,13 +57,17 @@ public class ReviewQuestionModel implements ReviewQuestion {
         return this.nextReview;
     }
 
-    public void setDifficulty(String difficulty) {
-        this.difficulty = difficulty;
+    public void setNextReview(String nextReview) {
+        this.nextReview = nextReview;
     }
 
     @Override
     public String getDifficulty() {
         return this.difficulty;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
     }
 
     public void setUserSolution(String userSolution) {
@@ -95,14 +96,14 @@ public class ReviewQuestionModel implements ReviewQuestion {
     @Override
     public String toString() {
         return "ReviewQuestionModel{" +
-                "status='" + status + '\'' +
-                ", title='" + title + '\'' +
-                ", userRate='" + userRate + '\'' +
-                ", lastModify='" + lastModify + '\'' +
-                ", nextReview='" + nextReview + '\'' +
-                ", difficulty='" + difficulty + '\'' +
-                ", userSolution='" + userSolution + '\'' +
-                ", id=" + id +
-                '}';
+            "status='" + status + '\'' +
+            ", title='" + title + '\'' +
+            ", userRate='" + userRate + '\'' +
+            ", lastModify='" + lastModify + '\'' +
+            ", nextReview='" + nextReview + '\'' +
+            ", difficulty='" + difficulty + '\'' +
+            ", userSolution='" + userSolution + '\'' +
+            ", id=" + id +
+            '}';
     }
 }

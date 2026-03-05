@@ -16,6 +16,11 @@ public class PythonTestcaseConvertor extends AbstractTestcaseConvertor {
         super(instanceName, result, project);
     }
 
+    @Deprecated // for test
+    public PythonTestcaseConvertor(String instanceName, AnalysisResult result) {
+        super(instanceName, result, null);
+    }
+
     @Override
     protected String createInstanceCallCode(String[] varNames, String instanceName) {
         StringBuilder sb = new StringBuilder();
@@ -31,10 +36,5 @@ public class PythonTestcaseConvertor extends AbstractTestcaseConvertor {
             }
         }
         return sb.toString();
-    }
-
-    @Deprecated // for test
-    public PythonTestcaseConvertor(String instanceName, AnalysisResult result) {
-        super(instanceName, result, null);
     }
 }

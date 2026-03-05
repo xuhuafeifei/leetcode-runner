@@ -7,6 +7,7 @@ package com.xhf.leetcode.plugin.debug.analysis.analyzer;
  * parameterTypes: 参数类型
  */
 public class AnalysisResult {
+
     private String methodName;
     private String returnType;
     private String[] parameterTypes;
@@ -51,9 +52,9 @@ public class AnalysisResult {
     @Override
     public String toString() {
         return "AnalysisResult{" +
-                "methodName='" + methodName + '\'' +
-                ", returnType='" + returnType + '\'' +
-                ", parameterTypes=" + java.util.Arrays.toString(parameterTypes) +
-                '}';
+            "methodName='" + methodName + '\'' +
+            ", returnType='" + returnType + '\'' +
+            ", parameterTypes=" + java.util.Arrays.toString(parameterTypes) +
+            '}';
     }
 }

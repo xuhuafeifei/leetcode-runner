@@ -1,14 +1,21 @@
 package com.xhf.leetcode.plugin.comp;
 
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 public class Carousel extends JPanel {
+
     private final JLabel label;
     private final java.util.List<ImageIcon> images = new ArrayList<>();
     private final java.util.List<JComponent> components = new ArrayList<>();
@@ -47,6 +54,25 @@ public class Carousel extends JPanel {
         add(nextButton, BorderLayout.EAST);
     }
 
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JFrame jFrame = new JFrame();
+                jFrame.setTitle(BundleUtils.i18n("comp.leetcode.carousel"));
+                jFrame.setSize(400, 300);
+                jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                Carousel comp = new Carousel();
+                jFrame.add(comp);
+                // 初始化图片资源
+                comp.addImageAndPanel("E:\\java_code\\leetcode-runner\\src\\main\\resources\\icons\\star1.jpg",
+                    new JTextArea("abab"));
+                comp.addImage("E:\\java_code\\leetcode-runner\\src\\main\\resources\\icons\\star2.jpg");
+                jFrame.setVisible(true);
+            }
+        });
+    }
+
     private void updateImageAndText() {
         label.setIcon(images.get(currentImageIndex));  // 假设JPanel的第一个组件是ImageIcon
         var comp = components.get(currentImageIndex);
@@ -64,23 +90,5 @@ public class Carousel extends JPanel {
         images.add(new ImageIcon(imagePath));
         components.add(comp);
         updateImageAndText();
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                JFrame jFrame = new JFrame();
-                jFrame.setTitle(BundleUtils.i18n("comp.leetcode.carousel"));
-                jFrame.setSize(400, 300);
-                jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                Carousel comp = new Carousel();
-                jFrame.add(comp);
-                // 初始化图片资源
-                comp.addImageAndPanel("E:\\java_code\\leetcode-runner\\src\\main\\resources\\icons\\star1.jpg", new JTextArea("abab"));
-                comp.addImage("E:\\java_code\\leetcode-runner\\src\\main\\resources\\icons\\star2.jpg");
-                jFrame.setVisible(true);
-            }
-        });
     }
 }

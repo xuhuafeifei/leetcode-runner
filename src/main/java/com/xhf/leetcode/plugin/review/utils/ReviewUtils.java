@@ -27,7 +27,9 @@ public class ReviewUtils {
         try {
             CodeService.getInstance(project).openCodeEditor(q);
         } catch (FileCreateError e) {
-            ConsoleUtils.getInstance(project).showError(BundleUtils.i18nHelper("打开文件失败", "Failed to open file"), true, true, e.getMessage(), "Error", null);
+            ConsoleUtils.getInstance(project)
+                .showError(BundleUtils.i18nHelper("打开文件失败", "Failed to open file"), true, true, e.getMessage(),
+                    "Error", null);
             LogUtils.warn(e);
             return;
         }

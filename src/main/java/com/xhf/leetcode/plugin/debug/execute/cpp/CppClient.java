@@ -19,7 +19,9 @@ import com.xhf.leetcode.plugin.utils.GsonUtils;
  * @email 2508020102@qq.com
  */
 public class CppClient {
+
     private final String url;
+
     public CppClient(Project project) {
         var debugger = DebugManager.getInstance(project).getCurrentDebugger();
         int cppPort = ((CppDebugEnv) debugger.getEnv()).getPort();
@@ -28,19 +30,21 @@ public class CppClient {
 
     public ExecuteResult postRequest(Instruction inst) {
         return postRequest(
-                inst.getOperation().getName(),
-                inst.getParam() == null ? "" : inst.getParam()
-                );
+            inst.getOperation().getName(),
+            inst.getParam() == null ? "" : inst.getParam()
+        );
     }
 
     public ExecuteResult postRequest(String operation, String gdbCommand) {
         HttpClient instance = HttpClient.getInstance();
         HttpResponse httpResponse = instance.executePost(new HttpRequest.RequestBuilder(this.url)
-                .addJsonBody("operation", operation)
-                .addJsonBody("gdbCommand", gdbCommand) // gson默认不会序列化为null字段
-                .buildByJsonBody()
+            .addJsonBody("operation", operation)
+            .addJsonBody("gdbCommand", gdbCommand) // gson默认不会序列化为null字段
+            .buildByJsonBody()
         );
-        if (httpResponse == null) return null;
+        if (httpResponse == null) {
+            return null;
+        }
         return GsonUtils.fromJson(httpResponse.getBody(), ExecuteResult.class);
     }
 }

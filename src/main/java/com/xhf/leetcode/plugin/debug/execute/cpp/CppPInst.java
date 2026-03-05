@@ -53,29 +53,30 @@ public class CppPInst extends AbstractCppInstExecutor {
         res += r.getResult();
         return ExecuteResult.success(inst.getOperation(), res);
 
-//        String gdbCommand = "-stack-list-variables  --all-values";
-//        CppGdbInfo cppGdbInfo = super.getCppGdbInfo(r);
-//        // 没有错误
-//        if (handleError(r, cppGdbInfo)) {
-//            GdbElement gdbElement =  super.gdbParser.parse(cppGdbInfo.getResultRecord());
-//            GdbArray variables = gdbElement.getAsGdbObject().get("variables").getAsGdbArray();
-//            StringBuilder sb = new StringBuilder();
-//            if (variables.size() == 0) {
-//                sb.append("No variables");
-//            } else {
-//                for (GdbElement variable : variables) {
-//                    GdbElement name = variable.getAsGdbObject().get("name");
-//                    GdbElement value = variable.getAsGdbObject().get("value");
-//                    sb.append(name.getAsGdbPrimitive().getAsString()).append("=").append(value.getAsGdbPrimitive().getAsString()).append("\n");
-//                }
-//            }
-//            r.setResult(sb.toString());
-//        }
-//        return r;
+        //        String gdbCommand = "-stack-list-variables  --all-values";
+        //        CppGdbInfo cppGdbInfo = super.getCppGdbInfo(r);
+        //        // 没有错误
+        //        if (handleError(r, cppGdbInfo)) {
+        //            GdbElement gdbElement =  super.gdbParser.parse(cppGdbInfo.getResultRecord());
+        //            GdbArray variables = gdbElement.getAsGdbObject().get("variables").getAsGdbArray();
+        //            StringBuilder sb = new StringBuilder();
+        //            if (variables.size() == 0) {
+        //                sb.append("No variables");
+        //            } else {
+        //                for (GdbElement variable : variables) {
+        //                    GdbElement name = variable.getAsGdbObject().get("name");
+        //                    GdbElement value = variable.getAsGdbObject().get("value");
+        //                    sb.append(name.getAsGdbPrimitive().getAsString()).append("=").append(value.getAsGdbPrimitive().getAsString()).append("\n");
+        //                }
+        //            }
+        //            r.setResult(sb.toString());
+        //        }
+        //        return r;
     }
 
     /**
      * 表达式计算
+     *
      * @param exp 需要计算的表达式
      * @param inst inst
      * @param pCtx pCtx

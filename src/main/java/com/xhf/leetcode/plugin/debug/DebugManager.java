@@ -4,10 +4,15 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
-import com.xhf.leetcode.plugin.debug.debugger.*;
+import com.xhf.leetcode.plugin.debug.debugger.CPPDebugger;
+import com.xhf.leetcode.plugin.debug.debugger.CppDebugConfig;
+import com.xhf.leetcode.plugin.debug.debugger.Debugger;
+import com.xhf.leetcode.plugin.debug.debugger.JavaDebugConfig;
+import com.xhf.leetcode.plugin.debug.debugger.JavaDebugger;
+import com.xhf.leetcode.plugin.debug.debugger.PythonDebugConfig;
+import com.xhf.leetcode.plugin.debug.debugger.PythonDebugger;
 import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +22,12 @@ import java.util.Map;
  */
 @Service(Service.Level.PROJECT) // 注册idea, 保证所有debugger强制关闭
 public final class DebugManager implements Disposable {
+
     private static volatile DebugManager instance;
     private final Project project;
+    // 容器
+    private final Map<Class<? extends Debugger>, Debugger> debuggers = new HashMap<>();
+    private Debugger currentDebugger;
 
     public DebugManager(Project project) {
         this.project = project;
@@ -37,11 +46,6 @@ public final class DebugManager implements Disposable {
         return instance;
     }
 
-    // 容器
-    private final Map<Class<? extends Debugger>, Debugger> debuggers = new HashMap<>();
-
-    private Debugger currentDebugger;
-
     /*
      * 创建并存储全新的debugger. 同时关闭已有debugger
      */
@@ -56,7 +60,7 @@ public final class DebugManager implements Disposable {
             debuggers.put(clazz, pythonDebugger);
             currentDebugger = pythonDebugger;
         } else if (clazz == CPPDebugger.class) {
-            CPPDebugger cppDebugger =  buildCppDebugger();
+            CPPDebugger cppDebugger = buildCppDebugger();
             debuggers.put(clazz, cppDebugger);
             currentDebugger = cppDebugger;
         }
@@ -98,7 +102,7 @@ public final class DebugManager implements Disposable {
             config = new CppDebugConfig.Builder(project).autoBuild().build();
         } catch (Exception ex) {
             LogUtils.error(ex);
-            throw new DebugError("Java环境配置创建异常!" + ex.toString(), ex);
+            throw new DebugError("Java环境配置创建异常!" + ex, ex);
         }
         return new CPPDebugger(project, config);
     }
@@ -109,7 +113,7 @@ public final class DebugManager implements Disposable {
             config = new PythonDebugConfig.Builder(project).autoBuild().build();
         } catch (Exception ex) {
             LogUtils.error(ex);
-            throw new DebugError("Java环境配置创建异常!" + ex.toString(), ex);
+            throw new DebugError("Java环境配置创建异常!" + ex, ex);
         }
         return new PythonDebugger(project, config);
     }
@@ -120,7 +124,7 @@ public final class DebugManager implements Disposable {
             config = new JavaDebugConfig.Builder(project).autoBuild().build();
         } catch (Exception ex) {
             LogUtils.error(ex);
-            throw new DebugError("Java环境配置创建异常!" + ex.toString(), ex);
+            throw new DebugError("Java环境配置创建异常!" + ex, ex);
         }
         return new JavaDebugger(project, config);
     }
@@ -130,8 +134,12 @@ public final class DebugManager implements Disposable {
     }
 
     public boolean isDebug() {
-        if (currentDebugger == null) return false;
-        if (currentDebugger.getEnv() == null) return false;
+        if (currentDebugger == null) {
+            return false;
+        }
+        if (currentDebugger.getEnv() == null) {
+            return false;
+        }
         return currentDebugger.getEnv().isDebug();
     }
 

@@ -11,10 +11,13 @@ import com.xhf.leetcode.plugin.debug.instruction.Instruction;
  * @email 2508020102@qq.com
  */
 public class JavaInstFactory implements InstructionFactory {
+
     // 单例
     private static final JavaInstFactory instance = new JavaInstFactory();
+
     private JavaInstFactory() {
     }
+
     public static JavaInstFactory getInstance() {
         return instance;
     }

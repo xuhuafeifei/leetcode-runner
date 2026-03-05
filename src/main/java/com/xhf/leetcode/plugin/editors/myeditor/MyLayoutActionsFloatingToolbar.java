@@ -5,23 +5,31 @@ import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.ui.JBColor;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 public class MyLayoutActionsFloatingToolbar extends JPanel implements Disposable {
-    private final ToolbarVisibilityController visibilityController;
+
     private static final float BACKGROUND_ALPHA = 0.75f;
     private static final Color BACKGROUND = JBColor.namedColor("Toolbar.Floating.background",
-            new JBColor(new Color(0xEDEDED), new Color(0x454A4D)));
+        new JBColor(new Color(0xEDEDED), new Color(0x454A4D)));
+    private final ToolbarVisibilityController visibilityController;
 
     public MyLayoutActionsFloatingToolbar(JComponent parentComponent, ActionGroup actionGroup) {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("myLayoutActionsFloatingToolbar", actionGroup, true);
+        ActionToolbar actionToolbar = ActionManager.getInstance()
+            .createActionToolbar("myLayoutActionsFloatingToolbar", actionGroup, true);
         actionToolbar.setTargetComponent(parentComponent);
         actionToolbar.setReservePlaceAutoPopupIcon(false);
         actionToolbar.setMinimumButtonSize(new Dimension(22, 22));

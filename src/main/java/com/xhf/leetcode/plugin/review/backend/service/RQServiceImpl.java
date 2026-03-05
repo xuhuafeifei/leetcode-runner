@@ -7,12 +7,11 @@ import com.xhf.leetcode.plugin.review.backend.card.QuestionCard;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionCardReq;
 import com.xhf.leetcode.plugin.review.backend.card.QuestionFront;
 import com.xhf.leetcode.plugin.review.backend.model.ReviewQuestion;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * RQServiceImpl, 前端真正调用的接口
@@ -23,10 +22,9 @@ import java.util.stream.Collectors;
 public class RQServiceImpl implements ReviewQuestionService {
 
 
+    private static RQServiceImpl instance;
     private final AlgorithmAPI api;
     private final Project project;
-
-    private static RQServiceImpl instance;
 
     public RQServiceImpl(Project project) {
         this.project = project;
@@ -56,7 +54,7 @@ public class RQServiceImpl implements ReviewQuestionService {
     @Override
     public void createQuestion(Question question, FSRSRating rating, String back) {
         api.createCard(
-                toQuestionCardReq(question, rating, back)
+            toQuestionCardReq(question, rating, back)
         );
     }
 
@@ -68,24 +66,24 @@ public class RQServiceImpl implements ReviewQuestionService {
 
     private QuestionFront getQuestionFront(Question question, FSRSRating rating) {
         return
-                new QuestionFront(
-                    question.getReviewTitle(),
-                    question.getDifficulty(),
-                    question.getStatus(),
-                    question.getAcRate(),
-                    rating.toInt(),
-                    question.getReviewTitleCn()
-                );
+            new QuestionFront(
+                question.getReviewTitle(),
+                question.getDifficulty(),
+                question.getStatus(),
+                question.getAcRate(),
+                rating.toInt(),
+                question.getReviewTitleCn()
+            );
     }
 
     @Override
-    public @NotNull List<ReviewQuestion>  getAllQuestions() {
+    public @NotNull List<ReviewQuestion> getAllQuestions() {
         List<QuestionCard> allCards = api.getAllCards();
         return allCards.stream()
-                .sorted(Comparator.comparingLong(QuestionCard::getNextReview))
-                .map(QuestionCard::toReviewQuestion)
-                .collect(Collectors.toList())
-                ;
+            .sorted(Comparator.comparingLong(QuestionCard::getNextReview))
+            .map(QuestionCard::toReviewQuestion)
+            .collect(Collectors.toList())
+            ;
 
     }
 

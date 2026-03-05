@@ -15,6 +15,11 @@ public class CppTestcaseConvertor extends AbstractTestcaseConvertor {
         super(instanceName, result, project);
     }
 
+    @Deprecated // for test
+    public CppTestcaseConvertor(String instanceName, AnalysisResult result) {
+        super(instanceName, result, null);
+    }
+
     @Override
     protected String createInstanceCallCode(String[] varNames, String instanceName) {
         StringBuilder sb = new StringBuilder();
@@ -30,10 +35,5 @@ public class CppTestcaseConvertor extends AbstractTestcaseConvertor {
             }
         }
         return sb.toString();
-    }
-
-    @Deprecated // for test
-    public CppTestcaseConvertor(String instanceName, AnalysisResult result) {
-        super(instanceName, result, null);
     }
 }

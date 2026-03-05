@@ -15,8 +15,8 @@ public class JavaRInst extends AbstractJavaInstExecutor {
         context.removeStepRequest();
         context.getVm().resume();
         super.doMoreInst(
-            new Operation[] {Operation.W, Operation.P},
-            new String[] {"w", "p"},
+            new Operation[]{Operation.W, Operation.P},
+            new String[]{"w", "p"},
             inst.getReadType()
         );
         return ExecuteResult.success(inst.getOperation());

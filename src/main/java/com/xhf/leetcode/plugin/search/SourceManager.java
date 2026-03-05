@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.search;
 
 import com.intellij.openapi.externalSystem.service.execution.NotSupportedException;
 import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
-
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -20,6 +19,7 @@ import java.util.NoSuchElementException;
  * @email 2508020102@qq.com
  */
 public class SourceManager {
+
     /**
      * 缓冲区大小
      */
@@ -29,14 +29,6 @@ public class SourceManager {
      * 缓冲区大小
      */
     private final int bufferSize;
-    /**
-     * 已加载数据偏移量
-     */
-    private int loadOffset;
-    /**
-     * 数据源
-     */
-    private Reader source;
     /**
      * 分段数据源加载缓冲区
      */
@@ -53,6 +45,14 @@ public class SourceManager {
      * 快照迭代器
      */
     private final CaptureIterator captureIterator;
+    /**
+     * 已加载数据偏移量
+     */
+    private int loadOffset;
+    /**
+     * 数据源
+     */
+    private Reader source;
 
     public SourceManager() {
         this(DEFAULT_BUFFER_SIZE);
@@ -87,7 +87,7 @@ public class SourceManager {
         }
         if (itrAdvance.hasNext()) {
             throw new RuntimeException("should not set new source data when iterator haven't" +
-                    " iterate all data that has been loaded!");
+                " iterate all data that has been loaded!");
         }
         this.source = source;
     }
@@ -108,8 +108,6 @@ public class SourceManager {
      * <p>
      * 如果当前SM并未加载数据, 那么创建的快照迭代器无法迭代数据, 哪怕后续SM在调用tryLoad()方法
      * 快照迭代器依然无法进行数据迭代, 因为快照开启的时候, 底层迭代器没有数据可以迭代
-     *
-     * @return
      */
     public Iterator captureIterator() {
         captureIterator.updateCapture();
@@ -120,7 +118,9 @@ public class SourceManager {
     public boolean tryLoad() throws IOException {
         // 如果迭代器还有数据, 不加载
         Iterator itr = sourceBuffer.iterator();
-        if (itr.hasNext()) return true;
+        if (itr.hasNext()) {
+            return true;
+        }
         // 如果迭代器没有数据, 从数据源分段加载
         int readCount = loadData();
         // 如果从source中加载数据量为-1, 则表示全部数据已经加载并处理完毕
@@ -131,8 +131,6 @@ public class SourceManager {
      * 向底层维护分段数据的SourceBuffer添加数据, 如果preBuffer中存在有效数据, 优先加载preBuffer
      * <p>
      * 当preBuffer内的数据加载完毕, preBuffer设置为无效状态
-     *
-     * @throws IOException
      */
     private int loadData() throws IOException {
         // 优先加载与缓冲区, 如果没有则从source中加载分段数据
@@ -159,6 +157,10 @@ public class SourceManager {
         return readCount;
     }
 
+    private void clearPreBuffer() {
+        preBuffer.setValid(false);
+    }
+
     /**
      * 迭代器增强类, 用于增强SourceBuffer的迭代器
      * <p>
@@ -167,9 +169,9 @@ public class SourceManager {
      * <p>
      * 需要注意的是, 增强迭代器是暴露给其他模块使用, 本模块切勿使用增强迭代器, 否则可能产生
      * 预料之外的错误
-     *
      */
     private class IteratorAdvance implements Iterator {
+
         private final Iterator itr;
 
         public IteratorAdvance(Iterator itr) {
@@ -179,7 +181,9 @@ public class SourceManager {
         @Override
         public boolean hasNext() {
             boolean flag = itr.hasNext();
-            if (flag) return true;
+            if (flag) {
+                return true;
+            }
             try {
                 // 自动触发加载机制
                 loadData();
@@ -223,11 +227,6 @@ public class SourceManager {
         }
     }
 
-    private void clearPreBuffer() {
-        preBuffer.setValid(false);
-    }
-
-
     /**
      * 快照迭代器, 负责迭代{@link #preBuffer}和{@link #sourceBuffer}数据, 同时还负责触发{@link SourceManager}(简称SM)的预加载机制
      * 该类不会影响{@link #sourceBuffer}(简称sB)对底层分段数据的迭代消费, 只对sB底层的迭代器做深拷贝处理
@@ -240,9 +239,9 @@ public class SourceManager {
      * 值得注意的是, 当SM将{@link #source}数据加载到preBuffer中时, source内读取文件的指针则会偏移, 因此
      * 在SourceBuffer加载数据时, 需要从preBuffer中加载被预加载的那一部分数据. 当preBuffer中的数据读入sourceBuffer中后
      * SourceManager则会修改preBuffer中的数据状态, 设置为无效数据
-     *
      */
     private class CaptureIterator implements Iterator {
+
         /*-------SourceBuffer的迭代器的深拷贝对象--------*/
         private Iterator itr;
 
@@ -269,62 +268,61 @@ public class SourceManager {
          * 以下为例
          * 为了更好的解释案例, 先介绍一些必要的背景信息.
          * 1. iterator和消费者
-         *      1. iterator: 是{@link SourceManager}对外提供数据的一种手段, 消费者如果想要消费数据, 需要通过iterator获取
-         *      2. 消费者: 在中分词的处理逻辑中, 消费数据的是{@link com.xhf.leetcode.plugin.search.process.CNProcessor}. CNProcessor通过
-         *               CaptureIterator获取数据, 然后对数据进行分词处理. 因为CaptureIterator并不会真正消费底层sB的数据, 因此CNProcessor
-         *               使用ci时, 只会消费一个字符. 换言之, 每次调用CNProcessor, 字符消费数量为1.
+         * 1. iterator: 是{@link SourceManager}对外提供数据的一种手段, 消费者如果想要消费数据, 需要通过iterator获取
+         * 2. 消费者: 在中分词的处理逻辑中, 消费数据的是{@link com.xhf.leetcode.plugin.search.process.CNProcessor}. CNProcessor通过
+         * CaptureIterator获取数据, 然后对数据进行分词处理. 因为CaptureIterator并不会真正消费底层sB的数据, 因此CNProcessor
+         * 使用ci时, 只会消费一个字符. 换言之, 每次调用CNProcessor, 字符消费数量为1.
          * 2. 中文分析器{@link com.xhf.leetcode.plugin.search.process.CNProcessor}
-         *      1. CNProcessor专门处理中文分词, 其分词原理是: 以每一个中文字符为start, 尽可能的匹配最长的合法Token, 也就是能够组成词组的Token
-         *         为了实现此功能, SourceManager专门提供ci迭代器, 运行CNProcessor在获取字符数据时, 不会消费底层数据. 从而实现让每个中文字符
-         *         都能进行匹配
+         * 1. CNProcessor专门处理中文分词, 其分词原理是: 以每一个中文字符为start, 尽可能的匹配最长的合法Token, 也就是能够组成词组的Token
+         * 为了实现此功能, SourceManager专门提供ci迭代器, 运行CNProcessor在获取字符数据时, 不会消费底层数据. 从而实现让每个中文字符
+         * 都能进行匹配
          * 3. CaptureIterator
-         *      1. ci内部维护两个迭代器
-         *          1. sB迭代器快照: 通过sourceBuffer.iterator().deepcopy()获取sB的迭代器快照
-         *          2. preBuffer迭代器: ci内部维护cursor和size变量, 两个变量为迭代PreBuffer提供基础能力
-         *      2. ci迭代数据的逻辑
-         *          1. 优先迭代sB迭代器快照
-         *          2. 如果sB迭代器快照已经消费完, 判断preBuffer内部是否有合法数据
-         *          3. 如果preBuffer内部数据合法, 迭代preBuffer.
+         * 1. ci内部维护两个迭代器
+         * 1. sB迭代器快照: 通过sourceBuffer.iterator().deepcopy()获取sB的迭代器快照
+         * 2. preBuffer迭代器: ci内部维护cursor和size变量, 两个变量为迭代PreBuffer提供基础能力
+         * 2. ci迭代数据的逻辑
+         * 1. 优先迭代sB迭代器快照
+         * 2. 如果sB迭代器快照已经消费完, 判断preBuffer内部是否有合法数据
+         * 3. 如果preBuffer内部数据合法, 迭代preBuffer.
          * 4. 符号含义
-         *      1. @ : sB迭代器指向位置
-         *      2. ^ : ci内部维护的sourceBuffer的深拷贝迭代器指向位置
-         *      3. * : ci内部维护的preBuffer迭代器指向位置
+         * 1. @ : sB迭代器指向位置
+         * 2. ^ : ci内部维护的sourceBuffer的深拷贝迭代器指向位置
+         * 3. * : ci内部维护的preBuffer迭代器指向位置
          * <p>
          * 现在开始介绍案例:
          * 现有如下所示的数据, 第一个[]内的数据被导入sourceBuffer中, 第二个[]数据未被加载. 并且sB迭代器和ci迭代器指向位置如下图所示
          * <p>
          * <CNProcessor第一轮中文分词处理, 以'中'为start>
          * <p>
-         *      sourceBuffer           未加载
+         * sourceBuffer           未加载
          * [, , , , , , , 中, 位]   [数, ' ', ......]
-         *                @
-         *                ^
-         *                       *(preBuffer未加载, *指向-1)
+         *
+         * @ ^
+         * *(preBuffer未加载, *指向-1)
          * <p>
          * sB的迭代器指向位置是@. 此时创建ci迭代器, ci指向位置是^和*. ^是sB的快照, *是迭代preBuffer的指针
          * CNProcessor在'中'的基础上迭代后续字符
          * <p>
          * [, , , , , , , 中, 位]   [数, ' ', ......]
-         *                 @  ^
-         *                       *
+         * @ ^
+         * *
          * <p>
          * 当ci处理到'位'的时候, 发现迭代到位于分段数据边界(^所指的位置),
          * 此时触发预加载机制, 将下一段分段数据读入preBuffer中. ci开始通过*迭代数据
-         *       sourceBuffer          preBuffer
+         * sourceBuffer          preBuffer
          * [, , , , , , , 中, 位]   [数, ' ', ......]
-         *                 @  ^
-         *                       *
+         * @ ^
+         * *
          * <p>
-         *     sourceBuffer            preBuffer
+         * sourceBuffer            preBuffer
          * [, , , , , , , 中, 位]   [数, ' ', ......]
-         *                @   ^          *
+         * @ ^          *
          * 当ci指向*所处位置时, 发现字符' '无法匹配成为以'中'为start的合法词组, 因此终止匹配, 第一轮CNProcessor处理完毕, 得到Token: 中位数
          * <p>
          * <CNProcessor第二轮匹配, 以'位'为start>
-         *     sourceBuffer           preBuffer
+         * sourceBuffer           preBuffer
          * [, , , , , , , 中, 位] [数, ' ', ......]
-         *                    @
-         *                    ^        *
+         * @ ^        *
          * CNProcessor获取快照迭代器. 如果不触发reset(), 则在第二轮匹配中, 会导致ci内部两个指针指向的位置是^, *
          * ^位置正确, 但*位置错误, 因为他指向的是上轮preBuffer迭代的位置. 它的位置没有重置
          * <p>
@@ -332,7 +330,6 @@ public class SourceManager {
          * 当前案例, ci的^无法迭代sB. 需要移动*迭代preBuffer. 但在获取ci时，没有调用reset()方法
          * 导致ci的*指向的位置是' ', 因此'数'将会被跳过, 从而导致数据的丢失. 所以, 获取ci时必须调用
          * reset()方法, 归位ci迭代器
-         *
          */
         public void updateCapture() {
             // 对sB迭代器拍摄快照
@@ -354,16 +351,9 @@ public class SourceManager {
             if (flag) {
                 return true;
             }
-            if (! preBuffer.isValid()) {
-                // preBuffer内没有数据, 执行预加载逻辑
-                int read = loadPreBuffer();
-                return read != -1;
-            } else if (this.cursor != this.size - 1) {
-                // 判断preBuffer内是否还有未读取的数据
-                return true;
-            } else {
-                // preBuffer内部的数据全被读取完毕
-                /*
+            // 判断preBuffer内是否还有未读取的数据
+            // preBuffer内部的数据全被读取完毕
+            /*
                   一般来说不会出现preBuffer内部数据被读取完毕.
                   因为消费者进行的是分词行为, 对于中文分词来说, 长度一般不会超过5个字符
                   <p>
@@ -371,13 +361,16 @@ public class SourceManager {
                   的数据, 其长度完全覆盖最大分词的长度.
                   因此在正常情况下是不会出现preBuffer数据读取完毕的情况.
                  */
-                return false;
-            }
+            if (!preBuffer.isValid()) {
+                // preBuffer内没有数据, 执行预加载逻辑
+                int read = loadPreBuffer();
+                return read != -1;
+            } else
+                return this.cursor != this.size - 1;
         }
 
         /**
          * 为preBuffer加载数据
-         * @return
          */
         private int loadPreBuffer() {
             /*
@@ -385,17 +378,13 @@ public class SourceManager {
              */
             if (preBuffer.isValid() && this.cursor != this.size - 1) {
                 throw new RuntimeException("should not set new source data when capture iterator haven't" +
-                        " iterate all data that has been loaded!");
+                    " iterate all data that has been loaded!");
             }
             try {
                 int read = source.read(preBuffer.getPreBuffer(), 0, bufferSize);
                 this.size = read;
-                if (read == -1) {
-                    // 啥也没读到, 数据无了
-                    preBuffer.setValid(false);
-                }else {
-                    preBuffer.setValid(true);
-                }
+                // 啥也没读到, 数据无了
+                preBuffer.setValid(read != -1);
                 preBuffer.setSize(read);
                 /*
                     preBuffer数据加载完毕, 重置captureIterator的迭代器
@@ -418,8 +407,9 @@ public class SourceManager {
             }
             // 迭代preBuffer
             int i = this.cursor + 1;
-            if (i >= this.size)
+            if (i >= this.size) {
                 throw new NoSuchElementException();
+            }
             this.cursor += 1;
             return preBuffer.getPreBuffer()[i];
         }
@@ -427,8 +417,9 @@ public class SourceManager {
         @Override
         public char peekNext() {
             int i = this.cursor + 1;
-            if (i >= this.size)
+            if (i >= this.size) {
                 throw new NoSuchElementException();
+            }
             return preBuffer.getPreBuffer()[i];
         }
 

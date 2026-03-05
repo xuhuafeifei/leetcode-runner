@@ -8,7 +8,8 @@ import com.intellij.openapi.project.Project;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class StdOutput extends IOOutput{
+public class StdOutput extends IOOutput {
+
     public StdOutput(Project project) {
         super(project);
     }

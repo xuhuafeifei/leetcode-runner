@@ -2,7 +2,13 @@ package com.xhf.leetcode.plugin.window.deepcoding;
 
 import com.google.common.eventbus.Subscribe;
 import com.intellij.openapi.project.Project;
-import com.xhf.leetcode.plugin.bus.*;
+import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
+import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.LoginEvent;
+import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
+import com.xhf.leetcode.plugin.bus.QLoadStartEvent;
+import com.xhf.leetcode.plugin.bus.RePositionEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.comp.MySearchConditionPanel;
 import com.xhf.leetcode.plugin.model.Question;
@@ -20,7 +26,6 @@ import com.xhf.leetcode.plugin.window.deepcoding.filter.DCAlgorithmFilter;
 import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
 import com.xhf.leetcode.plugin.window.filter.QFilterChain;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +35,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class Interview150Panel extends AbstractSearchPanel<Question> {
+
     /**
      * 用于 dci 存储的信息
      */
@@ -74,7 +80,13 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
 
     private int[] getInter150() {
         // 缓存面试150题的下标
-        return new int[] {87,26,25,79,168,188,120,121,54,44,273,379,237,133,134,41,12,11,57,13,150,5,27,67,124,391,166,10,14,208,2,29,75,35,53,47,72,288,382,204,289,241,48,0,201,218,127,227,55,56,451,19,70,154,149,223,140,1,20,137,91,24,18,81,60,85,145,103,99,225,100,104,105,116,113,111,128,123,172,221,235,198,636,101,102,529,229,97,199,129,132,398,206,209,908,432,126,207,210,211,16,76,45,38,51,21,78,107,147,426,22,52,917,34,73,161,32,33,152,3,214,501,372,294,66,189,190,135,136,200,8,65,171,68,49,148,69,197,138,321,299,119,63,62,4,96,71,122,187,220};
+        return new int[]{87, 26, 25, 79, 168, 188, 120, 121, 54, 44, 273, 379, 237, 133, 134, 41, 12, 11, 57, 13, 150,
+            5, 27, 67, 124, 391, 166, 10, 14, 208, 2, 29, 75, 35, 53, 47, 72, 288, 382, 204, 289, 241, 48, 0, 201, 218,
+            127, 227, 55, 56, 451, 19, 70, 154, 149, 223, 140, 1, 20, 137, 91, 24, 18, 81, 60, 85, 145, 103, 99, 225,
+            100, 104, 105, 116, 113, 111, 128, 123, 172, 221, 235, 198, 636, 101, 102, 529, 229, 97, 199, 129, 132, 398,
+            206, 209, 908, 432, 126, 207, 210, 211, 16, 76, 45, 38, 51, 21, 78, 107, 147, 426, 22, 52, 917, 34, 73, 161,
+            32, 33, 152, 3, 214, 501, 372, 294, 66, 189, 190, 135, 136, 200, 8, 65, 171, 68, 49, 148, 69, 197, 138, 321,
+            299, 119, 63, 62, 4, 96, 71, 122, 187, 220};
     }
 
     @Override
@@ -148,7 +160,8 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
             public OptionConvert createConvert() {
                 MapOptionConverter map = new MapOptionConverter(20);
                 if (AppSettings.getInstance().isZh()) {
-                    map.addPair("数组 / 字符串", "88,27,26,80,169,189,121,122,55,45,274,380,238,134,135,42,13,12,58,14,151,6,28,68");
+                    map.addPair("数组 / 字符串",
+                        "88,27,26,80,169,189,121,122,55,45,274,380,238,134,135,42,13,12,58,14,151,6,28,68");
                     map.addPair("双指针", "125,392,167,11,15");
                     map.addPair("滑动窗口", "209,3,30,76");
                     map.addPair("矩阵", "36,54,48,73,289");
@@ -172,7 +185,8 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
                     map.addPair("一维动态规划", "70,198,139,322,300");
                     map.addPair("多维动态规划", "120,64,63,5,97,72,123,188,221");
                 } else {
-                    map.addPair("Array / String", "88,27,26,80,169,189,121,122,55,45,274,380,238,134,135,42,13,12,58,14,151,6,28,68");
+                    map.addPair("Array / String",
+                        "88,27,26,80,169,189,121,122,55,45,274,380,238,134,135,42,13,12,58,14,151,6,28,68");
                     map.addPair("Two Pointers", "125,392,167,11,15");
                     map.addPair("Sliding Window", "209,3,30,76");
                     map.addPair("Matrix", "36,54,48,73,289");
@@ -223,8 +237,8 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void rePositionEventListeners(RePositionEvent event) {
-        if (! super.doCheck(INTERVIEW_150_TEXT)) {
-            if (! super.doCheck(INTERVIEW_150_TEXT)) {
+        if (!super.doCheck(INTERVIEW_150_TEXT)) {
+            if (!super.doCheck(INTERVIEW_150_TEXT)) {
                 return;
             }
             return;
@@ -244,6 +258,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
 
     /**
      * 当数据加载完毕后, 执行渲染逻辑
+     *
      * @param event event
      */
     @Subscribe
@@ -263,7 +278,7 @@ public class Interview150Panel extends AbstractSearchPanel<Question> {
 
     @Subscribe
     public void codeSubmitEventListener(CodeSubmitEvent event) {
-        if (! super.doCheck(INTERVIEW_150_TEXT)) {
+        if (!super.doCheck(INTERVIEW_150_TEXT)) {
             return;
         }
         indexLock();

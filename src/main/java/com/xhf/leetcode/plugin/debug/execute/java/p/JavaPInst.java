@@ -1,6 +1,16 @@
 package com.xhf.leetcode.plugin.debug.execute.java.p;
 
-import com.sun.jdi.*;
+import com.sun.jdi.AbsentInformationException;
+import com.sun.jdi.ClassNotLoadedException;
+import com.sun.jdi.Field;
+import com.sun.jdi.IncompatibleThreadStateException;
+import com.sun.jdi.LocalVariable;
+import com.sun.jdi.Location;
+import com.sun.jdi.ObjectReference;
+import com.sun.jdi.ReferenceType;
+import com.sun.jdi.StackFrame;
+import com.sun.jdi.ThreadReference;
+import com.sun.jdi.Value;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
 import com.xhf.leetcode.plugin.debug.execute.java.AbstractJavaInstExecutor;
@@ -13,10 +23,9 @@ import com.xhf.leetcode.plugin.exception.DebugError;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 执行P操作. 操作具体信息详见{@link Operation}
@@ -27,6 +36,7 @@ import java.util.List;
 public class JavaPInst extends AbstractJavaInstExecutor {
 
     private final JavaValueInspector inspector;
+
     public JavaPInst() {
         inspector = JavaValueInspector.getInstance();
     }
@@ -40,8 +50,10 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         String className = location.declaringType().name();
 
         // 执行到solution以外的代码, 不做任何处理
-        if (! "Solution".equals(className)) {
-            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(), BundleUtils.i18nHelper("当前断点执行的是系统函数, 不支持显示局部变量", "current breakpoint is in system function, not support for displaying local variables"));
+        if (!"Solution".equals(className)) {
+            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(),
+                BundleUtils.i18nHelper("当前断点执行的是系统函数, 不支持显示局部变量",
+                    "current breakpoint is in system function, not support for displaying local variables"));
             DebugUtils.fillExecuteResultByLocation(failed, location);
             return failed;
         }
@@ -53,7 +65,8 @@ public class JavaPInst extends AbstractJavaInstExecutor {
             DebugUtils.fillExecuteResultByLocation(success, location);
             return success;
         } catch (AbsentInformationException e) {
-            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(), BundleUtils.i18nHelper("没有局部变量", "no global variables"));
+            ExecuteResult failed = ExecuteResult.fail(inst.getOperation(),
+                BundleUtils.i18nHelper("没有局部变量", "no global variables"));
             DebugUtils.fillExecuteResultByLocation(failed, location);
             return failed;
         } catch (Exception e) {
@@ -74,17 +87,20 @@ public class JavaPInst extends AbstractJavaInstExecutor {
      * @throws IncompatibleThreadStateException IncompatibleThreadStateException
      * @throws AbsentInformationException AbsentInformationException
      */
-    private String checkAndGetValue(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
+    private String checkAndGetValue(Instruction inst, Context context)
+        throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
         if (inst.getOperation() == Operation.P) {
             return doP(inst, context);
         } else if (inst.getOperation() == Operation.WATCH) {
             return doWATCH(inst, context);
         }
-        throw new DebugError(BundleUtils.i18nHelper("JavaPInst不支持的操作 ", "JavaPInst not support this operation ") + inst.getOperation());
+        throw new DebugError(BundleUtils.i18nHelper("JavaPInst不支持的操作 ", "JavaPInst not support this operation ")
+            + inst.getOperation());
     }
 
     /**
      * 执行watch指令
+     *
      * @param inst inst
      * @param context context
      * @return string
@@ -92,7 +108,8 @@ public class JavaPInst extends AbstractJavaInstExecutor {
      * @throws IncompatibleThreadStateException IncompatibleThreadStateException
      * @throws AbsentInformationException AbsentInformationException
      */
-    private String doWATCH(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
+    private String doWATCH(Instruction inst, Context context)
+        throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
         String exp = inst.getParam();
         context.addToWatchPool(exp);
         return doP(inst, context);
@@ -100,6 +117,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     /**
      * 执行P指令
+     *
      * @param inst inst
      * @param context context
      * @return string
@@ -107,7 +125,8 @@ public class JavaPInst extends AbstractJavaInstExecutor {
      * @throws IncompatibleThreadStateException IncompatibleThreadStateException
      * @throws AbsentInformationException AbsentInformationException
      */
-    private String doP(Instruction inst, Context context) throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
+    private String doP(Instruction inst, Context context)
+        throws ClassNotLoadedException, IncompatibleThreadStateException, AbsentInformationException {
         StringBuilder res = new StringBuilder();
         String exp = inst.getParam();
         // 计算表达式(doP可能被doWATCH调用, 这里二次判断)
@@ -123,6 +142,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     /**
      * 检查watch pool, 如果存在内容, 执行计算逻辑
+     *
      * @param context context
      * @return string
      */
@@ -143,6 +163,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     /**
      * 计算表达式
+     *
      * @param exp exp
      * @param context context
      * @return string
@@ -151,7 +172,8 @@ public class JavaPInst extends AbstractJavaInstExecutor {
         StringBuilder res = new StringBuilder();
         // 设置loading data
         Output output = context.getOutput();
-        output.output(ExecuteResult.success(Operation.NULL, BundleUtils.i18nHelper("exp = 计算中...", "exp = calculating...")));
+        output.output(
+            ExecuteResult.success(Operation.NULL, BundleUtils.i18nHelper("exp = 计算中...", "exp = calculating...")));
 
         try {
             res.append(exp).append(" = ").append(new JavaEvaluatorImpl().executeExpression(exp, context));
@@ -163,6 +185,7 @@ public class JavaPInst extends AbstractJavaInstExecutor {
 
     /**
      * 获取当前执行环境存在的变量
+     *
      * @param thread thread
      * @param location location
      * @param context context
@@ -171,7 +194,8 @@ public class JavaPInst extends AbstractJavaInstExecutor {
      * @throws IncompatibleThreadStateException IncompatibleThreadStateException
      * @throws AbsentInformationException AbsentInformationException
      */
-    private String getVariable(ThreadReference thread, Location location, Context context) throws IncompatibleThreadStateException, AbsentInformationException, ClassNotLoadedException {
+    private String getVariable(ThreadReference thread, Location location, Context context)
+        throws IncompatibleThreadStateException, AbsentInformationException, ClassNotLoadedException {
         // 获取当前栈帧
         StackFrame frame = thread.frame(0);
         // 获取本地变量

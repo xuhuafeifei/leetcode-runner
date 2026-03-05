@@ -8,7 +8,8 @@ import com.intellij.openapi.project.Project;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class AbstractInstReader implements InstReader{
+public abstract class AbstractInstReader implements InstReader {
+
     protected final Project project;
     protected final ReadType readType;
 

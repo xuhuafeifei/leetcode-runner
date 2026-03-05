@@ -3,10 +3,15 @@ package com.xhf.leetcode.plugin.io.file.utils;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.OSHandler;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author feigebuge
@@ -27,8 +34,6 @@ public class FileUtils {
 
     /**
      * read resource file by relative path
-     * @param relativeFilePath
-     * @return
      */
     public static URL getResourceFileUrl(String relativeFilePath) {
         // deal with a file path (make all \ into /)
@@ -38,7 +43,6 @@ public class FileUtils {
         Class<?> clazz = FileUtils.class;
 
         URL resourceUrl = clazz.getResource(relativeFilePath);
-
 
         if (resourceUrl == null) {
             throw new IllegalArgumentException("File not found! " + relativeFilePath);
@@ -64,7 +68,7 @@ public class FileUtils {
 
     public static String readContentFromFile(String path) {
         File file = new File(path);
-        if (! file.exists()) {
+        if (!file.exists()) {
             return null;
         }
         return readContentFromFile(file);
@@ -98,7 +102,7 @@ public class FileUtils {
     public static void writePropertiesFileContent(String path, Properties properties) throws IOException {
         LogUtils.info("start to write properties file content to path = " + path);
         boolean flag = checkAndCreateNewFile(path);
-        if (! flag) {
+        if (!flag) {
             LogUtils.warn("文件持久化失败!");
             return;
         }
@@ -112,7 +116,7 @@ public class FileUtils {
     }
 
     private static boolean checkAndCreateNewFile(String path) throws IOException {
-        if (! isPath(path)) {
+        if (!isPath(path)) {
             LogUtils.warn("path is not valid ! path = " + path);
             return false;
         }
@@ -134,12 +138,10 @@ public class FileUtils {
 
     /**
      * 判断文件是否存在. 如果文件不存在，则尝试使用 URL 编码的路径进行解码，再次判断文件是否存在
-     * @param path
-     * @return
      */
     public static boolean fileExists(String path) {
         boolean exists = new File(path).exists();
-        if (! exists) {
+        if (!exists) {
             // 解码 URL 编码的路径
             String decodedPath;
             decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
@@ -150,7 +152,9 @@ public class FileUtils {
 
     private static File fileExistsOrNot(String path) {
         File file = new File(path);
-        if (file.exists()) return file;
+        if (file.exists()) {
+            return file;
+        }
 
         String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
         File file1 = new File(decodedPath);
@@ -162,14 +166,13 @@ public class FileUtils {
 
     /**
      * create a file if it does not exist and return the file
-     * @param path
-     * @return
-     * @throws IOException
      */
     public static File createAndGetFile(String path) throws IOException {
         // 检查文件是否存在
         File file = new File(path);
-        if (file.exists()) return file;
+        if (file.exists()) {
+            return file;
+        }
 
         File parentDir = file.getParentFile();
 
@@ -204,12 +207,8 @@ public class FileUtils {
     /**
      * this method will create a file if it does not exist
      * but will overwrite the content if the file exists
-     *
-     * @param path
-     * @param content
-     * @throws IOException
      */
-    public static void createAndWriteFile(String path, @Nullable  String content) throws IOException {
+    public static void createAndWriteFile(String path, @Nullable String content) throws IOException {
         File file = createAndGetFile(path);
 
         if (StringUtils.isBlank(content)) {
@@ -226,9 +225,6 @@ public class FileUtils {
 
     /**
      * find target file
-     * @param directory
-     * @param targetFileName
-     * @return
      */
     public static List<File> findTargetFiles(String directory, String targetFileName) {
         File dir = new File(directory);
@@ -280,7 +276,164 @@ public class FileUtils {
         return path.replaceAll("\\\\", "/");
     }
 
+    /**
+     * 判断内容是否为文件路径（增强版）
+     *
+     * @param content 输入的内容
+     * @return 如果是文件路径返回 true，否则返回 false
+     */
+    public static boolean isPath(String content) {
+        if (content == null || content.isEmpty()) {
+            return false; // 空字符串或 null 不可能是路径
+        }
+
+        return OSHandler.isPath(content);
+    }
+
+    public static void deleteFile(String path) {
+        try {
+            Files.deleteIfExists(Paths.get(path));
+        } catch (IOException e) {
+            LogUtils.error(e);
+        }
+    }
+
+    /**
+     * 会抛出异常, 如果文件无法删除
+     *
+     * @param path path
+     * @throws IOException exp
+     */
+    public static void removeFile(String path) throws IOException {
+        if (fileExists(path)) {
+            Files.delete(Paths.get(path));
+        }
+    }
+
+    public static void copyFile(File resource, String targetPath) throws IOException {
+        // 将resource 复制到solutionPyPath
+        try (InputStream inputStream = new FileInputStream(resource);
+            OutputStream outputStream = new FileOutputStream(targetPath)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+        }
+    }
+
+    public static void copyFile(URL resource, String targetPath) throws IOException {
+        // 将resource 复制到solutionPyPath
+        try (InputStream inputStream = resource.openStream();
+            OutputStream outputStream = new FileOutputStream(targetPath)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+        }
+    }
+
+    public static boolean copyFile(InputStream inputStream, String targetPath) {
+        try {
+            // 判断targetPath是否存在, 不存在就创建
+            File file = createAndGetFile(targetPath);
+            try (OutputStream outputStream = new FileOutputStream(file)) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            LogUtils.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 验证文件路径是否合法（根据当前操作系统）
+     *
+     * @param filePath 要验证的文件路径
+     * @return 如果路径合法返回true，否则返回false
+     */
+    public static boolean isValidFilePath(String filePath) {
+        if (filePath == null || filePath.isEmpty()) {
+            return false;
+        }
+
+        // 检查操作系统类型
+        String os = OSHandler.getOSName();
+
+        if (os.contains("win")) {
+            return isValidWindowsFilePath(filePath);
+        } else if (os.contains("mac") || os.contains("nix") || os.contains("nux") || os.contains("aix")) {
+            return isValidUnixFilePath(filePath);
+        }
+
+        return isValidUnixFilePath(filePath);
+    }
+
+    /**
+     * Windows平台文件路径验证
+     */
+    private static boolean isValidWindowsFilePath(String filePath) {
+        // Windows路径长度限制（260个字符）
+        if (filePath.length() > 259) {
+            return false;
+        }
+
+        // Windows非法字符
+        try {
+            Paths.get(filePath);
+        } catch (InvalidPathException ignored) {
+            return false;
+        }
+
+        // 保留设备名检查（CON, PRN, AUX, NUL, COM1-9, LPT1-9等）
+        String fileName = new File(filePath).getName().toUpperCase();
+        Pattern winReservedNames = Pattern.compile(
+            "^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\\..*)?$",
+            Pattern.CASE_INSENSITIVE);
+        if (winReservedNames.matcher(fileName).matches()) {
+            return false;
+        }
+
+        // 驱动器字母检查（如C:\）
+        if (filePath.matches("^[a-zA-Z]:\\\\.*")) {
+            String driveLetter = filePath.substring(0, 1);
+            if (!driveLetter.matches("[a-zA-Z]")) {
+                return false;
+            }
+        }
+
+        // 判断空格等特殊字符
+        return !filePath.contains(" ") && !filePath.contains("\t") && !filePath.contains("\r") && !filePath.contains(
+            "\n")
+            && !filePath.contains("\0");
+    }
+
+    /**
+     * Unix-like平台文件路径验证（macOS/Linux）
+     */
+    private static boolean isValidUnixFilePath(String filePath) {
+        // Unix路径长度限制（根据系统不同，通常很长）
+        if (filePath.length() > 4096) {
+            return false;
+        }
+
+        // Unix非法字符（主要是空字符和斜杠）
+        if (filePath.contains("\0") || filePath.contains(" ")) {
+            return false;
+        }
+
+        // 特殊文件检查（. 和 ..）
+        return !filePath.equals(".") && !filePath.equals("..");
+    }
+
     public static class BackslashEscape {
+
         /**
          * 检测字符串中是否存在未转义的反斜杠，并进行转义。
          *
@@ -329,171 +482,11 @@ public class FileUtils {
         }
     }
 
-
-    /**
-     * 判断内容是否为文件路径（增强版）
-     * @param content 输入的内容
-     * @return 如果是文件路径返回 true，否则返回 false
-     */
-    public static boolean isPath(String content) {
-        if (content == null || content.isEmpty()) {
-            return false; // 空字符串或 null 不可能是路径
-        }
-
-        return OSHandler.isPath(content);
-    }
-
-    public static void deleteFile(String path) {
-        try {
-            Files.deleteIfExists(Paths.get(path));
-        } catch (IOException e) {
-            LogUtils.error(e);
-        }
-    }
-
-    /**
-     * 会抛出异常, 如果文件无法删除
-     * @param path path
-     * @throws IOException exp
-     */
-    public static void removeFile(String path) throws IOException {
-        if (fileExists(path)) {
-            Files.delete(Paths.get(path));
-        }
-    }
-
-
-    public static void copyFile(File resource, String targetPath) throws IOException {
-        // 将resource 复制到solutionPyPath
-        try (InputStream inputStream = new FileInputStream(resource);
-            OutputStream outputStream = new FileOutputStream(targetPath)) {
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-        }
-    }
-
-    public static void copyFile(URL resource, String targetPath) throws IOException {
-        // 将resource 复制到solutionPyPath
-        try (InputStream inputStream = resource.openStream();
-            OutputStream outputStream = new FileOutputStream(targetPath)) {
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-        }
-    }
-
-    public static boolean copyFile(InputStream inputStream, String targetPath) {
-        try {
-            // 判断targetPath是否存在, 不存在就创建
-            File file = createAndGetFile(targetPath);
-            try (OutputStream outputStream = new FileOutputStream(file)) {
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = inputStream.read(buffer)) > 0) {
-                    outputStream.write(buffer, 0, length);
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            LogUtils.error(e);
-            return false;
-        }
-    }
-
-    /**
-     * 验证文件路径是否合法（根据当前操作系统）
-     * @param filePath 要验证的文件路径
-     * @return 如果路径合法返回true，否则返回false
-     */
-    public static boolean isValidFilePath(String filePath) {
-        if (filePath == null || filePath.isEmpty()) {
-            return false;
-        }
-
-        // 检查操作系统类型
-        String os = OSHandler.getOSName();
-
-        if (os.contains("win")) {
-            return isValidWindowsFilePath(filePath);
-        } else if (os.contains("mac") || os.contains("nix") || os.contains("nux") || os.contains("aix")) {
-            return isValidUnixFilePath(filePath);
-        }
-
-        return isValidUnixFilePath(filePath);
-    }
-
-    /**
-     * Windows平台文件路径验证
-     */
-    private static boolean isValidWindowsFilePath(String filePath) {
-        // Windows路径长度限制（260个字符）
-        if (filePath.length() > 259) {
-            return false;
-        }
-
-        // Windows非法字符
-        try {
-            Paths.get(filePath);
-        } catch (InvalidPathException ignored) {
-            return false;
-        }
-
-        // 保留设备名检查（CON, PRN, AUX, NUL, COM1-9, LPT1-9等）
-        String fileName = new File(filePath).getName().toUpperCase();
-        Pattern winReservedNames = Pattern.compile(
-                "^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\\..*)?$",
-                Pattern.CASE_INSENSITIVE);
-        if (winReservedNames.matcher(fileName).matches()) {
-            return false;
-        }
-
-        // 驱动器字母检查（如C:\）
-        if (filePath.matches("^[a-zA-Z]:\\\\.*")) {
-            String driveLetter = filePath.substring(0, 1);
-            if (!driveLetter.matches("[a-zA-Z]")) {
-                return false;
-            }
-        }
-
-        // 判断空格等特殊字符
-        if (filePath.contains(" ") || filePath.contains("\t") || filePath.contains("\r") || filePath.contains("\n") || filePath.contains("\0")) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Unix-like平台文件路径验证（macOS/Linux）
-     */
-    private static boolean isValidUnixFilePath(String filePath) {
-        // Unix路径长度限制（根据系统不同，通常很长）
-        if (filePath.length() > 4096) {
-            return false;
-        }
-
-        // Unix非法字符（主要是空字符和斜杠）
-        if (filePath.contains("\0") || filePath.contains(" ")) {
-            return false;
-        }
-
-        // 特殊文件检查（. 和 ..）
-        if (filePath.equals(".") || filePath.equals("..")) {
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * build a file path and make sure the path is unified
      */
     public static class PathBuilder {
+
         private final StringBuffer sb;
 
         public PathBuilder(String path) {
@@ -526,6 +519,7 @@ public class FileUtils {
 
         /**
          * 转义
+         *
          * @return 转义后的字符串
          */
         public String buildWithEscape() {

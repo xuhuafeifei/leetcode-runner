@@ -27,8 +27,9 @@ public class DebugRunAction extends AbstractAction {
     public void doActionPerformed(Project project, AnActionEvent e) {
         // 写指令到阻塞队列中
         boolean flag = InstSource.uiInstInput(Instruction.success(ReadType.UI_IN, Operation.R, ""));
-        if (! flag) {
-            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
+        if (!flag) {
+            ConsoleUtils.getInstance(project)
+                .showError(BundleUtils.i18n("action.leetcode.actions.debug.command.inputerr"), true);
         }
     }
 

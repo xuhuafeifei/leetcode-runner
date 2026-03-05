@@ -24,17 +24,18 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.OSHandler;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
 import java.io.IOException;
+import javax.swing.JPanel;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 启动cpp环境的debug
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class CppDebugEnv extends AbstractDebugEnv {
+
     /**
      * gdb
      */
@@ -77,57 +78,66 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     @Override
     protected void initFilePath() {
-        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug").append("cpp").build();
+        this.filePath = new FileUtils.PathBuilder(AppSettings.getInstance().getCoreFilePath()).append("debug")
+            .append("cpp").build();
     }
 
     @Override
     public boolean prepare() throws DebugError {
-        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && closeExe() && copyFile() && buildFile();
+        return buildToolPrepare() && testcasePrepare() && createSolutionFile() && createMainFile() && closeExe()
+            && copyFile() && buildFile();
     }
 
     /**
      * 强制关闭exe, 该方法不论是否执行成功, 都不会返回false
+     *
      * @return boolean
      */
     private boolean closeExe() {
-        this.solutionExePath = new FileUtils.PathBuilder(filePath).append(OSHandler.chooseCompliedFile("solution.exe", "solution.out")).build();
+        this.solutionExePath = new FileUtils.PathBuilder(filePath).append(
+            OSHandler.chooseCompliedFile("solution.exe", "solution.out")).build();
         this.serverMainExePath = new FileUtils.PathBuilder(filePath).append(getCompiledFileName()).build();
 
         try {
             FileUtils.removeFile(this.solutionExePath);
             LogUtils.simpleDebug(this.solutionExePath + BundleUtils.i18nHelper(" 删除成功!", " delete failed!"));
         } catch (Exception e) {
-            DebugUtils.simpleDebug(this.solutionExePath + BundleUtils.i18nHelper(" 删除失败!", " delete failed!") + " " + BundleUtils.i18n("action.leetcode.plugin.cause") +  " = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
+            DebugUtils.simpleDebug(
+                this.solutionExePath + BundleUtils.i18nHelper(" 删除失败!", " delete failed!") + " " + BundleUtils.i18n(
+                    "action.leetcode.plugin.cause") + " = " + e.getMessage(), project,
+                ConsoleViewContentType.ERROR_OUTPUT);
         }
         try {
             FileUtils.removeFile(this.serverMainExePath);
             LogUtils.simpleDebug(this.solutionExePath + BundleUtils.i18nHelper(" 删除成功!", " delete failed!"));
         } catch (Exception e) {
-            DebugUtils.simpleDebug(this.serverMainExePath + BundleUtils.i18nHelper(" 删除失败!", " delete failed!") + " cause = " + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
+            DebugUtils.simpleDebug(
+                this.serverMainExePath + BundleUtils.i18nHelper(" 删除失败!", " delete failed!") + " cause = "
+                    + e.getMessage(), project, ConsoleViewContentType.ERROR_OUTPUT);
         }
         return true;
     }
 
     private String getCompiledFile() {
         return OSHandler.chooseCompliedFile(
-                "/debug/cpp/complie/windows/leetcode_runner_debug_server_cpp_windows.exe",
-                "/debug/cpp/complie/linux/leetcode_runner_debug_server_cpp_linux.out",
-                        "/debug/cpp/complie/mac/leetcode_runner_debug_server_cpp_mac.out"
+            "/debug/cpp/complie/windows/leetcode_runner_debug_server_cpp_windows.exe",
+            "/debug/cpp/complie/linux/leetcode_runner_debug_server_cpp_linux.out",
+            "/debug/cpp/complie/mac/leetcode_runner_debug_server_cpp_mac.out"
         );
     }
 
     private String getCompiledFileName() {
         return OSHandler.chooseCompliedFile(
-                "leetcode_runner_debug_server_cpp_windows.exe",
-                "leetcode_runner_debug_server_cpp_linux.out",
-                "leetcode_runner_debug_server_cpp_mac.out"
+            "leetcode_runner_debug_server_cpp_windows.exe",
+            "leetcode_runner_debug_server_cpp_linux.out",
+            "leetcode_runner_debug_server_cpp_mac.out"
         );
     }
 
     @Override
     protected boolean copyFile() {
         return copyFileHelper(getCompiledFile())
-               && copyFileHelper("/debug/cpp/leetcode.h") ;
+            && copyFileHelper("/debug/cpp/leetcode.h");
     }
 
     @Override
@@ -162,15 +172,15 @@ public class CppDebugEnv extends AbstractDebugEnv {
         // 弹框选择
         JPanel targetComponent = new JPanel();
         targetComponent.add(
-                FormBuilder.createFormBuilder()
-                        .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.gpp.path")), gppBtn, 1, false)
-                        .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.gdb.path")), gdbBtn, 1, false)
-                        .getPanel()
+            FormBuilder.createFormBuilder()
+                .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.gpp.path")), gppBtn, 1, false)
+                .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.gdb.path")), gdbBtn, 1, false)
+                .getPanel()
         );
 
         int i = ViewUtils.getDialogWrapper(
-                targetComponent,
-                BundleUtils.i18nHelper("选择GPP和GDB路径", "choose GPP and GDB path")
+            targetComponent,
+            BundleUtils.i18nHelper("选择GPP和GDB路径", "choose GPP and GDB path")
         ).getExitCode();
 
         if (i != DialogWrapper.OK_EXIT_CODE) {
@@ -179,13 +189,13 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
         // 校验路径GPP
         this.GPP = gppBtn.getText();
-        if (! OSHandler.isGPP(this.GPP)) {
+        if (!OSHandler.isGPP(this.GPP)) {
             throw new DebugError(BundleUtils.i18nHelper("GPP路径错误: " + this.GPP, "GPP path error: " + this.GPP));
         }
 
         // 校验路径GDB
         this.GDB = gdbBtn.getText();
-        if (! OSHandler.isGDB(this.GDB)) {
+        if (!OSHandler.isGDB(this.GDB)) {
             throw new DebugError(BundleUtils.i18nHelper("GDB路径错误: " + this.GDB, "GDB path error: " + this.GDB));
         }
 
@@ -222,21 +232,24 @@ public class CppDebugEnv extends AbstractDebugEnv {
         int MiNGW_EXIT_CODE = 999;
 
         int i = ViewUtils.getDialogWrapper(
-                targetComponent,
-                BundleUtils.i18nHelper("选择MinGW目录", "choose MinGW directory"),
-                new String[] {BundleUtils.i18n("debug.leetcode.main.mingw.no")},
-                new int[] {MiNGW_EXIT_CODE}
+            targetComponent,
+            BundleUtils.i18nHelper("选择MinGW目录", "choose MinGW directory"),
+            new String[]{BundleUtils.i18n("debug.leetcode.main.mingw.no")},
+            new int[]{MiNGW_EXIT_CODE}
         ).getExitCode();
 
         if (i == MiNGW_EXIT_CODE) {
             // 给出下载链接
             ViewUtils.getDialogWrapper(
-                    FormBuilder.createFormBuilder()
-                            .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.github.link")), new JBTextField("https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-win32-seh-ucrt-rt_v12-rev1.7z"), 1, false)
-                            .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.my.link")), new JBTextField("https://pan.baidu.com/s/15aK7K5AIkMoMwxdV4jCNlA?pwd=1jxa"), 1, false)
-                            .getPanel()
-                    ,
-                    BundleUtils.i18n("debug.leetcode.mingw.download.function")
+                FormBuilder.createFormBuilder()
+                    .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.github.link")), new JBTextField(
+                            "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev1/x86_64-14.2.0-release-win32-seh-ucrt-rt_v12-rev1.7z"),
+                        1, false)
+                    .addLabeledComponent(new JBLabel(BundleUtils.i18n("debug.leetcode.my.link")),
+                        new JBTextField("https://pan.baidu.com/s/15aK7K5AIkMoMwxdV4jCNlA?pwd=1jxa"), 1, false)
+                    .getPanel()
+                ,
+                BundleUtils.i18n("debug.leetcode.mingw.download.function")
             );
         }
         if (i != DialogWrapper.OK_EXIT_CODE) {
@@ -300,15 +313,14 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     /**
      * 获取运行server的命令行参数
-     * @return
      */
     public String[] getServerArgv() {
         return new String[]{
-                String.valueOf(this.port),
-                new FileUtils.PathBuilder(stdLogPath).build(),
-                new FileUtils.PathBuilder(stdErrPath).build(),
-                new FileUtils.PathBuilder(this.GDB).build(),
-                new FileUtils.PathBuilder(solutionExePath).build()
+            String.valueOf(this.port),
+            new FileUtils.PathBuilder(stdLogPath).build(),
+            new FileUtils.PathBuilder(stdErrPath).build(),
+            new FileUtils.PathBuilder(this.GDB).build(),
+            new FileUtils.PathBuilder(solutionExePath).build()
         };
     }
 
@@ -358,71 +370,12 @@ public class CppDebugEnv extends AbstractDebugEnv {
         return content;
     }
 
-    /**
-     * 支持用户cancel进程
-     */
-    public static class MyTask extends Task.WithResult<Integer, Exception> {
-
-        private final String combinedCmd;
-        private Process process;
-
-        public MyTask(Project project, String combineCmd) {
-            super(project,
-                    BundleUtils.i18nHelper(
-                            "debug服务编译中, 需要一点时间, 这个时候, 您可以打开手机, 原生, 启动!",
-                            "debug service is compiling, please wait a moment, you can open the mobile phone, 原生, start!"
-                    )
-                    , true
-            );
-            this.combinedCmd = combineCmd;
-        }
-
-        @Override
-        protected Integer compute(@NotNull ProgressIndicator indicator) throws Exception {
-            LogUtils.simpleDebug("compile combinedCmd = " + combinedCmd);
-            /*
-              这里之所以使用全新线程执行combinedCmd, 是因为它会阻塞线程, 导致用户点击cancel后
-              无法触发onCancel方法, 所以使用新线程执行, 并且在while循环中判断是否被cancel
-             */
-            new Thread(() -> {
-                try {
-                    process = OSHandler.buildProcess(combinedCmd);
-                    DebugUtils.printProcess(process, true, super.myProject);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).start();
-            while (! indicator.isCanceled()) {
-                Thread.sleep(300);
-                try {
-                    if (process != null) {
-                        int exitProcess = process.exitValue();
-                        return exitProcess;
-                    }
-                } catch (IllegalThreadStateException e) {
-                    // 进程尚未结束，继续等待
-                }
-            }
-
-            return null;
-        }
-
-        @Override
-        public void onCancel() {
-            if (process != null && process.isAlive()) {
-                process.destroy(); // 尝试正常终止进程
-                // process.destroyForcibly();
-                LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.compile.stop"));
-            }
-        }
-    }
-
     private boolean buildFile() {
         try {
             // 指定生成exe文件的绝对路径, 否则会出现一堆奇葩错误, md
             String cmd = GPP + " -g " + this.solutionCppPath + " -o " + this.solutionExePath;
             // win/mac, 为编译文件增加可执行权限
-            if (! OSHandler.isWin()) {
+            if (!OSHandler.isWin()) {
                 cmd = cmd + " && chmod 744 " + this.solutionExePath;
             }
 
@@ -432,14 +385,15 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
             if (i == null) {
                 LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.compile.cancel"));
-                ConsoleUtils.getInstance(project).showError(BundleUtils.i18nHelper("取消编译!", "cancel compile!"), false, true);
+                ConsoleUtils.getInstance(project)
+                    .showError(BundleUtils.i18nHelper("取消编译!", "cancel compile!"), false, true);
                 return false;
             }
 
             if (i != 0) {
                 throw new DebugError(BundleUtils.i18n("debug.leetcode.compile.error") + "\n" +
-                        OSHandler.chooseCompliedFile("solution.exe", "solution.out") + " = " + this.solutionExePath + "\n" +
-                        getCompiledFileName() + " = " + this.serverMainExePath
+                    OSHandler.chooseCompliedFile("solution.exe", "solution.out") + " = " + this.solutionExePath + "\n" +
+                    getCompiledFileName() + " = " + this.serverMainExePath
                 );
             }
             return true;
@@ -482,5 +436,64 @@ public class CppDebugEnv extends AbstractDebugEnv {
 
     public String getMethodName() {
         return this.methodName;
+    }
+
+    /**
+     * 支持用户cancel进程
+     */
+    public static class MyTask extends Task.WithResult<Integer, Exception> {
+
+        private final String combinedCmd;
+        private Process process;
+
+        public MyTask(Project project, String combineCmd) {
+            super(project,
+                BundleUtils.i18nHelper(
+                    "debug服务编译中, 需要一点时间, 这个时候, 您可以打开手机, 原生, 启动!",
+                    "debug service is compiling, please wait a moment, you can open the mobile phone, 原生, start!"
+                )
+                , true
+            );
+            this.combinedCmd = combineCmd;
+        }
+
+        @Override
+        protected Integer compute(@NotNull ProgressIndicator indicator) throws Exception {
+            LogUtils.simpleDebug("compile combinedCmd = " + combinedCmd);
+            /*
+              这里之所以使用全新线程执行combinedCmd, 是因为它会阻塞线程, 导致用户点击cancel后
+              无法触发onCancel方法, 所以使用新线程执行, 并且在while循环中判断是否被cancel
+             */
+            new Thread(() -> {
+                try {
+                    process = OSHandler.buildProcess(combinedCmd);
+                    DebugUtils.printProcess(process, true, super.myProject);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
+            while (!indicator.isCanceled()) {
+                Thread.sleep(300);
+                try {
+                    if (process != null) {
+                        int exitProcess = process.exitValue();
+                        return exitProcess;
+                    }
+                } catch (IllegalThreadStateException e) {
+                    // 进程尚未结束，继续等待
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public void onCancel() {
+            if (process != null && process.isAlive()) {
+                process.destroy(); // 尝试正常终止进程
+                // process.destroyForcibly();
+                LogUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.compile.stop"));
+            }
+        }
     }
 }

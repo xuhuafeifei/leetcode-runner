@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.model;
 
 public class TopicAreaScore {
+
     private int score;
     private TopicArea topicArea;
 

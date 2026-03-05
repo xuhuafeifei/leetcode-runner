@@ -30,29 +30,42 @@ import com.xhf.leetcode.plugin.exception.FileCreateError;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
 import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
-import com.xhf.leetcode.plugin.model.*;
+import com.xhf.leetcode.plugin.model.DeepCodingInfo;
+import com.xhf.leetcode.plugin.model.DeepCodingQuestion;
+import com.xhf.leetcode.plugin.model.LangIconInfo;
+import com.xhf.leetcode.plugin.model.LeetcodeEditor;
+import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.service.QuestionService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
 import com.xhf.leetcode.plugin.window.LCToolWindowFactory;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.ListModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class ViewUtils {
+
     public static <T> T getFileEditor(Project project, Class<T> tClass) {
         /* get file editor */
         FileEditorManager manager = FileEditorManager.getInstance(project);
@@ -70,8 +83,11 @@ public class ViewUtils {
         String key = getCacheKeyByVFile(file);
         LeetcodeEditor cache = StoreService.getInstance(project).getCache(key, LeetcodeEditor.class);
         if (cache == null) {
-            LogUtils.warn("LeetcodeEditor load failed! this may caused by two reason. 1.cache file is crashed. 2.key is wrong. Here " +
-                    "are detail infomation : key="+key + " cache_file_path=" + StoreService.getInstance(project).getCacheFilePath());
+            LogUtils.warn(
+                "LeetcodeEditor load failed! this may caused by two reason. 1.cache file is crashed. 2.key is wrong. Here "
+                    +
+                    "are detail infomation : key=" + key + " cache_file_path=" + StoreService.getInstance(project)
+                    .getCacheFilePath());
         }
         return cache;
     }
@@ -83,8 +99,8 @@ public class ViewUtils {
 
     /**
      * 通过vFile构造cache的key
+     *
      * @param file 当前editor打开的虚拟文件(项目创建的code文件)
-     * @return
      */
     public static String getCacheKeyByVFile(VirtualFile file) {
         if (file == null) {
@@ -106,7 +122,8 @@ public class ViewUtils {
         return new LightVirtualFile(lc.getTitleSlug() + ".html", lc.getMarkdownContent());
     }
 
-    public static @Nullable LeetcodeEditor getLeetcodeEditorByEditor(SplitTextEditorWithPreview editor, Project project) {
+    public static @Nullable LeetcodeEditor getLeetcodeEditorByEditor(SplitTextEditorWithPreview editor,
+        Project project) {
         // get cache
         VirtualFile file = editor.getFile();
         if (file == null) {
@@ -122,15 +139,12 @@ public class ViewUtils {
     }
 
     public static void showDialog(Project project, String message) {
-        Messages.showMessageDialog(project, message, ConsoleUtils.LEETCODE_CODE_DIALOG_TITLE, Messages.getInformationIcon());
+        Messages.showMessageDialog(project, message, ConsoleUtils.LEETCODE_CODE_DIALOG_TITLE,
+            Messages.getInformationIcon());
     }
 
     /**
      * 通过vFile更新lc内容
-     *
-     * @param file
-     * @param lc
-     * @return
      */
     public static boolean updateLeetcodeEditorByVFile(Project project, VirtualFile file, LeetcodeEditor lc) {
         String key = getCacheKeyByVFile(file);
@@ -140,6 +154,7 @@ public class ViewUtils {
 
     /**
      * 获取当前打开的虚拟文件
+     *
      * @param project project
      * @return 虚拟文件
      */
@@ -154,8 +169,6 @@ public class ViewUtils {
 
     /**
      * 打开当前显示的file editor
-     * @param project
-     * @return
      */
     public static FileEditor getCurrentOpenEditor(Project project) {
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
@@ -185,6 +198,7 @@ public class ViewUtils {
 
     /**
      * 将内容写入vFile
+     *
      * @param cFile 要写入的虚拟文件
      * @param content 要写入的内容
      * @return 是否写入成功
@@ -215,6 +229,7 @@ public class ViewUtils {
 
     /**
      * 将内容写入当前打开的虚拟文件
+     *
      * @param project project
      * @param content 写入内容
      * @return 是否写入成功
@@ -226,7 +241,9 @@ public class ViewUtils {
 
     public static boolean updateLeetcodeEditorByCurrentVFile(Project project, LeetcodeEditor lc) {
         VirtualFile cFile = getCurrentOpenVirtualFile(project);
-        if (cFile == null) return false;
+        if (cFile == null) {
+            return false;
+        }
         return updateLeetcodeEditorByVFile(project, cFile, lc);
     }
 
@@ -265,6 +282,7 @@ public class ViewUtils {
 
     /**
      * 选择并显示myList第i个元素
+     *
      * @param myList myList
      * @param i idx
      */
@@ -280,6 +298,7 @@ public class ViewUtils {
 
     /**
      * 选择并显示myList第i个元素
+     *
      * @param myList myList
      * @param i idx
      */
@@ -301,7 +320,8 @@ public class ViewUtils {
      * @param project project
      * @param pattern deepcoding的对应模式
      */
-    public static void rePositionInDeepCoding(RePositionEvent event, MyList<? extends DeepCodingQuestion> questionList, Project project, String pattern) {
+    public static void rePositionInDeepCoding(RePositionEvent event, MyList<? extends DeepCodingQuestion> questionList,
+        Project project, String pattern) {
         String fid = event.getFrontendQuestionId();
         String titleSlug = event.getTitleSlug();
         ListModel<?> model = questionList.getModel();
@@ -323,7 +343,8 @@ public class ViewUtils {
                         return;
                     }
                 }
-                showDialog(project, BundleUtils.i18nHelper("当前文件无法被重新打开", "The current file cannot be re-opened"));
+                showDialog(project,
+                    BundleUtils.i18nHelper("当前文件无法被重新打开", "The current file cannot be re-opened"));
             }
         } catch (Exception ex) {
             LogUtils.error(ex);
@@ -333,6 +354,7 @@ public class ViewUtils {
 
     /**
      * 根据系统设置的langType打开文件
+     *
      * @param question question
      * @param size 当前deepcoding模式下显示的有多少题目
      * @param index 当前题目的index
@@ -341,15 +363,18 @@ public class ViewUtils {
      * @param project project
      * @param pattern deepcoding 的那种模式
      */
-    private static void handleSuccessfulReposition(DeepCodingQuestion question, int size, int index, MyList<? extends DeepCodingQuestion> questionList, RePositionEvent event, Project project, String pattern) {
+    private static void handleSuccessfulReposition(DeepCodingQuestion question, int size, int index,
+        MyList<? extends DeepCodingQuestion> questionList, RePositionEvent event, Project project, String pattern) {
         ViewUtils.scrollToVisibleOfMyList(questionList, index, true);
         // 重新打开文件
         DeepCodingInfo hot1001 = new DeepCodingInfo(pattern, size, index);
         try {
-            CodeService.getInstance(project).reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
+            CodeService.getInstance(project)
+                .reOpenCodeEditor(question.toQuestion(project), event.getFile(), event.getLangType(), hot1001);
         } catch (FileCreateError e) {
             LogUtils.error(e);
-            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
+            ConsoleUtils.getInstance(project)
+                .showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
             return;
         }
 
@@ -382,7 +407,7 @@ public class ViewUtils {
             Question question;
             // double check
             if (
-                    i < model.getSize() &&
+                i < model.getSize() &&
                     (question = model.getElementAt(i)).getTitleSlug().equals(titleSlug)) {
                 ViewUtils.scrollToVisibleOfMyList(questionList, i, true);
                 // 重新打开文件 (根据当前系统语言打开文件)
@@ -390,14 +415,16 @@ public class ViewUtils {
                     CodeService.getInstance(project).reOpenCodeEditor(question, event.getFile(), event.getLangType());
                 } catch (FileCreateError e) {
                     LogUtils.error(e);
-                    ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true, true);
+                    ConsoleUtils.getInstance(project)
+                        .showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + e.getMessage(), true,
+                            true);
                     return;
                 }
                 // 获取并显示 ToolWindow（确保控制台窗口可见）
                 showToolWindow(project);
                 return;
             }
-            ViewUtils.getDialogWrapper( "当前文件无法被重新打开");
+            ViewUtils.getDialogWrapper("当前文件无法被重新打开");
         } catch (Exception ex) {
             LogUtils.error(ex);
             ConsoleUtils.getInstance(project).showError("文件重定位错误! 错误原因是: " + ex.getMessage(), false, true);
@@ -453,12 +480,13 @@ public class ViewUtils {
     }
 
     @NotNull
-    public static DialogWrapper getDialogWrapper(JComponent component, String title, String[] exitActionNames, int[] exitActionCodes) {
+    public static DialogWrapper getDialogWrapper(JComponent component, String title, String[] exitActionNames,
+        int[] exitActionCodes) {
         DialogWrapper dialog = new DialogWrapper((Project) null, true) {
             private final DialogWrapperExitAction okAction =
-                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
+                new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
             private final DialogWrapperExitAction cancelAction =
-                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
+                new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
 
             {
                 if (exitActionCodes.length != exitActionNames.length) {
@@ -516,9 +544,9 @@ public class ViewUtils {
     public static DialogWrapper getDialogWrapper(JComponent component, String title) {
         DialogWrapper dialog = new DialogWrapper((Project) null, true) {
             private final DialogWrapperExitAction okAction =
-                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
+                new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
             private final DialogWrapperExitAction cancelAction =
-                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
+                new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
 
             {
                 setTitle(title);
@@ -562,9 +590,9 @@ public class ViewUtils {
     public static DialogWrapper getDialogWrapper(String title) {
         DialogWrapper dialog = new DialogWrapper((Project) null, true) {
             private final DialogWrapperExitAction okAction =
-                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
+                new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.ok"), OK_EXIT_CODE);
             private final DialogWrapperExitAction cancelAction =
-                    new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
+                new DialogWrapperExitAction(BundleUtils.i18n("action.leetcode.plugin.cancel"), CANCEL_EXIT_CODE);
 
             {
                 setTitle(title);
@@ -623,6 +651,7 @@ public class ViewUtils {
 
     /**
      * 给FileBrowseFolder添加路径验证器
+     *
      * @param myFileBrowserBtn TextFieldWithBrowseButton
      * @return TextBrowseFolderListener
      */
@@ -648,12 +677,12 @@ public class ViewUtils {
                 if (!FileUtils.isValidFilePath(selectedPath)) {
                     String osName = OSHandler.getOSName();
                     String errorMsg =
-                            BundleUtils.i18nHelper(
-                                    String.format("路径包含非法字符（%s系统）",
-                                            osName.contains("Windows") ? "Windows" : "Unix-like"),
-                                    String.format("The path contains invalid characters (%s system)",
-                                            osName.contains("Windows") ? "Windows" : "Unix-like")
-                            );
+                        BundleUtils.i18nHelper(
+                            String.format("路径包含非法字符（%s系统）",
+                                osName.contains("Windows") ? "Windows" : "Unix-like"),
+                            String.format("The path contains invalid characters (%s system)",
+                                osName.contains("Windows") ? "Windows" : "Unix-like")
+                        );
                     setPathValid(false, errorMsg);
                     return;
                 }

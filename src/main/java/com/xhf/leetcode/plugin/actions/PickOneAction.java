@@ -28,7 +28,8 @@ public class PickOneAction extends AbstractAction {
             CodeService.getInstance(project).openCodeEditor(question);
         } catch (FileCreateError ex) {
             LogUtils.error(ex);
-            ConsoleUtils.getInstance(project).showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + ex.getMessage(), true, true);
+            ConsoleUtils.getInstance(project)
+                .showError(BundleUtils.i18n("code.service.file.create.error") + "\n" + ex.getMessage(), true, true);
         }
     }
 

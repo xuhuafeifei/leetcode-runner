@@ -2,13 +2,14 @@ package com.xhf.leetcode.plugin.model;
 
 import com.google.gson.annotations.SerializedName;
 
-    /**
-     * extract base info from the {@link RunCodeResult} result and {@link SubmitCodeResult} result
-     *
-     * @author feigebuge
-     * @email 2508020102@qq.com
-     */
-    public class BaseCodeResult {
+/**
+ * extract base info from the {@link RunCodeResult} result and {@link SubmitCodeResult} result
+ *
+ * @author feigebuge
+ * @email 2508020102@qq.com
+ */
+public class BaseCodeResult {
+
     @SerializedName("lang")
     private String lang;
     @SerializedName("run_success")
@@ -39,89 +40,100 @@ import com.google.gson.annotations.SerializedName;
     private String statusMemory;
     @SerializedName("full_compile_error")
     private String fullCompileError;
+
+    public String getLang() {
+        return lang;
+    }
+
     public void setLang(String lang) {
         this.lang = lang;
     }
-    public String getLang() {
-        return lang;
+
+    public boolean getRunSuccess() {
+        return runSuccess;
     }
 
     public void setRunSuccess(boolean runSuccess) {
         this.runSuccess = runSuccess;
     }
-    public boolean getRunSuccess() {
-        return runSuccess;
+
+    public String getStatusRuntime() {
+        return statusRuntime;
     }
 
     public void setStatusRuntime(String statusRuntime) {
         this.statusRuntime = statusRuntime;
     }
-    public String getStatusRuntime() {
-        return statusRuntime;
+
+    public long getMemory() {
+        return memory;
     }
 
     public void setMemory(long memory) {
         this.memory = memory;
     }
-    public long getMemory() {
-        return memory;
-    }
 
-    public void setDisplayRuntime(String displayRuntime) {
-        this.displayRuntime = displayRuntime;
-    }
     public String getDisplayRuntime() {
         return displayRuntime;
     }
 
-    public void setCompareResult(String compareResult) {
-        this.compareResult = compareResult;
+    public void setDisplayRuntime(String displayRuntime) {
+        this.displayRuntime = displayRuntime;
     }
 
     public String getCompareResult() {
         return this.compareResult;
     }
 
-    public void setTotalTestcases(String totalTestcases) {
-        this.totalTestcases = totalTestcases;
+    public void setCompareResult(String compareResult) {
+        this.compareResult = compareResult;
     }
+
     public String getTotalTestcases() {
         return totalTestcases;
     }
 
-    public void setTotalCorrect(String totalCorrect) {
-        this.totalCorrect = totalCorrect;
+    public void setTotalTestcases(String totalTestcases) {
+        this.totalTestcases = totalTestcases;
     }
+
     public String getTotalCorrect() {
         return totalCorrect;
     }
 
-    public void setFullCompileError(String fullCompileError) {
-        this.fullCompileError = fullCompileError;
+    public void setTotalCorrect(String totalCorrect) {
+        this.totalCorrect = totalCorrect;
     }
 
     public String getFullCompileError() {
         return fullCompileError;
     }
 
+    public void setFullCompileError(String fullCompileError) {
+        this.fullCompileError = fullCompileError;
+    }
+
+    public String getFullRuntimeError() {
+        return fullRuntimeError;
+    }
+
     public void setFullRuntimeError(String fullRuntimeError) {
         this.fullRuntimeError = fullRuntimeError;
     }
-    public String getFullRuntimeError() {
-        return fullRuntimeError;
+
+    public String getStatusMsg() {
+        return statusMsg;
     }
 
     public void setStatusMsg(String statusMsg) {
         this.statusMsg = statusMsg;
     }
-    public String getStatusMsg() {
-        return statusMsg;
+
+    public String getStatusMemory() {
+        return statusMemory;
     }
 
     public void setStatusMemory(String statusMemory) {
         this.statusMemory = statusMemory;
-    }
-    public String getStatusMemory() {
-        return statusMemory;
     }
 }

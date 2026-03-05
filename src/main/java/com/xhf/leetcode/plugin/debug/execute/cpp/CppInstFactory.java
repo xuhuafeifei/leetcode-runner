@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.debug.execute.cpp;
 import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.InstructionFactory;
-import com.xhf.leetcode.plugin.debug.execute.python.*;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
 
 /**
@@ -11,10 +10,13 @@ import com.xhf.leetcode.plugin.debug.instruction.Instruction;
  * @email 2508020102@qq.com
  */
 public class CppInstFactory implements InstructionFactory {
+
     // 单例
     private static final CppInstFactory instance = new CppInstFactory();
+
     private CppInstFactory() {
     }
+
     public static CppInstFactory getInstance() {
         return instance;
     }

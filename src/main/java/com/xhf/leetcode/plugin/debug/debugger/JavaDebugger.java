@@ -5,7 +5,11 @@ import com.sun.jdi.Bootstrap;
 import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.VirtualMachineManager;
-import com.sun.jdi.connect.*;
+import com.sun.jdi.connect.AttachingConnector;
+import com.sun.jdi.connect.Connector;
+import com.sun.jdi.connect.IllegalConnectorArgumentsException;
+import com.sun.jdi.connect.LaunchingConnector;
+import com.sun.jdi.connect.VMStartException;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequestManager;
@@ -29,7 +33,6 @@ import com.xhf.leetcode.plugin.io.file.utils.FileUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.OSHandler;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,20 +47,21 @@ import java.util.Map;
  * @email 2508020102@qq.com
  */
 public class JavaDebugger extends AbstractDebugger {
+
     private final JavaDebugConfig config;
+    private final Context context;
+    /**
+     * 用于输出debug过程中, 代码的std out/ std error
+     */
+    private final OutputHelper outputHelper;
     private JavaDebugEnv env;
     private VirtualMachine vm;
-    private final Context context;
     private Output output;
     private List<BreakpointRequest> breakpointRequests;
     /**
      * 服务启动端口
      */
     private int port = -1;
-    /**
-     * 用于输出debug过程中, 代码的std out/ std error
-     */
-    private final OutputHelper outputHelper;
     private String stdLogPath;
     private String stdErrPath;
 
@@ -69,11 +73,21 @@ public class JavaDebugger extends AbstractDebugger {
         this.outputHelper = new OutputHelper(project);
     }
 
+    // 获取 JDWP 连接器
+    private static AttachingConnector getConnector(VirtualMachineManager vmm) {
+        for (AttachingConnector connector : vmm.attachingConnectors()) {
+            if (connector.transport().name().equals("dt_socket")) {
+                return connector;
+            }
+        }
+        throw new RuntimeException("No suitable connector found.");
+    }
+
     @Override
     public void start() {
         env = new JavaDebugEnv(project);
         boolean flag = super.envPrepare(env);
-        if (! flag) {
+        if (!flag) {
             return;
         }
         // 启动debug
@@ -117,19 +131,20 @@ public class JavaDebugger extends AbstractDebugger {
             // debugLocally();
             debugRemotely();
         } catch (DebugError ex) {
-            ConsoleUtils.getInstance(project).showError(ex.getMessage(), false, true, ex.getMessage(), "debug异常", ConsoleDialog.ERROR);
+            ConsoleUtils.getInstance(project)
+                .showError(ex.getMessage(), false, true, ex.getMessage(), "debug异常", ConsoleDialog.ERROR);
             LogUtils.error(ex);
         } catch (VMDisconnectedException e) {
             DebugUtils.simpleDebug(BundleUtils.i18n("debug.leetcode.vm.connect.stop"), project, true);
         } catch (Exception e) {
-            ConsoleUtils.getInstance(project).showError(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
+            ConsoleUtils.getInstance(project)
+                .showError(e.getMessage(), false, true, e.getMessage(), "未知异常", ConsoleDialog.ERROR);
             LogUtils.error(e);
         }
         if (DebugManager.getInstance(project).isDebug()) {
             DebugManager.getInstance(project).stopDebugger();
         }
     }
-
 
     /**
      * 本地断点启动
@@ -157,7 +172,7 @@ public class JavaDebugger extends AbstractDebugger {
 
         List<String> list = Arrays.asList("main", "options", "home", "vmexec", "suspend", "quote", "vmexec");
         for (String key : arguments.keySet()) {
-            if (! list.contains(key)) {
+            if (!list.contains(key)) {
                 arguments.remove(key);
             }
         }
@@ -201,7 +216,6 @@ public class JavaDebugger extends AbstractDebugger {
 
     /**
      * 开始处理debug流程
-     * @param vm
      */
     private void startProcessEvent(VirtualMachine vm) {
         EventRequestManager erm = vm.eventRequestManager();
@@ -316,17 +330,6 @@ public class JavaDebugger extends AbstractDebugger {
         startProcessEvent(vm);
     }
 
-
-    // 获取 JDWP 连接器
-    private static AttachingConnector getConnector(VirtualMachineManager vmm) {
-        for (AttachingConnector connector : vmm.attachingConnectors()) {
-            if (connector.transport().name().equals("dt_socket")) {
-                return connector;
-            }
-        }
-        throw new RuntimeException("No suitable connector found.");
-    }
-
     private void startVMService() {
         // 创建检测标准输出, 标准错误文件
         this.stdLogPath = new FileUtils.PathBuilder(env.getFilePath()).append("javaLog").append("std_log.log").build();
@@ -338,8 +341,8 @@ public class JavaDebugger extends AbstractDebugger {
             FileUtils.createAndWriteFile(stdErrPath, "");
         } catch (Exception e) {
             String message = BundleUtils.i18n("debug.leetcode.java.log.create.failed") + "\n"
-                    + "std_log.log = " + stdLogPath + "\n"
-                    + "std_err_log = " + stdErrPath + "\n";
+                + "std_log.log = " + stdLogPath + "\n"
+                + "std_err_log = " + stdErrPath + "\n";
             LogUtils.simpleDebug(message);
             ConsoleUtils.getInstance(project).showError(message, false);
         }
@@ -348,8 +351,9 @@ public class JavaDebugger extends AbstractDebugger {
         LogUtils.simpleDebug("get available port : " + this.port);
 
         String cdCmd = "cd " + env.getFilePath();
-        String startCmd = String.format("%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=%d -cp %s %s %s",
-                env.getJava(), port, env.getFilePath(), "Main", "> " + stdLogPath + " 2> " + stdErrPath);
+        String startCmd = String.format(
+            "%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=%d -cp %s %s %s",
+            env.getJava(), port, env.getFilePath(), "Main", "> " + stdLogPath + " 2> " + stdErrPath);
 
         String combinedCmd = cdCmd + " & " + startCmd;
 
@@ -359,7 +363,7 @@ public class JavaDebugger extends AbstractDebugger {
             var exec = OSHandler.buildProcess(combinedCmd);
             // DebugUtils.buildProcess("cmd.exe", "/c", combinedCmd);
             getRunInfo(exec);
-        } catch(InterruptedException ignored) {
+        } catch (InterruptedException ignored) {
         } catch (Exception e) {
             throw new DebugError(e.toString(), e);
         }

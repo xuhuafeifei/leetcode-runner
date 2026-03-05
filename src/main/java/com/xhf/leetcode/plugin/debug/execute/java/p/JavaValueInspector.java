@@ -1,14 +1,35 @@
 package com.xhf.leetcode.plugin.debug.execute.java.p;
 
-import com.sun.jdi.*;
+import com.sun.jdi.ArrayReference;
+import com.sun.jdi.BooleanValue;
+import com.sun.jdi.ByteValue;
+import com.sun.jdi.CharValue;
+import com.sun.jdi.ClassLoaderReference;
+import com.sun.jdi.ClassObjectReference;
+import com.sun.jdi.DoubleValue;
+import com.sun.jdi.Field;
+import com.sun.jdi.FloatValue;
+import com.sun.jdi.IntegerValue;
+import com.sun.jdi.LongValue;
+import com.sun.jdi.ObjectReference;
+import com.sun.jdi.PrimitiveValue;
+import com.sun.jdi.ReferenceType;
+import com.sun.jdi.ShortValue;
+import com.sun.jdi.StringReference;
+import com.sun.jdi.ThreadGroupReference;
+import com.sun.jdi.ThreadReference;
+import com.sun.jdi.Value;
 import com.xhf.leetcode.plugin.debug.analysis.converter.convert.TreeNode;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.MapUtils;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 强转value, 并给出value的实际内容, md, 真恶心啊我靠
@@ -16,11 +37,38 @@ import java.util.stream.Collectors;
  * 使用了不少递归处理, 最怕递归太深了, 出现StackOverflow, 爆栈什么的, 那种事情不要啊~
  */
 public class JavaValueInspector {
+
     // 单例
     private static final JavaValueInspector INSTANCE = new JavaValueInspector();
+    // 包装类集合
+    public final Map<String, String> WRAPPER_TO_PRIMITIVES = MapUtils.getMapFromList(
+        Arrays.asList(
+            "java.lang.Integer", "java.lang.Double", "java.lang.Character", "java.lang.Long",
+            "java.lang.Float", "java.lang.Boolean", "java.lang.Byte", "java.lang.Short"
+        ),
+        Arrays.asList(
+            "int", "double", "char", "long",
+            "float", "boolean", "byte", "short"
+        )
+    );
+    public final Map<String, String> PRIMITIVES_TO_WRAPPER = MapUtils.getMapFromList(
+        Arrays.asList(
+            "int", "double", "char", "long",
+            "float", "boolean", "byte", "short"
+        ),
+        Arrays.asList(
+            "java.lang.Integer", "java.lang.Double", "java.lang.Character", "java.lang.Long",
+            "java.lang.Float", "java.lang.Boolean", "java.lang.Byte", "java.lang.Short"
+        )
+    );
+    // 在打印复杂对象时, 有些字段不需要打印
+    private final Set<String> skipWords = Set.of("hash", "next", "entrySet", "modCount", "threshold", "loadFactor",
+        "keySet", "values", "comparator", "serialVersionUID", "DEFAULT_INITIAL_CAPACITY");
+
     private JavaValueInspector() {
 
     }
+
     public static JavaValueInspector getInstance() {
         return INSTANCE;
     }
@@ -71,8 +119,6 @@ public class JavaValueInspector {
         return res;
     }
 
-
-
     private String handleObjectReference(ObjectReference objRef, int depth) {
         String res;
         if (objRef instanceof StringReference) {
@@ -83,13 +129,18 @@ public class JavaValueInspector {
             }
             Value value = ((ArrayReference) objRef).getValue(0);
             if (value instanceof StringReference) {
-                res = "[" + ((ArrayReference) objRef).getValues().stream().map(String::valueOf).collect(Collectors.joining(", ")) + "]";
+                res = "[" + ((ArrayReference) objRef).getValues().stream().map(String::valueOf)
+                    .collect(Collectors.joining(", ")) + "]";
             } else if (value instanceof PrimitiveValue) {
-                res = "[" + ((ArrayReference) objRef).getValues().stream().map(e -> handlePrimitiveValue((PrimitiveValue) e)).collect(Collectors.joining(", ")) + "]";
+                res = "[" + ((ArrayReference) objRef).getValues().stream()
+                    .map(e -> handlePrimitiveValue((PrimitiveValue) e)).collect(Collectors.joining(", ")) + "]";
             } else if (isWrapperType(value)) {
-                res = "[" + ((ArrayReference) objRef).getValues().stream().map(e -> handleWrapper((ObjectReference) e)).collect(Collectors.joining(", ")) + "]";
+                res = "[" + ((ArrayReference) objRef).getValues().stream().map(e -> handleWrapper((ObjectReference) e))
+                    .collect(Collectors.joining(", ")) + "]";
             } else {
-                res = "[" + ((ArrayReference) objRef).getValues().stream().map(e -> handleObjectReference((ObjectReference) e, depth + 1)).collect(Collectors.joining(", ")) + "]";
+                res = "[" + ((ArrayReference) objRef).getValues().stream()
+                    .map(e -> handleObjectReference((ObjectReference) e, depth + 1)).collect(Collectors.joining(", "))
+                    + "]";
             }
         } else if (objRef instanceof ThreadReference) {
             res = ((ThreadReference) objRef).name();
@@ -196,7 +247,8 @@ public class JavaValueInspector {
                         next = objNode.getValue(objNodeRef.fieldByName("next"));
                         if (includeValue) {
                             Value value = objNode.getValue(objNodeRef.fieldByName("value"));
-                            sb.append(this.inspectValue(key)).append(":  ").append(this.inspectValue(value)).append(",   ");
+                            sb.append(this.inspectValue(key)).append(":  ").append(this.inspectValue(value))
+                                .append(",   ");
                         } else {
                             sb.append(this.inspectValue(key)).append(",   ");
                         }
@@ -217,7 +269,6 @@ public class JavaValueInspector {
     private String handleHashMap(ObjectReference objRef, int depth) {
         return handleMapBasedCollection(objRef, depth, true);
     }
-
 
     private boolean isHashMap(ObjectReference objRef) {
         if (objRef == null) {
@@ -246,7 +297,7 @@ public class JavaValueInspector {
     }
 
     private String handleListNode(ObjectReference objRef, int depth) {
-        if (! isMyListNode(objRef)) {
+        if (!isMyListNode(objRef)) {
             return handleComplexObject(objRef, depth);
         }
         ReferenceType referenceType = objRef.referenceType();
@@ -274,8 +325,6 @@ public class JavaValueInspector {
 
     /**
      * 判断是否是我提供的ListNode
-     * @param objRef
-     * @return
      */
     private boolean isMyListNode(ObjectReference objRef) {
         // 检查并获取变量
@@ -285,7 +334,7 @@ public class JavaValueInspector {
         if (val == null || next == null) {
             return false;
         }
-        if (! (val instanceof IntegerValue) ) {
+        if (!(val instanceof IntegerValue)) {
             return false;
         }
         // 判断类型
@@ -294,9 +343,6 @@ public class JavaValueInspector {
 
     /**
      * 处理复杂对象的打印
-     * @param objRef
-     * @param depth
-     * @return
      */
     private String handleComplexObject(ObjectReference objRef, int depth) {
         StringBuilder sb = new StringBuilder();
@@ -322,7 +368,7 @@ public class JavaValueInspector {
                 sb.append("\n");
             }
             sb.append(getTabsByDepth(depth)).append("}");  // 结束的 右大括号 也要缩进
-        }else {
+        } else {
             sb.append(getTabsByDepth(depth));
             sb.append("{}");
         }
@@ -331,10 +377,10 @@ public class JavaValueInspector {
 
     private String handleTreeNode(ObjectReference objRef, int depth) {
         // 检查是否和我项目提供的TreeNode一致, 否则不进行打印
-//        if (! isMyTreeNode(objRef)) {
-//            // 采用默认的复杂对象打印器
-//            return handleComplexObject(objRef, depth);
-//        }
+        //        if (! isMyTreeNode(objRef)) {
+        //            // 采用默认的复杂对象打印器
+        //            return handleComplexObject(objRef, depth);
+        //        }
         // 创建头节点
         TreeNode cp = dfs(objRef);
         return new TreeNodePrinter(cp).visitAndReturn().toString();
@@ -342,7 +388,6 @@ public class JavaValueInspector {
 
     /**
      * 返回头节点
-     * @return
      */
     private TreeNode dfs(ObjectReference objRef) {
         if (objRef == null) {
@@ -362,14 +407,11 @@ public class JavaValueInspector {
     }
 
     private int getIntNodeVal(Value val) {
-        return ((IntegerValue)val).intValue();
+        return ((IntegerValue) val).intValue();
     }
 
     /**
      * 判断是否是我提供的TreeNode
-     *
-     * @param objRef
-     * @return
      */
     @Deprecated // 因为debug内核采用的是我提供的TreeNode. 所以不用判断
     private boolean isMyTreeNode(ObjectReference objRef) {
@@ -381,7 +423,7 @@ public class JavaValueInspector {
         if (val == null || left == null || right == null) {
             return false;
         }
-        if (! (val instanceof IntegerValue) ) {
+        if (!(val instanceof IntegerValue)) {
             return false;
         }
         // 判断类型
@@ -395,9 +437,6 @@ public class JavaValueInspector {
         // 判断是否是 java.util.ArrayDeque
         return value instanceof ObjectReference && value.type().name().contains("TreeNode");
     }
-
-    // 在打印复杂对象时, 有些字段不需要打印
-    private final Set<String> skipWords = Set.of("hash", "next", "entrySet", "modCount", "threshold", "loadFactor", "keySet", "values", "comparator", "serialVersionUID", "DEFAULT_INITIAL_CAPACITY");
 
     private boolean isSkipWord(String s) {
         return skipWords.contains(s);
@@ -499,6 +538,7 @@ public class JavaValueInspector {
 
     /**
      * 获取Arrays.ArrayList
+     *
      * @return 以String的形式表示Arrays.ArrayList
      */
     private String handleArraysArrayList(ObjectReference objRef, int depth) {
@@ -523,6 +563,7 @@ public class JavaValueInspector {
 
     /**
      * 获取ArrayList
+     *
      * @return 以String的形式表示ArrayList
      */
     private String handleArrayList(ObjectReference objRef, int depth) {
@@ -555,31 +596,9 @@ public class JavaValueInspector {
         return value instanceof ObjectReference && "java.util.ArrayList".equals(value.type().name());
     }
 
-    // 包装类集合
-    public final Map<String, String> WRAPPER_TO_PRIMITIVES = MapUtils.getMapFromList(
-            Arrays.asList(
-                    "java.lang.Integer", "java.lang.Double", "java.lang.Character", "java.lang.Long",
-                    "java.lang.Float", "java.lang.Boolean", "java.lang.Byte", "java.lang.Short"
-            ),
-            Arrays.asList(
-                    "int", "double", "char", "long",
-                    "float", "boolean", "byte", "short"
-            )
-    );
-
-    public final Map<String, String> PRIMITIVES_TO_WRAPPER = MapUtils.getMapFromList(
-            Arrays.asList(
-                    "int", "double", "char", "long",
-                    "float", "boolean", "byte", "short"
-            ),
-            Arrays.asList(
-                    "java.lang.Integer", "java.lang.Double", "java.lang.Character", "java.lang.Long",
-                    "java.lang.Float", "java.lang.Boolean", "java.lang.Byte", "java.lang.Short"
-            )
-    );
-
     /**
      * 通过包装类型返回对应的基本类型
+     *
      * @param wrapperTypeName 包装类型
      * @return 对应的基本类型
      */
@@ -589,6 +608,7 @@ public class JavaValueInspector {
 
     /**
      * 通过primitiveType获取对应的包装类型
+     *
      * @param primitiveTypeName 基本类型
      * @return 对应的包装类型
      */
@@ -599,8 +619,6 @@ public class JavaValueInspector {
 
     /**
      * 判断是不是primitiveType
-     * @param value
-     * @return
      */
     public boolean isPrimitiveType(Value value) {
         return value instanceof PrimitiveValue;
@@ -649,8 +667,6 @@ public class JavaValueInspector {
 
     /**
      * 获取包装类型类的 'value' 字段. 该字段是PrimitiveValue
-     * @param objRef
-     * @return
      */
     public Value getWrapperValue(ObjectReference objRef) {
         if (objRef == null) {

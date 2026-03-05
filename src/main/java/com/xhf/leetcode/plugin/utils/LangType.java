@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public enum LangType {
     JAVA("java", ".java", "//", new String[]{"java", "Java"}),
-//    PYTHON("python", ".py", "#"),
+    //    PYTHON("python", ".py", "#"),
     CPP("cpp", ".cpp", "//", new String[]{"cpp", "c++", "C++", "Cpp", "CPP"}),
     JAVASCRIPT("javascript", ".js", "//", new String[]{"js"}),
     C("c", ".c", "//", new String[]{"c", "C"}),
@@ -18,7 +18,7 @@ public enum LangType {
     ;
 
 
-    private LangType(String langType, String suffix, String commentSymbol, String[] rec) {
+    LangType(String langType, String suffix, String commentSymbol, String[] rec) {
         this.langType = langType;
         this.suffix = suffix;
         this.commentSymbol = commentSymbol;
@@ -41,8 +41,6 @@ public enum LangType {
 
     /**
      * 匹配给定langType是否被允许.
-     * @param langType
-     * @return
      */
     public static boolean contains(String langType) {
         if (StringUtils.isBlank(langType)) {
@@ -58,8 +56,6 @@ public enum LangType {
 
     /**
      * 通过文件后缀返回对应的langType
-     * @param suffix
-     * @return
      */
     public static String convertBySuffix(String suffix) {
         for (LangType lt : LangType.values()) {
@@ -75,12 +71,11 @@ public enum LangType {
             return false;
         }
         boolean flag = langType.equalsIgnoreCase(settingLangType);
-        if (flag) return true;
-        // python特判
-        if (langType.contains("python") && settingLangType.contains("python")) {
+        if (flag) {
             return true;
         }
-        return false;
+        // python特判
+        return langType.contains("python") && settingLangType.contains("python");
     }
 
     public static LangType getType(String langType) {
@@ -112,6 +107,7 @@ public enum LangType {
 
     /**
      * langType是否是当前LangType
+     *
      * @param lang langType
      * @return boolean
      */

@@ -1,6 +1,10 @@
 package com.xhf.leetcode.plugin.search.utils;
 
-import com.xhf.leetcode.plugin.search.process.*;
+import com.xhf.leetcode.plugin.search.process.CNProcessor;
+import com.xhf.leetcode.plugin.search.process.DigitProcessor;
+import com.xhf.leetcode.plugin.search.process.ENProcessor;
+import com.xhf.leetcode.plugin.search.process.NonProcessor;
+import com.xhf.leetcode.plugin.search.process.Processor;
 
 public enum CharType {
     EN("en", ENProcessor.class),

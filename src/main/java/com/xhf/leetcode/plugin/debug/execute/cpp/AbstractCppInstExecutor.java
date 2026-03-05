@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.debug.execute.cpp;
 import com.xhf.leetcode.plugin.debug.execute.AbstractInstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteContext;
 import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
-import com.xhf.leetcode.plugin.debug.execute.InstExecutor;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.CppGdbInfo;
 import com.xhf.leetcode.plugin.debug.execute.cpp.gdb.GdbParser;
 import com.xhf.leetcode.plugin.debug.instruction.Instruction;
@@ -25,8 +24,9 @@ public abstract class AbstractCppInstExecutor extends AbstractInstExecutor {
 
     @Override
     public ExecuteResult execute(@NotNull Instruction inst, @NotNull ExecuteContext context) {
-        if (! (context instanceof CppContext) ) {
-            throw new DebugError("context must be instance of com.xhf.leetcode.plugin.debug.execute.cpp.CppContext in cpp executor");
+        if (!(context instanceof CppContext)) {
+            throw new DebugError(
+                "context must be instance of com.xhf.leetcode.plugin.debug.execute.cpp.CppContext in cpp executor");
         }
         var pCtx = (CppContext) context;
         // 前置处理inst
@@ -53,6 +53,7 @@ public abstract class AbstractCppInstExecutor extends AbstractInstExecutor {
 
     /**
      * 执行逻辑, 发送指令给GDB服务
+     *
      * @param inst inst
      * @param pCtx pCtx
      * @param gdbCommand gdbCommand
@@ -70,6 +71,7 @@ public abstract class AbstractCppInstExecutor extends AbstractInstExecutor {
 
     /**
      * 如果cppGdbInfo为false, 返回true, 并处理ExecuteResult
+     *
      * @param r r
      * @param cppGdbInfo info
      * @return boolean true表示gdb执行发生错误

@@ -6,6 +6,7 @@ import com.xhf.leetcode.plugin.debug.reader.InstReader;
 
 /**
  * 没想好要做哪些拓展, 先这么预留着
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */

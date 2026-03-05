@@ -10,6 +10,7 @@ public interface InstParser {
 
     /**
      * 解析指令
+     *
      * @param command 命令
      * @param readType 命令来源
      * @return 解析对象

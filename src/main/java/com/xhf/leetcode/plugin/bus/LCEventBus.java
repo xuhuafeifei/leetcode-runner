@@ -5,18 +5,16 @@ import com.xhf.leetcode.plugin.utils.LogUtils;
 
 /**
  * 使用guava的EventBus, LCEventBus对其api做出封装, 适配当前项目
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class LCEventBus {
+
     private final EventBus eventBus;
 
     private LCEventBus() {
         eventBus = new EventBus();
-    }
-
-    private static class SingletonHolder {
-        private static final LCEventBus INSTANCE = new LCEventBus();
     }
 
     public static LCEventBus getInstance() {
@@ -38,5 +36,10 @@ public class LCEventBus {
 
     public void remove(Object listener) {
         eventBus.unregister(listener);
+    }
+
+    private static class SingletonHolder {
+
+        private static final LCEventBus INSTANCE = new LCEventBus();
     }
 }

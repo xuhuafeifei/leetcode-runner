@@ -17,14 +17,14 @@ import com.xhf.leetcode.plugin.service.SolutionService;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.MarkdownContentType;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import java.util.Map;
+import javax.swing.JComponent;
+import javax.swing.JTextPane;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.util.Map;
 
 /**
  * @author feigebuge
@@ -84,7 +84,7 @@ public class SolutionEditor extends AbstractSplitTextEditor {
             jTextPane.setText(Constants.SOLUTION_CONTENT_NOT_SUPPORT);
             secondComponent = JBUI.Panels.simplePanel(jTextPane);
             secondComponent.addToTop(createToolbarWrapper(jTextPane));
-        }else {
+        } else {
             // 显示solution
             content.put(Constants.VFILE, file);
             MarkDownEditor markDownEditor = new MarkDownEditor(project, content, MarkdownContentType.SOLUTION);

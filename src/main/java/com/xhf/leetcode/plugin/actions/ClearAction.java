@@ -26,12 +26,12 @@ public class ClearAction extends AbstractAction {
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         int result = Messages.showOkCancelDialog(
-                project,
-                BundleUtils.i18n("action.leetcode.actions.clear.confirm.info"),
-                BundleUtils.i18n("action.leetcode.actions.clear.confirm.title"),
-                Messages.getOkButton(),
-                Messages.getCancelButton(),
-                Messages.getQuestionIcon()
+            project,
+            BundleUtils.i18n("action.leetcode.actions.clear.confirm.info"),
+            BundleUtils.i18n("action.leetcode.actions.clear.confirm.title"),
+            Messages.getOkButton(),
+            Messages.getCancelButton(),
+            Messages.getQuestionIcon()
         );
 
         if (result == Messages.OK) {

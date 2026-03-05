@@ -5,6 +5,7 @@ package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
  * @email 2508020102@qq.com
  */
 public class IntConvertor extends AbstractVariableConvertor {
+
     @Override
     protected String doCpp(String testcase, String variableName) {
         return "int " + variableName + " = " + testcase + ";\r\n";

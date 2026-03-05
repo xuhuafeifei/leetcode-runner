@@ -4,17 +4,18 @@ import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.ListModel;
 
 /**
  * 为MyList提供右键菜单. 菜单包括copy, delete选项
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
@@ -30,6 +31,7 @@ public class PopupMenuAdaptor<T> extends MouseAdapter {
 
     /**
      * 创建popupMenu
+     *
      * @return 返回popupMenu
      */
     private JPopupMenu createPopupMenu() {
@@ -51,7 +53,7 @@ public class PopupMenuAdaptor<T> extends MouseAdapter {
                 for (int i = 0; i < model.getSize(); i++) {
                     if (i < selectedIndex) {
                         data[i] = model.getElementAt(i);
-                    }else if (i > selectedIndex) {
+                    } else if (i > selectedIndex) {
                         data[i - 1] = model.getElementAt(i);
                     }
                 }

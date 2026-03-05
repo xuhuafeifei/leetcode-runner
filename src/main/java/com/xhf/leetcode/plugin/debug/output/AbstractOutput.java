@@ -9,10 +9,13 @@ import com.xhf.leetcode.plugin.debug.execute.ExecuteResult;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public abstract class AbstractOutput implements Output{
+public abstract class AbstractOutput implements Output {
+
     protected final Project project;
+
     public AbstractOutput(Project project) {
         this.project = project;
     }
+
     public abstract void output(ExecuteResult r);
 }

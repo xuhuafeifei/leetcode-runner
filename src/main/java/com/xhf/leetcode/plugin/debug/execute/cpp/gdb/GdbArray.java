@@ -1,10 +1,9 @@
 package com.xhf.leetcode.plugin.debug.execute.cpp.gdb;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * gdb array, 存储GDB-MI输出的数组
@@ -12,7 +11,8 @@ import java.util.List;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-public class GdbArray extends GdbElement implements Iterable<GdbElement>{
+public class GdbArray extends GdbElement implements Iterable<GdbElement> {
+
     private final List<GdbElement> elements = new ArrayList<>();
 
     @NotNull

@@ -12,7 +12,13 @@ import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.service.CodeService;
 import com.xhf.leetcode.plugin.setting.AppSettings;
-import com.xhf.leetcode.plugin.utils.*;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.DebugCheck;
+import com.xhf.leetcode.plugin.utils.LangType;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.LoginPass;
+import com.xhf.leetcode.plugin.utils.OSHandler;
+import com.xhf.leetcode.plugin.utils.RatePass;
 
 /**
  * 启动debug调试功能
@@ -32,7 +38,8 @@ public class DebugAction extends AbstractAction {
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         if (DebugManager.getInstance(project).isDebug()) {
-            ConsoleUtils.getInstance(project).showInfo(BundleUtils.i18n("action.leetcode.actions.debug.quit"), false, true);
+            ConsoleUtils.getInstance(project)
+                .showInfo(BundleUtils.i18n("action.leetcode.actions.debug.quit"), false, true);
             return;
         }
         LangType langType = LangType.getType(AppSettings.getInstance().getLangType());
@@ -52,13 +59,15 @@ public class DebugAction extends AbstractAction {
                 break;
             default:
                 // 别把空格删除了, 否则不好看
-                ConsoleUtils.getInstance(project).showWaring(langType.getLangType() + " " + BundleUtils.i18n("action.leetcode.actions.debug.notsupport"), false, true);
+                ConsoleUtils.getInstance(project).showWaring(
+                    langType.getLangType() + " " + BundleUtils.i18n("action.leetcode.actions.debug.notsupport"), false,
+                    true);
         }
     }
 
 
     private void doCPPDebug(Project project, LangType langType) {
-        if (! doCheck(project, langType)) {
+        if (!doCheck(project, langType)) {
             return;
         }
         // mac操作系统不支持cpp的调试, 因为他无法兼容gdb（操蛋的mac对gdb有诸多限制, 且lldb又找不到输出结构化数据的方式, 放弃了，毁灭吧）
@@ -75,19 +84,21 @@ public class DebugAction extends AbstractAction {
         try {
             debugger.start();
         } catch (Exception e) {
-            DebugUtils.simpleDebug(BundleUtils.i18n("action.leetcode.actions.debug.failed") + " " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
+            DebugUtils.simpleDebug(BundleUtils.i18n("action.leetcode.actions.debug.failed") + " " + e, project,
+                ConsoleViewContentType.ERROR_OUTPUT, true);
         }
     }
 
     private void doPythonDebug(Project project, LangType langType) {
-        if (! doCheck(project, langType)) {
+        if (!doCheck(project, langType)) {
             return;
         }
         Debugger debugger = DebugManager.getInstance(project).createDebugger(PythonDebugger.class);
         try {
             debugger.start();
         } catch (Exception e) {
-            DebugUtils.simpleDebug(BundleUtils.i18n("action.leetcode.actions.debug.failed") + " " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
+            DebugUtils.simpleDebug(BundleUtils.i18n("action.leetcode.actions.debug.failed") + " " + e, project,
+                ConsoleViewContentType.ERROR_OUTPUT, true);
         }
     }
 
@@ -99,7 +110,8 @@ public class DebugAction extends AbstractAction {
         try {
             debugger.start();
         } catch (Exception e) {
-            DebugUtils.simpleDebug(BundleUtils.i18n("action.leetcode.actions.debug.failed") + " " + e, project, ConsoleViewContentType.ERROR_OUTPUT, true);
+            DebugUtils.simpleDebug(BundleUtils.i18n("action.leetcode.actions.debug.failed") + " " + e, project,
+                ConsoleViewContentType.ERROR_OUTPUT, true);
         }
     }
 
@@ -107,12 +119,15 @@ public class DebugAction extends AbstractAction {
         // 通过文件名获取语言类型
         String langFromFile = CodeService.getInstance(project).parseLangTypeFromCVFile(project);
         if (LangType.getType(langFromFile) != langType) {
-            LogUtils.warn(BundleUtils.i18n("action.leetcode.plugin.error") + ", LangType != langFromFile " + langType + " != " + langFromFile);
+            LogUtils.warn(
+                BundleUtils.i18n("action.leetcode.plugin.error") + ", LangType != langFromFile " + langType + " != "
+                    + langFromFile);
             ConsoleUtils.getInstance(project).showWaring(
-                    BundleUtils.i18n("action.leetcode.actions.debug.langtype.not.equal") + "\n"
-                            + BundleUtils.i18n("action.leetcode.actions.debug.langtype.file.type") + " = " + langFromFile + "\n"
-                            + BundleUtils.i18n("action.leetcode.actions.debug.langtype.setting.type") + " = " + langType.getLangType()
-                    , false, true
+                BundleUtils.i18n("action.leetcode.actions.debug.langtype.not.equal") + "\n"
+                    + BundleUtils.i18n("action.leetcode.actions.debug.langtype.file.type") + " = " + langFromFile + "\n"
+                    + BundleUtils.i18n("action.leetcode.actions.debug.langtype.setting.type") + " = "
+                    + langType.getLangType()
+                , false, true
             );
             return false;
         }

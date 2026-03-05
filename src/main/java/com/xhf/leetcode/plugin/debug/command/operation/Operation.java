@@ -1,6 +1,17 @@
 package com.xhf.leetcode.plugin.debug.command.operation;
 
-import com.xhf.leetcode.plugin.debug.command.parameter.*;
+import com.xhf.leetcode.plugin.debug.command.parameter.BParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.HELPParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.NParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.PParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.ParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.RBAParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.RBParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.RParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.SHOWBParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.STEPParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.WATCHParameterExtractor;
+import com.xhf.leetcode.plugin.debug.command.parameter.WParameterExtractor;
 
 /**
  * 操作类型. 由用户命令行输入的内容决定
@@ -28,9 +39,9 @@ public enum Operation {
     B(new BParameterExtractor(), "^b\\s*(\\d+)?$", "B"),
     /**
      * 显示所有断点 [show|s] b
-     *  show b
-     *  s b
-     *  sb
+     * show b
+     * s b
+     * sb
      */
     SHOWB(new SHOWBParameterExtractor(), "^(show|s)\\s*b$", "SHOWB"),
     /**

@@ -9,16 +9,20 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBTabbedPane;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
-import com.xhf.leetcode.plugin.utils.*;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.Constants;
+import com.xhf.leetcode.plugin.utils.GsonUtils;
+import com.xhf.leetcode.plugin.utils.LogUtils;
+import com.xhf.leetcode.plugin.utils.MarkdownContentType;
+import com.xhf.leetcode.plugin.utils.ViewUtils;
+import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.JComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.beans.PropertyChangeListener;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author feigebuge
@@ -31,13 +35,13 @@ public class FocusTextEditor implements FileEditor {
      */
     private final Project project;
     /**
-     * 核心容器
-     */
-    private JComponent myComponent;
-    /**
      * 打开的文件
      */
     private final VirtualFile file;
+    /**
+     * 核心容器
+     */
+    private JComponent myComponent;
 
     public FocusTextEditor(Project project, @NotNull VirtualFile file) {
         this.project = project;
@@ -58,10 +62,10 @@ public class FocusTextEditor implements FileEditor {
         }
         // 参数检测
         if (StringUtils.isBlank(lc.getFrontendQuestionId()) ||
-                StringUtils.isBlank(lc.getTranslatedTitle()) ||
-                StringUtils.isBlank(lc.getDifficulty()) ||
-                StringUtils.isBlank(lc.getTitleSlug()) ||
-                StringUtils.isBlank(lc.getMarkdownContent())
+            StringUtils.isBlank(lc.getTranslatedTitle()) ||
+            StringUtils.isBlank(lc.getDifficulty()) ||
+            StringUtils.isBlank(lc.getTitleSlug()) ||
+            StringUtils.isBlank(lc.getMarkdownContent())
         ) {
             ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("editor.focus.open.error"), true, true);
             String s = BundleUtils.i18n("editor.focus.open.error.desc") + GsonUtils.toJsonStr(lc);
@@ -69,7 +73,8 @@ public class FocusTextEditor implements FileEditor {
             ConsoleUtils.getInstance(project).showError(s, false);
             return;
         }
-        JComponent contentPanel = new MarkDownEditor(project, buildMarkDownContent(lc), MarkdownContentType.QUESTION).getComponent();
+        JComponent contentPanel = new MarkDownEditor(project, buildMarkDownContent(lc),
+            MarkdownContentType.QUESTION).getComponent();
         JComponent solutionPanel = new SolutionEditor(project, file).getComponent();
         JComponent submissionPanel = new SubmissionEditor(project, file).getComponent();
 
@@ -150,6 +155,7 @@ public class FocusTextEditor implements FileEditor {
 
     /**
      * 兼容不同版本, 早期版本super没有实现该方法
+     *
      * @return null
      */
     @Override

@@ -3,7 +3,6 @@ package com.xhf.leetcode.plugin.window.deepcoding.filter;
 import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.QFilter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +16,7 @@ import java.util.List;
  * @email 2508020102@qq.com
  */
 public class DCAlgorithmFilter implements QFilter {
+
     private final List<String> items = new ArrayList<>(3);
 
     @Override
@@ -32,6 +32,7 @@ public class DCAlgorithmFilter implements QFilter {
 
     /**
      * item是所有题目fid的集合, 并通过,连接
+     *
      * @param item item
      * @return boolean
      */

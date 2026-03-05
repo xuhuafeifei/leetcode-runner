@@ -6,17 +6,21 @@ import com.xhf.leetcode.plugin.review.backend.algorithm.constant.SchedulingCard;
 /**
  * @author 文艺倾年
  */
-public class FSRSAlgorithmResult{
+public class FSRSAlgorithmResult {
 
-    private int interval;
+    private final int interval;
 
-    private long dueTime, lastReview;
-    private float stability, difficulty;
-    private int elapsedDays, repetitions;
-    private FSRSState state;
+    private final long dueTime;
+    private final long lastReview;
+    private final float stability;
+    private final float difficulty;
+    private final int elapsedDays;
+    private final int repetitions;
+    private final FSRSState state;
 
     /**
      * 构造函数，用于初始化 FSRS 算法的结果
+     *
      * @param card 包含新计算属性的卡片
      */
     public FSRSAlgorithmResult(SchedulingCard card) {
@@ -30,21 +34,22 @@ public class FSRSAlgorithmResult{
         this.state = card.getState();
     }
 
-//    /**
-//     * 计算下一次复习的时间点（以毫秒为单位）
-//     * @return 下一次复习的时间点（毫秒）
-//     */
-//    public long getNextRepetitionTime() {
-//        // 一天的毫秒数
-//        long dayMillis = 60 * 60 * 24 * 1000;
-//        // 当前时间的毫秒数
-//        long currentMillis = System.currentTimeMillis();
-//
-//        return currentMillis + (dayMillis * interval);
-//    }
+    //    /**
+    //     * 计算下一次复习的时间点（以毫秒为单位）
+    //     * @return 下一次复习的时间点（毫秒）
+    //     */
+    //    public long getNextRepetitionTime() {
+    //        // 一天的毫秒数
+    //        long dayMillis = 60 * 60 * 24 * 1000;
+    //        // 当前时间的毫秒数
+    //        long currentMillis = System.currentTimeMillis();
+    //
+    //        return currentMillis + (dayMillis * interval);
+    //    }
 
     /**
      * 获取计算出的新复习间隔（以天为单位）
+     *
      * @return 新的复习间隔（天）
      */
     public int getInterval() {
@@ -53,6 +58,7 @@ public class FSRSAlgorithmResult{
 
     /**
      * 计算下一次复习的时间点（以毫秒为单位）
+     *
      * @return 下一次复习的时间点（毫秒）
      */
     public long getNextRepetitionTime() {
@@ -61,6 +67,7 @@ public class FSRSAlgorithmResult{
 
     /**
      * 获取稳定性
+     *
      * @return 内容的稳定性
      */
     public float getStability() {
@@ -69,6 +76,7 @@ public class FSRSAlgorithmResult{
 
     /**
      * 获取难度
+     *
      * @return 内容的难度
      */
     public float getDifficulty() {
@@ -77,6 +85,7 @@ public class FSRSAlgorithmResult{
 
     /**
      * 获取自上次复习以来经过的天数
+     *
      * @return 经过的天数
      */
     public int getElapsedDays() {
@@ -85,6 +94,7 @@ public class FSRSAlgorithmResult{
 
     /**
      * 获取复习次数
+     *
      * @return 复习次数
      */
     public int getRepetitions() {
@@ -93,6 +103,7 @@ public class FSRSAlgorithmResult{
 
     /**
      * 获取上次复习的时间点（以毫秒为单位）
+     *
      * @return 上次复习的时间点（毫秒）
      */
     public long getLastReview() {
@@ -101,6 +112,7 @@ public class FSRSAlgorithmResult{
 
     /**
      * 获取内容的状态
+     *
      * @return 内容的状态
      */
     public FSRSState getState() {

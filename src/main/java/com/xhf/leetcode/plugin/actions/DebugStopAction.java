@@ -26,7 +26,8 @@ public class DebugStopAction extends AbstractAction {
     @Override
     public void doActionPerformed(Project project, AnActionEvent e) {
         DebugManager.getInstance(project).stopDebugger();
-        ConsoleUtils.getInstance(project).simpleShowConsole(BundleUtils.i18n("action.leetcode.actions.debug.stop") + "\n");
+        ConsoleUtils.getInstance(project)
+            .simpleShowConsole(BundleUtils.i18n("action.leetcode.actions.debug.stop") + "\n");
     }
 
 }

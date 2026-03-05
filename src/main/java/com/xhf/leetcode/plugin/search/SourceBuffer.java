@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.search;
 
 import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -17,6 +16,7 @@ import java.util.NoSuchElementException;
  * @email 2508020102@qq.com
  */
 public class SourceBuffer {
+
     /**
      * 缓冲区
      */
@@ -57,17 +57,15 @@ public class SourceBuffer {
      * @param source 数据源, 分段数据的来源. SourceBuffer从source中分段加载数据
      * @param offset 详见{@link Reader}的read方法.
      * @param length 详见{@link Reader}的read方法.
-     * @return
-     * @throws IOException
      */
     public int segLoad(Reader source, int offset, int length) throws IOException {
         if (length > buffer.length) {
             throw new IllegalArgumentException("length cannot be greater than buffer length, source buffer length is "
-                    + buffer.length + " your support length is " + length);
+                + buffer.length + " your support length is " + length);
         }
         if (offset > buffer.length) {
             throw new IllegalArgumentException("offset cannot be greater than buffer length, buffer length is= "
-                    + buffer.length + " but your support offset is " + offset);
+                + buffer.length + " but your support offset is " + offset);
         }
         int read = source.read(buffer, offset, length);
         this.totalCnt = read;
@@ -83,6 +81,7 @@ public class SourceBuffer {
     public String getBufferStr(int start, int length) {
         return new String(buffer, start, length);
     }
+
     public String getBufferStr() {
         return getBufferStr(0, buffer.length);
     }
@@ -91,6 +90,7 @@ public class SourceBuffer {
      * 迭代器. 维护分段数据{@link #buffer}消费情况. 被迭代过的数据, 会被标记为已消费
      */
     private class Itr implements Iterator {
+
         /**
          * 当前遍历到的元素下标
          */
@@ -113,8 +113,9 @@ public class SourceBuffer {
         @Override
         public char next() {
             int i = this.cursor + 1;
-            if (i >= this.size)
+            if (i >= this.size) {
                 throw new NoSuchElementException();
+            }
             this.cursor += 1;
             return buffer[i];
         }
@@ -122,15 +123,18 @@ public class SourceBuffer {
         @Override
         public char peekNext() {
             int i = this.cursor + 1;
-            if (i >= this.size) return CharacterHelper.NULL;
+            if (i >= this.size) {
+                return CharacterHelper.NULL;
+            }
             return buffer[i];
         }
 
         @Override
         public char current() {
             int i = this.cursor;
-            if (i == -1)
+            if (i == -1) {
                 throw new NoSuchElementException();
+            }
             return buffer[i];
         }
 
@@ -139,7 +143,7 @@ public class SourceBuffer {
             // 如果cursor处于迭代过程中, buffer还有数据没有完成迭代, 则不允许执行reset操作
             if (hasNext()) {
                 throw new RuntimeException("The reset method should not be executed when " +
-                        "the iterator has not completed iterating over all the data.");
+                    "the iterator has not completed iterating over all the data.");
             }
             this.cursor = -1;
             this.size = totalCnt;

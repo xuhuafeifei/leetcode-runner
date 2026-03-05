@@ -9,11 +9,13 @@ import com.xhf.leetcode.plugin.search.utils.CharacterHelper;
  * @email 2508020102@qq.com
  */
 public class ENProcessor implements Processor {
+
     private final StringBuilder sb;
 
     public ENProcessor() {
         sb = new StringBuilder();
     }
+
     @Override
     public void doProcess(Context context) {
         sb.delete(0, sb.length());
@@ -29,7 +31,7 @@ public class ENProcessor implements Processor {
                 sb.append(next);
                 itr.next();
                 len += 1;
-            }else {
+            } else {
                 break;
             }
         }

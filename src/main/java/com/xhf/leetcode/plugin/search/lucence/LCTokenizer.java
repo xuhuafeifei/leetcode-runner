@@ -2,12 +2,11 @@ package com.xhf.leetcode.plugin.search.lucence;
 
 import com.xhf.leetcode.plugin.search.Segmentation;
 import com.xhf.leetcode.plugin.search.Token;
+import java.io.IOException;
+import java.io.Reader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
-
-import java.io.IOException;
-import java.io.Reader;
 
 /**
  * @author feigebuge

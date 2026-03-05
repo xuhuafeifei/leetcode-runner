@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
  * @email 2508020102@qq.com
  */
 public class Submission {
+
     private String id;
     private String status;
     private String statusDisplay;
@@ -86,7 +87,8 @@ public class Submission {
     private String convertTime() {
         long timestamp = Long.parseLong(getTimestamp());
         Instant instant = Instant.ofEpochSecond(timestamp);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.systemDefault());
         return formatter.format(instant);
     }
 

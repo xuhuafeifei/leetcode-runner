@@ -5,10 +5,9 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.ide.HttpRequestHandler;
-
-import java.io.IOException;
 
 /**
  * 拦截idea发出的特定http请求. 具体拦截的逻辑在isSupported中
@@ -35,13 +34,14 @@ public class LocalHttpRequestHandler extends HttpRequestHandler {
      */
     @Override
     public boolean isSupported(@NotNull FullHttpRequest request) {
-        return (request.method() == HttpMethod.GET || request.method() == HttpMethod.HEAD || request.method() == HttpMethod.POST) && request.uri().startsWith(PREFIX);
+        return (request.method() == HttpMethod.GET || request.method() == HttpMethod.HEAD
+            || request.method() == HttpMethod.POST) && request.uri().startsWith(PREFIX);
     }
 
     @Override
     public boolean process(@NotNull QueryStringDecoder urlDecoder,
-                           @NotNull FullHttpRequest request,
-                           @NotNull ChannelHandlerContext context) throws IOException {
+        @NotNull FullHttpRequest request,
+        @NotNull ChannelHandlerContext context) throws IOException {
         resourcesController.process(urlDecoder, request, context);
         return true;
     }

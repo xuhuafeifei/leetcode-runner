@@ -8,6 +8,7 @@ import java.util.Map;
  * @email 2508020102@qq.com
  */
 public class DictNode {
+
     private char c;
     private Map<Character, DictNode> children;
     private boolean isEnd;
@@ -44,11 +45,11 @@ public class DictNode {
         children.put(c, new DictNode());
     }
 
-    public void setEnd(boolean isEnd) {
-        this.isEnd = isEnd;
-    }
-
     public boolean isEnd() {
         return isEnd;
+    }
+
+    public void setEnd(boolean isEnd) {
+        this.isEnd = isEnd;
     }
 }

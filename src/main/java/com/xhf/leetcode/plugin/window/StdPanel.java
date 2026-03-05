@@ -6,9 +6,11 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
 import com.xhf.leetcode.plugin.comp.MyJTextAreaWithPopupMenu;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 /**
  * 负责显示代码 debug 过程中输出的 std out, std error 面板
@@ -20,6 +22,7 @@ public class StdPanel extends JPanel {
 
     private final StdOutPanel stdoutPanel;
     private final StdErrPanel stderrPanel;
+    private final Application application = ApplicationManager.getApplication();
 
     public StdPanel() {
         // 创建一个 JBSplitter，支持垂直分割，第一块用于显示 stdout，第二块用于显示 stderr
@@ -49,8 +52,6 @@ public class StdPanel extends JPanel {
             });
         });
     }
-
-    private final Application application = ApplicationManager.getApplication();
 
     public void setStdoutContent(String stdout) {
         application.invokeLater(() -> {
@@ -88,6 +89,7 @@ public class StdPanel extends JPanel {
 
     // 用于显示 stdout 的面板
     private static class StdOutPanel extends MyJTextAreaWithPopupMenu {
+
         public StdOutPanel() {
             setEditable(false);
             setLineWrap(true);
@@ -114,6 +116,7 @@ public class StdPanel extends JPanel {
 
     // 用于显示 stderr 的面板，字体颜色与 IntelliJ 主题同步
     private static class StdErrPanel extends MyJTextAreaWithPopupMenu {
+
         public StdErrPanel() {
             setEditable(false);
             setText(BundleUtils.i18n("action.leetcode.stderr") + "\n");

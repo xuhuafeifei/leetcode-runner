@@ -15,14 +15,20 @@ import com.xhf.leetcode.plugin.review.utils.ReviewConstants;
 import com.xhf.leetcode.plugin.review.utils.ReviewUtils;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import javax.swing.border.CompoundBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JEditorPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import javax.swing.border.CompoundBorder;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * 每日一题面板
@@ -31,6 +37,7 @@ import java.awt.event.ActionListener;
  * @email 2508020102@qq.com
  */
 public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface {
+
     private final Project project;
 
     private final ReviewQuestionService service;
@@ -77,7 +84,8 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
         this.topQuestion = service.getTopQuestion();
         this.questionCard = createQuestionCard(topQuestion);
 
-        var iconBtn = new IconButton(BundleUtils.i18nHelper("翻转卡片", "flip card"), IconLoader.getIcon("/icons/flip.svg", DailyPlanTabPanel.class));
+        var iconBtn = new IconButton(BundleUtils.i18nHelper("翻转卡片", "flip card"),
+            IconLoader.getIcon("/icons/flip.svg", DailyPlanTabPanel.class));
         var flipBtn = new JButton(iconBtn);
         flipBtn.setBorder(JBUI.Borders.empty(0, 5));
         flipBtn.addActionListener(doFlip(flipBtn, topQuestion));
@@ -252,13 +260,13 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
             editorPane.setContentType("text/html");
             editorPane.setEditable(false);
             editorPane.setText(
-                    new CssBuilder()
-                            .addStatus(rq.getStatus())
-                            .addTitle(rq.getTitle(), rq.getDifficulty())
-                            .addUserRate(rq.getUserRate())
-                            .lastModify(rq.getLastModify())
-                            .nextReview(rq.getNextReview())
-                            .build()
+                new CssBuilder()
+                    .addStatus(rq.getStatus())
+                    .addTitle(rq.getTitle(), rq.getDifficulty())
+                    .addUserRate(rq.getUserRate())
+                    .lastModify(rq.getLastModify())
+                    .nextReview(rq.getNextReview())
+                    .build()
             );
 
             return editorPane;
@@ -273,8 +281,8 @@ public class DailyPlanTabPanel extends JPanel implements MessageReceiveInterface
 
             // 设置边框和内边距
             textArea.setBorder(new CompoundBorder(
-                    JBUI.Borders.customLine(JBColor.border(), 1),  // 外边框
-                    JBUI.Borders.empty(8)  // 内边距
+                JBUI.Borders.customLine(JBColor.border(), 1),  // 外边框
+                JBUI.Borders.empty(8)  // 内边距
             ));
 
             // 设置背景色为稍微淡一点的主题色

@@ -9,7 +9,7 @@ import com.xhf.leetcode.plugin.utils.ViewUtils;
 /**
  * 移除选定提交代码区域注释
  */
-public class RemoveCommentAction extends AbstractAction{
+public class RemoveCommentAction extends AbstractAction {
 
     public RemoveCommentAction() {
         super(BundleUtils.i18n("action.leetcode.plugin.RemoveCommentAction"));

@@ -12,6 +12,7 @@ import com.xhf.leetcode.plugin.bus.WatchPoolRemoveEvent;
  * 但Java 的Context已经比较常用了, 所以还是沿用这个命名吧
  */
 public interface ExecuteContext {
+
     Project getProject();
 
     void addToWatchPool(String s);
@@ -20,7 +21,6 @@ public interface ExecuteContext {
 
     /**
      * watch pool 移除监听
-     * @param event
      */
     @Subscribe
     void removeWatchPoolListener(WatchPoolRemoveEvent event);

@@ -24,22 +24,22 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.DataKeys;
 import com.xhf.leetcode.plugin.utils.TaskCenter;
 import com.xhf.leetcode.plugin.window.deepcoding.DeepCodingPanel;
+import java.io.File;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
 
 /**
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
+
     private final ActionToolbar actionToolbar;
-    private DeepCodingPanel deepCodingPanel;
     private final Project project;
     private final SearchPanel searchPanel;
+    private DeepCodingPanel deepCodingPanel;
     /**
      * 表示当前显示状态, 如果是true, 则显示正常界面, 否则显示deep coding界面
      */
@@ -55,8 +55,8 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
             init();
         } catch (Exception e) {
             DebugUtils.simpleDebug(BundleUtils.i18nHelper("Leetcode-Runner 初始化异常!", "Leetcode-Runner init error!"),
-                    project, ConsoleViewContentType.ERROR_OUTPUT, true
-                    );
+                project, ConsoleViewContentType.ERROR_OUTPUT, true
+            );
         }
 
         // get action toolbar
@@ -89,16 +89,18 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
                 // 创建临时文件夹
                 try {
                     // 在filePath下创建文件
-                    File file = FileUtils.createAndGetFile(new FileUtils.PathBuilder(filePath).append("temp-file.txt").build());
+                    File file = FileUtils.createAndGetFile(
+                        new FileUtils.PathBuilder(filePath).append("temp-file.txt").build());
                     // 删除文件
                     FileUtils.removeFile(file.getAbsolutePath());
                 } catch (Exception e) {
                     ConsoleUtils.getInstance(project).showError(
-                            BundleUtils.i18nHelper(
-                                    "您的存储路径存在异常, Runner无法正确创建文件, 请检查路径权限! filePath = " + filePath,
-                                    "Your storage path has an abnormality, Runner cannot create the file correctly, please check the path permission! filePath = " + filePath
-                            ),
-                            false, false
+                        BundleUtils.i18nHelper(
+                            "您的存储路径存在异常, Runner无法正确创建文件, 请检查路径权限! filePath = " + filePath,
+                            "Your storage path has an abnormality, Runner cannot create the file correctly, please check the path permission! filePath = "
+                                + filePath
+                        ),
+                        false, false
                     );
                 }
             }).invokeLater();
@@ -110,18 +112,23 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
                 // 创建缓存文件夹
                 try {
                     // 在filePath下创建文件
-                    File file = FileUtils.createAndGetFile(new FileUtils.PathBuilder(path).append("temp-file.txt").build());
+                    File file = FileUtils.createAndGetFile(
+                        new FileUtils.PathBuilder(path).append("temp-file.txt").build());
                     // 删除文件
                     FileUtils.removeFile(file.getAbsolutePath());
                 } catch (Exception e) {
                     ConsoleUtils.getInstance(project).showError(
-                            BundleUtils.i18nHelper(
-                                    "您的缓存存储路径存在异常, Runner无法正确写入缓存文件, 请清除缓存后重试! core_path = " + path
-                                            + "\n" + "如果您需要更详细的信息, 可以参考: https://itxaiohanglover.github.io/leetcode-runner-doc/pages/9cc27d/#_11-%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E5%A4%B1%E8%B4%A5",
-                                    "Your cache storage path has an abnormality, Runner cannot write the cache file correctly, please clear the cache and try again! core_path = " + path
-                                            + "\n" + "If you need more detailed information, you can refer to: https://itxaiohanglover.github.io/leetcode-runner-doc/pages/9cc27d/#_11-%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E5%A4%B1%E8%B4%A5"
-                            ),
-                            false, false
+                        BundleUtils.i18nHelper(
+                            "您的缓存存储路径存在异常, Runner无法正确写入缓存文件, 请清除缓存后重试! core_path = "
+                                + path
+                                + "\n"
+                                + "如果您需要更详细的信息, 可以参考: https://itxaiohanglover.github.io/leetcode-runner-doc/pages/9cc27d/#_11-%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E5%A4%B1%E8%B4%A5",
+                            "Your cache storage path has an abnormality, Runner cannot write the cache file correctly, please clear the cache and try again! core_path = "
+                                + path
+                                + "\n"
+                                + "If you need more detailed information, you can refer to: https://itxaiohanglover.github.io/leetcode-runner-doc/pages/9cc27d/#_11-%E7%B3%BB%E7%BB%9F%E5%88%9B%E5%BB%BA%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6%E5%A4%B1%E8%B4%A5"
+                        ),
+                        false, false
                     );
                 }
             }).invokeLater();
@@ -181,7 +188,7 @@ public class LCPanel extends SimpleToolWindowPanel implements DataProvider, Disp
      */
     @Subscribe
     public void deepCodingTabChooseEventListener(DeepCodingTabChooseEvent event) {
-        state = ! state;
+        state = !state;
         setDeepCodingContent();
         deepCodingPanel.setTab(event.getPattern());
     }

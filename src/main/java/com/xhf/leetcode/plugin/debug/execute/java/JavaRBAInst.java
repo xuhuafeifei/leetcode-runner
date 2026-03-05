@@ -10,11 +10,13 @@ import com.xhf.leetcode.plugin.utils.BundleUtils;
  * @email 2508020102@qq.com
  */
 public class JavaRBAInst extends AbstractJavaInstExecutor {
+
     @Override
     public ExecuteResult doExecute(Instruction inst, Context context) {
         for (BreakpointRequest breakpointRequest : context.getBreakpointRequests()) {
             breakpointRequest.disable();
         }
-        return ExecuteResult.success(inst.getOperation(), BundleUtils.i18nHelper("所有断点已移除", "All breakpoint removed !"));
+        return ExecuteResult.success(inst.getOperation(),
+            BundleUtils.i18nHelper("所有断点已移除", "All breakpoint removed !"));
     }
 }

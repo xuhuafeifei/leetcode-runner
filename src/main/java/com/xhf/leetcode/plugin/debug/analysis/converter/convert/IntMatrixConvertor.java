@@ -3,6 +3,7 @@ package com.xhf.leetcode.plugin.debug.analysis.converter.convert;
 import org.jetbrains.annotations.NotNull;
 
 public class IntMatrixConvertor extends AbstractVariableConvertor {
+
     @Override
     protected String doJava(String testcase, String variableName) {
         // 处理 int[][]

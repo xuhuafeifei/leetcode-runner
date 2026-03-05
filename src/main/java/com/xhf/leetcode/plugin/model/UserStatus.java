@@ -4,6 +4,7 @@ package com.xhf.leetcode.plugin.model;
  * @author 文艺倾年
  */
 public class UserStatus {
+
     /**
      * 是否登录
      */

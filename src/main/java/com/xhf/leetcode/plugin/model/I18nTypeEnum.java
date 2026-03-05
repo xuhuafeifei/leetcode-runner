@@ -1,7 +1,6 @@
 package com.xhf.leetcode.plugin.model;
 
 import com.xhf.leetcode.plugin.utils.LogUtils;
-
 import java.util.Locale;
 
 public enum I18nTypeEnum {

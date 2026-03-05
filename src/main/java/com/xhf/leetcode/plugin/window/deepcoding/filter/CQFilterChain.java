@@ -4,13 +4,13 @@ import com.xhf.leetcode.plugin.model.CompetitionQuestion;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.window.filter.Filter;
 import com.xhf.leetcode.plugin.window.filter.FilterChain;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * CompetitionQuestion: 竞赛题目过滤链
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
@@ -37,8 +37,8 @@ public class CQFilterChain implements FilterChain<CompetitionQuestion> {
     public List<CompetitionQuestion> apply(List<CompetitionQuestion> targets) {
         // 获取可用过滤器
         List<Filter<CompetitionQuestion, ?>> usableFilters = filters.stream()
-                .filter(Filter::usable)
-                .collect(Collectors.toList());
+            .filter(Filter::usable)
+            .collect(Collectors.toList());
 
         // 没有能进行过滤的过滤器
         if (usableFilters.isEmpty()) {
@@ -49,7 +49,7 @@ public class CQFilterChain implements FilterChain<CompetitionQuestion> {
         // 过滤
         LogUtils.info("执行过滤行为...");
         return targets.stream()
-                .filter(e -> usableFilters.stream().allMatch(f -> f.doFilter(e)))
-                .collect(Collectors.toList());
+            .filter(e -> usableFilters.stream().allMatch(f -> f.doFilter(e)))
+            .collect(Collectors.toList());
     }
 }

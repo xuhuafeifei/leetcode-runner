@@ -16,15 +16,15 @@ import com.xhf.leetcode.plugin.model.Question;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
-import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeListener;
+import javax.swing.JComponent;
+import javax.swing.JTextPane;
+import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * 显示submission里的history code
@@ -33,6 +33,7 @@ import java.beans.PropertyChangeListener;
  * @email 2508020102@qq.com
  */
 public class CodeEditor extends CopyToolBarEditor {
+
     /**
      * 填充code内容的容器
      */
@@ -44,45 +45,6 @@ public class CodeEditor extends CopyToolBarEditor {
 
     private final Project project;
 
-
-    @Override
-    protected AnAction copyAction() {
-        return new AnAction(BundleUtils.i18n("action.leetcode.code.copy"), BundleUtils.i18n("action.leetcode.code.copy"), AllIcons.Actions.Copy) {
-            @Override
-            public void actionPerformed(@NotNull AnActionEvent e) {
-                // copy to clipboard
-                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                StringSelection stringSelection = new StringSelection(textPane.getText());
-                clipboard.setContents(stringSelection, null);
-
-                ConsoleUtils.getInstance(project).showInfoWithoutConsole(BundleUtils.i18n("action.leetcode.code.copy.success"), false, true);
-            }
-        };
-    }
-
-    @Override
-    protected AnAction copyToAction() {
-        return new AnAction(BundleUtils.i18n("action.leetcode.code.switch"), BundleUtils.i18n("action.leetcode.code.switch"), IconLoader.getIcon("/icons/switch.svg", CodeEditor.class)) {
-            @Override
-            public void actionPerformed(@NotNull AnActionEvent e) {
-                String content = textPane.getText();
-                Project project = e.getProject();
-                if (project == null) {
-                    ViewUtils.getDialogWrapper( BundleUtils.i18n("action.leetcode.code.copy.null"));
-
-                    return;
-                }
-                ConsoleUtils instance = ConsoleUtils.getInstance(project);
-                String curContent = ViewUtils.getContentOfCurrentOpenVFile(project);
-                boolean flag = ViewUtils.writeContentToCurrentVFile(project, Question.replaceCodeSnippets(curContent, content));
-                if (flag) {
-                    // instance.showInfoWithoutConsole(BundleUtils.i18n("action.leetcode.code.switch.success"), false, true);
-                }else {
-                    instance.showWaringWithoutConsole(BundleUtils.i18n("action.leetcode.code.switch.failure"), false, true);
-                }
-            }
-        };
-    }
 
     public CodeEditor(@NotNull Project project, @NotNull String code) {
         this.project = project;
@@ -96,6 +58,51 @@ public class CodeEditor extends CopyToolBarEditor {
         SplitEditorToolbar toolbarWrapper = createToolbarWrapper(this.textPane);
         this.myComponent.addToTop(toolbarWrapper);
         this.myComponent.addToCenter(this.textPane);
+    }
+
+    @Override
+    protected AnAction copyAction() {
+        return new AnAction(BundleUtils.i18n("action.leetcode.code.copy"),
+            BundleUtils.i18n("action.leetcode.code.copy"), AllIcons.Actions.Copy) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent e) {
+                // copy to clipboard
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                StringSelection stringSelection = new StringSelection(textPane.getText());
+                clipboard.setContents(stringSelection, null);
+
+                ConsoleUtils.getInstance(project)
+                    .showInfoWithoutConsole(BundleUtils.i18n("action.leetcode.code.copy.success"), false, true);
+            }
+        };
+    }
+
+    @Override
+    protected AnAction copyToAction() {
+        return new AnAction(BundleUtils.i18n("action.leetcode.code.switch"),
+            BundleUtils.i18n("action.leetcode.code.switch"),
+            IconLoader.getIcon("/icons/switch.svg", CodeEditor.class)) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent e) {
+                String content = textPane.getText();
+                Project project = e.getProject();
+                if (project == null) {
+                    ViewUtils.getDialogWrapper(BundleUtils.i18n("action.leetcode.code.copy.null"));
+
+                    return;
+                }
+                ConsoleUtils instance = ConsoleUtils.getInstance(project);
+                String curContent = ViewUtils.getContentOfCurrentOpenVFile(project);
+                boolean flag = ViewUtils.writeContentToCurrentVFile(project,
+                    Question.replaceCodeSnippets(curContent, content));
+                if (flag) {
+                    // instance.showInfoWithoutConsole(BundleUtils.i18n("action.leetcode.code.switch.success"), false, true);
+                } else {
+                    instance.showWaringWithoutConsole(BundleUtils.i18n("action.leetcode.code.switch.failure"), false,
+                        true);
+                }
+            }
+        };
     }
 
     @Override

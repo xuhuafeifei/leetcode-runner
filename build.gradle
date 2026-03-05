@@ -87,8 +87,11 @@ dependencies {
     implementation 'org.jgrapht:jgrapht-core:1.5.1'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
     implementation group: 'org.apache.commons', name: 'commons-jexl3', version: '3.2.1'
-    // 核心SQLite依赖
-    implementation 'org.xerial:sqlite-jdbc:3.8.11.2'
+    // 核心SQLite依赖（3.34+ 才支持 Mac aarch64/Apple Silicon）
+    // 排除 slf4j，避免与 IDE 自带的 slf4j 双加载导致 LinkageError（loader constraint violation）
+    implementation('org.xerial:sqlite-jdbc:3.44.1.0') {
+        exclude group: 'org.slf4j'
+    }
 }
 kotlin {
     jvmToolchain(11)

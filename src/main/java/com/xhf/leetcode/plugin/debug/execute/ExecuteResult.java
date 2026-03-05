@@ -5,10 +5,12 @@ import com.xhf.leetcode.plugin.debug.command.operation.Operation;
 
 /**
  * 执行结果
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class ExecuteResult {
+
     private Operation operation;
     /**
      * 为了配合Operation.NULL的引入, 增加moreInfo字段. 用于表示额外信息
@@ -57,31 +59,6 @@ public class ExecuteResult {
 
     }
 
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public boolean isHasResult() {
-        return hasResult;
-    }
-
-    public void setHasResult(boolean hasResult) {
-        this.hasResult = hasResult;
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-        this.hasResult = true;
-    }
-
     public static ExecuteResult success(Operation operation, String result) {
         ExecuteResult r = new ExecuteResult();
         r.operation = operation;
@@ -115,12 +92,37 @@ public class ExecuteResult {
         return r;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public boolean isHasResult() {
+        return hasResult;
+    }
+
+    public void setHasResult(boolean hasResult) {
+        this.hasResult = hasResult;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+        this.hasResult = true;
     }
 
     public String getMsg() {
         return this.msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 
     public Operation getOperation() {
@@ -142,44 +144,44 @@ public class ExecuteResult {
     @Override
     public String toString() {
         return "ExecuteResult{" +
-                "operation=" + operation +
-                ", success=" + success +
-                ", hasResult=" + hasResult +
-                ", result='" + result + '\'' +
-                ", msg='" + msg + '\'' +
-                ", addLine=" + addLine +
-                '}';
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
+            "operation=" + operation +
+            ", success=" + success +
+            ", hasResult=" + hasResult +
+            ", result='" + result + '\'' +
+            ", msg='" + msg + '\'' +
+            ", addLine=" + addLine +
+            '}';
     }
 
     public String getMethodName() {
         return methodName;
     }
 
-    public void setContext(ExecuteContext context) {
-        this.context = context;
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 
     public ExecuteContext getContext() {
         return context;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setContext(ExecuteContext context) {
+        this.context = context;
     }
 
     public String getClassName() {
         return className;
     }
 
-    public void setMoreInfo(String moreInfo) {
-        this.moreInfo = moreInfo;
+    public void setClassName(String className) {
+        this.className = className;
     }
 
     public String getMoreInfo() {
         return moreInfo;
+    }
+
+    public void setMoreInfo(String moreInfo) {
+        this.moreInfo = moreInfo;
     }
 }

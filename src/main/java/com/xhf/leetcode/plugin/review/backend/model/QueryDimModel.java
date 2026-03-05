@@ -5,4 +5,5 @@ package com.xhf.leetcode.plugin.review.backend.model;
  * @email 2508020102@qq.com
  */
 public class QueryDimModel implements QueryDim {
+
 }

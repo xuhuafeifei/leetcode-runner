@@ -2,15 +2,16 @@ package com.xhf.leetcode.plugin.model;
 
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.service.QuestionService;
-
 import java.util.List;
 
 /**
  * 竞赛题目信息
+ *
  * @author feigebuge
  * @email 2508020102@qq.com
  */
 public class CompetitionQuestion implements DeepCodingQuestion {
+
     private double Rating;
     private int ID;
     private String Title;
@@ -25,39 +26,44 @@ public class CompetitionQuestion implements DeepCodingQuestion {
     private String algorithm;
     private String status;
 
+    public double getRating() {
+        return Rating;
+    }
+
     public void setRating(double Rating) {
         this.Rating = Rating;
     }
-    public double getRating() {
-        return Rating;
+
+    public int getID() {
+        return ID;
     }
 
     public void setID(int ID) {
         this.ID = ID;
     }
-    public int getID() {
-        return ID;
+
+    public String getTitle() {
+        return Title;
     }
 
     public void setTitle(String Title) {
         this.Title = Title;
     }
-    public String getTitle() {
-        return Title;
+
+    public String getTitleZH() {
+        return TitleZH;
     }
 
     public void setTitleZH(String TitleZH) {
         this.TitleZH = TitleZH;
     }
-    public String getTitleZH() {
-        return TitleZH;
+
+    public String getTitleSlug() {
+        return TitleSlug;
     }
 
     public void setTitleSlug(String TitleSlug) {
         this.TitleSlug = TitleSlug;
-    }
-    public String getTitleSlug() {
-        return TitleSlug;
     }
 
     public String getContestSlug() {
@@ -116,12 +122,12 @@ public class CompetitionQuestion implements DeepCodingQuestion {
         this.algorithm = algorithm;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getStatus() {
         return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Question toQuestion(Project project) {
@@ -145,10 +151,10 @@ public class CompetitionQuestion implements DeepCodingQuestion {
         }
         sb.append(" ").append("难度分: ").append((int) getRating()).append("   ");
         sb.append("[")
-                .append(getFid())
-                .append("]")
-                .append(getTitleZH())
-//                .append(AppSettings.getInstance().isZh() ? " " + getTitleZH() : " " + getTitle())
+            .append(getFid())
+            .append("]")
+            .append(getTitleZH())
+        //                .append(AppSettings.getInstance().isZh() ? " " + getTitleZH() : " " + getTitle())
         ;
         sb.append("   【").append(getAlgorithm()).append("】");
         sb.append("   【").append(getContestID_zh()).append("】");

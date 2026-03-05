@@ -2,7 +2,6 @@ package com.xhf.leetcode.plugin.search;
 
 import com.xhf.leetcode.plugin.search.process.Processor;
 import com.xhf.leetcode.plugin.search.process.ProcessorFactory;
-
 import java.io.IOException;
 import java.io.Reader;
 
@@ -13,6 +12,7 @@ import java.io.Reader;
  * @email 2508020102@qq.com
  */
 public class Segmentation {
+
     private final SourceManager sm;
     private final Iterator itr;
     private final ProcessorFactory pf;
@@ -41,7 +41,9 @@ public class Segmentation {
         if (ctx.hasToken()) {
             return ctx.getToken();
         }
-        if (! sm.tryLoad()) return null;
+        if (!sm.tryLoad()) {
+            return null;
+        }
         // 赋值上下文
         ctx.setC(itr.next());
         // 获取处理器

@@ -1,6 +1,7 @@
 package com.xhf.leetcode.plugin.model;
 
 public class SubmissionDetail {
+
     private String code;
     private Object fullCodeOutput;
     private boolean isMine;
@@ -23,66 +24,171 @@ public class SubmissionDetail {
     private long timestamp;
     private long totalTestCaseCnt;
 
-    public String getCode() { return code; }
-    public void setCode(String value) { this.code = value; }
+    public String getCode() {
+        return code;
+    }
 
-    public Object getFullCodeOutput() { return fullCodeOutput; }
-    public void setFullCodeOutput(Object value) { this.fullCodeOutput = value; }
+    public void setCode(String value) {
+        this.code = value;
+    }
 
-    public boolean getIsMine() { return isMine; }
-    public void setIsMine(boolean value) { this.isMine = value; }
+    public Object getFullCodeOutput() {
+        return fullCodeOutput;
+    }
 
-    public String getLang() { return lang; }
-    public void setLang(String value) { this.lang = value; }
+    public void setFullCodeOutput(Object value) {
+        this.fullCodeOutput = value;
+    }
 
-    public String getLangVerboseName() { return langVerboseName; }
-    public void setLangVerboseName(String value) { this.langVerboseName = value; }
+    public boolean getIsMine() {
+        return isMine;
+    }
 
-    public String getMemory() { return memory; }
-    public void setMemory(String value) { this.memory = value; }
+    public void setIsMine(boolean value) {
+        this.isMine = value;
+    }
 
-    public String getMemoryDisplay() { return memoryDisplay; }
-    public void setMemoryDisplay(String value) { this.memoryDisplay = value; }
+    public String getLang() {
+        return lang;
+    }
 
-    public double getMemoryPercentile() { return memoryPercentile; }
-    public void setMemoryPercentile(double value) { this.memoryPercentile = value; }
+    public void setLang(String value) {
+        this.lang = value;
+    }
 
-    public OutputDetail getOutputDetail() { return outputDetail; }
-    public void setOutputDetail(OutputDetail value) { this.outputDetail = value; }
+    public String getLangVerboseName() {
+        return langVerboseName;
+    }
 
-    public long getPassedTestCaseCnt() { return passedTestCaseCnt; }
-    public void setPassedTestCaseCnt(long value) { this.passedTestCaseCnt = value; }
+    public void setLangVerboseName(String value) {
+        this.langVerboseName = value;
+    }
 
-    public Question getQuestion() { return question; }
-    public void setQuestion(Question value) { this.question = value; }
+    public String getMemory() {
+        return memory;
+    }
 
-    public String getRuntimeDisplay() { return runtimeDisplay; }
-    public void setRuntimeDisplay(String value) { this.runtimeDisplay = value; }
+    public void setMemory(String value) {
+        this.memory = value;
+    }
 
-    public double getRuntimePercentile() { return runtimePercentile; }
-    public void setRuntimePercentile(double value) { this.runtimePercentile = value; }
+    public String getMemoryDisplay() {
+        return memoryDisplay;
+    }
 
-    public String getStatusDisplay() { return statusDisplay; }
-    public void setStatusDisplay(String value) { this.statusDisplay = value; }
+    public void setMemoryDisplay(String value) {
+        this.memoryDisplay = value;
+    }
 
-    public String getStdOutput() { return stdOutput; }
-    public void setStdOutput(String value) { this.stdOutput = value; }
+    public double getMemoryPercentile() {
+        return memoryPercentile;
+    }
 
-    public Object getSubmissionComment() { return submissionComment; }
-    public void setSubmissionComment(Object value) { this.submissionComment = value; }
+    public void setMemoryPercentile(double value) {
+        this.memoryPercentile = value;
+    }
 
-    public Object getTestBodies() { return testBodies; }
-    public void setTestBodies(Object value) { this.testBodies = value; }
+    public OutputDetail getOutputDetail() {
+        return outputDetail;
+    }
 
-    public Object getTestDescriptions() { return testDescriptions; }
-    public void setTestDescriptions(Object value) { this.testDescriptions = value; }
+    public void setOutputDetail(OutputDetail value) {
+        this.outputDetail = value;
+    }
 
-    public Object getTestInfo() { return testInfo; }
-    public void setTestInfo(Object value) { this.testInfo = value; }
+    public long getPassedTestCaseCnt() {
+        return passedTestCaseCnt;
+    }
 
-    public long getTimestamp() { return timestamp; }
-    public void setTimestamp(long value) { this.timestamp = value; }
+    public void setPassedTestCaseCnt(long value) {
+        this.passedTestCaseCnt = value;
+    }
 
-    public long getTotalTestCaseCnt() { return totalTestCaseCnt; }
-    public void setTotalTestCaseCnt(long value) { this.totalTestCaseCnt = value; }
+    public Question getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(Question value) {
+        this.question = value;
+    }
+
+    public String getRuntimeDisplay() {
+        return runtimeDisplay;
+    }
+
+    public void setRuntimeDisplay(String value) {
+        this.runtimeDisplay = value;
+    }
+
+    public double getRuntimePercentile() {
+        return runtimePercentile;
+    }
+
+    public void setRuntimePercentile(double value) {
+        this.runtimePercentile = value;
+    }
+
+    public String getStatusDisplay() {
+        return statusDisplay;
+    }
+
+    public void setStatusDisplay(String value) {
+        this.statusDisplay = value;
+    }
+
+    public String getStdOutput() {
+        return stdOutput;
+    }
+
+    public void setStdOutput(String value) {
+        this.stdOutput = value;
+    }
+
+    public Object getSubmissionComment() {
+        return submissionComment;
+    }
+
+    public void setSubmissionComment(Object value) {
+        this.submissionComment = value;
+    }
+
+    public Object getTestBodies() {
+        return testBodies;
+    }
+
+    public void setTestBodies(Object value) {
+        this.testBodies = value;
+    }
+
+    public Object getTestDescriptions() {
+        return testDescriptions;
+    }
+
+    public void setTestDescriptions(Object value) {
+        this.testDescriptions = value;
+    }
+
+    public Object getTestInfo() {
+        return testInfo;
+    }
+
+    public void setTestInfo(Object value) {
+        this.testInfo = value;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long value) {
+        this.timestamp = value;
+    }
+
+    public long getTotalTestCaseCnt() {
+        return totalTestCaseCnt;
+    }
+
+    public void setTotalTestCaseCnt(long value) {
+        this.totalTestCaseCnt = value;
+    }
 }
