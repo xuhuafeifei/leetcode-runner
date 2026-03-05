@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 /**
  * @author 文艺倾年
@@ -27,6 +28,8 @@ public class Sqlite {
     private final String dbFolder;
     private final String dbName;
     private Connection connection;
+    /** 连接失败时只弹一次框，避免重复打扰用户 */
+    private boolean connectionErrorShown;
 
     /**
      * Sqlite类的构造函数，用于设置数据库连接的相关信息
@@ -38,28 +41,50 @@ public class Sqlite {
 
     /**
      * 连接到Sqlite数据库
+     * 连接失败时弹框提示一次，但不抛异常，不影响后续代码运行。
      *
-     * @return Sqlite对象
+     * @return Sqlite对象（连接可能为 null，调用方需通过 isConnected() 判断）
      */
     public Sqlite connect() {
         try {
+            // 优先使用纯 Java 模式，避免 native 库在部分环境（如 Mac aarch64）加载失败
+            System.setProperty("sqlite.purejava", "true");
+            // 插件环境下 DriverManager 的 ServiceLoader 用不到插件 classpath，必须显式加载 driver
             Class.forName("org.sqlite.JDBC");
-            // 保证兼容其他系统
             String dbUrl = "jdbc:sqlite:" + this.dbFolder + File.separator + this.dbName;
             LogUtils.info("[Database] 正在连接到数据库: " + dbUrl);
-            // 初始化时自动创建目录结构
             initializeDatabaseDirectory();
             connection = DriverManager.getConnection(dbUrl);
             LogUtils.info("[Database] 成功连接到数据库");
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(new JFrame(),
-                "SQLLite错误: " + e,
-                "建立数据库连接时发生错误", JOptionPane.ERROR_MESSAGE);
-            LogUtils.info("[Database] 无法连接到数据库: " + e);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            LogUtils.error("[Database] 未找到 SQLite 驱动:\n" + DebugUtils.getStackTraceAsString(e));
+            if (!connectionErrorShown) {
+                connectionErrorShown = true;
+                SwingUtilities.invokeLater(() ->
+                    JOptionPane.showMessageDialog(new JFrame(),
+                        "未找到 SQLite 驱动，复习/评分功能不可用。", "数据库连接失败", JOptionPane.WARNING_MESSAGE));
+            }
+        } catch (SQLException e) {
+            LogUtils.error("[Database] 无法连接到数据库:\n" + DebugUtils.getStackTraceAsString(e));
+            if (!connectionErrorShown) {
+                connectionErrorShown = true;
+                String message = "SQLite 连接失败，复习/评分功能不可用。\n错误: " + e.getMessage();
+                String title = "数据库连接失败";
+                SwingUtilities.invokeLater(() ->
+                    JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.WARNING_MESSAGE));
+            }
+        } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
+            // 若 driver 在别处先被加载且初始化失败，此处会收到；按连接失败处理
+            LogUtils.error("[Database] SQLite 驱动初始化失败:\n" + DebugUtils.getStackTraceAsString(e));
+            if (!connectionErrorShown) {
+                connectionErrorShown = true;
+                String message = "SQLite 驱动加载失败，复习/评分功能不可用。\n" + e.getMessage();
+                SwingUtilities.invokeLater(() ->
+                    JOptionPane.showMessageDialog(new JFrame(), message, "数据库连接失败", JOptionPane.WARNING_MESSAGE));
+            }
+        } catch (Exception e) {
+            LogUtils.error(e);
         }
-
         return this;
     }
 
@@ -98,10 +123,15 @@ public class Sqlite {
      * 断开与Sqlite数据库的连接
      */
     public void disconnect() {
+        if (this.connection == null) {
+            return;
+        }
         try {
             this.connection.close();
         } catch (SQLException e) {
             LogUtils.warn(DebugUtils.getStackTraceAsString(e));
+        } finally {
+            this.connection = null;
         }
     }
 
@@ -144,7 +174,9 @@ public class Sqlite {
     public void query(PreparedStatement statement, Consumer<ResultSet> consumer) {
         checkConnection();
         ResultSet result = this.query(statement);
-        consumer.accept(result);
+        if (result != null) {
+            consumer.accept(result);
+        }
     }
 
     /**
@@ -156,7 +188,9 @@ public class Sqlite {
     public void query(String statement, Consumer<ResultSet> consumer) {
         checkConnection();
         ResultSet result = this.query(statement);
-        consumer.accept(result);
+        if (result != null) {
+            consumer.accept(result);
+        }
     }
 
     /**
@@ -167,6 +201,9 @@ public class Sqlite {
      */
     public ResultSet query(String query) {
         checkConnection();
+        if (this.connection == null) {
+            return null;
+        }
         try {
             return query(this.connection.prepareStatement(query));
         } catch (Exception e) {
@@ -183,6 +220,9 @@ public class Sqlite {
      */
     public ResultSet query(PreparedStatement statement) {
         checkConnection();
+        if (this.connection == null || statement == null) {
+            return null;
+        }
         try {
             return statement.executeQuery();
         } catch (Exception e) {
@@ -199,7 +239,9 @@ public class Sqlite {
      */
     public void syncQuery(String statement, Consumer<ResultSet> consumer) {
         ResultSet result = this.query(statement);
-        consumer.accept(result);
+        if (result != null) {
+            consumer.accept(result);
+        }
     }
 
     /**
@@ -210,6 +252,9 @@ public class Sqlite {
      */
     public PreparedStatement prepare(String query) {
         checkConnection();
+        if (this.connection == null) {
+            return null;
+        }
         try {
             return this.connection.prepareStatement(query);
         } catch (Exception e) {
@@ -225,6 +270,9 @@ public class Sqlite {
      */
     public void queryUpdate(String query) {
         checkConnection();
+        if (this.connection == null) {
+            return;
+        }
         try (PreparedStatement statement = this.connection.prepareStatement(query)) {
             queryUpdate(statement);
         } catch (Exception e) {
@@ -239,6 +287,9 @@ public class Sqlite {
      */
     public void queryUpdate(PreparedStatement preparedStatement) {
         checkConnection();
+        if (preparedStatement == null) {
+            return;
+        }
         try {
             preparedStatement.executeUpdate();
         } catch (Exception e) {
@@ -279,6 +330,9 @@ public class Sqlite {
      */
     public void beginTransaction() {
         checkConnection();
+        if (this.connection == null) {
+            return;
+        }
         try {
             connection.setAutoCommit(false);
             LogUtils.info("[Database] 事务开始");
@@ -293,6 +347,9 @@ public class Sqlite {
      */
     public void commitTransaction() {
         checkConnection();
+        if (this.connection == null) {
+            return;
+        }
         try {
             connection.commit();
             connection.setAutoCommit(true);
@@ -308,6 +365,9 @@ public class Sqlite {
      */
     public void rollbackTransaction() {
         checkConnection();
+        if (this.connection == null) {
+            return;
+        }
         try {
             connection.rollback();
             connection.setAutoCommit(true);
@@ -327,6 +387,9 @@ public class Sqlite {
      */
     public List<Map<String, Object>> queryForList(String query) {
         checkConnection();
+        if (this.connection == null) {
+            return new ArrayList<>();
+        }
         List<Map<String, Object>> resultList = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery()) {
@@ -356,6 +419,9 @@ public class Sqlite {
      */
     public List<Card> queryForCards(String query) {
         checkConnection();
+        if (this.connection == null) {
+            return new ArrayList<>();
+        }
         List<Card> resultList = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery()) {
@@ -391,6 +457,9 @@ public class Sqlite {
      */
     public void insert(String tableName, Map<String, Object> data) {
         checkConnection();
+        if (this.connection == null) {
+            return;
+        }
         if (data == null || data.isEmpty()) {
             throw new IllegalArgumentException("插入数据不能为空");
         }

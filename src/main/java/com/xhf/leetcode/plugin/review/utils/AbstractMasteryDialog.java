@@ -36,7 +36,6 @@ public abstract class AbstractMasteryDialog extends JDialog {
         Color bgColor = UIManager.getColor("Panel.background");
         Color fgColor = UIManager.getColor("Label.foreground");
         Color borderColor = UIManager.getColor("Component.borderColor");
-        Color selectionBg = UIManager.getColor("Button.select");
 
         // 设置对话框背景
         getContentPane().setBackground(bgColor);
@@ -107,15 +106,12 @@ public abstract class AbstractMasteryDialog extends JDialog {
         }
         contentPanel.add(radioPanel, gbc);
 
-        // 5. 确认按钮
+        // 5. 确认按钮（完全跟随 IDEA 主题：不设背景/前景，浅色/深色主题下文字都可见）
         gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.EAST;
         JButton confirmButton = new JButton(BundleUtils.i18nHelper("确认", "Confirm"));
         confirmButton.setFont(Constants.CN_FONT_BOLD);
-        confirmButton.setBackground(
-            selectionBg != null ? selectionBg : new JBColor(new Color(70, 130, 180), new Color(70, 130, 180)));
-        confirmButton.setForeground(JBColor.WHITE);
         confirmButton.setFocusPainted(false);
         setConfirmButtonListener(confirmButton, group, noteTextArea);
         contentPanel.add(confirmButton, gbc);

@@ -69,6 +69,9 @@ public class AlgorithmApp {
         LogUtils.simpleDebug("[cards] 查询所有数据 SQL: " + query);
 
         this.databaseAdapter.getSqlite().query(query, resultSet -> {
+            if (resultSet == null) {
+                return;
+            }
             try {
                 while (resultSet.next()) {
                     String strFront = resultSet.getString("front");

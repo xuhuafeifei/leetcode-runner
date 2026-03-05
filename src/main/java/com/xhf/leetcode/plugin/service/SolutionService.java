@@ -6,12 +6,15 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.xhf.leetcode.plugin.comp.MyList;
 import com.xhf.leetcode.plugin.editors.SolutionEditor;
+import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.http.LeetcodeClient;
 import com.xhf.leetcode.plugin.model.LeetcodeEditor;
 import com.xhf.leetcode.plugin.model.Solution;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.Constants;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.ViewUtils;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +34,14 @@ public class SolutionService {
             @Override
             public void run(ProgressIndicator indicator) {
                 // query
-                List<Solution> solutionList = LeetcodeClient.getInstance(project).querySolutionList(titleSlug);
+                List<Solution> solutionList;
+                try {
+                    solutionList = LeetcodeClient.getInstance(project).querySolutionList(titleSlug);
+                } catch (Exception e) {
+                    ConsoleUtils.getInstance(project).showError(BundleUtils.i18nHelper("查询题解失败,返回空题解!",
+                        "query solution failed! return empty solution list!"));
+                    solutionList = new ArrayList<>();
+                }
                 myList.setListData(solutionList);
                 myList.updateUI();
             }

@@ -71,13 +71,21 @@ public class CustomTextEditor implements TextEditor {
     private final JPanel component;
     private final VirtualFile file;
     private final Project project;
-    private final RQServiceImpl service;
+    // 可以为 null. 为 null 表示出初始化错误
+    private RQServiceImpl service;
+    private String rqInitErrorReason;
     private @Nullable ActionGroup actionGroup;
 
     public CustomTextEditor(@NotNull Project project, @NotNull VirtualFile file) {
         this.file = file;
         this.project = project;
-        this.service = new RQServiceImpl(project);
+        try {
+            this.service = new RQServiceImpl(project);
+        } catch (Exception e) {
+            LogUtils.error("RQServiceImpl init error", e);
+            rqInitErrorReason = e.getMessage();
+            this.service = null;
+        }
         Document document = FileDocumentManager.getInstance().getDocument(file);
         if (document == null) {
             throw new IllegalStateException("Cannot create editor for file: " + file.getName());
@@ -121,7 +129,13 @@ public class CustomTextEditor implements TextEditor {
                     String levelStr = group.getSelection().getActionCommand();
 
                     Question question = ViewUtils.getQuestionByVFile(file, project);
-                    service.createQuestion(question, FSRSRating.getById(levelStr), textArea.getText());
+                    if (Objects.isNull(service)) {
+                        Objects.requireNonNull(ConsoleUtils.getInstance(project))
+                            .showError(BundleUtils.i18nHelper("RQServiceImpl初始化错误! 错误原因: " + rqInitErrorReason,
+                                "RQServiceImpl Init Error, the reason is" + rqInitErrorReason));
+                    } else {
+                        service.createQuestion(question, FSRSRating.getById(levelStr), textArea.getText());
+                    }
 
                     // 关闭对话框
                     this.dispose();
@@ -131,7 +145,15 @@ public class CustomTextEditor implements TextEditor {
             @Override
             protected String getNoteText() {
                 try {
-                    List<ReviewQuestion> allQuestions = service.getAllQuestions();
+                    List<ReviewQuestion> allQuestions;
+                    if (Objects.isNull(service)) {
+                        Objects.requireNonNull(ConsoleUtils.getInstance(project))
+                            .showError(BundleUtils.i18nHelper("RQServiceImpl初始化错误! 错误原因: " + rqInitErrorReason,
+                                "RQServiceImpl Init Error, the reason is" + rqInitErrorReason));
+                        return "";
+                    } else {
+                        allQuestions = service.getAllQuestions();
+                    }
 
                     Question question = ViewUtils.getQuestionByVFile(file, project);
                     int id = Question.getIdx(question, project);
