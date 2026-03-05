@@ -7,8 +7,8 @@ plugins {
 }
 
 patchPluginXml {
-    sinceBuild = '222.*'
-    untilBuild = '252.*'
+    sinceBuild = '203'
+    untilBuild = '221.*'
 }
 
 intellij {
