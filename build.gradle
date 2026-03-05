@@ -8,7 +8,7 @@ plugins {
 
 patchPluginXml {
     sinceBuild = '203'
-    untilBuild = '221.*'
+    untilBuild = '252.*'
 }
 
 intellij {
@@ -27,7 +27,7 @@ test {
 //}
 
 group 'com.xhf'
-version '3.7.2-ADAPT'
+version '3.7.4'
 
 
 repositories {
