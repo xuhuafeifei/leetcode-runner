@@ -715,18 +715,6 @@ public class MyTextEditorWithPreview extends UserDataHolderBase implements TextE
             return myLayout == myActionLayout;
         }
 
-    @Override
-    public void setSelected(@NotNull AnActionEvent e, boolean state) {
-      if (state) {
-        setLayout(myActionLayout);
-      }
-      else {
-        if (myActionLayout == Layout.SHOW_EDITOR_AND_PREVIEW) {
-          mySplitter.setOrientation(!myIsVerticalSplit);
-          myIsVerticalSplit = !myIsVerticalSplit;
-        }
-      }
-    }
         @Override
         public @NotNull ActionUpdateThread getActionUpdateThread() {
             return ActionUpdateThread.BGT;

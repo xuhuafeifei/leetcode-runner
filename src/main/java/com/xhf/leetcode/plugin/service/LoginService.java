@@ -13,6 +13,7 @@ import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.bus.LoginEvent;
 import com.xhf.leetcode.plugin.bus.LogoutEvent;
 import com.xhf.leetcode.plugin.bus.SecretKeyUpdateEvent;
+import com.xhf.leetcode.plugin.bus.UnAuthorizedEvent;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.io.file.StoreService;
@@ -47,7 +48,7 @@ import org.jetbrains.annotations.Nullable;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-@LCSubscriber(events = {ClearCacheEvent.class})
+@LCSubscriber(events = {ClearCacheEvent.class, UnAuthorizedEvent.class})
 public final class LoginService {
 
     private static volatile LoginService instance;
@@ -172,6 +173,16 @@ public final class LoginService {
                 StoreService.getInstance(project).addEncryptCache(StoreService.LEETCODE_SESSION_KEY, value, true);
             }
         }
+    }
+
+    @Subscribe
+    public void clearCacheEvent(ClearCacheEvent event) {
+        this.loginFlag = false;
+    }
+
+    @Subscribe
+    public void UnAuthEvent(ClearCacheEvent event) {
+        this.loginFlag = false;
     }
 
     abstract static class BasicWindow {

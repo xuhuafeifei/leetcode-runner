@@ -3,6 +3,8 @@ package com.xhf.leetcode.plugin.io.http.utils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.intellij.openapi.project.Project;
+import com.xhf.leetcode.plugin.bus.LCEventBus;
+import com.xhf.leetcode.plugin.bus.UnAuthorizedEvent;
 import com.xhf.leetcode.plugin.debug.utils.DebugUtils;
 import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.HttpRequest;
@@ -139,6 +141,7 @@ public class HttpClient {
             return httpResponse;
         }
         if (StringUtils.equals(error, "User is not authenticated")) {
+            LCEventBus.getInstance().post(new UnAuthorizedEvent(null));
             throw new LoginException(
                 BundleUtils.i18nHelper("登录过期, 请重新登陆!", "Login expired, please login again!"));
         }
