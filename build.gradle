@@ -7,8 +7,8 @@ plugins {
 }
 
 patchPluginXml {
-    sinceBuild = '222.*'
-    untilBuild = '252.*'
+    sinceBuild = '222'
+    untilBuild = '262.*'
 }
 
 intellij {
@@ -27,10 +27,14 @@ test {
 //}
 
 group 'com.xhf'
-version '3.7.4'
+version '3.7.7'
 
 
 repositories {
+    maven { url 'https://maven.aliyun.com/repository/public' }
+    maven { url 'https://maven.aliyun.com/repository/central' }
+    maven { url 'https://maven.aliyun.com/repository/google' }
+    maven { url 'https://repo1.maven.org/maven2/' }
     mavenCentral()
 }
 
@@ -83,6 +87,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.guava/guava
     implementation group: 'com.google.guava', name: 'guava', version: '33.4.0-jre'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'org.apache.lucene:lucene-core:3.0.3'
     implementation 'org.jgrapht:jgrapht-core:1.5.1'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
@@ -96,3 +101,5 @@ dependencies {
 kotlin {
     jvmToolchain(11)
 }
+
+// Kotlin 编译已修复（移走了有问题的 UI 类）

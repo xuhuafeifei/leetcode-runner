@@ -9,6 +9,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.xhf.leetcode.plugin.bus.ClearCacheEvent;
 import com.xhf.leetcode.plugin.bus.CodeSubmitEvent;
+import com.xhf.leetcode.plugin.bus.QLoadEndEvent;
 import com.xhf.leetcode.plugin.bus.LCEventBus;
 import com.xhf.leetcode.plugin.bus.LCSubscriber;
 import com.xhf.leetcode.plugin.bus.LoginEvent;
@@ -41,7 +42,7 @@ import org.jetbrains.annotations.NotNull;
  * @author feigebuge
  * @email 2508020102@qq.com
  */
-@LCSubscriber(events = {LoginEvent.class, ClearCacheEvent.class, CodeSubmitEvent.class})
+@LCSubscriber(events = {LoginEvent.class, ClearCacheEvent.class, CodeSubmitEvent.class, QLoadEndEvent.class})
 public class SubmissionEditor extends AbstractSplitTextEditor {
 
     public SubmissionEditor(Project project, VirtualFile file) {
@@ -179,6 +180,12 @@ public class SubmissionEditor extends AbstractSplitTextEditor {
 
     @Subscribe
     public void codeSubmitListener(CodeSubmitEvent event) {
+        this.initFirstComp();
+    }
+
+    @Subscribe
+    public void qLoadEndListener(QLoadEndEvent event) {
+        // 题目加载完成后，重新加载提交记录（解决首次打开题目时提交记录为空的问题）
         this.initFirstComp();
     }
 

@@ -60,6 +60,10 @@ public class HttpClient {
         return instance;
     }
 
+    public CookieStore getCookieStore() {
+        return cookieStore;
+    }
+
     // 忘了之前为啥把这个方法deprecated了
     // @Deprecated
     public List<Cookie> getCookies() {

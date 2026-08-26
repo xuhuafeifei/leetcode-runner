@@ -368,10 +368,10 @@ public class Question implements DeepCodingQuestion {
         StringBuilder sb = new StringBuilder();
         sb.append("      ");
 
-        if ("AC".equals(getStatus())) {
+        if ("ac".equalsIgnoreCase(getStatus())) {
             // sb.append("done ");
             sb.append("✔");
-        } else if ("TRIED".equals(getStatus())) {
+        } else if ("tried".equalsIgnoreCase(getStatus())) {
             sb.append("❓");
         } else {
             // sb.append("          ");

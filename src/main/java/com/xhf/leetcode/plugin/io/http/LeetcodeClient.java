@@ -54,6 +54,7 @@ public class LeetcodeClient {
     private static boolean first = true;
     private static volatile LeetcodeClient instance;
     private final HttpClient httpClient;
+    private final GraphqlClient graphqlClient;
     UserCalendar userCalendar;
     private Project project;
     private UserStatus userStatus;
@@ -68,6 +69,12 @@ public class LeetcodeClient {
         this.project = project;
         // loadCache
         httpClient = HttpClient.getInstance();
+        // 初始化 GraphqlClient，通过桥接共享 Apache HttpClient 的 cookie
+        graphqlClient = GraphqlClient.create(
+            new ApacheCookieJarBridge(httpClient.getCookieStore()),
+            LeetcodeApiUtils.getLeetcodeReqUrl(),
+            LeetcodeApiUtils.getLeetcodeUrl()
+        );
         LCEventBus.getInstance().register(this);
     }
 
@@ -76,6 +83,11 @@ public class LeetcodeClient {
     @Deprecated
     private LeetcodeClient() {
         httpClient = HttpClient.getInstance();
+        graphqlClient = GraphqlClient.create(
+            new ApacheCookieJarBridge(httpClient.getCookieStore()),
+            LeetcodeApiUtils.getLeetcodeReqUrl(),
+            LeetcodeApiUtils.getLeetcodeUrl()
+        );
     }
 
     public static LeetcodeClient getInstance(Project project) {
@@ -187,38 +199,21 @@ public class LeetcodeClient {
      * @return UserStatus
      */
     public UserStatus queryUserStatus() {
-        // check LEETCODE_SESSION
         if (!httpClient.containsCookie(LeetcodeApiUtils.LEETCODE_SESSION)) {
             return null;
         }
-
-        // 不考虑用户刷题刷到一半, 给leetcode充钱变成vip的情况
-        // todo: 后续新增的用户信息展示功能, 在提供userStatues改变接口
         if (userStatus != null) {
             return userStatus;
         }
-
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_STATUS_QUERY);
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-
-        String resp = httpResponse.getBody();
-
         try {
-            // extract field
-            JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-            JsonObject dataObject = jsonObject.getAsJsonObject("data");
-            JsonObject userStatusObject = dataObject.getAsJsonObject("userStatus");
-            this.userStatus = GsonUtils.fromJson(userStatusObject, UserStatus.class);
-            return userStatus;
+            UserStatus result = graphqlClient.query(
+                LeetcodeApiUtils.USER_STATUS_QUERY,
+                new java.util.HashMap<>(),
+                java.util.Arrays.asList("userStatus"),
+                UserStatus.class
+            );
+            this.userStatus = result;
+            return result;
         } catch (Exception e) {
             LogUtils.error(e);
             return null;
@@ -292,48 +287,41 @@ public class LeetcodeClient {
     }
 
     public @NotNull List<Question> queryTotalQuestion() {
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.PROBLEM_SET_QUERY);
-
-        List<Question> ans = new ArrayList<>();
+        LogUtils.info("[题目列表] queryTotalQuestion 开始请求...");
+        List<Question> ans = new java.util.ArrayList<>();
         boolean flag = true;
-        int skip = 0, limit = 100;
+        int skip = 0;
+        final int limit = 100;
         while (flag) {
-            GraphqlReqBody.SearchParams params = new GraphqlReqBody.SearchParams.ParamsBuilder()
-                .setCategorySlug("all-code-essentials")
-                .setLimit(limit)
-                .setSkip(skip)
-                .build();
-            body.setBySearchParams(params);
+            java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            variables.put("categorySlug", "all-code-essentials");
+            variables.put("skip", skip);
+            variables.put("limit", limit);
+            variables.put("filters", new java.util.HashMap<>());
 
-            HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-                .setBody(body.toJsonStr())
-                .setContentType("application/json")
-                .addBasicHeader()
-                .build();
-
-            HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-            String resp = httpResponse.getBody();
-
-            // parse json to array
-            JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-            JsonObject pql = jsonObject.getAsJsonObject("data").getAsJsonObject("problemsetQuestionList");
-
-            // no questions left
-            if (!pql.get("hasMore").getAsBoolean()) {
-                flag = false;
+            try {
+                JsonObject jsonObject = graphqlClient.queryForJsonObject(
+                    LeetcodeApiUtils.PROBLEM_SET_QUERY,
+                    variables
+                );
+                JsonObject pql = jsonObject.getAsJsonObject("data").getAsJsonObject("problemsetQuestionList");
+                if (!pql.get("hasMore").getAsBoolean()) {
+                    flag = false;
+                }
+                JsonArray jsonArray = pql.getAsJsonArray("questions");
+                // 手动解析 List<Question>
+                List<Question> questions = new java.util.ArrayList<>();
+                for (JsonElement element : jsonArray) {
+                    questions.add(com.xhf.leetcode.plugin.utils.GsonUtils.fromJson(element, Question.class));
+                }
+                ans.addAll(questions);
+                skip += limit;
+            } catch (Exception e) {
+                LogUtils.error("[题目列表] queryTotalQuestion 失败: " + e.getMessage(), e);
+                break;
             }
-            // parse json array
-            JsonArray jsonArray = pql.getAsJsonArray("questions");
-            List<Question> questions = GsonUtils.fromJsonArray(jsonArray, Question.class);
-            // merge
-            ans.addAll(questions);
-
-            body.clear();
-            skip = skip + limit;
         }
-
+        LogUtils.info("[题目列表] queryTotalQuestion 成功，共 " + ans.size() + " 道题");
         return ans;
     }
 
@@ -393,19 +381,12 @@ public class LeetcodeClient {
         if (StringUtils.isBlank(params.getTitleSlug())) {
             throw new RuntimeException("title slug is null ! " + GsonUtils.toJsonStr(params));
         }
-
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.QUESTION_CONTENT_QUERY);
-        body.setBySearchParams(params);
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        return httpClient.executePost(httpRequest, project).getBody();
+        java.util.Map<String, Object> variables = new java.util.HashMap<>();
+        variables.put("titleSlug", params.getTitleSlug());
+        return graphqlClient.queryForJsonObject(
+            LeetcodeApiUtils.QUESTION_CONTENT_QUERY,
+            variables
+        ).toString();
     }
 
     /**
@@ -424,48 +405,28 @@ public class LeetcodeClient {
         return totalQuestion.get(qId);
     }
 
-    private JsonElement fetchTodayRecord(Project project) {
-        /* search question */
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.QUESTION_OF_TODAY_QUERY);
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-
-        String resp = httpResponse.getBody();
-        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-
-        return jsonObject.getAsJsonObject("data").getAsJsonArray("todayRecord").get(0);
+    private JsonObject fetchTodayQuestionJsonObject() {
+        return graphqlClient.queryForJsonObject(
+            LeetcodeApiUtils.QUESTION_OF_TODAY_QUERY,
+            new java.util.HashMap<>()
+        );
     }
-
+    
     public TodayRecord getTodayRecord(Project project) {
-        JsonElement jsonElement = fetchTodayRecord(project);
-        return GsonUtils.fromJson(jsonElement, TodayRecord.class);
+        JsonObject jsonObject = fetchTodayQuestionJsonObject();
+        JsonElement todayRecord = jsonObject.getAsJsonObject("data").getAsJsonArray("todayRecord").get(0);
+        return GsonUtils.fromJson(todayRecord, TodayRecord.class);
     }
 
     /**
      * get today question
      */
     public Question getTodayQuestion(Project project) {
-        JsonElement jsonElement = fetchTodayRecord(project);
-        JsonObject questionJOB = jsonElement.getAsJsonObject().getAsJsonObject("question");
-
-        // extract field
-        Question q = new Question();
-        q.setFrontendQuestionId(questionJOB.get("frontendQuestionId").getAsString());
-        q.setDifficulty(questionJOB.get("difficulty").getAsString());
-        q.setTitle(questionJOB.get("title").getAsString());
-        q.setTitleSlug(questionJOB.get("titleSlug").getAsString());
-        q.setTitleCn(questionJOB.get("titleCn").getAsString());
-
-        return q;
+        JsonObject jsonObject = fetchTodayQuestionJsonObject();
+        JsonObject question = jsonObject.getAsJsonObject("data").getAsJsonArray("todayRecord").get(0).getAsJsonObject().getAsJsonObject("question");
+        return GsonUtils.fromJson(question, Question.class);
     }
+
 
     /**
      * run code by leetcode platform
@@ -585,129 +546,99 @@ public class LeetcodeClient {
     }
 
     public List<Solution> querySolutionList(String questionSlug) {
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SOLUTION_LIST_QUERY);
-        // build by params
-        body.setBySearchParams(new GraphqlReqBody.SearchParams.ParamsBuilder()
-            .setQuestionSlug(questionSlug)
-            .setSkip(0)
-            .setFirst(30)
-            .setOrderBy("DEFAULT")
-            .build()
-        );
+        java.util.Map<String, Object> variables = new java.util.HashMap<>();
+        variables.put("questionSlug", questionSlug);
+        variables.put("skip", 0);
+        variables.put("first", 30);
+        variables.put("orderBy", "DEFAULT");
 
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
+        try {
+            JsonObject jsonObject = graphqlClient.queryForJsonObject(
+                LeetcodeApiUtils.SOLUTION_LIST_QUERY,
+                variables
+            );
+            JsonArray edges = jsonObject.getAsJsonObject("data")
+                .getAsJsonObject("questionSolutionArticles")
+                .getAsJsonArray("edges");
 
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-
-        String resp = httpResponse.getBody();
-
-        // parse json to array
-        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-        JsonArray jsonArray = jsonObject.getAsJsonObject("data")
-            .getAsJsonObject("questionSolutionArticles")
-            .getAsJsonArray("edges");
-
-        List<Solution> res = new ArrayList<>(15);
-        for (JsonElement element : jsonArray) {
-            JsonElement node = element.getAsJsonObject().get("node");
-            Solution solution = GsonUtils.fromJson(node, Solution.class);
-            res.add(solution);
+            List<Solution> res = new ArrayList<>(15);
+            for (JsonElement element : edges) {
+                JsonElement node = element.getAsJsonObject().get("node");
+                Solution solution = GsonUtils.fromJson(node, Solution.class);
+                res.add(solution);
+            }
+            return res;
+        } catch (Exception e) {
+            LogUtils.warn("查询题解失败,返回空题解!");
+            LogUtils.warn(e.getMessage());
+            return new ArrayList<>();
         }
-
-        return res;
     }
 
     public String getSolutionContent(String solutionSlug) {
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SOLUTION_CONTENT_QUERY);
-        body.addVariable("slug", solutionSlug);
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-
-        String resp = httpResponse.getBody();
-
-        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-
-        return jsonObject.getAsJsonObject("data")
-            .getAsJsonObject("solutionArticle")
-            .get("content")
-            .getAsString();
+        java.util.Map<String, Object> variables = new java.util.HashMap<>();
+        variables.put("solutionSlug", solutionSlug);
+        try {
+            return graphqlClient.queryForJsonObject(
+                LeetcodeApiUtils.SOLUTION_CONTENT_QUERY,
+                variables
+            ).toString();
+        } catch (Exception e) {
+            LogUtils.error("getSolutionContent failed: " + e.getMessage());
+            return "";
+        }
     }
 
     public List<Submission> getSubmissionList(String slug) {
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SUBMISSION_LIST_QUERY);
-        body.addVariable("questionSlug", slug);
-        body.addVariable("offset", 0);
-        body.addVariable("limit", 50);
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-
-        String resp = httpResponse.getBody();
-
-        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-
-        JsonArray jsonArray = jsonObject.getAsJsonObject("data")
-            .getAsJsonObject("submissionList")
-            .getAsJsonArray("submissions");
-
-        return GsonUtils.fromJsonArray(jsonArray, Submission.class);
+        java.util.Map<String, Object> variables = new java.util.HashMap<>();
+        variables.put("questionSlug", slug);
+        variables.put("offset", 0);
+        variables.put("limit", 50);
+        try {
+            return graphqlClient.queryList(
+                LeetcodeApiUtils.SUBMISSION_LIST_QUERY,
+                variables,
+                java.util.Arrays.asList("submissionList", "submissions"),
+                Submission.class
+            );
+        } catch (Exception e) {
+            LogUtils.error("getSubmissionList failed: " + e.getMessage());
+            return new java.util.ArrayList<>();
+        }
     }
 
     public SubmissionDetail getSubmissionDetail(String submissionId) {
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        JsonObject jsonObject = querySubmissionCodeForJsonObject(submissionId, url);
-        JsonObject submissionDetail = jsonObject.getAsJsonObject("data").getAsJsonObject("submissionDetail");
-
-        return GsonUtils.fromJson(submissionDetail, SubmissionDetail.class);
+        java.util.Map<String, Object> variables = new java.util.HashMap<>();
+        variables.put("submissionId", submissionId);
+        return graphqlClient.query(
+            LeetcodeApiUtils.SUBMISSION_CONTENT_QUERY,
+            variables,
+            java.util.Arrays.asList("submissionDetail"),
+            SubmissionDetail.class
+        );
     }
 
     @Deprecated
     public String getSubmissionCode(String submissionId) {
-        String url;
-        url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        JsonObject jsonObject = querySubmissionCodeForJsonObject(submissionId, url);
-
-        return jsonObject.getAsJsonObject("data").getAsJsonObject("submissionDetail").get("code").getAsString();
+        try {
+            JsonObject jsonObject = querySubmissionDetailForJsonObject(submissionId);
+            return jsonObject.getAsJsonObject("data").getAsJsonObject("submissionDetail").get("code").getAsString();
+        } catch (Exception e) {
+            LogUtils.error("getSubmissionCode failed: " + e.getMessage());
+            return "";
+        }
+    }
+    
+    private JsonObject querySubmissionDetailForJsonObject(String submissionId) {
+        java.util.Map<String, Object> variables = new java.util.HashMap<>();
+        variables.put("submissionId", submissionId);
+        return graphqlClient.queryForJsonObject(
+            LeetcodeApiUtils.SUBMISSION_CONTENT_QUERY,
+            variables
+        );
     }
 
-    private JsonObject querySubmissionCodeForJsonObject(String submissionId, String url) {
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.SUBMISSION_CONTENT_QUERY);
-        body.addVariable("submissionId", submissionId);
 
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-
-        String resp = httpResponse.getBody();
-        return JsonParser.parseString(resp).getAsJsonObject();
-    }
 
     public void cacheQuestionList(List<Question> totalQuestion) {
         ql = totalQuestion;
@@ -715,45 +646,38 @@ public class LeetcodeClient {
     }
 
     public Article queryArticle(String articleUrl) {
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.ARTICLE_CONTENT_QUERY);
-        String[] urls = articleUrl.split("/");
-        String uuid = urls[urls.length - 1];
-        body.addVariable("uuid", uuid);
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-
-        String resp = httpResponse.getBody();
-        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
-        JsonElement jsonElement = jsonObject.get("data").getAsJsonObject().get("qaQuestion");
-
-        return GsonUtils.fromJson(jsonElement, Article.class);
+        try {
+            String[] urls = articleUrl.split("/");
+            String uuid = urls[urls.length - 1];
+            java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            variables.put("uuid", uuid);
+            
+            JsonObject jsonObject = graphqlClient.queryForJsonObject(
+                LeetcodeApiUtils.ARTICLE_CONTENT_QUERY,
+                variables
+            );
+            
+            JsonElement jsonElement = jsonObject.get("data").getAsJsonObject().get("qaQuestion");
+            return GsonUtils.fromJson(jsonElement, Article.class);
+        } catch (Exception e) {
+            LogUtils.error(e);
+            return null;
+        }
     }
 
     public CalendarSubmitRecord getCalendarSubmitRecord() {
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.CALENDAR_SUBMIT_RECORD_QUERY);
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-        String resp = httpResponse.getBody();
-        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
-            .get("calendarSubmitRecord");
-
-        return GsonUtils.fromJson(jsonElement, CalendarSubmitRecord.class);
+        try {
+            java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            return graphqlClient.query(
+                LeetcodeApiUtils.CALENDAR_SUBMIT_RECORD_QUERY,
+                variables,
+                java.util.Arrays.asList("calendarSubmitRecord"),
+                CalendarSubmitRecord.class
+            );
+        } catch (Exception e) {
+            LogUtils.error(e);
+            return null;
+        }
     }
 
     public List<Cookie> getLeetcodeSession() {
@@ -767,24 +691,20 @@ public class LeetcodeClient {
         if (leetcodeUserProfile != null) {
             return leetcodeUserProfile;
         }
-
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_PROFILE_PUBLIC_QUERY);
-        body.addVariable("userSlug", queryUserStatus().getUserSlug());
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-        String resp = httpResponse.getBody();
-        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
-            .get("userProfilePublicProfile").getAsJsonObject().get("profile");
-        leetcodeUserProfile = GsonUtils.fromJson(jsonElement, LeetcodeUserProfile.class);
-        return leetcodeUserProfile;
+        try {
+            java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            LeetcodeUserProfile result = graphqlClient.query(
+                LeetcodeApiUtils.USER_PROFILE_PUBLIC_QUERY,
+                variables,
+                java.util.Arrays.asList("userProfilePublicProfile"),
+                LeetcodeUserProfile.class
+            );
+            this.leetcodeUserProfile = result;
+            return result;
+        } catch (Exception e) {
+            LogUtils.error(e);
+            return null;
+        }
     }
 
     /**
@@ -794,24 +714,20 @@ public class LeetcodeClient {
         if (userQuestionProgress != null) {
             return userQuestionProgress;
         }
-
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_QUESTION_PROGRESS_QUERY);
-        body.addVariable("userSlug", queryUserStatus().getUserSlug());
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-        String resp = httpResponse.getBody();
-        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
-            .get("userProfileUserQuestionProgressV2");
-        userQuestionProgress = GsonUtils.fromJson(jsonElement, UserQuestionProgress.class);
-        return userQuestionProgress;
+        try {
+            java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            UserQuestionProgress result = graphqlClient.query(
+                LeetcodeApiUtils.USER_QUESTION_PROGRESS_QUERY,
+                variables,
+                java.util.Arrays.asList("userQuestionProgress"),
+                UserQuestionProgress.class
+            );
+            this.userQuestionProgress = result;
+            return result;
+        } catch (Exception e) {
+            LogUtils.error(e);
+            return null;
+        }
     }
 
     /**
@@ -821,24 +737,20 @@ public class LeetcodeClient {
         if (userContestRanking != null) {
             return userContestRanking;
         }
-        String url = LeetcodeApiUtils.getLeetcodeReqNOJUrl();
-
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_CONTEST_RANKING_QUERY);
-        body.addVariable("userSlug", queryUserStatus().getUserSlug());
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-        String resp = httpResponse.getBody();
-        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
-            .get("userContestRanking");
-        userContestRanking = GsonUtils.fromJson(jsonElement, UserContestRanking.class);
-        return userContestRanking;
+        try {
+            java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            UserContestRanking result = graphqlClient.query(
+                LeetcodeApiUtils.USER_CONTEST_RANKING_QUERY,
+                variables,
+                java.util.Arrays.asList("userContestRanking"),
+                UserContestRanking.class
+            );
+            this.userContestRanking = result;
+            return result;
+        } catch (Exception e) {
+            LogUtils.error(e);
+            return null;
+        }
     }
 
     /**
@@ -848,26 +760,20 @@ public class LeetcodeClient {
         if (userProgressQuestionList != null) {
             return userProgressQuestionList;
         }
-        String url = LeetcodeApiUtils.getLeetcodeReqUrl();
-
-        // build graphql req
-        GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_PROGRESS_QUESTION_LIST_QUERY);
-        body.addVariable("filters", Maps.of("limit", 20, "skip", 0));
-
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
-            .setBody(body.toJsonStr())
-            .setContentType("application/json")
-            .addBasicHeader()
-            .build();
-
-        HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
-        String resp = httpResponse.getBody();
-        JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
-            .get("userProgressQuestionList");
-        userProgressQuestionList = GsonUtils.fromJson(jsonElement, UserProgressQuestionList.class);
-        return userProgressQuestionList;
+        try {
+            UserProgressQuestionList result = graphqlClient.query(
+                LeetcodeApiUtils.USER_PROGRESS_QUESTION_LIST_QUERY,
+                new java.util.HashMap<>(),
+                java.util.Arrays.asList("userProgressQuestionList"),
+                UserProgressQuestionList.class
+            );
+            this.userProgressQuestionList = result;
+            return result;
+        } catch (Exception e) {
+            LogUtils.error(e);
+            return null;
+        }
     }
-
     public UserCalendar queryUserCalendar() {
         if (userCalendar != null) {
             return userCalendar;
@@ -876,13 +782,13 @@ public class LeetcodeClient {
         // build graphql req
         GraphqlReqBody body = new GraphqlReqBody(LeetcodeApiUtils.USER_PROFILE_CALENDAR_QUERY);
         body.addVariable("userSlug", queryUserStatus().getUserSlug());
-
+    
         HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
             .setBody(body.toJsonStr())
             .setContentType("application/json")
             .addBasicHeader()
             .build();
-
+    
         HttpResponse httpResponse = httpClient.executePost(httpRequest, project);
         String resp = httpResponse.getBody();
         JsonElement jsonElement = JsonParser.parseString(resp).getAsJsonObject().get("data").getAsJsonObject()
