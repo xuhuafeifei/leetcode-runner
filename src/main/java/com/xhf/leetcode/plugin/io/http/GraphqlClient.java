@@ -58,7 +58,14 @@ public class GraphqlClient {
      * 执行 GraphQL 查询，返回指定类型的对象（自动从 data 路径解析）
      */
     public <T> T query(String query, Map<String, Object> variables, List<String> dataPath, Class<T> clazz) {
-        JsonObject jsonObject = queryForJsonObject(query, variables);
+        return query(query, variables, null, dataPath, clazz);
+    }
+
+    /**
+     * 执行 GraphQL 查询（支持自定义 URL），返回指定类型的对象
+     */
+    public <T> T query(String query, Map<String, Object> variables, String urlOverride, List<String> dataPath, Class<T> clazz) {
+        JsonObject jsonObject = queryForJsonObject(query, variables, urlOverride);
         JsonElement element = jsonObject.getAsJsonObject("data");
         for (String path : dataPath) {
             element = element.getAsJsonObject().get(path);
@@ -73,7 +80,14 @@ public class GraphqlClient {
      * 执行 GraphQL 查询，返回列表
      */
     public <T> List<T> queryList(String query, Map<String, Object> variables, List<String> dataPath, Class<T> clazz) {
-        JsonObject jsonObject = queryForJsonObject(query, variables);
+        return queryList(query, variables, null, dataPath, clazz);
+    }
+
+    /**
+     * 执行 GraphQL 查询（支持自定义 URL），返回列表
+     */
+    public <T> List<T> queryList(String query, Map<String, Object> variables, String urlOverride, List<String> dataPath, Class<T> clazz) {
+        JsonObject jsonObject = queryForJsonObject(query, variables, urlOverride);
         JsonElement element = jsonObject.getAsJsonObject("data");
         for (String path : dataPath) {
             element = element.getAsJsonObject().get(path);
@@ -93,6 +107,14 @@ public class GraphqlClient {
      * 执行 GraphQL 查询，返回原始 JsonObject（包含 data/errors 的最外层）
      */
     public JsonObject queryForJsonObject(String query, Map<String, Object> variables) {
+        return queryForJsonObject(query, variables, null);
+    }
+
+    /**
+     * 执行 GraphQL 查询（支持自定义 URL），返回原始 JsonObject
+     */
+    public JsonObject queryForJsonObject(String query, Map<String, Object> variables, String urlOverride) {
+        String url = urlOverride != null ? urlOverride : graphqlUrl;
         String bodyJson = buildJson(query, variables);
         Exception lastException = null;
 
@@ -111,7 +133,7 @@ public class GraphqlClient {
 
             try {
                 Request request = new Request.Builder()
-                    .url(graphqlUrl)
+                    .url(url)
                     .post(RequestBody.create(bodyJson, MediaType.parse("application/json; charset=utf-8")))
                     .addHeader("Accept", "*/*")
                     .addHeader("Origin", origin)

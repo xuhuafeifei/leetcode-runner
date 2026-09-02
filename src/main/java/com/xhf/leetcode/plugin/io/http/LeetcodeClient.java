@@ -693,10 +693,11 @@ public class LeetcodeClient {
         }
         try {
             java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            variables.put("userSlug", queryUserStatus().getUserSlug());
             LeetcodeUserProfile result = graphqlClient.query(
                 LeetcodeApiUtils.USER_PROFILE_PUBLIC_QUERY,
                 variables,
-                java.util.Arrays.asList("userProfilePublicProfile"),
+                java.util.Arrays.asList("userProfilePublicProfile", "profile"),
                 LeetcodeUserProfile.class
             );
             this.leetcodeUserProfile = result;
@@ -716,10 +717,11 @@ public class LeetcodeClient {
         }
         try {
             java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            variables.put("userSlug", queryUserStatus().getUserSlug());
             UserQuestionProgress result = graphqlClient.query(
                 LeetcodeApiUtils.USER_QUESTION_PROGRESS_QUERY,
                 variables,
-                java.util.Arrays.asList("userQuestionProgress"),
+                java.util.Arrays.asList("userProfileUserQuestionProgressV2"),
                 UserQuestionProgress.class
             );
             this.userQuestionProgress = result;
@@ -739,9 +741,11 @@ public class LeetcodeClient {
         }
         try {
             java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            variables.put("userSlug", queryUserStatus().getUserSlug());
             UserContestRanking result = graphqlClient.query(
                 LeetcodeApiUtils.USER_CONTEST_RANKING_QUERY,
                 variables,
+                LeetcodeApiUtils.getLeetcodeReqNOJUrl(),
                 java.util.Arrays.asList("userContestRanking"),
                 UserContestRanking.class
             );
@@ -761,9 +765,14 @@ public class LeetcodeClient {
             return userProgressQuestionList;
         }
         try {
+            java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            java.util.Map<String, Object> filters = new java.util.HashMap<>();
+            filters.put("limit", 20);
+            filters.put("skip", 0);
+            variables.put("filters", filters);
             UserProgressQuestionList result = graphqlClient.query(
                 LeetcodeApiUtils.USER_PROGRESS_QUESTION_LIST_QUERY,
-                new java.util.HashMap<>(),
+                variables,
                 java.util.Arrays.asList("userProgressQuestionList"),
                 UserProgressQuestionList.class
             );

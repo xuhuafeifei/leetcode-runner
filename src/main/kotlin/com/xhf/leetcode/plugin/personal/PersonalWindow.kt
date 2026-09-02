@@ -14,6 +14,7 @@ import com.xhf.leetcode.plugin.model.*
 import com.xhf.leetcode.plugin.service.CodeService
 import com.xhf.leetcode.plugin.service.QuestionService
 import com.xhf.leetcode.plugin.utils.BundleUtils
+import com.xhf.leetcode.plugin.utils.LogUtils
 import com.xhf.leetcode.plugin.utils.TaskCenter
 import java.awt.*
 import java.awt.event.WindowAdapter
@@ -156,15 +157,25 @@ class PersonalWindow(private val project: Project) : JFrame(), Disposable {
                 userProgressQuestions = client.queryUserProgressQuestionList()
             }
 
+            // 各自容错: 单个 future 失败不影响整体数据加载, 避免窗口渲染崩溃
             try {
                 userProfileFuture.invokeAndGet()
+            } catch (e: Exception) {
+                LogUtils.error("加载用户资料失败: " + e.message)
+            }
+            try {
                 userStatsFuture.invokeAndGet()
             } catch (e: Exception) {
-                throw e
+                LogUtils.error("加载用户统计失败: " + e.message)
             }
 
             SwingUtilities.invokeLater {
-                updateUIAfterDataLoaded()
+                try {
+                    updateUIAfterDataLoaded()
+                } catch (e: Exception) {
+                    LogUtils.error("渲染个人面板失败: " + e.message)
+                    loadingPanel.stopLoading()
+                }
             }
         }.invokeLater()
     }
