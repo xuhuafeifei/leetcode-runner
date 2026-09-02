@@ -1,32 +1,31 @@
 import logging
 
-class LogOutHelper:
-    def __init__(self, log_dir="run_log.log"):
-        # 配置日志记录器，使用日志文件
-        self.log_dir = log_dir
 
-        # 配置logging，设置日志级别为DEBUG
+class LogOutHelper:
+    def __init__(self, log_dir="run_log.log", enabled=False):
+        """
+        :param enabled: 日志总开关. 默认关闭.
+        debug_core 的 trace 事件量级是语句级的, 全量落盘会导致日志文件
+        以 GB 速度膨胀, 因此仅在排查调试器自身问题时临时开启.
+        """
+        self.enabled = enabled
+        self.log_dir = log_dir
+        if not enabled:
+            return
         logging.basicConfig(
             filename=self.log_dir,
-            level=logging.DEBUG,  # 只需要DEBUG级别
-            format='%(asctime)s - %(message)s',  # 简单的时间戳和消息
-            filemode='a',  # 以追加模式打开文件
-            encoding='utf-8'  # 指定编码为 UTF-8
+            level=logging.DEBUG,
+            format='%(asctime)s - %(message)s',
+            filemode='a',
+            encoding='utf-8'
         )
 
     def log_out(self, message: str, title: str = None):
-        '''
-        Write debug log entries to the log file.
-
-        :param message: Log message to be written to file
-        :param title: Optional title for the log entry
-        '''
+        if not self.enabled:
+            return
         log_entry = ""
         if title:
             log_entry += f"Title: {title}\n"
         if message:
             log_entry += f"Message: {message}\n"
-
-        # 记录日志
         logging.debug(log_entry)
-        # print(log_entry)

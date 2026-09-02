@@ -35,20 +35,6 @@ class Debugger:
 
     def trace_calls(self, frame, event, arg):
         try:
-            # DEBUG
-            # debug_info = "-------debug info----------" + "\n"
-            debug_info = "event = " + event + "\n"
-            debug_info += "line = " + str(frame.f_lineno) + "\n"
-            debug_info += "call_stack = " + str(self.call_stack) + "\n"
-            debug_info += "pre_option = " + str(self.pre_option) + "\n"
-            debug_info += "pre_param = " + str(self.pre_param) + "\n"
-            debug_info += "pre_breakpoint = " + str(self.pre_breakpoint) + "\n"
-            debug_info += "pre_line = " + str(self.pre_line) + "\n"
-            debug_info += "cur_method = " + str(self.breakpoint_list) + "\n"
-            debug_info += "catpure_stack_len = " + str(self.capture_stack_len) + "\n"
-            debug_info += "cur_method = " + frame.f_code.co_name + "\n"
-            self.log.log_out(debug_info, "---------------trace_calls--------------")
-
             # 如果执行step over, 则一直执行到当前栈的长度和快照拍摄时栈长度一致
             if event == 'line' and self.pre_option == 'STEP' and self.pre_param == "over":
                 # capture_len = -1, 表示没有初始化, 不进行判断
@@ -151,6 +137,10 @@ class Debugger:
                         # 读取指令
                         self.log.log_out("准备init断点信息....")
                         instruction = self.inst_source.consume_input()
+                        if instruction is None:
+                            self.log.log_out("等待断点初始化指令超时, 退出....")
+                            self.inst_source.store_output(ExecuteResult.fail("PYTHON_INIT_BREAKPOINT_TIMEOUT", "等待断点初始化指令超时"))
+                            return self.trace_calls
                         self.log.log_out("接受断点信息: " + str(instruction))
                         # 读取instruction的operation
                         operation = instruction["operation"]
@@ -235,6 +225,10 @@ class Debugger:
                     # 读取指令
                     self.log.log_out("准备读取指令")
                     instruction = self.inst_source.consume_input()
+                    if instruction is None:
+                        # 超时无指令, 继续等待而不是崩溃(客户端可能只是还没发)
+                        self.log.log_out("等待指令超时, 继续等待....")
+                        continue
                     self.log.log_out("debug_core接受指令: " + str(instruction))
 
                     # 读取instruction的operation
@@ -281,6 +275,8 @@ class Debugger:
         except Exception as e:
             traceback.print_exc()
             self.inst_source.store_output(ExecuteResult.fail("指令执行出错" + str(e)))
+            # 关键: 保持跟踪, 否则当前栈帧的调试会静默失效
+            return self.trace_calls
 
     def handle_value(self, value):
         # 如果value含有__humna_visible__()
@@ -318,7 +314,7 @@ class Debugger:
                 r.result = str(param) + ': '
                 flag = False
                 for arg in e.args:
-                    r.result += arg + ","
+                    r.result += str(arg) + ","
                     flag = True
                 if flag:
                     r.result = r.result[:-1]
