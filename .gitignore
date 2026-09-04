@@ -3,4 +3,4 @@
 build/
 out/
 .xcodemap/
-.bin/
+.bin/.DS_Store
