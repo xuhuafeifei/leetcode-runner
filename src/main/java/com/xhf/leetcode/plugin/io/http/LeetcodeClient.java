@@ -576,13 +576,18 @@ public class LeetcodeClient {
     }
 
     public String getSolutionContent(String solutionSlug) {
-        java.util.Map<String, Object> variables = new java.util.HashMap<>();
-        variables.put("solutionSlug", solutionSlug);
         try {
-            return graphqlClient.queryForJsonObject(
+            java.util.Map<String, Object> variables = new java.util.HashMap<>();
+            variables.put("slug", solutionSlug);
+            JsonObject jsonObject = graphqlClient.queryForJsonObject(
                 LeetcodeApiUtils.SOLUTION_CONTENT_QUERY,
                 variables
-            ).toString();
+            );
+            // 与原版一致: 提取 data.solutionArticle.content 纯文本
+            return jsonObject.getAsJsonObject("data")
+                .getAsJsonObject("solutionArticle")
+                .get("content")
+                .getAsString();
         } catch (Exception e) {
             LogUtils.error("getSolutionContent failed: " + e.getMessage());
             return "";
