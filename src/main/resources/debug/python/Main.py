@@ -73,3 +73,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+if __name__ == '__main__':
+    main()
+    # 兜底退出, 防止僵尸进程
+    import os
+    os._exit(0)
