@@ -32,6 +32,7 @@ import com.xhf.leetcode.plugin.model.UserContestRanking;
 import com.xhf.leetcode.plugin.model.UserProgressQuestionList;
 import com.xhf.leetcode.plugin.model.UserQuestionProgress;
 import com.xhf.leetcode.plugin.model.UserStatus;
+import com.xhf.leetcode.plugin.utils.BundleUtils;
 import com.xhf.leetcode.plugin.utils.GsonUtils;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import com.xhf.leetcode.plugin.utils.RandomUtils;
@@ -504,8 +505,15 @@ public class LeetcodeClient {
      */
     private String checkAndGetLeetcodeAnswer(String id) {
         String url = LeetcodeApiUtils.getSubmissionCheckUrl(id);
+        String origin = LeetcodeApiUtils.getLeetcodeUrl();
 
-        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url).setContentType("application/json").build();
+        HttpRequest httpRequest = new HttpRequest.RequestBuilder(url)
+            .setContentType("application/json")
+            .addBasicHeader()
+            .addHeader("Accept", "application/json")
+            .addHeader("Referer", origin + "/")
+            .addHeader("Origin", origin)
+            .build();
 
         HttpResponse httpResponse = httpClient.executeGet(httpRequest, project);
 
@@ -529,7 +537,10 @@ public class LeetcodeClient {
      */
     private boolean checkLeetcodeReady(HttpResponse httpResponse) {
         String resp = httpResponse.getBody();
-        JsonObject jsonObject = JsonParser.parseString(resp).getAsJsonObject();
+        if (StringUtils.isBlank(resp)) {
+            return false;
+        }
+        JsonObject jsonObject = parseCheckResponse(resp, httpResponse.getStatusCode());
         /*
          * if the result contains `state` field, that means the answer is not ready yet
          * otherwise, the result is ready
@@ -543,6 +554,39 @@ public class LeetcodeClient {
         int size = jsonObject.asMap().size();
         // 保险点, 大于2就认为返回的是真是的数据
         return size > 2;
+    }
+
+    private JsonObject parseCheckResponse(String resp, int statusCode) {
+        String trimmed = resp.trim();
+        if (StringUtils.startsWithIgnoreCase(trimmed, "<!DOCTYPE")
+            || StringUtils.startsWithIgnoreCase(trimmed, "<html")) {
+            LogUtils.warn("leetcode check got html instead of json. status=" + statusCode
+                + ", body=" + StringUtils.abbreviate(trimmed, 200));
+            throw new RuntimeException(BundleUtils.i18nHelper(
+                "获取判题结果失败：请求被 Cloudflare 拦截（HTTP " + statusCode + "）。请确认已登录，或稍后重试。",
+                "Failed to read the judge result: the request was blocked by Cloudflare (HTTP "
+                    + statusCode + "). Please make sure you are logged in, or try again later."
+            ));
+        }
+        try {
+            JsonElement element = JsonParser.parseString(trimmed);
+            if (element != null && element.isJsonObject()) {
+                return element.getAsJsonObject();
+            }
+        } catch (Exception e) {
+            LogUtils.warn("leetcode check response is not json. status=" + statusCode
+                + ", body=" + StringUtils.abbreviate(trimmed, 200));
+            throw new RuntimeException(BundleUtils.i18nHelper(
+                "获取判题结果失败：LeetCode 返回了非 JSON 数据（HTTP " + statusCode + "），可能是登录过期或请求被拦截，请重新登录后重试",
+                "Failed to read the judge result: LeetCode returned non-JSON data (HTTP "
+                    + statusCode + "). Your login may have expired or the request was blocked. Please log in again."
+            ), e);
+        }
+        throw new RuntimeException(BundleUtils.i18nHelper(
+            "获取判题结果失败：LeetCode 返回了非 JSON 数据（HTTP " + statusCode + "），可能是登录过期或请求被拦截，请重新登录后重试",
+            "Failed to read the judge result: LeetCode returned non-JSON data (HTTP "
+                + statusCode + "). Your login may have expired or the request was blocked. Please log in again."
+        ));
     }
 
     public List<Solution> querySolutionList(String questionSlug) {

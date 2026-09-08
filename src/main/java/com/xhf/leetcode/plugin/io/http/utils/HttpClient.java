@@ -41,14 +41,18 @@ import org.jetbrains.annotations.NotNull;
 public class HttpClient {
 
     private static final HttpClient instance = new HttpClient();
+    private static final String USER_AGENT =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0";
     private final CookieStore cookieStore = new BasicCookieStore();
     // private final CloseableHttpClient httpClient = HttpClients.createDefault();
     // 更新为带宽松 cookie 策略的 httpClient, 解决leetcode平台返回的cookie, expire time无法识别的警告
+    // GET 轮询如果不带浏览器 UA，会被 leetcode.cn 的 Cloudflare 拦截成 HTML 挑战页
     private final CloseableHttpClient httpClient = HttpClientBuilder.create()
+        .setUserAgent(USER_AGENT)
         .setDefaultRequestConfig(RequestConfig.custom()
             .setCookieSpec(CookieSpecs.STANDARD) // 使用宽松的 cookie 解析策略
-            .setConnectTimeout(3000) // 设置连接超时时间
-            .setSocketTimeout(2000) // 设置读取超时时间
+            .setConnectTimeout(10000) // 设置连接超时时间
+            .setSocketTimeout(10000) // 设置读取超时时间
             .build())
         .setDefaultCookieStore(cookieStore) // 使用自定义的 CookieStore
         .build();
@@ -92,6 +96,7 @@ public class HttpClient {
         HttpResponse httpResponse = new HttpResponse(-1);
 
         addHeaders(request);
+        applyRequestHeaders(request, httpRequest);
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             HttpEntity entity = response.getEntity();
@@ -163,6 +168,16 @@ public class HttpClient {
         }
     }
 
+    private void applyRequestHeaders(HttpRequestBase request, HttpRequest httpRequest) {
+        Map<String, String> headers = httpRequest.getHeader();
+        if (headers == null) {
+            return;
+        }
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            request.setHeader(entry.getKey(), entry.getValue());
+        }
+    }
+
     public HttpResponse executePost(@NotNull HttpRequest httpRequest, Project project) {
         HttpResponse httpResponse = executePost(httpRequest);
         if (httpResponse == null) {
@@ -188,17 +203,10 @@ public class HttpClient {
      */
     public HttpResponse executePost(@NotNull HttpRequest httpRequest) {
         HttpPost request = new HttpPost(httpRequest.getUrl());
-        Map<String, String> headers = httpRequest.getHeader();
         String body = httpRequest.getBody();
 
         addHeaders(request);
-
-        // 设置请求头
-        if (headers != null) {
-            for (Map.Entry<String, String> entry : headers.entrySet()) {
-                request.setHeader(entry.getKey(), entry.getValue());
-            }
-        }
+        applyRequestHeaders(request, httpRequest);
 
         // 设置请求体
         if (body != null) {
@@ -220,10 +228,8 @@ public class HttpClient {
                 }
             }
         } catch (IOException e) {
-            // todo: 修改为弹窗提示
-            // throw new RuntimeException("POST request failed: " + e.getMessage(), e);
-            LogUtils.warn(DebugUtils.getStackTraceAsString(e));
-            return null;
+            // 直接抛出运行时异常，携带真实原因，不再返回 null 导致上层猜"httpResponse is null"
+            throw new RuntimeException("POST request failed: " + e.getMessage() + " url=" + httpRequest.getUrl(), e);
         }
         if (httpResponse.getBody() != null) {
             if (httpResponse.getBody().length() < 10000) {
