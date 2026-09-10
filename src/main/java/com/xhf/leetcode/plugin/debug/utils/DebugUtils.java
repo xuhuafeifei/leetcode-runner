@@ -547,14 +547,12 @@ public class DebugUtils {
      */
     public static boolean isPortAvailable2(String host, int port) {
         try (ServerSocket socket = new ServerSocket()) {
-            // 明确绑定到指定地址, 解决可能导致的端口占用判断异常问题
+            // bind 成功说明端口未被占用（服务还没启动），返回 false
             socket.bind(new InetSocketAddress(host, port));
-            socket.bind(new InetSocketAddress("0.0.0.0", port));
-            socket.bind(new InetSocketAddress("127.0.0.1", port));
-            socket.bind(new InetSocketAddress("localhost", port));
-            return false; // 端口可用
+            return false;
         } catch (IOException e) {
-            return true; // 端口不可用
+            // bind 失败说明端口已被占用（服务正在监听），返回 true
+            return true;
         }
     }
 
