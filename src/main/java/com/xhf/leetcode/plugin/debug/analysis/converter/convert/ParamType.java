@@ -66,7 +66,7 @@ public enum ParamType {
         for (ParamType paramType : values()) {
             // 遍历可识别列表, 如果匹配, 则返回对应类型
             for (String rec : paramType.getRecognized()) {
-                if (rec.equals(type)) {
+                if (rec.equalsIgnoreCase(type)) {
                     return paramType;
                 }
             }

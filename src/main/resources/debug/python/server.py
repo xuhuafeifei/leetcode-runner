@@ -117,7 +117,10 @@ class WebServer:
                 # 返回响应内容
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps(response.to_dict()).encode('utf-8'))
+                try:
+                    self.end_headers()
+                    self.wfile.write(json.dumps(response.to_dict()).encode('utf-8'))
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
 
         return RequestHandler
