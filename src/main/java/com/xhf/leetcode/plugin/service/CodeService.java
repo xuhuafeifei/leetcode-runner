@@ -378,12 +378,44 @@ public class CodeService {
             if (FileUtils.fileExists(filePath)) {
                 return filePath;
             }
-            FileUtils.createAndWriteFile(filePath, question.getCodeSnippets());
+            String content = buildQuestionComment(question) + question.getCodeSnippets();
+            FileUtils.createAndWriteFile(filePath, content);
         } catch (IOException e) {
             throw new FileCreateError(e);
         }
 
         return filePath;
+    }
+
+    /**
+     * 构建题目描述注释, 以注释形式写入代码文件头部
+     * 方便用户在刷题时看到题目描述, 不用切回 LeetCode 页面
+     */
+    private String buildQuestionComment(Question question) {
+        String commentSymbol = LangType.getCommentSymbol(AppSettings.getInstance().getLangType());
+        if (commentSymbol == null) {
+            commentSymbol = "//";
+        }
+        StringBuilder sb = new StringBuilder();
+        // 标题
+        sb.append(commentSymbol).append(" ").append(question.getTranslatedTitle()).append("\n");
+        sb.append(commentSymbol).append("\n");
+        // 题目描述 (HTML 转纯文本)
+        String desc = question.getTranslatedContent();
+        if (desc != null && !desc.isEmpty()) {
+            // 去掉 HTML 标签
+            String plain = desc.replaceAll("<[^>]+>", "");
+            // 去掉连续空行
+            plain = plain.replaceAll("\\n{2,}", "\\n");
+            for (String line : plain.split("\\n")) {
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty()) {
+                    sb.append(commentSymbol).append(" ").append(trimmed).append("\n");
+                }
+            }
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
     private String createCodeFile(Question question, String fileName) throws FileCreateError {
