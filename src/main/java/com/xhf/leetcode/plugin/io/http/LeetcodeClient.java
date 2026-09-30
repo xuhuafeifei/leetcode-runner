@@ -457,7 +457,15 @@ public class LeetcodeClient {
         String resp = httpResponse.getBody();
 
         // get interpret_id
-        String interpretId = JsonParser.parseString(resp).getAsJsonObject().get("interpret_id").getAsString();
+        String interpretId;
+        try {
+            interpretId = JsonParser.parseString(resp).getAsJsonObject().get("interpret_id").getAsString();
+        } catch (Exception e) {
+            // 响应不是预期 JSON(可能被 Cloudflare 拦截/服务端报错/未登录), 输出片段帮助定位
+            String snippet = resp == null ? "null" : resp.substring(0, Math.min(resp.length(), 200));
+            LogUtils.error("runCode response is not valid JSON: " + snippet);
+            throw new RuntimeException("运行代码失败, 服务端返回异常响应: " + snippet);
+        }
 
         resp = checkAndGetLeetcodeAnswer(interpretId);
         return GsonUtils.fromJson(resp, RunCodeResult.class);
@@ -490,7 +498,14 @@ public class LeetcodeClient {
         String resp = httpResponse.getBody();
 
         // get submission_id
-        String submissionId = JsonParser.parseString(resp).getAsJsonObject().get("submission_id").getAsString();
+        String submissionId;
+        try {
+            submissionId = JsonParser.parseString(resp).getAsJsonObject().get("submission_id").getAsString();
+        } catch (Exception e) {
+            String snippet = resp == null ? "null" : resp.substring(0, Math.min(resp.length(), 200));
+            LogUtils.error("submitCode response is not valid JSON: " + snippet);
+            throw new RuntimeException("提交代码失败, 服务端返回异常响应: " + snippet);
+        }
 
         resp = checkAndGetLeetcodeAnswer(submissionId);
         return GsonUtils.fromJson(resp, SubmitCodeResult.class);
