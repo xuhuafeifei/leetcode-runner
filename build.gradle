@@ -27,7 +27,7 @@ test {
 //}
 
 group 'com.xhf'
-version '3.7.10'
+version '3.7.11'
 
 
 repositories {
