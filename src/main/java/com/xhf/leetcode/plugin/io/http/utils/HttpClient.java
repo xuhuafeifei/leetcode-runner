@@ -136,6 +136,8 @@ public class HttpClient {
 
     @NotNull
     private HttpResponse loginCheck(HttpResponse httpResponse) throws LoginException {
+        // Cloudflare 质询检测: 命中时替换 body 为可读错误, 后续 JSON 解析会得到明确提示
+        detectCloudflareChallenge(httpResponse);
         String body = httpResponse.getBody();
         String error = "";
         // 如果解析失败, 则认为是正常的json数据, 直接返回
@@ -231,6 +233,7 @@ public class HttpClient {
             // 直接抛出运行时异常，携带真实原因，不再返回 null 导致上层猜"httpResponse is null"
             throw new RuntimeException("POST request failed: " + e.getMessage() + " url=" + httpRequest.getUrl(), e);
         }
+        detectCloudflareChallenge(httpResponse);
         if (httpResponse.getBody() != null) {
             if (httpResponse.getBody().length() < 10000) {
                 LogUtils.info("response body: " + httpResponse.getBody());
@@ -246,6 +249,27 @@ public class HttpClient {
         }
 
         return httpResponse;
+    }
+
+    /**
+     * 检测 Cloudflare "Just a moment..." 人机质询响应。
+     * 命中时将响应体替换为带自救指引的简洁提示, 状态码置 403,
+     * 让上层(runCode/submitCode/GraphQL)自然收到可读错误而非 HTML 解析失败。
+     */
+    private void detectCloudflareChallenge(HttpResponse httpResponse) {
+        String body = httpResponse.getBody();
+        if (body == null) {
+            return;
+        }
+        if (body.contains("Just a moment...") || body.contains("_cf_chl_opt")
+            || body.contains("challenges.cloudflare.com")) {
+            LogUtils.error("Cloudflare challenge detected! leetcode.cn 风控拦截了插件请求, 需要浏览器过一次人机验证");
+            httpResponse.setStatusCode(403);
+            httpResponse.setBody("{\"error\": \"cloudflare_challenge\", \"message\": \"请求被 leetcode.cn 的 Cloudflare 风控拦截。"
+                + "请用浏览器打开 leetcode.cn 并完成一次人机验证(勾选验证框), 之后插件请求通常会自动恢复。"
+                + "若频繁出现, 请降低短时间内的运行/提交频率。\"}");
+            httpResponse.setMsg("Cloudflare challenge");
+        }
     }
 
     public void clearCookies() {
