@@ -585,7 +585,16 @@ public class CodeService {
                 public void run(@NotNull ProgressIndicator indicator) {
                     // todo: 记得删除
                     LogUtils.simpleDebug("run code: " + runCode);
-                    RunCodeResult rcr = LeetcodeClient.getInstance(project).runCode(runCode);
+                    RunCodeResult rcr;
+                    try {
+                        rcr = LeetcodeClient.getInstance(project).runCode(runCode);
+                    } catch (Exception e) {
+                        LogUtils.error("runCode failed: " + e.getMessage());
+                        ConsoleUtils.getInstance(project).showWaring(
+                            "运行失败: " + e.getMessage(), false, true,
+                            "运行失败", BundleUtils.i18n("action.leetcode.unknown.error"), ConsoleDialog.ERROR);
+                        return;
+                    }
                     // todo: 记得删除
                     LogUtils.simpleDebug("rcr = " + rcr);
                     // show it
@@ -634,7 +643,16 @@ public class CodeService {
                 false) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
-                    SubmitCodeResult scr = LeetcodeClient.getInstance(project).submitCode(runCode);
+                    SubmitCodeResult scr;
+                    try {
+                        scr = LeetcodeClient.getInstance(project).submitCode(runCode);
+                    } catch (Exception e) {
+                        LogUtils.error("submitCode failed: " + e.getMessage());
+                        ConsoleUtils.getInstance(project).showWaring(
+                            "提交失败: " + e.getMessage(), false, true,
+                            "提交失败", BundleUtils.i18n("action.leetcode.unknown.error"), ConsoleDialog.ERROR);
+                        return;
+                    }
                     // show it
                     AbstractResultBuilder<SubmitCodeResult> scrb = createSubmitCodeResultBuilder(scr, project);
                     boolean correctAnswer = scrb.isCorrectAnswer();
