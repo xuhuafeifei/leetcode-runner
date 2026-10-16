@@ -403,10 +403,24 @@ public class CodeService {
         // 题目描述 (HTML 转纯文本)
         String desc = question.getTranslatedContent();
         if (desc != null && !desc.isEmpty()) {
-            // 去掉 HTML 标签
-            String plain = desc.replaceAll("<[^>]+>", "");
-            // 去掉连续空行
-            plain = plain.replaceAll("\\n{2,}", "\\n");
+            // HTML 转纯文本:
+            // 1. 块级标签转换行, 保留段落结构 (否则内容粘连成一行)
+            String plain = desc
+                .replaceAll("(?i)<br\\s*/?>", "\n")
+                .replaceAll("(?i)</(p|div|li|tr|h[1-6]|pre|ul|ol|blockquote)>", "\n")
+                .replaceAll("(?i)<li[^>]*>", "\n- ")
+                // 2. 解码常见 HTML 实体
+                .replace("&nbsp;", " ")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&amp;", "&")
+                .replace("&quot;", "\"")
+                .replace("&#39;", "'")
+                .replace("&apos;", "'")
+                // 3. 剥掉剩余行内标签
+                .replaceAll("<[^>]+>", "");
+            // 4. 压缩多余空行
+            plain = plain.replaceAll("\\n{3,}", "\n\n");
             for (String line : plain.split("\\n")) {
                 String trimmed = line.trim();
                 if (!trimmed.isEmpty()) {
@@ -1213,5 +1227,3 @@ public class CodeService {
          * null
          */
         protected abstract void createBody();
-    }
-}
