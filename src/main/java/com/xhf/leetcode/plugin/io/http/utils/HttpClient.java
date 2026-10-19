@@ -10,6 +10,7 @@ import com.xhf.leetcode.plugin.io.console.ConsoleUtils;
 import com.xhf.leetcode.plugin.model.HttpRequest;
 import com.xhf.leetcode.plugin.model.HttpResponse;
 import com.xhf.leetcode.plugin.utils.BundleUtils;
+import com.xhf.leetcode.plugin.utils.CloudflareNotifier;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -264,6 +265,7 @@ public class HttpClient {
         if (body.contains("Just a moment...") || body.contains("_cf_chl_opt")
             || body.contains("challenges.cloudflare.com")) {
             LogUtils.error("Cloudflare challenge detected! leetcode.cn 风控拦截了插件请求, 需要浏览器过一次人机验证");
+            CloudflareNotifier.notifyChallenge();
             httpResponse.setStatusCode(403);
             httpResponse.setBody("{\"error\": \"cloudflare_challenge\", \"message\": \"请求被 leetcode.cn 的 Cloudflare 风控拦截。"
                 + "请用浏览器打开 leetcode.cn 并完成一次人机验证(勾选验证框), 之后插件请求通常会自动恢复。"

@@ -90,6 +90,20 @@ public class CodeService {
      * @param question question
      */
     public void openCodeEditor(Question question) throws FileCreateError {
+        // 如果点击的题目和当前打开的题目一致, 弹框提示用户, 不再重复发起网络请求
+        VirtualFile cFile = ViewUtils.getCurrentOpenVirtualFile(project);
+        if (cFile != null) {
+            String openFid = parseFidFromVFile(cFile);
+            String openSlug = parseTitleSlugFromVFile(cFile);
+            if (openFid != null && openFid.equals(question.getFrontendQuestionId())
+                && openSlug != null && openSlug.equals(question.getTitleSlug())) {
+                ViewUtils.getDialogWrapper(BundleUtils.i18nHelper(
+                    "当前题目 [" + question.getTranslatedTitle() + "] 已在编辑器中打开, 无需重复打开",
+                    "Question [" + question.getTranslatedTitle() + "] is already open in the editor"));
+                return;
+            }
+        }
+
         // 判断题目是否付费，以及用户VIP身份
         if (question.getIsPaidOnly() && !LoginService.getInstance(project).isPremium()) {
             ConsoleUtils.getInstance(project).showWaring(BundleUtils.i18n("vip.question"), false, true);

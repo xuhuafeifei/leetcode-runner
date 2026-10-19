@@ -33,6 +33,9 @@
         <toolWindow id="Leetcode Runner Console" secondary="true" icon="/icons/leetcode-runner16x16.svg" anchor="bottom"
                     factoryClass="com.xhf.leetcode.plugin.window.LCConsoleWindowFactory" />
 
+        <!-- notification -->
+        <notificationGroup id="leetcode-runner.notifications" displayType="BALLOON"/>
+
         <!-- http request -->
         <httpRequestHandler implementation="com.xhf.leetcode.plugin.io.http.LocalHttpRequestHandler"/>
     </extensions>

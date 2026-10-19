@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.xhf.leetcode.plugin.utils.CloudflareNotifier;
 import com.xhf.leetcode.plugin.utils.LogUtils;
 import okhttp3.CookieJar;
 import okhttp3.MediaType;
@@ -146,6 +147,7 @@ public class GraphqlClient {
                     // Cloudflare 质询检测: leetcode.cn 风控拦截时返回 "Just a moment..." HTML
                     if (bodyStr.contains("Just a moment...") || bodyStr.contains("_cf_chl_opt")) {
                         LogUtils.error("Cloudflare challenge detected on graphql request! 请用浏览器打开 leetcode.cn 过一次人机验证");
+                        CloudflareNotifier.notifyChallenge();
                         throw new LcException.Business("请求被 leetcode.cn 风控拦截(Cloudflare)。请用浏览器打开 leetcode.cn 完成一次人机验证后重试; 若频繁出现请降低请求频率。");
                     }
 
